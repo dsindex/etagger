@@ -7,6 +7,9 @@ etagger
   - https://github.com/monikkinom/ner-lstm
 
 - modification
+  - modified for tf version(1.6)
+  - removed unnecessary files
+  - refactoring .... ing
 
 ### pre-requisites
 
