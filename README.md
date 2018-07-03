@@ -10,6 +10,8 @@ etagger
   - modified for tf version(1.6)
   - removed unnecessary files
   - refactoring .... ing
+    - split model.py, train.py, inference.py
+    - remove get_conll_embeddings.py and use embedding lookup
 
 ### pre-requisites
 
