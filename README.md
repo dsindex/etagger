@@ -7,8 +7,9 @@ etagger
   - https://github.com/monikkinom/ner-lstm
 
 - modification
-  - modified for tf version(1.6)
+  - modified for tf version(1.4)
   - removed unnecessary files
+  - fix bugs for MultiRNNCell()
   - refactoring .... ing
     - split model.py, train.py, inference.py
     - remove get_conll_embeddings.py and use embedding lookup
@@ -36,6 +37,8 @@ $ python glove_model.py --dimension 50 --restore glove.6B.50d.txt
 $ cd embeddings
 $ python get_conll_embeddings.py --train ../data/train.txt --test_a ../data/dev.txt --test_b ../data/test.txt --use_model glovevec_model_50.pkl --model_dim 50 --sentence_length 125
 
+* for small sample data
+$ python get_conll_embeddings.py --train ../data/eng.train_50 --test_a ../data/eng.test_a_50 --test_b ../data/eng.test_b_50 --use_model glovevec_model_50.pkl --model_dim 50 --sentence_length 125
 ```
 
 - train
