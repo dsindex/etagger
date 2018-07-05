@@ -45,11 +45,14 @@ $ python get_conll_embeddings.py --train ../data/eng.train_50 --test_a ../data/e
 ```
 $ python model.py --word_dim 61 --sentence_length 125 --class_size 5 --rnn_size 256 --num_layers 1 --batch_size 128 --epoch 50
 ...
-116-th batch in 14987(size of train_inp)
-117-th batch in 14987(size of train_inp)
-epoch 49:
+
+(num_layers 1)
 test_a score:
 [0.96773173046504268, 0.93732327992459941, 0.88112566715186802, 0.8534119629317608, 0.99481961576881084, 0.92333841284726292]
 
-PER, LOC, ORG, MISC, O
+: PER, LOC, ORG, MISC, O
+
+(num_layers 2)
+test_a score:
+[0.96857142857142853, 0.93333333333333335, 0.88687561214495603, 0.8617754357519255, 0.9952267580279891, 0.92487244149903236]
 ```
