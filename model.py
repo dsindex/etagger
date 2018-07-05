@@ -12,31 +12,38 @@ class Model:
 
     def __init__(self, args):
         self.args = args
-        # Input and Output layer
+
+        # Input layer and Output(answer)
         self.input_data = tf.placeholder(tf.float32, [None, args.sentence_length, args.word_dim])
         self.output_data = tf.placeholder(tf.float32, [None, args.sentence_length, args.class_size])
+
         # RNN layer
         fw_cell = tf.contrib.rnn.MultiRNNCell([self.get_a_cell(args.rnn_size, keep_prob=self.__keep_prob) for _ in range(args.num_layers)], state_is_tuple=True)
         bw_cell = tf.contrib.rnn.MultiRNNCell([self.get_a_cell(args.rnn_size, keep_prob=self.__keep_prob) for _ in range(args.num_layers)], state_is_tuple=True)
         self.length = self.compute_length(self.input_data)
         '''
-        [None, args.sentence_length, args.word_dim] -> [args.sentence_length, None, args.word_dim] -> list of [None, args.word_dim]
+        transpose([None, args.sentence_length, args.word_dim]) -> unstack([args.sentence_length, None, args.word_dim]) -> list of [None, args.word_dim]
         '''
         output, _, _ = tf.contrib.rnn.static_bidirectional_rnn(fw_cell, bw_cell,
                                                tf.unstack(tf.transpose(self.input_data, perm=[1, 0, 2])),
                                                dtype=tf.float32, sequence_length=self.length)
+        '''
+        stack(list of [None, 2*args.rnn_size]) -> transpose([args.sentence_length, None, 2*args.rnn_size]) -> reshpae([None, args.sentence_length, 2*args.rnn_size]) -> [None, 2*args.rnn_size]
+        '''
         output = tf.reshape(tf.transpose(tf.stack(output), perm=[1, 0, 2]), [-1, 2*args.rnn_size])
-        # Fully connected and Softmax layer
+
+        # Fully Connected and Softmax Output layer
         weight, bias = self.weight_and_bias(2*args.rnn_size, args.class_size)
         '''
-        [None, 2*args.rnn_size] x [2*args.rnn_size, args.class_size]  -> [None, args.class_size]
+        [None, 2*args.rnn_size] x [2*args.rnn_size, args.class_size] + [args.class_size]  -> softmax([None, args.class_size]) -> [None, args.class_size]
         '''
         prediction = tf.nn.softmax(tf.matmul(output, weight) + bias)
         '''
-        [None, args.class_size] -> [None, args.sentence_length, args.class_size]
+        reshape([None, args.class_size]) -> [None, args.sentence_length, args.class_size]
         '''
         self.prediction = tf.reshape(prediction, [-1, args.sentence_length, args.class_size])
-        # Loss and optimization
+
+        # Loss and Optimization
         self.loss = self.cost()
         optimizer = tf.train.AdamOptimizer(self.__learning_rate)
         tvars = tf.trainable_variables()
@@ -44,29 +51,50 @@ class Model:
         self.train_op = optimizer.apply_gradients(zip(grads, tvars))
 
     def cost(self):
+        # Compute cross entropy(self.output_data, self.prediction)
+        '''
+        [None, args.sentence_length, args.class_size] * log([None, args.sentence_length, args.class_size]) -> [None, args.sentence_length, args.class_size]
+        reduce_sum([None, args.sentence_length, args.class_size]) -> [None, args.sentence_length] = [ [0.8, 0.2, ..., 0], [0, 0.7, 0.3, ..., 0], ... ]
+        '''
         cross_entropy = self.output_data * tf.log(self.prediction)
         cross_entropy = -tf.reduce_sum(cross_entropy, reduction_indices=2)
-        # for ignoring padding region, use mask
+        '''
+        reduce_max(abs([None, args.sentence_length, args.class_size])) -> sign([None, args.sentence_length]) = [ [1, 0, 0, ..., 0], [0, 1, 1, ..., 0], ... ]
+        [None, args.sentence_length] * [None, args.sentence_length] -> [None, args.sentence_length] (masked)
+        '''
         mask = tf.sign(tf.reduce_max(tf.abs(self.output_data), reduction_indices=2))
         cross_entropy *= mask
+        '''
+        reduce_sum([None, args.sentence_length]) -> [None] = [2.9, 3.6, 0.4, 0, ... , 0] (args.batch_size)
+        cast([None], tf.float32) -> [11.0, 16.0, 13.0, ..., 123.0]
+        [None] / [None] -> [None]
+        reduce_mean([None]) -> scalar
+        '''
         cross_entropy = tf.reduce_sum(cross_entropy, reduction_indices=1)
         cross_entropy /= tf.cast(self.length, tf.float32)
         return tf.reduce_mean(cross_entropy)
 
     @staticmethod
     def get_a_cell(rnn_size, keep_prob):
+        # Create a LSTM cell
         cell = tf.contrib.rnn.LSTMCell(rnn_size, state_is_tuple=True)
         drop = tf.contrib.rnn.DropoutWrapper(cell, output_keep_prob=keep_prob)
         return drop
 
     @staticmethod
     def compute_length(input_data):
+        # Compute each sentence length in input_data
+        '''
+        reduce_max(abs([None, args.sentence_length, args.word_dim])) -> sign([None, args.sentence_length]) = [ [1, 1, 1, ..., 0], [1, 1, 1, ..., 0], ... ] 
+        reduce_sum([None, args.sentence_length]) -> [None] = [11, 16, 13, ..., 123] (args.batch_size)
+        '''
         words_used_in_sent = tf.sign(tf.reduce_max(tf.abs(input_data), reduction_indices=2))
         length = tf.cast(tf.reduce_sum(words_used_in_sent, reduction_indices=1), tf.int32)
         return length
 
     @staticmethod
     def weight_and_bias(in_size, out_size):
+        # Create weight matrix and bias
         weight = tf.truncated_normal([in_size, out_size], stddev=0.01)
         bias = tf.constant(0.1, shape=[out_size])
         return tf.Variable(weight), tf.Variable(bias)
@@ -113,28 +141,29 @@ def train(args):
         sess.run(tf.global_variables_initializer())
         saver = tf.train.Saver()
         if args.restore is not None:
-            saver.restore(sess, checkpoint_dir + '/' + 'model.ckpt')
+            saver.restore(sess, args.restore)
             print("model restored")
         for e in range(args.epoch):
             idx = 0
             for ptr in range(0, len(train_inp), args.batch_size):
                 print('%s-th batch in %s(size of train_inp)' % (idx, len(train_inp)))
-                sess.run(model.train_op, {model.input_data: train_inp[ptr:ptr + args.batch_size],
+                _, train_loss = sess.run([model.train_op, model.loss], {model.input_data: train_inp[ptr:ptr + args.batch_size],
                                           model.output_data: train_out[ptr:ptr + args.batch_size]})
+                print('train loss: %s' % (train_loss))
                 idx += 1
             if e % 10 == 0:
                 save_path = saver.save(sess, checkpoint_dir + '/' + 'model.ckpt')
                 print("model saved in file: %s" % save_path)
-            pred, length = sess.run([model.prediction, model.length], {model.input_data: test_a_inp,
+            pred, length, dev_loss = sess.run([model.prediction, model.length, model.loss], {model.input_data: test_a_inp,
                                                                        model.output_data: test_a_out})
-            print("epoch %d:" % e)
+            print("epoch: %d, dev loss: %s" % (e, dev_loss))
             print('test_a score:')
             m = f1(args, pred, test_a_out, length)
             if m > maximum:
                 maximum = m
                 save_path = saver.save(sess, checkpoint_dir + '/' + 'model_max.ckpt')
                 print("max model saved in file: %s" % save_path)
-                pred, length = sess.run([model.prediction, model.length], {model.input_data: test_b_inp,
+                pred, length, test_loss = sess.run([model.prediction, model.length, model.loss], {model.input_data: test_b_inp,
                                                                            model.output_data: test_b_out})
                 print("test_b score:")
                 f1(args, pred, test_b_out, length)
