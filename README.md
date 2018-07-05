@@ -43,7 +43,7 @@ $ python get_conll_embeddings.py --train ../data/eng.train_50 --test_a ../data/e
 
 - train
 ```
-$ python model.py --word_dim 61 --sentence_length 125 --class_size 5 --rnn_size 256 --num_layers 1 --batch_size 128 --epoch 50
+$ python train.py --word_dim 61 --sentence_length 125 --class_size 5 --rnn_size 256 --num_layers 1 --batch_size 128 --epoch 50
 ...
 
 (num_layers 1)
