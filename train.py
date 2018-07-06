@@ -8,39 +8,6 @@ from input import *
 import sys
 import argparse
 
-def f1(args, prediction, target, length):
-    '''
-    Compute F1 measure
-    '''
-    tp = np.array([0] * (args.class_size + 1))
-    fp = np.array([0] * (args.class_size + 1))
-    fn = np.array([0] * (args.class_size + 1))
-    target = np.argmax(target, 2)
-    prediction = np.argmax(prediction, 2)
-    for i in range(len(target)):
-        for j in range(length[i]):
-            if target[i, j] == prediction[i, j]:
-                tp[target[i, j]] += 1
-            else:
-                fp[target[i, j]] += 1
-                fn[prediction[i, j]] += 1
-    unnamed_entity = args.class_size - 1
-    for i in range(args.class_size):
-        if i != unnamed_entity:
-            tp[args.class_size] += tp[i]
-            fp[args.class_size] += fp[i]
-            fn[args.class_size] += fn[i]
-    precision = []
-    recall = []
-    fscore = []
-    for i in range(args.class_size + 1):
-        precision.append(tp[i] * 1.0 / (tp[i] + fp[i]))
-        recall.append(tp[i] * 1.0 / (tp[i] + fn[i]))
-        fscore.append(2.0 * precision[i] * recall[i] / (precision[i] + recall[i]))
-    print(fscore)
-    return fscore[args.class_size]
-
-
 def train(args):
     '''
     Train model
@@ -88,7 +55,7 @@ def train(args):
                                                                        model.output_data: dev_out})
             print("epoch: %d, dev loss: %s" % (e, dev_loss))
             print('dev score:')
-            m = f1(args, pred, dev_out, length)
+            m = Model.f1(args, pred, dev_out, length)
             if m > maximum:
                 maximum = m
                 save_path = saver.save(sess, args.checkpoint_dir + '/' + 'model_max.ckpt')
@@ -96,7 +63,7 @@ def train(args):
                 pred, length, test_loss = sess.run([model.prediction, model.length, model.loss], {model.input_data: test_inp,
                                                                            model.output_data: test_out})
                 print("test score:")
-                f1(args, pred, test_out, length)
+                Model.f1(args, pred, test_out, length)
 
 
 if __name__ == '__main__':
@@ -105,8 +72,6 @@ if __name__ == '__main__':
     parser.add_argument('--emb_dim', type=int, help='dimension of word embedding vector', required=True)
     parser.add_argument('--sentence_length', type=int, help='max sentence length', required=True)
     parser.add_argument('--class_size', type=int, help='number of classes', required=True)
-    parser.add_argument('--rnn_size', type=int, default=256, help='hidden dimension of rnn')
-    parser.add_argument('--num_layers', type=int, default=2, help='number of layers in rnn')
     parser.add_argument('--batch_size', type=int, default=128, help='batch size of training')
     parser.add_argument('--epoch', type=int, default=50, help='number of epochs')
     parser.add_argument('--checkpoint_dir', type=str, default='./checkpoint', help='path of saved model(ex, ./checkpoint/model.ckpt)')
