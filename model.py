@@ -45,7 +45,6 @@ class Model:
         grads, _ = tf.clip_by_global_norm(tf.gradients(self.loss, tvars), 10)
         self.train_op = optimizer.apply_gradients(zip(grads, tvars))
 
-    @staticmethod
     def cost(self):
         '''
         Compute cross entropy(self.output_data, self.prediction)

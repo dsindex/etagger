@@ -1,7 +1,6 @@
 from random import random
 import numpy as np
 
-
 class RandomVec:
     def __init__(self, dim):
         self.dim = dim
