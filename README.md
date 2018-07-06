@@ -45,10 +45,15 @@ test, max_sentence_length = 124
 $ python train.py --emb_path embeddings/glove.6B.50d.txt.pkl --emb_dim 50 --sentence_length 125 --class_size 5 
 ```
 
-- inference
+- inference(bulk)
 ```
 $ python inference.py --emb_path embeddings/glove.6B.50d.txt.pkl --emb_dim 50 --sentence_length 125 --class_size 5 --restore checkpoint/model_max.ckpt
 ...
 test score:
 [0.95465306865780364, 0.89133777549974369, 0.85596221959858321, 0.75253874933190812, 0.99184267269373649, 0.88572127737672823]
+```
+
+- inference(interactive)
+```
+$ python inference.py --interactive 1 --emb_path embeddings/glove.6B.50d.txt.pkl --emb_dim 50 --sentence_length 125 --class_size 5 --restore checkpoint/model_max.ckpt < data/test.txt | more
 ```

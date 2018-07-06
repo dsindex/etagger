@@ -15,15 +15,18 @@ def train(args):
 
     # Build input data
     embvec = pkl.load(open(args.emb_path, 'rb'))
-    train_data = Input('data/train.txt', embvec, args.emb_dim, args.class_size, args.sentence_length)
+    train_data = Input()
+    train_data.create_input_bulk('data/train.txt', embvec, args.emb_dim, args.class_size, args.sentence_length)
     train_inp = train_data.sentence
     train_out = train_data.sentence_tag
     print('max_sentence_length = %d' % train_data.max_sentence_length)
-    dev_data = Input('data/dev.txt', embvec, args.emb_dim, args.class_size, args.sentence_length)
+    dev_data = Input()
+    dev_data.create_input_bulk('data/dev.txt', embvec, args.emb_dim, args.class_size, args.sentence_length)
     dev_inp = dev_data.sentence
     dev_out = dev_data.sentence_tag
     print('max_sentence_length = %d' % dev_data.max_sentence_length)
-    test_data = Input('data/test.txt', embvec, args.emb_dim, args.class_size, args.sentence_length)
+    test_data = Input()
+    test_data.create_input_bulk('data/test.txt', embvec, args.emb_dim, args.class_size, args.sentence_length)
     test_inp = test_data.sentence
     test_out = test_data.sentence_tag
     print('max_sentence_length = %d' % test_data.max_sentence_length)

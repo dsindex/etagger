@@ -7,7 +7,10 @@ import sys
 
 class Input:
 
-    def __init__(self, input_file, embvec, emb_dim, class_size, sentence_length=-1):
+    def __init__(self):
+        return None
+
+    def create_input_bulk(self, input_file, embvec, emb_dim, class_size, sentence_length=-1):
         word = []
         tag = []
         self.sentence = []
@@ -48,6 +51,28 @@ class Input:
                 word.append(temp)
                 tag.append(self.label(tokens[3], class_size))     # label one-hot(5)
         assert (len(self.sentence) == len(self.sentence_tag))
+
+    def create_input_interactive(self, bucket, embvec, emb_dim, max_sentence_length):
+        word = []
+        self.sentence = []
+        self.emb_dim = emb_dim
+        self.word_dim = emb_dim + 11
+        sentence_length = 0
+        for line in bucket:
+            tokens = line.split()
+            assert (len(tokens) <= 4)
+            temp = embvec[tokens[0]]
+            assert len(temp) == emb_dim
+            temp = np.append(temp, self.pos(tokens[1]))       # adding pos one-hot(5)
+            temp = np.append(temp, self.chunk(tokens[2]))     # adding chunk one-hot(5)
+            temp = np.append(temp, self.capital(tokens[0]))   # adding capital one-hot(1)
+            word.append(temp)
+            sentence_length += 1
+        # padding
+        for _ in range(max_sentence_length - sentence_length):
+            temp = np.array([0 for _ in range(word_dim)])
+            word.append(temp)
+        self.sentence.append(word)
 
     @staticmethod
     def find_max_length(file_name):
