@@ -1,1 +1,0 @@
-- [download](https://github.com/mxhofer/Named-Entity-Recognition-BidirectionalLSTM-CNN-CoNLL)
