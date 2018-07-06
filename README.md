@@ -3,6 +3,8 @@ etagger
 
 ### description
 
+- named entity tagger using multi-layer Bidirectional LSTM
+
 - original git repository
   - https://github.com/monikkinom/ner-lstm
 
