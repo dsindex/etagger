@@ -16,7 +16,7 @@ class Input:
         if sentence_length == -1:
             if type(data) is list:
                 self.max_sentence_length = len(data)
-            else: # treat as a string
+            else: # treat as file path
                 self.max_sentence_length = self.find_max_length(data)
         else:
             self.max_sentence_length = sentence_length
@@ -27,7 +27,7 @@ class Input:
             word, tag = self.__create_input(data)
             self.sentence.append(word)
             self.sentence_tag.append(tag)
-        else: # treat as a string
+        else: # treat as file path
             bucket = []
             for line in open(data):
                 if line in ['\n', '\r\n']:
@@ -133,13 +133,14 @@ class Input:
         length : int
         '''
         pred = pred[0:length]
-        pred_argmax = np.argmax(pred, 1)
+        # [length]
+        pred_list = np.argmax(pred, 1).tolist()
         labels = []
-        for idx in pred_argmax:
-            if idx == 0: labels.append('PER')
-            if idx == 1: labels.append('LOC')
-            if idx == 2: labels.append('ORG')
-            if idx == 3: labels.append('MISC')
+        for i in pred_list:
+            if i == 0: labels.append('PER')
+            elif i == 1: labels.append('LOC')
+            elif i == 2: labels.append('ORG')
+            elif i == 3: labels.append('MISC')
             else: labels.append('O')
         return labels
 
