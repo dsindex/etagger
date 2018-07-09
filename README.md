@@ -13,9 +13,13 @@ etagger
   - removed unnecessary files
   - fix bugs for MultiRNNCell()
   - refactoring .... ing
-    - implement input.py
-    - split model.py, train.py, inference.py
-    - 5 class to 9 class
+    - implement input.py [done]
+    - split model.py, train.py, inference.py [done]
+    - extend 5 class to 9 class [done]
+    - use embedding_lookup()
+    - use character-level embedding
+    - use gazetter features
+    - use attention
 
 ### pre-requisites
 
