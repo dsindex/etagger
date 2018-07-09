@@ -7,86 +7,59 @@ import sys
 
 class Input:
 
-    def __init__(self):
-        return None
-
-    def create_input_bulk(self, input_file, embvec, emb_dim, class_size, sentence_length=-1):
-        word = []
-        tag = []
+    def __init__(self, data, embvec, emb_dim, class_size, sentence_length=-1):
         self.sentence = []
         self.sentence_tag = []
+        self.embvec = embvec
         self.emb_dim = emb_dim
         self.class_size = class_size
         if sentence_length == -1:
-            max_sentence_length = self.find_max_length(input_file)
+            if type(data) is list:
+                self.max_sentence_length = len(data)
+            else: # treat as a string
+                self.max_sentence_length = self.find_max_length(data)
         else:
-            max_sentence_length = sentence_length
-        self.max_sentence_length = max_sentence_length
+            self.max_sentence_length = sentence_length
         # 'emb_dim + (5+5+1)' number of 0's
         self.word_dim = emb_dim + 11
 
-        sentence_length = 0
-        for line in open(input_file):
-            if line in ['\n', '\r\n']:
-                # padding
-                for _ in range(max_sentence_length - sentence_length):
-                    # five 0's
-                    tag.append(np.array([0] * class_size))
-                    temp = np.array([0 for _ in range(self.word_dim)])
-                    word.append(temp)
-                self.sentence.append(word)
-                self.sentence_tag.append(np.array(tag))
-                sentence_length = 0
-                word = []
-                tag = []
-            else:
-                tokens = line.split()
-                assert (len(tokens) == 4)
-                sentence_length += 1
-                temp = embvec[tokens[0]]
-                assert len(temp) == emb_dim
-                temp = np.append(temp, self.pos(tokens[1]))       # adding pos one-hot(5)
-                temp = np.append(temp, self.chunk(tokens[2]))     # adding chunk one-hot(5)
-                temp = np.append(temp, self.capital(tokens[0]))   # adding capital one-hot(1)
-                word.append(temp)
-                tag.append(self.label(tokens[3], class_size))     # label one-hot(5)
-        assert (len(self.sentence) == len(self.sentence_tag))
+        if type(data) is list:
+            word, tag = self.__create_input(data)
+            self.sentence.append(word)
+            self.sentence_tag.append(tag)
+        else: # treat as a string
+            bucket = []
+            for line in open(data):
+                if line in ['\n', '\r\n']:
+                    word, tag = self.__create_input(bucket)
+                    self.sentence.append(word)
+                    self.sentence_tag.append(tag)
+                    bucket = []
+                else:
+                    bucket.append(line)
 
-    def create_input_interactive(self, bucket, embvec, emb_dim, class_size, sentence_length=-1):
+    def __create_input(self, bucket):
         word = []
-        tag = []
-        self.sentence = []
-        self.sentence_tag = []
-        self.emb_dim = emb_dim
-        self.class_size = class_size
-        if sentence_length == -1:
-            max_sentence_length = len(bucket)
-        else:
-            max_sentence_length = sentence_length
-        self.max_sentence_length = max_sentence_length
-        # 'emb_dim + (5+5+1)' number of 0's
-        self.word_dim = emb_dim + 11
-
+        tag  = []
         sentence_length = 0
         for line in bucket:
             tokens = line.split()
             assert (len(tokens) == 4)
             sentence_length += 1
-            temp = embvec[tokens[0]]
-            assert len(temp) == emb_dim
-            temp = np.append(temp, self.pos(tokens[1]))       # adding pos one-hot(5)
-            temp = np.append(temp, self.chunk(tokens[2]))     # adding chunk one-hot(5)
-            temp = np.append(temp, self.capital(tokens[0]))   # adding capital one-hot(1)
+            temp = self.embvec[tokens[0]]
+            assert len(temp) == self.emb_dim
+            temp = np.append(temp, self.pos(tokens[1]))        # adding pos one-hot(5)
+            temp = np.append(temp, self.chunk(tokens[2]))      # adding chunk one-hot(5)
+            temp = np.append(temp, self.capital(tokens[0]))    # adding capital one-hot(1)
             word.append(temp)
-            tag.append(self.label(tokens[3], class_size))     # label one-hot(5)
+            tag.append(self.label(tokens[3], self.class_size)) # label one-hot(5)
         # padding
-        for _ in range(max_sentence_length - sentence_length):
+        for _ in range(self.max_sentence_length - sentence_length):
             # five 0's
-            tag.append(np.array([0] * class_size))
+            tag.append(np.array([0] * self.class_size))
             temp = np.array([0 for _ in range(self.word_dim)])
             word.append(temp)
-        self.sentence.append(word)
-        self.sentence_tag.append(tag)
+        return word, tag
 
     @staticmethod
     def find_max_length(file_name):
@@ -152,4 +125,21 @@ class Input:
         else:
             one_hot[4] = 1
         return one_hot
+
+    @staticmethod
+    def pred_to_label(pred, length):
+        '''
+        pred : [args.senence_length, args.class_size]
+        length : int
+        '''
+        pred = pred[0:length]
+        pred_argmax = np.argmax(pred, 1)
+        labels = []
+        for idx in pred_argmax:
+            if idx == 0: labels.append('PER')
+            if idx == 1: labels.append('LOC')
+            if idx == 2: labels.append('ORG')
+            if idx == 3: labels.append('MISC')
+            else: labels.append('O')
+        return labels
 

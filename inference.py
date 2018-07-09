@@ -16,8 +16,7 @@ def inference_bulk(args):
     embvec = pkl.load(open(args.emb_path, 'rb'))
 
     # Build input data
-    test_data = Input()
-    test_data.create_input_bulk('data/test.txt', embvec, args.emb_dim, args.class_size, args.sentence_length)
+    test_data = Input('data/test.txt', embvec, args.emb_dim, args.class_size, args.sentence_length)
     print('max_sentence_length = %d' % test_data.max_sentence_length)
     print('loading input data ... done')
 
@@ -32,7 +31,7 @@ def inference_bulk(args):
         print("model restored")
         pred, length, test_loss = sess.run([model.prediction, model.length, model.loss], {model.input_data: test_data.sentence, model.output_data: test_data.sentence_tag})
         print("test score:")
-        Model.f1(args, pred, test_out, length)
+        Model.f1(args, pred, test_data.sentence_tag, length)
 
 def inference_interactive(args):
     '''
@@ -60,18 +59,24 @@ def inference_interactive(args):
         line = line.strip()
         if not line and len(bucket) >= 1:
             # Build input data
-            inp = Input()
-            inp.create_input_interactive(bucket, embvec, args.emb_dim, args.class_size, args.sentence_length)
+            inp = Input(bucket, embvec, args.emb_dim, args.class_size, args.sentence_length)
             pred, length, loss = sess.run([model.prediction, model.length, model.loss], {model.input_data: inp.sentence, model.output_data: inp.sentence_tag})
-            print(pred)
+            labels = Input.pred_to_label(pred[0], length[0])
+            for i in range(len(bucket)):
+                out = bucket[i] + '\t' + labels[i]
+                sys.stdout.write(out + '\n')
+            sys.stdout.write('\n')
             bucket = []
         if line : bucket.append(line)
     if len(bucket) != 0 :
         # Build input data
-        inp = Input()
-        inp.create_input_interactive(bucket, embvec, args.emb_dim, args.class_size, args.sentence_length)
+        inp = Input(bucket, embvec, args.emb_dim, args.class_size, args.sentence_length)
         pred, length, loss = sess.run([model.prediction, model.length, model.loss], {model.input_data: inp.sentence, model.output_data: inp.sentence_tag})
-        print(pred)
+        labels = Input.pred_to_label(pred[0], length[0])
+        for i in range(len(bucket)):
+            out = bucket[i] + '\t' + labels[i]
+            sys.stdout.write(out + '\n')
+        sys.stdout.write('\n')
 		
     sess.close()
 
