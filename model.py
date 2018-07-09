@@ -126,6 +126,9 @@ class Model:
             precision.append(tp[i] * 1.0 / (tp[i] + fp[i]))
             recall.append(tp[i] * 1.0 / (tp[i] + fn[i]))
             fscore.append(2.0 * precision[i] * recall[i] / (precision[i] + recall[i]))
+        print('precision, recall, fscore')
+        print(precision)
+        print(recall)
         print(fscore)
         return fscore[args.class_size]
 
