@@ -31,7 +31,7 @@ def inference_bulk(args):
         print("model restored")
         pred, length, test_loss = sess.run([model.prediction, model.length, model.loss], {model.input_data: test_data.sentence, model.output_data: test_data.sentence_tag})
         print("test score:")
-        Model.f1(args, pred, test_data.sentence_tag, length)
+        Model.compute_f1(args, pred, test_data.sentence_tag, length)
 
 def inference_interactive(args):
     '''

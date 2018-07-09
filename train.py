@@ -55,7 +55,7 @@ def train(args):
                                                                        model.output_data: dev_out})
             print("epoch: %d, dev loss: %s" % (e, dev_loss))
             print('dev score:')
-            m = Model.f1(args, pred, dev_out, length)
+            m = Model.compute_f1(args, pred, dev_out, length)
             if m > maximum:
                 maximum = m
                 save_path = saver.save(sess, args.checkpoint_dir + '/' + 'model_max.ckpt')
@@ -63,7 +63,7 @@ def train(args):
                 pred, length, test_loss = sess.run([model.prediction, model.length, model.loss], {model.input_data: test_inp,
                                                                            model.output_data: test_out})
                 print("test score:")
-                Model.f1(args, pred, test_out, length)
+                Model.compute_f1(args, pred, test_out, length)
 
 
 if __name__ == '__main__':

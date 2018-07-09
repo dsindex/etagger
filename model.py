@@ -41,13 +41,13 @@ class Model:
         self.prediction = tf.reshape(prediction, [-1, args.sentence_length, args.class_size])
 
         # Loss and Optimization
-        self.loss = self.cost()
+        self.loss = self.compute_cost()
         optimizer = tf.train.AdamOptimizer(self.__learning_rate)
         tvars = tf.trainable_variables()
         grads, _ = tf.clip_by_global_norm(tf.gradients(self.loss, tvars), 10)
         self.train_op = optimizer.apply_gradients(zip(grads, tvars))
 
-    def cost(self):
+    def compute_cost(self):
         '''
         Compute cross entropy(self.output_data, self.prediction)
         '''
@@ -97,7 +97,7 @@ class Model:
         return tf.Variable(weight), tf.Variable(bias)
 
     @staticmethod
-    def f1(args, prediction, target, length):
+    def compute_f1(args, prediction, target, length):
         '''
         Compute F1 measure
         '''
