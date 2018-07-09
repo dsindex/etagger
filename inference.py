@@ -49,7 +49,7 @@ def inference_interactive(args):
     sess.run(tf.global_variables_initializer())
     saver = tf.train.Saver()
     saver.restore(sess, args.restore)
-    print("model restored")
+    sys.stderr.write('model restored' +'\n')
 
     bucket = []
     while 1 :
@@ -63,7 +63,7 @@ def inference_interactive(args):
             pred, length, loss = sess.run([model.prediction, model.length, model.loss], {model.input_data: inp.sentence, model.output_data: inp.sentence_tag})
             labels = Input.pred_to_label(pred[0], length[0])
             for i in range(len(bucket)):
-                out = bucket[i] + '\t' + labels[i]
+                out = bucket[i] + ' ' + labels[i]
                 sys.stdout.write(out + '\n')
             sys.stdout.write('\n')
             bucket = []
@@ -74,10 +74,10 @@ def inference_interactive(args):
         pred, length, loss = sess.run([model.prediction, model.length, model.loss], {model.input_data: inp.sentence, model.output_data: inp.sentence_tag})
         labels = Input.pred_to_label(pred[0], length[0])
         for i in range(len(bucket)):
-            out = bucket[i] + '\t' + labels[i]
+            out = bucket[i] + ' ' + labels[i]
             sys.stdout.write(out + '\n')
         sys.stdout.write('\n')
-		
+
     sess.close()
 
 if __name__ == '__main__':
