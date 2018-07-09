@@ -22,18 +22,16 @@ def _eval(bucket):
         chunk = tokens[2]
         tag = tokens[3]
         pred = tokens[4]
-        ctag = 'O'
-        if '-' in tag: ctag = tag.split('-')[1]
         if pred not in tp: tp[pred] = 0
         if pred not in fp: fp[pred] = 0
-        if ctag not in fn: fn[ctag] = 0
-        if ctag == pred:
+        if tag not in fn: fn[tag] = 0
+        if tag == pred:
             tp[pred] += 1
         else:
             fp[pred] += 1
-            fn[ctag] += 1
+            fn[tag] += 1
         cls[pred] = None
-        cls[ctag] = None
+        cls[tag] = None
 
 def eval(args):
     bucket = []
