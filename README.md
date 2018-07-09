@@ -14,12 +14,13 @@ etagger
   - fix bugs for MultiRNNCell()
   - refactoring .... ing
     - implement input.py [done]
-    - split model.py, train.py, inference.py [done]
+    - split model.py to model.py, train.py, inference.py [done]
     - extend 5 class to 9 class [done]
     - use embedding_lookup()
-    - use character-level embedding
-    - use gazetter features
-    - use attention
+    - add character-level embedding
+    - add gazetter features
+    - add self-attention
+    - serve api
 
 ### pre-requisites
 
