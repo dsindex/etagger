@@ -52,10 +52,10 @@ class Input:
             temp = np.append(temp, self.chunk(tokens[2]))      # adding chunk one-hot(5)
             temp = np.append(temp, self.capital(tokens[0]))    # adding capital one-hot(1)
             word.append(temp)
-            tag.append(self.label(tokens[3], self.class_size)) # label one-hot(5)
+            tag.append(self.label(tokens[3], self.class_size)) # label one-hot(9)
         # padding
         for _ in range(self.max_sentence_length - sentence_length):
-            # five 0's
+            # nine 0's
             tag.append(np.array([0] * self.class_size))
             temp = np.array([0 for _ in range(self.word_dim)])
             word.append(temp)
@@ -114,16 +114,24 @@ class Input:
     @staticmethod
     def label(tag, class_size):
         one_hot = np.zeros(class_size)
-        if tag.endswith('PER'):
+        if tag == 'B-PER':
             one_hot[0] = 1
-        elif tag.endswith('LOC'):
+        elif tag == 'I-PER':
             one_hot[1] = 1
-        elif tag.endswith('ORG'):
+        elif tag == 'B-LOC':
             one_hot[2] = 1
-        elif tag.endswith('MISC'):
+        elif tag == 'I-LOC':
             one_hot[3] = 1
-        else:
+        elif tag == 'B-ORG':
             one_hot[4] = 1
+        elif tag == 'I-ORG':
+            one_hot[5] = 1
+        elif tag == 'B-MISC':
+            one_hot[6] = 1
+        elif tag == 'I-MISC':
+            one_hot[7] = 1
+        else:
+            one_hot[8] = 1
         return one_hot
 
     @staticmethod
@@ -137,10 +145,14 @@ class Input:
         pred_list = np.argmax(pred, 1).tolist()
         labels = []
         for i in pred_list:
-            if i == 0: labels.append('PER')
-            elif i == 1: labels.append('LOC')
-            elif i == 2: labels.append('ORG')
-            elif i == 3: labels.append('MISC')
+            if i == 0: labels.append('B-PER')
+            elif i == 1: labels.append('I-PER')
+            elif i == 2: labels.append('B-LOC')
+            elif i == 3: labels.append('I-LOC')
+            elif i == 4: labels.append('B-ORG')
+            elif i == 5: labels.append('I-ORG')
+            elif i == 6: labels.append('B-MISC')
+            elif i == 7: labels.append('I-MISC')
             else: labels.append('O')
         return labels
 
