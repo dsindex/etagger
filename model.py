@@ -109,10 +109,10 @@ class Model:
         for i in range(len(target)):
             for j in range(length[i]):
                 if target[i, j] == prediction[i, j]:
-                    tp[target[i, j]] += 1
+                    tp[prediction[i, j]] += 1
                 else:
-                    fp[target[i, j]] += 1
-                    fn[prediction[i, j]] += 1
+                    fp[prediction[i, j]] += 1
+                    fn[target[i, j]] += 1
         unnamed_entity = args.class_size - 1
         for i in range(args.class_size):
             if i != unnamed_entity:
