@@ -18,8 +18,6 @@ def inference_bulk(args):
     # Build input data
     test_data = Input()
     test_data.create_input_bulk('data/test.txt', embvec, args.emb_dim, args.class_size, args.sentence_length)
-    test_inp = test_data.sentence
-    test_out = test_data.sentence_tag
     print('max_sentence_length = %d' % test_data.max_sentence_length)
     print('loading input data ... done')
 
@@ -32,7 +30,7 @@ def inference_bulk(args):
         saver = tf.train.Saver()
         saver.restore(sess, args.restore)
         print("model restored")
-        pred, length, test_loss = sess.run([model.prediction, model.length, model.loss], {model.input_data: test_inp, model.output_data: test_out})
+        pred, length, test_loss = sess.run([model.prediction, model.length, model.loss], {model.input_data: test_data.sentence, model.output_data: test_data.sentence_tag})
         print("test score:")
         Model.f1(args, pred, test_out, length)
 
@@ -63,16 +61,16 @@ def inference_interactive(args):
         if not line and len(bucket) >= 1:
             # Build input data
             inp = Input()
-            inp.create_input_interactive(bucket, embvec, args.emb_dim, args.sentence_length)
-            pred, length, loss = sess.run([model.prediction, model.length, model.loss], {model.input_data: inp.sentence})
+            inp.create_input_interactive(bucket, embvec, args.emb_dim, args.class_size, args.sentence_length)
+            pred, length, loss = sess.run([model.prediction, model.length, model.loss], {model.input_data: inp.sentence, model.output_data: inp.sentence_tag})
             print(pred)
             bucket = []
         if line : bucket.append(line)
     if len(bucket) != 0 :
         # Build input data
         inp = Input()
-        inp.create_input_interactive(bucket, embvec, args.emb_dim, args.sentence_length)
-        pred, length, loss = sess.run([model.prediction, model.length, model.loss], {model.input_data: inp.sentence})
+        inp.create_input_interactive(bucket, embvec, args.emb_dim, args.class_size, args.sentence_length)
+        pred, length, loss = sess.run([model.prediction, model.length, model.loss], {model.input_data: inp.sentence, model.output_data: inp.sentence_tag})
         print(pred)
 		
     sess.close()

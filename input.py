@@ -52,27 +52,41 @@ class Input:
                 tag.append(self.label(tokens[3], class_size))     # label one-hot(5)
         assert (len(self.sentence) == len(self.sentence_tag))
 
-    def create_input_interactive(self, bucket, embvec, emb_dim, max_sentence_length):
+    def create_input_interactive(self, bucket, embvec, emb_dim, class_size, sentence_length=-1):
         word = []
+        tag = []
         self.sentence = []
+        self.sentence_tag = []
         self.emb_dim = emb_dim
+        self.class_size = class_size
+        if sentence_length == -1:
+            max_sentence_length = len(bucket)
+        else:
+            max_sentence_length = sentence_length
+        self.max_sentence_length = max_sentence_length
+        # 'emb_dim + (5+5+1)' number of 0's
         self.word_dim = emb_dim + 11
+
         sentence_length = 0
         for line in bucket:
             tokens = line.split()
-            assert (len(tokens) <= 4)
+            assert (len(tokens) == 4)
+            sentence_length += 1
             temp = embvec[tokens[0]]
             assert len(temp) == emb_dim
             temp = np.append(temp, self.pos(tokens[1]))       # adding pos one-hot(5)
             temp = np.append(temp, self.chunk(tokens[2]))     # adding chunk one-hot(5)
             temp = np.append(temp, self.capital(tokens[0]))   # adding capital one-hot(1)
             word.append(temp)
-            sentence_length += 1
+            tag.append(self.label(tokens[3], class_size))     # label one-hot(5)
         # padding
         for _ in range(max_sentence_length - sentence_length):
-            temp = np.array([0 for _ in range(word_dim)])
+            # five 0's
+            tag.append(np.array([0] * class_size))
+            temp = np.array([0 for _ in range(self.word_dim)])
             word.append(temp)
         self.sentence.append(word)
+        self.sentence_tag.append(tag)
 
     @staticmethod
     def find_max_length(file_name):
