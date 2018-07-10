@@ -3,6 +3,7 @@ import tensorflow as tf
 import numpy as np
 import pickle as pkl
 from model import Model
+from eval  import Eval
 from input import *
 
 import sys
@@ -55,7 +56,7 @@ def train(args):
                                                                        model.output_data: dev_out})
             print("epoch: %d, dev loss: %s" % (e, dev_loss))
             print('dev score:')
-            m = Model.compute_f1(args, pred, dev_out, length)
+            m = Eval.compute_f1(args, pred, dev_out, length)
             if m > maximum:
                 maximum = m
                 save_path = saver.save(sess, args.checkpoint_dir + '/' + 'model_max.ckpt')
@@ -63,7 +64,7 @@ def train(args):
                 pred, length, test_loss = sess.run([model.prediction, model.length, model.loss], {model.input_data: test_inp,
                                                                            model.output_data: test_out})
                 print("test score:")
-                Model.compute_f1(args, pred, test_out, length)
+                Eval.compute_f1(args, pred, test_out, length)
 
 
 if __name__ == '__main__':
