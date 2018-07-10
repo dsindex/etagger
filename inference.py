@@ -5,7 +5,6 @@ import pickle as pkl
 from model import Model
 from eval  import Eval
 from input import *
-
 import sys
 import argparse
 

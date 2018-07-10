@@ -1,32 +1,31 @@
-from __future__ import print_function
 import numpy as np
 import pickle as pkl
-from randomvec import RandomVec
-
+from random import random
+import sys
 import argparse
 
 class EmbVec:
     def __init__(self, args):
         self.model = {}
-        self.rand_model = RandomVec(args.emb_dim)
-        path = args.emb_path
+        self.dim = args.emb_dim
         invalid = 0
-        for line in open(path):
+        for line in open(args.emb_path):
             line = line.split()
             word = line[0]
             vector = np.array([float(val) for val in line[1:]])
-            if len(vector) != args.emb_dim:
+            if len(vector) != self.dim:
                 invalid += 1
                 continue
             self.model[word] = vector
-        print('invalid entries %d' % invalid)
+        sys.stderr.write('invalid entries %d' % (invalid) + '\n')
 
     def __getitem__(self, word):
         word = word.lower()
         try:
             return self.model[word]
         except KeyError:
-            return self.rand_model[word]
+            vec = np.array([random() for i in range(self.dim)])
+            return vec
 
 
 if __name__ == '__main__':

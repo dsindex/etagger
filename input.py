@@ -1,12 +1,11 @@
 from __future__ import print_function
+import tensorflow as tf
 import numpy as np
 import pickle
 from embvec import EmbVec
 import sys
 
-
 class Input:
-
     def __init__(self, data, embvec, emb_dim, class_size, sentence_length=-1):
         self.sentence = []
         self.sentence_tag = []

@@ -5,15 +5,10 @@ import pickle as pkl
 from model import Model
 from eval  import Eval
 from input import *
-
 import sys
 import argparse
 
 def train(args):
-    '''
-    Train model
-    '''
-
     # Build input data
     embvec = pkl.load(open(args.emb_path, 'rb'))
     train_data = Input('data/train.txt', embvec, args.emb_dim, args.class_size, args.sentence_length)

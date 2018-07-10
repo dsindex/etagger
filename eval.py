@@ -1,15 +1,9 @@
 from __future__ import print_function
 import numpy as np
-
 import sys
 import argparse
 
-
 class Eval:
-    '''
-    Evaluation class, ex) compute precision, recall, fscore
-    '''
-
     def __init__(self):
         self.cls = {}
         self.tp = {}
@@ -41,6 +35,9 @@ class Eval:
             self.cls[tag] = None
 
     def eval(self):
+        '''
+        Compute precision, recall, fscore given file
+        '''
         bucket = []
         while 1:
             try: line = sys.stdin.readline()
@@ -79,7 +76,7 @@ class Eval:
     @staticmethod
     def compute_f1(args, prediction, target, length):
         '''
-        Compute F1 measure
+        Compute F1 measure given prediction and target
         '''
         tp = np.array([0] * (args.class_size + 1))
         fp = np.array([0] * (args.class_size + 1))
