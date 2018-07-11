@@ -1,6 +1,7 @@
 from __future__ import print_function
 import tensorflow as tf
 import numpy as np
+from embvec import EmbVec
 
 class Model:
     '''
@@ -12,15 +13,23 @@ class Model:
     __keep_prob = 0.5         # keep probability for dropout
     __learning_rate = 0.003   # learning rate
 
-    def __init__(self, args):
+    def __init__(self, embvec, args):
         '''
         Initialize RNN model
         '''
         self.args = args
 
         # Input layer and Output(answer)
-        self.input_data = tf.placeholder(tf.float32, [None, args.sentence_length, args.word_dim])
-        self.output_data = tf.placeholder(tf.float32, [None, args.sentence_length, args.class_size])
+        self.input_data_word_ids = tf.placeholder(tf.int32, [None, args.sentence_length], name='input_data_word_dis')
+        embed_arr = np.array(embvec.embeddings)
+        embed_init = tf.constant_initializer(embed_arr)
+        embeddings = tf.get_variable(name='embeddings', initializer=embed_init, shape=embed_arr.shape, trainable=False)
+        # embedding_lookup([None, args.sentence_length]) -> [None, args.sentence_length, args.emb_dim]
+        self.word_embeddings = tf.nn.embedding_lookup(embeddings, self.input_data_word_ids, name='word_embeddings')
+        self.input_data_etc = tf.placeholder(tf.float32, [None, args.sentence_length, args.etc_dim], name='input_data_etc')
+        # concat([None, args.sentence_length, args.emb_dim], [None, args.sentence_length, args.etc_dim]) -> [None, args.sentence_length, args.word_dim]
+        self.input_data = tf.concat([self.word_embeddings, self.input_data_etc], axis=-1, name='input_data')
+        self.output_data = tf.placeholder(tf.float32, [None, args.sentence_length, args.class_size], name='output_data')
 
         # RNN layer
         fw_cell = tf.contrib.rnn.MultiRNNCell([self.create_cell(self.__rnn_size, keep_prob=self.__keep_prob) for _ in range(self.__num_layers)], state_is_tuple=True)

@@ -16,7 +16,8 @@ def inference_bulk(args):
     embvec = pkl.load(open(args.emb_path, 'rb'))
 
     # Build input data
-    test_data = Input('data/test.txt', embvec, args.emb_dim, args.class_size, args.sentence_length)
+    test_file = 'data/test.txt'
+    test_data = Input(test_file, embvec, args.emb_dim, args.class_size, args.sentence_length)
     print('max_sentence_length = %d' % test_data.max_sentence_length)
     print('loading input data ... done')
 

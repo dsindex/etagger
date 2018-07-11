@@ -7,7 +7,8 @@ import sys
 
 class Input:
     def __init__(self, data, embvec, emb_dim, class_size, sentence_length=-1):
-        self.sentence = []
+        self.sentence_word_ids = []  # [None, sentence_length]
+        self.sentence_etc = []       # [None, sentence_length, etc_dim]
         self.sentence_tag = []
         self.embvec = embvec
         self.emb_dim = emb_dim
@@ -20,45 +21,69 @@ class Input:
         else:
             self.max_sentence_length = sentence_length
         # 'emb_dim + (5+5+1)' number of 0's
-        self.word_dim = emb_dim + 11
+        self.etc_dim = 5+5+1
+        self.word_dim = self.emb_dim + self.etc_dim
 
         if type(data) is list:
-            word, tag = self.__create_input(data)
-            self.sentence.append(word)
+            word = self.__create_word_ids(data)
+            self.sentence_word_ids.append(word)
+            word, tag = self.__create_etc(data)
+            self.sentence_etc.append(word)
             self.sentence_tag.append(tag)
         else: # treat as file path
+            # word_ids
             bucket = []
             for line in open(data):
                 if line in ['\n', '\r\n']:
-                    word, tag = self.__create_input(bucket)
-                    self.sentence.append(word)
+                    word_ids = self.__create_word_ids(bucket)
+                    self.sentence_word_ids.append(word_ids)
+                    bucket = []
+                else:
+                    bucket.append(line)
+            # etc
+            bucket = []
+            for line in open(data):
+                if line in ['\n', '\r\n']:
+                    etc, tag = self.__create_etc(bucket)
+                    self.sentence_etc.append(etc)
                     self.sentence_tag.append(tag)
                     bucket = []
                 else:
                     bucket.append(line)
 
-    def __create_input(self, bucket):
-        word = []
+    def __create_word_ids(self, bucket):
+        word_ids = []
+        sentence_length = 0
+        for line in bucket:
+            tokens = line.split()
+            assert (len(tokens) == 4)
+            sentence_length += 1
+            id = self.embvec.get_id(tokens[0])
+            word_ids.append(id)
+        # padding with pad id
+        for _ in range(self.max_sentence_length - sentence_length):
+            word_ids.append(self.embvec.pad_id)
+        return word_ids
+
+    def __create_etc(self, bucket):
+        etc = []
         tag  = []
         sentence_length = 0
         for line in bucket:
             tokens = line.split()
             assert (len(tokens) == 4)
             sentence_length += 1
-            temp = self.embvec[tokens[0]]
-            assert len(temp) == self.emb_dim
-            temp = np.append(temp, self.pos(tokens[1]))        # adding pos one-hot(5)
+            temp = self.pos(tokens[1])                         # adding pos one-hot(5)
             temp = np.append(temp, self.chunk(tokens[2]))      # adding chunk one-hot(5)
             temp = np.append(temp, self.capital(tokens[0]))    # adding capital one-hot(1)
-            word.append(temp)
+            etc.append(temp)
             tag.append(self.label(tokens[3], self.class_size)) # label one-hot(9)
-        # padding
+        # padding with 0s
         for _ in range(self.max_sentence_length - sentence_length):
-            # nine 0's
+            temp = np.array([0 for _ in range(self.etc_dim)])
+            etc.append(temp)
             tag.append(np.array([0] * self.class_size))
-            temp = np.array([0 for _ in range(self.word_dim)])
-            word.append(temp)
-        return word, tag
+        return etc, tag
 
     @staticmethod
     def find_max_length(file_name):

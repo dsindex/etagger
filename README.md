@@ -16,10 +16,11 @@ etagger
     - implement input.py [done]
     - split model.py to model.py, train.py, inference.py [done]
     - extend 5 class to 9 class [done]
-    - use embedding_lookup()
-    - add character-level embedding
-    - add gazetter features
-    - add self-attention
+    - apply embedding_lookup()
+    - apply character-level embedding
+    - apply gazetter features
+    - apply self-attention
+    - apply ELMO embedding
     - serve api
 
 ### pre-requisites

@@ -6,23 +6,43 @@ import argparse
 
 class EmbVec:
     def __init__(self, args):
-        self.model = {}
+        self.vocab = {}
+        self.embeddings = []
         self.dim = args.emb_dim
+        self.pad_id = 0  # for padding
+        self.unk_id = 1  # for unknown
         invalid = 0
+        # 0 id for padding
+        vector = np.array([float(0) for i in range(self.dim)])
+        assert(len(vector) == self.dim)
+        self.embeddings.append(vector)
+        # 1 id for unknown
+        vector = np.array([random() for i in range(self.dim)])
+        assert(len(vector) == self.dim)
+        self.embeddings.append(vector)
+        # 2 id ~ 
+        id = self.unk_id + 1
         for line in open(args.emb_path):
             line = line.split()
-            word = line[0]
+            word = line[0].lower()
             vector = np.array([float(val) for val in line[1:]])
             if len(vector) != self.dim:
                 invalid += 1
                 continue
-            self.model[word] = vector
+            self.vocab[word] = id
+            self.embeddings.append(vector)
+            id += 1
         sys.stderr.write('invalid entries %d' % (invalid) + '\n')
 
-    def __getitem__(self, word):
+    def get_id(self, word):
         word = word.lower()
+        if word in self.vocab:
+            return self.vocab[word]
+        return self.unk_id
+
+    def __getitem__(self, id):
         try:
-            return self.model[word]
+            return self.embeddings[id]
         except KeyError:
             vec = np.array([random() for i in range(self.dim)])
             return vec
