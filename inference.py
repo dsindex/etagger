@@ -1,59 +1,54 @@
 from __future__ import print_function
 import tensorflow as tf
 import numpy as np
-import pickle as pkl
+from config import Config
 from model import Model
 from eval  import Eval
 from input import *
 import sys
 import argparse
 
-def inference_bulk(args):
+def inference_bulk(config):
     '''
     inference model by test data
     '''
 
-    embvec = pkl.load(open(args.emb_path, 'rb'))
-
     # Build input data
     test_file = 'data/test.txt'
-    test_data = Input(test_file, embvec, args.emb_dim, args.class_size, args.sentence_length)
+    test_data = Input(test_file, config)
     print('max_sentence_length = %d' % test_data.max_sentence_length)
     print('loading input data ... done')
 
     # Create model
-    model = Model(embvec, args.sentence_length, test_data.etc_dim, args.class_size, is_train=0)
+    model = Model(config)
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         saver = tf.train.Saver()
-        saver.restore(sess, args.restore)
+        saver.restore(sess, config.restore)
         print('model restored')
         feed_dict = {model.input_data_word_ids: test_data.sentence_word_ids,
                      model.input_data_etc: test_data.sentence_etc,
                      model.output_data: test_data.sentence_tag}
         pred, length, test_loss = sess.run([model.prediction, model.length, model.loss], feed_dict=feed_dict)
         print('test score:')
-        fscore = Eval.compute_f1(args.class_size, pred, test_data.sentence_tag, length)
+        fscore = Eval.compute_f1(config.class_size, pred, test_data.sentence_tag, length)
         print('total fscore:')
         print(fscore)
 
-def inference_interactive(args):
+def inference_interactive(config):
     '''
     inference model interactively
     '''
 
-    embvec = pkl.load(open(args.emb_path, 'rb'))
-
     # Create model
-    etc_dim = 5+5+1
-    model = Model(embvec, args.sentence_length, etc_dim, args.class_size, is_train=0)
+    model = Model(config)
 
-    sess = tf.Session()
     # Restore model
+    sess = tf.Session()
     sess.run(tf.global_variables_initializer())
     saver = tf.train.Saver()
-    saver.restore(sess, args.restore)
+    saver.restore(sess, config.restore)
     sys.stderr.write('model restored' +'\n')
 
     bucket = []
@@ -64,7 +59,7 @@ def inference_interactive(args):
         line = line.strip()
         if not line and len(bucket) >= 1:
             # Build input data
-            inp = Input(bucket, embvec, args.emb_dim, args.class_size, args.sentence_length)
+            inp = Input(bucket, config)
             feed_dict = {model.input_data_word_ids: inp.sentence_word_ids,
                          model.input_data_etc: inp.sentence_etc,
                          model.output_data: inp.sentence_tag}
@@ -78,7 +73,7 @@ def inference_interactive(args):
         if line : bucket.append(line)
     if len(bucket) != 0 :
         # Build input data
-        inp = Input(bucket, embvec, args.emb_dim, args.class_size, args.sentence_length)
+        inp = Input(bucket, config)
         feed_dict = {model.input_data_word_ids: inp.sentence_word_ids,
                      model.input_data_etc: inp.sentence_etc,
                      model.output_data: inp.sentence_tag}
@@ -101,7 +96,8 @@ if __name__ == '__main__':
     parser.add_argument('--interactive', type=int, default=0, help='interactive mode')
 
     args = parser.parse_args()
+    config = Config(args, is_train=0)
     if args.interactive:
-        inference_interactive(args)
+        inference_interactive(config)
     else:
-        inference_bulk(args)
+        inference_bulk(config)

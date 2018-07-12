@@ -13,15 +13,15 @@ class Model:
     __keep_prob = 0.5         # keep probability for dropout
     __learning_rate = 0.003   # learning rate
 
-    def __init__(self, embvec, sentence_length, etc_dim, class_size, is_train=1):
+    def __init__(self, config):
         '''
         Initialize RNN model
         '''
-        self.embvec = embvec
-        self.sentence_length = sentence_length
-        self.etc_dim = etc_dim
-        self.class_size = class_size
-        self.is_train = is_train
+        embvec = config.embvec
+        sentence_length = config.sentence_length
+        etc_dim = config.etc_dim
+        class_size = config.class_size
+        is_train = config.is_train
 
         # Input layer and Output(answer)
         self.input_data_word_ids = tf.placeholder(tf.int32, [None, sentence_length], name='input_data_word_dis')
@@ -36,8 +36,11 @@ class Model:
         self.output_data = tf.placeholder(tf.float32, [None, sentence_length, class_size], name='output_data')
 
         # RNN layer
-        if is_train == 'train': keep_prob = self.__keep_prob
-        else: keep_prob = 1.0
+        if is_train == 'train':
+            keep_prob = self.__keep_prob
+        else:
+            # do not apply dropout for inference 
+            keep_prob = 1.0
         fw_cell = tf.contrib.rnn.MultiRNNCell([self.create_cell(self.__rnn_size, keep_prob=keep_prob) for _ in range(self.__num_layers)], state_is_tuple=True)
         bw_cell = tf.contrib.rnn.MultiRNNCell([self.create_cell(self.__rnn_size, keep_prob=keep_prob) for _ in range(self.__num_layers)], state_is_tuple=True)
         self.length = self.compute_length(self.input_data)
@@ -48,7 +51,7 @@ class Model:
         # stack(list of [None, 2*self.__rnn_size]) -> transpose([sentence_length, None, 2*self.__rnn_size]) -> reshpae([None, sentence_length, 2*self.__rnn_size]) -> [None, 2*self.__rnn_size]
         output = tf.reshape(tf.transpose(tf.stack(output), perm=[1, 0, 2]), [-1, 2*self.__rnn_size])
 
-        # Fully Connected and Softmax Output layer
+        # Projection layer
         weight, bias = self.create_weight_and_bias(2*self.__rnn_size, class_size)
         # [None, 2*self.__rnn_size] x [2*self.__rnn_size, class_size] + [class_size]  -> softmax([None, class_size]) -> [None, class_size]
         prediction = tf.nn.softmax(tf.matmul(output, weight) + bias)
@@ -109,5 +112,5 @@ class Model:
         '''
         weight = tf.truncated_normal([in_size, out_size], stddev=0.01)
         bias = tf.constant(0.1, shape=[out_size])
-        return tf.Variable(weight), tf.Variable(bias)
+        return tf.Variable(weight, name='projection_weight'), tf.Variable(bias, name='projection_bias')
 
