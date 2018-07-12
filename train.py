@@ -35,8 +35,7 @@ def train(args):
     print('loading input data ... done')
 
     # Create model
-    args.etc_dim = train_data.etc_dim
-    model = Model(embvec, args)
+    model = Model(embvec, train_data.etc_dim, args)
 
     maximum = 0
     with tf.Session() as sess:
@@ -49,19 +48,19 @@ def train(args):
             idx = 0
             for ptr in range(0, len(train_inp_word_ids), args.batch_size):
                 print('%s-th batch in %s(size of train_inp)' % (idx, len(train_inp_word_ids)))
-                _, train_loss = sess.run([model.train_op, model.loss],
-                                         {model.input_data_word_ids: train_inp_word_ids[ptr:ptr + args.batch_size],
-                                          model.input_data_etc: train_inp_etc[ptr:ptr + args.batch_size],
-                                          model.output_data: train_out[ptr:ptr + args.batch_size]})
+                feed_dict={model.input_data_word_ids: train_inp_word_ids[ptr:ptr + args.batch_size],
+                           model.input_data_etc: train_inp_etc[ptr:ptr + args.batch_size],
+                           model.output_data: train_out[ptr:ptr + args.batch_size]}
+                _, train_loss = sess.run([model.train_op, model.loss], feed_dict=feed_dict)
                 print('train loss: %s' % (train_loss))
                 idx += 1
             if e % 10 == 0:
                 save_path = saver.save(sess, args.checkpoint_dir + '/' + 'model.ckpt')
                 print("model saved in file: %s" % save_path)
-            pred, length, dev_loss = sess.run([model.prediction, model.length, model.loss],
-                                              {model.input_data_word_ids: dev_inp_word_ids,
-                                               model.input_data_etc: dev_inp_etc,
-                                               model.output_data: dev_out})
+            feed_dict={model.input_data_word_ids: dev_inp_word_ids,
+                       model.input_data_etc: dev_inp_etc,
+                       model.output_data: dev_out}
+            pred, length, dev_loss = sess.run([model.prediction, model.length, model.loss], feed_dict=feed_dict)
             print("epoch: %d, dev loss: %s" % (e, dev_loss))
             print('dev score:')
             m = Eval.compute_f1(args, pred, dev_out, length)
@@ -69,10 +68,10 @@ def train(args):
                 maximum = m
                 save_path = saver.save(sess, args.checkpoint_dir + '/' + 'model_max.ckpt')
                 print("max model saved in file: %s" % save_path)
-                pred, length, test_loss = sess.run([model.prediction, model.length, model.loss],
-                                                   {model.input_data_word_ids: test_inp_word_ids,
-                                                    model.input_data_etc: test_inp_etc,
-                                                    model.output_data: test_out})
+                feed_dict={model.input_data_word_ids: test_inp_word_ids,
+                           model.input_data_etc: test_inp_etc,
+                           model.output_data: test_out}
+                pred, length, test_loss = sess.run([model.prediction, model.length, model.loss], feed_dict=feed_dict)
                 print("test score:")
                 Eval.compute_f1(args, pred, test_out, length)
 

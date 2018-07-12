@@ -22,15 +22,17 @@ def inference_bulk(args):
     print('loading input data ... done')
 
     # Create model
-    args.word_dim = test_data.word_dim
-    model = Model(args)
+    model = Model(embvec, test_data.etc_dim, args)
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         saver = tf.train.Saver()
         saver.restore(sess, args.restore)
         print("model restored")
-        pred, length, test_loss = sess.run([model.prediction, model.length, model.loss], {model.input_data: test_data.sentence, model.output_data: test_data.sentence_tag})
+        feed_dict = {model.input_data_word_ids: test_data.sentence_word_ids,
+                     model.input_data_etc: test_data.sentence_etc,
+                     model.output_data: test_data.sentence_tag}
+        pred, length, test_loss = sess.run([model.prediction, model.length, model.loss], feed_dict=feed_dict)
         print("test score:")
         Eval.compute_f1(args, pred, test_data.sentence_tag, length)
 
@@ -42,8 +44,8 @@ def inference_interactive(args):
     embvec = pkl.load(open(args.emb_path, 'rb'))
 
     # Create model
-    args.word_dim = args.emb_dim + 11
-    model = Model(args)
+    etc_dim = 5+5+1
+    model = Model(embvec, etc_dim, args)
 
     sess = tf.Session()
     # Restore model
@@ -61,7 +63,10 @@ def inference_interactive(args):
         if not line and len(bucket) >= 1:
             # Build input data
             inp = Input(bucket, embvec, args.emb_dim, args.class_size, args.sentence_length)
-            pred, length, loss = sess.run([model.prediction, model.length, model.loss], {model.input_data: inp.sentence, model.output_data: inp.sentence_tag})
+            feed_dict = {model.input_data_word_ids: inp.sentence_word_ids,
+                         model.input_data_etc: inp.sentence_etc,
+                         model.output_data: inp.sentence_tag}
+            pred, length, loss = sess.run([model.prediction, model.length, model.loss], feed_dict=feed_dict)
             labels = Input.pred_to_label(pred[0], length[0])
             for i in range(len(bucket)):
                 out = bucket[i] + ' ' + labels[i]
@@ -72,7 +77,10 @@ def inference_interactive(args):
     if len(bucket) != 0 :
         # Build input data
         inp = Input(bucket, embvec, args.emb_dim, args.class_size, args.sentence_length)
-        pred, length, loss = sess.run([model.prediction, model.length, model.loss], {model.input_data: inp.sentence, model.output_data: inp.sentence_tag})
+        feed_dict = {model.input_data_word_ids: inp.sentence_word_ids,
+                     model.input_data_etc: inp.sentence_etc,
+                     model.output_data: inp.sentence_tag}
+        pred, length, loss = sess.run([model.prediction, model.length, model.loss], feed_dict=feed_dict)
         labels = Input.pred_to_label(pred[0], length[0])
         for i in range(len(bucket)):
             out = bucket[i] + ' ' + labels[i]
