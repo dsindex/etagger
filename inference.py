@@ -22,19 +22,21 @@ def inference_bulk(args):
     print('loading input data ... done')
 
     # Create model
-    model = Model(embvec, test_data.etc_dim, args)
+    model = Model(embvec, args.sentence_length, test_data.etc_dim, args.class_size, is_train=0)
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         saver = tf.train.Saver()
         saver.restore(sess, args.restore)
-        print("model restored")
+        print('model restored')
         feed_dict = {model.input_data_word_ids: test_data.sentence_word_ids,
                      model.input_data_etc: test_data.sentence_etc,
                      model.output_data: test_data.sentence_tag}
         pred, length, test_loss = sess.run([model.prediction, model.length, model.loss], feed_dict=feed_dict)
-        print("test score:")
-        Eval.compute_f1(args, pred, test_data.sentence_tag, length)
+        print('test score:')
+        fscore = Eval.compute_f1(args.class_size, pred, test_data.sentence_tag, length)
+        print('total fscore:')
+        print(fscore)
 
 def inference_interactive(args):
     '''
@@ -45,7 +47,7 @@ def inference_interactive(args):
 
     # Create model
     etc_dim = 5+5+1
-    model = Model(embvec, etc_dim, args)
+    model = Model(embvec, args.sentence_length, etc_dim, args.class_size, is_train=0)
 
     sess = tf.Session()
     # Restore model

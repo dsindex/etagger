@@ -27,8 +27,8 @@ class Input:
         if type(data) is list:
             word = self.__create_word_ids(data)
             self.sentence_word_ids.append(word)
-            word, tag = self.__create_etc(data)
-            self.sentence_etc.append(word)
+            etc, tag = self.__create_etc(data)
+            self.sentence_etc.append(etc)
             self.sentence_tag.append(tag)
         else: # treat as file path
             # word_ids
@@ -161,7 +161,7 @@ class Input:
     @staticmethod
     def pred_to_label(pred, length):
         '''
-        pred : [args.senence_length, args.class_size]
+        pred : [senence_length, class_size]
         length : int
         '''
         pred = pred[0:length]

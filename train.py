@@ -35,7 +35,7 @@ def train(args):
     print('loading input data ... done')
 
     # Create model
-    model = Model(embvec, train_data.etc_dim, args)
+    model = Model(embvec, args.sentence_length, train_data.etc_dim, args.class_size, is_train=1)
 
     maximum = 0
     with tf.Session() as sess:
@@ -43,7 +43,7 @@ def train(args):
         saver = tf.train.Saver()
         if args.restore is not None:
             saver.restore(sess, args.restore)
-            print("model restored")
+            print('model restored')
         for e in range(args.epoch):
             idx = 0
             for ptr in range(0, len(train_inp_word_ids), args.batch_size):
@@ -56,24 +56,24 @@ def train(args):
                 idx += 1
             if e % 10 == 0:
                 save_path = saver.save(sess, args.checkpoint_dir + '/' + 'model.ckpt')
-                print("model saved in file: %s" % save_path)
+                print('model saved in file: %s' % save_path)
             feed_dict={model.input_data_word_ids: dev_inp_word_ids,
                        model.input_data_etc: dev_inp_etc,
                        model.output_data: dev_out}
             pred, length, dev_loss = sess.run([model.prediction, model.length, model.loss], feed_dict=feed_dict)
-            print("epoch: %d, dev loss: %s" % (e, dev_loss))
+            print('epoch: %d, dev loss: %s' % (e, dev_loss))
             print('dev score:')
-            m = Eval.compute_f1(args, pred, dev_out, length)
+            m = Eval.compute_f1(args.class_size, pred, dev_out, length)
             if m > maximum:
                 maximum = m
                 save_path = saver.save(sess, args.checkpoint_dir + '/' + 'model_max.ckpt')
-                print("max model saved in file: %s" % save_path)
+                print('max model saved in file: %s' % save_path)
                 feed_dict={model.input_data_word_ids: test_inp_word_ids,
                            model.input_data_etc: test_inp_etc,
                            model.output_data: test_out}
                 pred, length, test_loss = sess.run([model.prediction, model.length, model.loss], feed_dict=feed_dict)
-                print("test score:")
-                Eval.compute_f1(args, pred, test_out, length)
+                print('test score:')
+                Eval.compute_f1(args.class_size, pred, test_out, length)
 
 
 if __name__ == '__main__':

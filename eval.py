@@ -51,6 +51,19 @@ class Eval:
         if len(bucket) != 0:
             self.eval_bucket(bucket)
 
+        # in_class vs out_class
+        in_class  = 'I'
+        out_class = 'O'
+        self.tp[in_class] = 0
+        self.fp[in_class] = 0
+        self.fn[in_class] = 0
+        for c, _ in self.cls.iteritems():
+            if c != out_class:
+                self.tp[in_class] += self.tp[c]
+                self.fp[in_class] += self.fp[c]
+                self.fn[in_class] += self.fn[c]
+        self.cls[in_class] = None
+
         print(self.tp)
         print(self.fp)
         print(self.fn)
@@ -72,15 +85,18 @@ class Eval:
         print('fscore:')
         for c, _ in self.fscore.iteritems():
             print(c + ',' + str(self.fscore[c]))
+        print('')
+        print('total fscore:')
+        print(self.fscore[in_class])
 
     @staticmethod
-    def compute_f1(args, prediction, target, length):
+    def compute_f1(class_size, prediction, target, length):
         '''
         Compute F1 measure given prediction and target
         '''
-        tp = np.array([0] * (args.class_size + 1))
-        fp = np.array([0] * (args.class_size + 1))
-        fn = np.array([0] * (args.class_size + 1))
+        tp = np.array([0] * (class_size + 1))
+        fp = np.array([0] * (class_size + 1))
+        fn = np.array([0] * (class_size + 1))
         target = np.argmax(target, 2)
         prediction = np.argmax(prediction, 2)
         for i in range(len(target)):
@@ -90,16 +106,16 @@ class Eval:
                 else:
                     fp[prediction[i, j]] += 1
                     fn[target[i, j]] += 1
-        unnamed_entity = args.class_size - 1
-        for i in range(args.class_size):
+        unnamed_entity = class_size - 1
+        for i in range(class_size):
             if i != unnamed_entity:
-                tp[args.class_size] += tp[i]
-                fp[args.class_size] += fp[i]
-                fn[args.class_size] += fn[i]
+                tp[class_size] += tp[i]
+                fp[class_size] += fp[i]
+                fn[class_size] += fn[i]
         precision = []
         recall = []
         fscore = []
-        for i in range(args.class_size + 1):
+        for i in range(class_size + 1):
             precision.append(tp[i] * 1.0 / (tp[i] + fp[i]))
             recall.append(tp[i] * 1.0 / (tp[i] + fn[i]))
             fscore.append(2.0 * precision[i] * recall[i] / (precision[i] + recall[i]))
@@ -107,7 +123,7 @@ class Eval:
         print(precision)
         print(recall)
         print(fscore)
-        return fscore[args.class_size]
+        return fscore[class_size]
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
