@@ -27,7 +27,7 @@ class Model:
         self.input_data_word_ids = tf.placeholder(tf.int32, [None, sentence_length], name='input_data_word_dis')
         embed_arr = np.array(embvec.embeddings)
         embed_init = tf.constant_initializer(embed_arr)
-        embeddings = tf.get_variable(name='embeddings', initializer=embed_init, shape=embed_arr.shape, trainable=True)
+        embeddings = tf.get_variable(name='embeddings', initializer=embed_init, shape=embed_arr.shape, trainable=False)
         # embedding_lookup([None, sentence_length]) -> [None, sentence_length, emb_dim]
         self.word_embeddings = tf.nn.embedding_lookup(embeddings, self.input_data_word_ids, name='word_embeddings')
         self.input_data_etc = tf.placeholder(tf.float32, [None, sentence_length, etc_dim], name='input_data_etc')
