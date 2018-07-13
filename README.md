@@ -143,19 +143,19 @@ Obama NNP O O B-PER
 left VBD O O O
 office NN O O O
 in IN O O O
-January NNP O O O
-2017 CD O O O
+January NNP O B-DATE O
+2017 CD O I-DATE O
 with IN O O O
 a DT O O O
-60 CD O O O
-% NN O O O
+60 CD O B-PERCENT O
+% NN O I-PERCENT O
 approval NN O O O
 rating NN O O O
 and CC O O O
 currently RB O O O
 resides VBZ O O O
 in IN O O O
-Washington NNP O O B-LOC
-, , O O O
-D.C. NNP O O I-LOC
+Washington NNP O B-GPE B-LOC
+, , O I-GPE O
+D.C. NNP O B-GPE I-LOC
 ```

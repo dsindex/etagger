@@ -90,20 +90,31 @@ def inference_line(config):
     '''
     inference for raw string
     '''
+    def get_entity(doc, begin, end):
+        for ent in doc.ents:
+            # check included
+            if ent.start_char <= begin and end <= ent.end_char:
+                if ent.start_char == begin: return 'B-' + ent.label_
+                else: return 'I-' + ent.label_
+        return 'O'
+     
     def build_bucket(nlp, line):
         bucket = []
         uline = line.decode('utf-8','ignore') # unicode
         doc = nlp(uline)
         for token in doc:
+            begin = token.idx
+            end   = begin + len(token.text) - 1
             temp = []
             '''
-            print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_,
-                  token.shape_, token.is_alpha, token.is_stop)
+            print(token.i, token.text, token.lemma_, token.pos_, token.tag_, token.dep_,
+                  token.shape_, token.is_alpha, token.is_stop, begin, end)
             '''
             temp.append(token.text)
             temp.append(token.tag_)
-            temp.append('O')  # no chunking info
-            temp.append('O')  # label
+            temp.append('O')     # no chunking info
+            entity = get_entity(doc, begin, end)
+            temp.append(entity)  # entity by spacy
             utemp = ' '.join(temp)
             bucket.append(utemp.encode('utf-8'))
         return bucket

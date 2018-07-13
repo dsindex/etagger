@@ -26,7 +26,7 @@ def build_bucket(nlp, line):
         temp.append(token.tag_)
         temp.append('O')     # no chunking info
         entity = get_entity(doc, begin, end)
-        temp.append(entity)  # label
+        temp.append(entity)
         utemp = ' '.join(temp)
         bucket.append(utemp.encode('utf-8'))
         seq += 1
