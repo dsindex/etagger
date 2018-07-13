@@ -158,4 +158,19 @@ in IN O O O
 Washington NNP O B-GPE B-LOC
 , , O I-GPE O
 D.C. NNP O B-GPE I-LOC
+
+The Beatles were an English rock band formed in Liverpool in 1960.
+The DT O O O
+Beatles NNPS O B-PERSON O
+were VBD O O O
+an DT O O O
+English JJ O B-LANGUAGE B-MISC
+rock NN O O O
+band NN O O O
+formed VBN O O O
+in IN O O O
+Liverpool NNP O B-GPE B-ORG
+in IN O O O
+1960 CD O B-DATE O
+. . O I-DATE O
 ```
