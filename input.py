@@ -25,6 +25,7 @@ class Input:
             self.sentence_etc.append(etc)
             self.sentence_tag.append(tag)
         else: # treat as file path
+            # read twice
             # word_ids
             bucket = []
             for line in open(data):

@@ -20,7 +20,7 @@ class EmbVec:
         vector = np.array([random() for i in range(self.dim)])
         assert(len(vector) == self.dim)
         self.embeddings.append(vector)
-        # 2 id ~ 
+        # 2 id ~ for normal entries
         id = self.unk_id + 1
         for line in open(args.emb_path):
             line = line.split()

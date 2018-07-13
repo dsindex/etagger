@@ -3,6 +3,8 @@ import tensorflow as tf
 import numpy as np
 import pickle as pkl
 
+# see input.py -> __create_etc()
+# you should define etc dimension.
 ETC_DIM = 5+5+1
 
 class Config:

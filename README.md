@@ -15,6 +15,9 @@ etagger
   - refactoring .... ing
     - implement input.py, config.py [done]
     - split model.py to model.py, train.py, inference.py [done]
+      - inference bulk [done]
+      - inference bucket [done]
+      - inference line using spacy [done]
     - extend 5 class to 9 class [done]
     - apply dropout for train() only [done]
     - apply embedding_lookup()
@@ -34,6 +37,13 @@ etagger
 - glove embedding
   - [download](http://nlp.stanford.edu/data/glove.6B.zip)
   - unzip to 'embeddings' dir
+
+- spacy [optional]
+  - if you want to analyze input string and see how it detects entities, then you need to install spacy lib.
+  ```
+  $ pip install spacy
+  $ python -m spacy download en
+  ```
 
 ### how to 
 
@@ -75,9 +85,9 @@ total fscore:
 0.880161993005
 ```
 
-- inference(interactive)
+- inference(bucket)
 ```
-$ python inference.py --interactive 1 --emb_path embeddings/glove.6B.50d.txt.pkl --emb_dim 50 --sentence_length 125 --class_size 9 --restore checkpoint/model_max.ckpt < data/test.txt > pred.txt
+$ python inference.py --mode bucket --emb_path embeddings/glove.6B.50d.txt.pkl --emb_dim 50 --sentence_length 125 --class_size 9 --restore checkpoint/model_max.ckpt < data/test.txt > pred.txt
 $ python eval.py < pred.txt
 ...
 {'I': 7172, 'I-LOC': 219, 'B-ORG': 1415, 'O': 38241, 'B-PER': 1510, 'I-PER': 1118, 'I-MISC': 139, 'B-MISC': 558, 'I-ORG': 687, 'B-LOC': 1526}
@@ -122,4 +132,30 @@ B-PER,0.942277691108
 
 total fscore:
 0.880161993005
+```
+
+- inference(line)
+```
+$ python inference.py --mode line --emb_path embeddings/glove.6B.50d.txt.pkl --emb_dim 50 --sentence_length 125 --class_size 9 --restore checkpoint/model_max.ckpt
+...
+Obama left office in January 2017 with a 60% approval rating and currently resides in Washington, D.C.
+Obama NNP O O B-PER
+left VBD O O O
+office NN O O O
+in IN O O O
+January NNP O O O
+2017 CD O O O
+with IN O O O
+a DT O O O
+60 CD O O O
+% NN O O O
+approval NN O O O
+rating NN O O O
+and CC O O O
+currently RB O O O
+resides VBZ O O O
+in IN O O O
+Washington NNP O O B-LOC
+, , O O O
+D.C. NNP O O I-LOC
 ```
