@@ -24,8 +24,11 @@ class Eval:
             tag = tokens[3]
             pred = tokens[4]
             if pred not in self.tp: self.tp[pred] = 0
+            if tag not in self.tp:  self.tp[tag] = 0
             if pred not in self.fp: self.fp[pred] = 0
-            if tag not in self.fn: self.fn[tag] = 0
+            if tag not in self.fp:  self.fp[tag] = 0
+            if pred not in self.fn: self.fn[pred] = 0
+            if tag not in self.fn:  self.fn[tag] = 0
             if tag == pred:
                 self.tp[pred] += 1
             else:
@@ -69,9 +72,12 @@ class Eval:
         print(self.fn)
 
         for c, _ in self.cls.iteritems():
-            self.precision[c] = self.tp[c]*1.0 / (self.tp[c] + self.fp[c])
-            self.recall[c] = self.tp[c]*1.0 / (self.tp[c] + self.fn[c])
-            self.fscore[c] = 2.0*self.precision[c]*self.recall[c] / (self.precision[c] + self.recall[c])
+            if self.tp[c] + self.fp[c] != 0: self.precision[c] = self.tp[c]*1.0 / (self.tp[c] + self.fp[c])
+            else: self.precision[c] = 0
+            if self.tp[c] + self.fn[c] != 0: self.recall[c] = self.tp[c]*1.0 / (self.tp[c] + self.fn[c])
+            else: self.recall[c] = 0
+            if self.precision[c] + self.recall[c] != 0: self.fscore[c] = 2.0*self.precision[c]*self.recall[c] / (self.precision[c] + self.recall[c])
+            else: self.fscore[c] = 0
 
         print('')
         print('precision:')
