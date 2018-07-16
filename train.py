@@ -80,8 +80,9 @@ def train(config):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--emb_path', type=str, help='path to word embedding vector(.pkl)', required=True)
-    parser.add_argument('--emb_dim', type=int, help='dimension of word embedding vector', required=True)
+    parser.add_argument('--wrd_dim', type=int, help='dimension of word embedding vector', required=True)
     parser.add_argument('--sentence_length', type=int, help='max sentence length', required=True)
+    parser.add_argument('--word_length', type=int, default=15, help='max word length')
     parser.add_argument('--class_size', type=int, help='number of classes', required=True)
     parser.add_argument('--batch_size', type=int, default=128, help='batch size of training')
     parser.add_argument('--epoch', type=int, default=50, help='number of epochs')

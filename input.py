@@ -8,6 +8,7 @@ class Input:
     def __init__(self, data, config):
         self.sentence_word_ids = []  # [None, sentence_length]
         self.sentence_etc = []       # [None, sentence_length, etc_dim]
+        self.sentence_chr_ids = []   # [None, sentence_length, word_length]
         self.sentence_tag = []
         self.config = config
         if config.sentence_length == -1:
@@ -53,11 +54,11 @@ class Input:
             tokens = line.split()
             assert (len(tokens) == 4)
             sentence_length += 1
-            id = self.config.embvec.get_id(tokens[0])
-            word_ids.append(id)
-        # padding with pad id
+            wid = self.config.embvec.get_wid(tokens[0])
+            word_ids.append(wid)
+        # padding with pad wid
         for _ in range(self.max_sentence_length - sentence_length):
-            word_ids.append(self.config.embvec.pad_id)
+            word_ids.append(self.config.embvec.pad_wid)
         return word_ids
 
     def __create_etc(self, bucket):

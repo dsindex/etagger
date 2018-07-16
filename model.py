@@ -28,10 +28,10 @@ class Model:
         embed_arr = np.array(embvec.embeddings)
         embed_init = tf.constant_initializer(embed_arr)
         embeddings = tf.get_variable(name='embeddings', initializer=embed_init, shape=embed_arr.shape, trainable=False)
-        # embedding_lookup([None, sentence_length]) -> [None, sentence_length, emb_dim]
+        # embedding_lookup([None, sentence_length]) -> [None, sentence_length, wrd_dim]
         self.word_embeddings = tf.nn.embedding_lookup(embeddings, self.input_data_word_ids, name='word_embeddings')
         self.input_data_etc = tf.placeholder(tf.float32, [None, sentence_length, etc_dim], name='input_data_etc')
-        # concat([None, sentence_length, emb_dim], [None, sentence_length, etc_dim]) -> [None, sentence_length, word_dim]
+        # concat([None, sentence_length, wrd_dim], [None, sentence_length, etc_dim]) -> [None, sentence_length, unit_dim]
         self.input_data = tf.concat([self.word_embeddings, self.input_data_etc], axis=-1, name='input_data')
         self.output_data = tf.placeholder(tf.float32, [None, sentence_length, class_size], name='output_data')
 
@@ -44,7 +44,7 @@ class Model:
         fw_cell = tf.contrib.rnn.MultiRNNCell([self.create_cell(self.__rnn_size, keep_prob=keep_prob) for _ in range(self.__num_layers)], state_is_tuple=True)
         bw_cell = tf.contrib.rnn.MultiRNNCell([self.create_cell(self.__rnn_size, keep_prob=keep_prob) for _ in range(self.__num_layers)], state_is_tuple=True)
         self.length = self.compute_length(self.input_data)
-        # transpose([None, sentence_length, word_dim]) -> unstack([sentence_length, None, word_dim]) -> list of [None, word_dim]
+        # transpose([None, sentence_length, unit_dim]) -> unstack([sentence_length, None, unit_dim]) -> list of [None, unit_dim]
         output, _, _ = tf.contrib.rnn.static_bidirectional_rnn(fw_cell, bw_cell,
                                                tf.unstack(tf.transpose(self.input_data, perm=[1, 0, 2])),
                                                dtype=tf.float32, sequence_length=self.length)
@@ -99,7 +99,7 @@ class Model:
         '''
         Compute each sentence length in input_data
         '''
-        # reduce_max(abs([None, sentence_length, word_dim])) -> sign([None, sentence_length]) = [ [1, 1, 1, ..., 0], [1, 1, 1, ..., 0], ... ] 
+        # reduce_max(abs([None, sentence_length, unit_dim])) -> sign([None, sentence_length]) = [ [1, 1, 1, ..., 0], [1, 1, 1, ..., 0], ... ] 
         # reduce_sum([None, sentence_length]) -> [None] = [11, 16, 13, ..., 123] (batch_size)
         words_used_in_sent = tf.sign(tf.reduce_max(tf.abs(input_data), reduction_indices=2))
         length = tf.cast(tf.reduce_sum(words_used_in_sent, reduction_indices=1), tf.int32)
