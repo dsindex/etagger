@@ -28,6 +28,8 @@ etagger
     - apply self-attention
     - apply ELMO embedding
     - serve api
+- references
+  - https://web.stanford.edu/class/cs224n/reports/6896582.pdf
 
 ### pre-requisites
 
