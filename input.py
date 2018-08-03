@@ -6,9 +6,9 @@ import sys
 
 class Input:
     def __init__(self, data, config):
-        self.sentence_word_ids = []  # [None, sentence_length]
-        self.sentence_etc = []       # [None, sentence_length, etc_dim]
-        self.sentence_chr_ids = []   # [None, sentence_length, word_length]
+        self.sentence_word_ids = []      # [None, sentence_length]
+        self.sentence_wordchr_ids = []   # [None, sentence_length, word_length]
+        self.sentence_etc = []           # [None, sentence_length, etc_dim]
         self.sentence_tag = []
         self.config = config
         if config.sentence_length == -1:
@@ -19,27 +19,24 @@ class Input:
         else:
             self.max_sentence_length = config.sentence_length
 
-        if type(data) is list:
-            word = self.__create_word_ids(data)
-            self.sentence_word_ids.append(word)
-            etc, tag = self.__create_etc(data)
+        if type(data) is list: # treat data as bucket
+            bucket = data
+            word_ids = self.__create_word_ids(bucket)
+            self.sentence_word_ids.append(word_ids)
+            wordchr_ids = self.__create_wordchr_ids(bucket)
+            self.sentence_wordchr_ids.append(wordchr_ids)
+            etc, tag = self.__create_etc(bucket)
             self.sentence_etc.append(etc)
             self.sentence_tag.append(tag)
-        else: # treat as file path
-            # read twice
-            # word_ids
+        else:                  # treat data as file path
+            path = data
             bucket = []
-            for line in open(data):
+            for line in open(path):
                 if line in ['\n', '\r\n']:
                     word_ids = self.__create_word_ids(bucket)
                     self.sentence_word_ids.append(word_ids)
-                    bucket = []
-                else:
-                    bucket.append(line)
-            # etc
-            bucket = []
-            for line in open(data):
-                if line in ['\n', '\r\n']:
+                    wordchr_ids = self.__create_wordchr_ids(bucket)
+                    self.sentence_wordchr_ids.append(wordchr_ids)
                     etc, tag = self.__create_etc(bucket)
                     self.sentence_etc.append(etc)
                     self.sentence_tag.append(tag)
@@ -60,6 +57,32 @@ class Input:
         for _ in range(self.max_sentence_length - sentence_length):
             word_ids.append(self.config.embvec.pad_wid)
         return word_ids
+
+    def __create_wordchr_ids(self, bucket):
+        wordchr_ids = []
+        sentence_length = 0
+        for line in bucket:
+            tokens = line.split()
+            assert (len(tokens) == 4)
+            sentence_length += 1
+            chr_ids = []
+            word_length = 0
+            for ch in tokens[0]:
+                word_length += 1 
+                cid = self.config.embvec.get_cid(ch)
+                chr_ids.append(cid)
+                if word_length == self.config.word_length: break
+            # padding with pad cid
+            for _ in range(self.config.word_length - word_length):
+                chr_ids.append(self.config.embvec.pad_cid)
+            wordchr_ids.append(chr_ids)
+        # padding with empty chr_ids
+        for _ in range(self.max_sentence_length - sentence_length):
+            chr_ids = []
+            for _ in range(self.config.word_length):
+                chr_ids.append(self.config.embvec.pad_cid)
+            wordchr_ids.append(chr_ids)
+        return wordchr_ids
 
     def __create_etc(self, bucket):
         etc = []

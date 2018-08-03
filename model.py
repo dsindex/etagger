@@ -19,23 +19,39 @@ class Model:
         '''
         embvec = config.embvec
         sentence_length = config.sentence_length
+        word_length = config.word_length
+        cvocab_size = len(embvec.cvocab)
+        chr_dim = config.chr_dim
         etc_dim = config.etc_dim
         class_size = config.class_size
         is_train = config.is_train
 
-        # Input layer and Output(answer)
-        self.input_data_word_ids = tf.placeholder(tf.int32, [None, sentence_length], name='input_data_word_dis')
+        # Input layer
+
+        # word embedding
+        self.input_data_word_ids = tf.placeholder(tf.int32, shape=[None, sentence_length], name='input_data_word_ids')
         embed_arr = np.array(embvec.embeddings)
         embed_init = tf.constant_initializer(embed_arr)
         embeddings = tf.get_variable(name='embeddings', initializer=embed_init, shape=embed_arr.shape, trainable=False)
         # embedding_lookup([None, sentence_length]) -> [None, sentence_length, wrd_dim]
         self.word_embeddings = tf.nn.embedding_lookup(embeddings, self.input_data_word_ids, name='word_embeddings')
-        self.input_data_etc = tf.placeholder(tf.float32, [None, sentence_length, etc_dim], name='input_data_etc')
+
+        # character embedding
+        self.input_data_wordchr_ids = tf.placeholder(tf.int32, shape=[None, sentence_length, word_length], name='input_data_wordchr_ids')
+        chr_embeddings = tf.get_variable(name="chr_embeddings", dtype=tf.float32, shape=[cvocab_size, chr_dim])
+        # embedding_lookup([None, sentence_length, word_length]) -> [None, sentence_length, word_length, chr_dim]
+        self.wordchr_embeddings = tf.nn.embedding_lookup(chr_embeddings, self.input_data_wordchr_ids, name='wordchr_embeddings')
+
+        self.input_data_etc = tf.placeholder(tf.float32, shape=[None, sentence_length, etc_dim], name='input_data_etc')
         # concat([None, sentence_length, wrd_dim], [None, sentence_length, etc_dim]) -> [None, sentence_length, unit_dim]
         self.input_data = tf.concat([self.word_embeddings, self.input_data_etc], axis=-1, name='input_data')
-        self.output_data = tf.placeholder(tf.float32, [None, sentence_length, class_size], name='output_data')
+
+        # Answer
+
+        self.output_data = tf.placeholder(tf.float32, shape=[None, sentence_length, class_size], name='output_data')
 
         # RNN layer
+
         if is_train == 'train':
             keep_prob = self.__keep_prob
         else:
@@ -52,6 +68,7 @@ class Model:
         output = tf.reshape(tf.transpose(tf.stack(output), perm=[1, 0, 2]), [-1, 2*self.__rnn_size])
 
         # Projection layer
+
         weight, bias = self.create_weight_and_bias(2*self.__rnn_size, class_size)
         # [None, 2*self.__rnn_size] x [2*self.__rnn_size, class_size] + [class_size]  -> softmax([None, class_size]) -> [None, class_size]
         prediction = tf.nn.softmax(tf.matmul(output, weight) + bias)
@@ -59,6 +76,7 @@ class Model:
         self.prediction = tf.reshape(prediction, [-1, sentence_length, class_size])
 
         # Loss and Optimization
+
         self.loss = self.compute_cost()
         optimizer = tf.train.AdamOptimizer(self.__learning_rate)
         tvars = tf.trainable_variables()

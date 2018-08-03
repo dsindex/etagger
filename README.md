@@ -23,13 +23,15 @@ etagger
     - apply embedding_lookup()
       - word embedding [done]
     - apply character-level embedding
-      - character embedding
+      - character embedding [doing]
     - apply gazetter features
     - apply self-attention
     - apply ELMO embedding
     - serve api
 - references
   - https://web.stanford.edu/class/cs224n/reports/6896582.pdf
+  - https://github.com/cuteboydot/Sentence-Classification-using-Char-CNN-and-RNN
+    - https://github.com/cuteboydot/Sentence-Classification-using-Char-CNN-and-RNN/blob/master/sentence_classification_char_cnn.py
 
 ### pre-requisites
 
