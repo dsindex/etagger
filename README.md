@@ -30,8 +30,8 @@ etagger
     - serve api
 - references
   - https://web.stanford.edu/class/cs224n/reports/6896582.pdf
+  - http://www.wildml.com/2015/12/implementing-a-cnn-for-text-classification-in-tensorflow/
   - https://github.com/cuteboydot/Sentence-Classification-using-Char-CNN-and-RNN
-    - https://github.com/cuteboydot/Sentence-Classification-using-Char-CNN-and-RNN/blob/master/sentence_classification_char_cnn.py
 
 ### pre-requisites
 
