@@ -8,10 +8,12 @@ class Model:
     RNN model for sequence tagging
     '''
 
-    __rnn_size = 256          # size of RNN hidden unit
-    __num_layers = 2          # number of RNN layers
-    __keep_prob = 0.5         # keep probability for dropout
-    __learning_rate = 0.003   # learning rate
+    __rnn_size = 256           # size of RNN hidden unit
+    __num_layers = 2           # number of RNN layers
+    __keep_prob = 0.5          # keep probability for dropout
+    __learning_rate = 0.003    # learning rate
+    __filter_sizes = [3, 4, 5] # filter sizes
+    __num_filters = 32         # number of filters
 
     def __init__(self, config):
         '''
@@ -28,23 +30,80 @@ class Model:
 
         # Input layer
 
-        # word embedding
         self.input_data_word_ids = tf.placeholder(tf.int32, shape=[None, sentence_length], name='input_data_word_ids')
-        embed_arr = np.array(embvec.embeddings)
-        embed_init = tf.constant_initializer(embed_arr)
-        embeddings = tf.get_variable(name='embeddings', initializer=embed_init, shape=embed_arr.shape, trainable=False)
-        # embedding_lookup([None, sentence_length]) -> [None, sentence_length, wrd_dim]
-        self.word_embeddings = tf.nn.embedding_lookup(embeddings, self.input_data_word_ids, name='word_embeddings')
+        # word embedding features
+        with tf.device('/cpu:0'), tf.name_scope('word-embedding'):
+            embed_arr = np.array(embvec.embeddings)
+            embed_init = tf.constant_initializer(embed_arr)
+            embeddings = tf.get_variable(name='embeddings', initializer=embed_init, shape=embed_arr.shape, trainable=False)
+            # embedding_lookup([None, sentence_length]) -> [None, sentence_length, wrd_dim]
+            self.word_embeddings = tf.nn.embedding_lookup(embeddings, self.input_data_word_ids, name='word_embeddings')
 
-        # character embedding
+        # character embedding features
         self.input_data_wordchr_ids = tf.placeholder(tf.int32, shape=[None, sentence_length, word_length], name='input_data_wordchr_ids')
-        chr_embeddings = tf.get_variable(name="chr_embeddings", dtype=tf.float32, shape=[cvocab_size, chr_dim])
-        # embedding_lookup([None, sentence_length, word_length]) -> [None, sentence_length, word_length, chr_dim]
-        self.wordchr_embeddings = tf.nn.embedding_lookup(chr_embeddings, self.input_data_wordchr_ids, name='wordchr_embeddings')
+        with tf.device('/cpu:0'), tf.name_scope('wordchr-embeddings'):
+            chr_embeddings = tf.Variable(tf.random_uniform([cvocab_size, chr_dim], -1.0, 1.0), name='chr_embeddings')
+            # embedding_lookup([None, sentence_length, word_length]) -> [None, sentence_length, word_length, chr_dim]
+            self.wordchr_embeddings = tf.nn.embedding_lookup(chr_embeddings, self.input_data_wordchr_ids, name='wordchr_embeddings')
+            # reshape([None, sentence_length, word_length, chr_dim]) -> [None, word_length, chr_dim]
+            self.wordchr_embeddings = tf.reshape(self.wordchr_embeddings, [-1, word_length, chr_dim])
+            # expaned_dims([None, word_length, chr_dim]) -> [None, word_length, chr_dim, 1]
+            self.wordchr_embeddings = tf.expand_dims(self.wordchr_embeddings, -1)
+        pooled_outputs = []
+        for i, filter_size in enumerate(self.__filter_sizes):
+            with tf.name_scope('conv-maxpool-%s' % filter_size):
+                # convolution layer
+                filter_shape = [filter_size, chr_dim, 1, self.__num_filters]
+                W = tf.Variable(tf.truncated_normal(filter_shape, stddev=0.1), name='W')
+                b = tf.Variable(tf.constant(0.1, shape=[self.__num_filters]), name='b')
+                conv = tf.nn.conv2d(
+                    self.wordchr_embeddings,
+                    W,
+                    strides=[1, 1, 1, 1],
+                    padding='VALID',
+                    name='conv')
+                # apply nonlinearity
+                h = tf.nn.relu(tf.nn.bias_add(conv, b), name='relu')
+                # max-pooling over the outputs
+                pooled = tf.nn.max_pool(
+                    h,
+                    ksize=[1, word_length - filter_size + 1, 1, 1],
+                    strides=[1, 1, 1, 1],
+                    padding='VALID',
+                    name='pool')
+                pooled_outputs.append(pooled) 
+                '''
+                wordchr_embeddings Tensor("wordchr_embeddings/ExpandDims:0", shape=(?, 15, 20, 1), dtype=float32, device=/device:CPU:0)
+                conv Tensor("conv-maxpool-3/conv:0", shape=(?, 13, 1, 32), dtype=float32)
+                h Tensor("conv-maxpool-3/relu:0", shape=(?, 13, 1, 32), dtype=float32)
+                pooled Tensor("conv-maxpool-3/pool:0", shape=(?, 1, 1, 32), dtype=float32)
+                conv Tensor("conv-maxpool-4/conv:0", shape=(?, 12, 1, 32), dtype=float32)
+                h Tensor("conv-maxpool-4/relu:0", shape=(?, 12, 1, 32), dtype=float32)
+                pooled Tensor("conv-maxpool-4/pool:0", shape=(?, 1, 1, 32), dtype=float32)
+                conv Tensor("conv-maxpool-5/conv:0", shape=(?, 11, 1, 32), dtype=float32)
+                h Tensor("conv-maxpool-5/relu:0", shape=(?, 11, 1, 32), dtype=float32)
+                pooled Tensor("conv-maxpool-5/pool:0", shape=(?, 1, 1, 32), dtype=float32)
+                '''
+        with tf.name_scope('conv-combine'):
+            # combine all the pooled features
+            num_filters_total = self.__num_filters * len(self.__filter_sizes)
+            self.h_pool = tf.concat(pooled_outputs, axis=-1)
+            self.h_pool_flat = tf.reshape(self.h_pool, [-1, num_filters_total])
+            self.h_drop = tf.nn.dropout(self.h_pool_flat, self.__keep_prob)
+            # reshape([-1, num_filters_total]) -> [None, sentence_length, num_filters_total]
+            self.wordchr_embeddings_conv = tf.reshape(self.h_drop, [-1, sentence_length, num_filters_total])
+            '''
+            h_pool Tensor("concat:0", shape=(?, 1, 1, 96), dtype=float32)
+            h_pool_flat Tensor("Reshape:0", shape=(?, 96), dtype=float32)
+            wordchr_embeddings_conv Tensor("Reshape_1:0", shape=(?, 125, 96), dtype=float32)
+            '''
 
-        self.input_data_etc = tf.placeholder(tf.float32, shape=[None, sentence_length, etc_dim], name='input_data_etc')
-        # concat([None, sentence_length, wrd_dim], [None, sentence_length, etc_dim]) -> [None, sentence_length, unit_dim]
-        self.input_data = tf.concat([self.word_embeddings, self.input_data_etc], axis=-1, name='input_data')
+        with tf.name_scope('etc'):
+            # etc features 
+            self.input_data_etc = tf.placeholder(tf.float32, shape=[None, sentence_length, etc_dim], name='input_data_etc')
+
+        # concat([None, sentence_length, wrd_dim], [None, sentence_length, etc_dim], [None, sentence_length, num_filters_total]) -> [None, sentence_length, unit_dim]
+        self.input_data = tf.concat([self.word_embeddings, self.input_data_etc, self.wordchr_embeddings_conv], axis=-1, name='input_data')
 
         # Answer
 
@@ -52,36 +111,39 @@ class Model:
 
         # RNN layer
 
-        if is_train == 'train':
-            keep_prob = self.__keep_prob
-        else:
-            # do not apply dropout for inference 
-            keep_prob = 1.0
-        fw_cell = tf.contrib.rnn.MultiRNNCell([self.create_cell(self.__rnn_size, keep_prob=keep_prob) for _ in range(self.__num_layers)], state_is_tuple=True)
-        bw_cell = tf.contrib.rnn.MultiRNNCell([self.create_cell(self.__rnn_size, keep_prob=keep_prob) for _ in range(self.__num_layers)], state_is_tuple=True)
-        self.length = self.compute_length(self.input_data)
-        # transpose([None, sentence_length, unit_dim]) -> unstack([sentence_length, None, unit_dim]) -> list of [None, unit_dim]
-        output, _, _ = tf.contrib.rnn.static_bidirectional_rnn(fw_cell, bw_cell,
-                                               tf.unstack(tf.transpose(self.input_data, perm=[1, 0, 2])),
-                                               dtype=tf.float32, sequence_length=self.length)
-        # stack(list of [None, 2*self.__rnn_size]) -> transpose([sentence_length, None, 2*self.__rnn_size]) -> reshpae([None, sentence_length, 2*self.__rnn_size]) -> [None, 2*self.__rnn_size]
-        output = tf.reshape(tf.transpose(tf.stack(output), perm=[1, 0, 2]), [-1, 2*self.__rnn_size])
+        with tf.name_scope('rnn'):
+            if is_train == 'train':
+                keep_prob = self.__keep_prob
+            else:
+                # do not apply dropout for inference 
+                keep_prob = 1.0
+            fw_cell = tf.contrib.rnn.MultiRNNCell([self.create_cell(self.__rnn_size, keep_prob=keep_prob) for _ in range(self.__num_layers)], state_is_tuple=True)
+            bw_cell = tf.contrib.rnn.MultiRNNCell([self.create_cell(self.__rnn_size, keep_prob=keep_prob) for _ in range(self.__num_layers)], state_is_tuple=True)
+            self.length = self.compute_length(self.input_data)
+            # transpose([None, sentence_length, unit_dim]) -> unstack([sentence_length, None, unit_dim]) -> list of [None, unit_dim]
+            output, _, _ = tf.contrib.rnn.static_bidirectional_rnn(fw_cell, bw_cell,
+                                                   tf.unstack(tf.transpose(self.input_data, perm=[1, 0, 2])),
+                                                   dtype=tf.float32, sequence_length=self.length)
+            # stack(list of [None, 2*self.__rnn_size]) -> transpose([sentence_length, None, 2*self.__rnn_size]) -> reshpae([None, sentence_length, 2*self.__rnn_size]) -> [None, 2*self.__rnn_size]
+            output = tf.reshape(tf.transpose(tf.stack(output), perm=[1, 0, 2]), [-1, 2*self.__rnn_size])
 
         # Projection layer
 
-        weight, bias = self.create_weight_and_bias(2*self.__rnn_size, class_size)
-        # [None, 2*self.__rnn_size] x [2*self.__rnn_size, class_size] + [class_size]  -> softmax([None, class_size]) -> [None, class_size]
-        prediction = tf.nn.softmax(tf.matmul(output, weight) + bias)
-        # reshape([None, class_size]) -> [None, sentence_length, class_size]
-        self.prediction = tf.reshape(prediction, [-1, sentence_length, class_size])
+        with tf.name_scope('projection'):
+            weight, bias = self.create_weight_and_bias(2*self.__rnn_size, class_size)
+            # [None, 2*self.__rnn_size] x [2*self.__rnn_size, class_size] + [class_size]  -> softmax([None, class_size]) -> [None, class_size]
+            prediction = tf.nn.softmax(tf.matmul(output, weight) + bias)
+            # reshape([None, class_size]) -> [None, sentence_length, class_size]
+            self.prediction = tf.reshape(prediction, [-1, sentence_length, class_size])
 
         # Loss and Optimization
 
-        self.loss = self.compute_cost()
-        optimizer = tf.train.AdamOptimizer(self.__learning_rate)
-        tvars = tf.trainable_variables()
-        grads, _ = tf.clip_by_global_norm(tf.gradients(self.loss, tvars), 10)
-        self.train_op = optimizer.apply_gradients(zip(grads, tvars))
+        with tf.name_scope('loss'):
+            self.loss = self.compute_cost()
+            optimizer = tf.train.AdamOptimizer(self.__learning_rate)
+            tvars = tf.trainable_variables()
+            grads, _ = tf.clip_by_global_norm(tf.gradients(self.loss, tvars), 10)
+            self.train_op = optimizer.apply_gradients(zip(grads, tvars))
 
     def compute_cost(self):
         '''
