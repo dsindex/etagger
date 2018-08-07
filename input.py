@@ -53,6 +53,7 @@ class Input:
             sentence_length += 1
             wid = self.config.embvec.get_wid(tokens[0])
             word_ids.append(wid)
+            if sentence_length == self.max_sentence_length: break
         # padding with pad wid
         for _ in range(self.max_sentence_length - sentence_length):
             word_ids.append(self.config.embvec.pad_wid)
@@ -76,6 +77,7 @@ class Input:
             for _ in range(self.config.word_length - word_length):
                 chr_ids.append(self.config.embvec.pad_cid)
             wordchr_ids.append(chr_ids)
+            if sentence_length == self.max_sentence_length: break
         # padding with empty chr_ids
         for _ in range(self.max_sentence_length - sentence_length):
             chr_ids = []
@@ -97,6 +99,7 @@ class Input:
             temp = np.append(temp, self.capital(tokens[0]))           # adding capital one-hot(1)
             etc.append(temp)
             tag.append(self.label(tokens[3], self.config.class_size)) # label one-hot(9)
+            if sentence_length == self.max_sentence_length: break
         # padding with 0s
         for _ in range(self.max_sentence_length - sentence_length):
             temp = np.array([0 for _ in range(self.config.etc_dim)])
