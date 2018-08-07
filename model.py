@@ -89,7 +89,9 @@ class Model:
             num_filters_total = self.__num_filters * len(self.__filter_sizes)
             self.h_pool = tf.concat(pooled_outputs, axis=-1)
             self.h_pool_flat = tf.reshape(self.h_pool, [-1, num_filters_total])
-            self.h_drop = tf.nn.dropout(self.h_pool_flat, self.__keep_prob)
+            if is_train == 'train': keep_prob = self.__keep_prob
+            else: keep_prob = 1.0 # do not apply dropout for inference
+            self.h_drop = tf.nn.dropout(self.h_pool_flat, keep_prob)
             # reshape([-1, num_filters_total]) -> [None, sentence_length, num_filters_total]
             self.wordchr_embeddings_conv = tf.reshape(self.h_drop, [-1, sentence_length, num_filters_total])
             '''
@@ -112,14 +114,11 @@ class Model:
         # RNN layer
 
         with tf.name_scope('rnn'):
-            if is_train == 'train':
-                keep_prob = self.__keep_prob
-            else:
-                # do not apply dropout for inference 
-                keep_prob = 1.0
+            if is_train == 'train': keep_prob = self.__keep_prob
+            else: keep_prob = 1.0 # do not apply dropout for inference 
             fw_cell = tf.contrib.rnn.MultiRNNCell([self.create_cell(self.__rnn_size, keep_prob=keep_prob) for _ in range(self.__num_layers)], state_is_tuple=True)
             bw_cell = tf.contrib.rnn.MultiRNNCell([self.create_cell(self.__rnn_size, keep_prob=keep_prob) for _ in range(self.__num_layers)], state_is_tuple=True)
-            self.length = self.compute_length(self.input_data)
+            self.length = self.compute_length(self.input_data_etc) # for efficiency
             # transpose([None, sentence_length, unit_dim]) -> unstack([sentence_length, None, unit_dim]) -> list of [None, unit_dim]
             output, _, _ = tf.contrib.rnn.static_bidirectional_rnn(fw_cell, bw_cell,
                                                    tf.unstack(tf.transpose(self.input_data, perm=[1, 0, 2])),
@@ -177,9 +176,9 @@ class Model:
     @staticmethod
     def compute_length(input_data):
         '''
-        Compute each sentence length in input_data
+        Compute each sentence length
         '''
-        # reduce_max(abs([None, sentence_length, unit_dim])) -> sign([None, sentence_length]) = [ [1, 1, 1, ..., 0], [1, 1, 1, ..., 0], ... ] 
+        # reduce_max(abs([None, sentence_length, dim])) -> sign([None, sentence_length]) = [ [1, 1, 1, ..., 0], [1, 1, 1, ..., 0], ... ] 
         # reduce_sum([None, sentence_length]) -> [None] = [11, 16, 13, ..., 123] (batch_size)
         words_used_in_sent = tf.sign(tf.reduce_max(tf.abs(input_data), reduction_indices=2))
         length = tf.cast(tf.reduce_sum(words_used_in_sent, reduction_indices=1), tf.int32)

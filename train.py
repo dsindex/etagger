@@ -8,41 +8,11 @@ from input import *
 import sys
 import argparse
 
-def train(config):
-    '''
-    Training
-    '''
-
-    # Build input data
-    train_file = 'data/train.txt'
-    dev_file = 'data/dev.txt'
-    test_file = 'data/test.txt'
-    train_data = Input(train_file, config)
-    train_inp_word_ids = train_data.sentence_word_ids
-    train_inp_wordchr_ids = train_data.sentence_wordchr_ids
-    train_inp_etc = train_data.sentence_etc
-    train_out = train_data.sentence_tag
-    print('max_sentence_length = %d' % train_data.max_sentence_length)
-    dev_data = Input(dev_file, config)
-    dev_inp_word_ids = dev_data.sentence_word_ids
-    dev_inp_wordchr_ids = dev_data.sentence_wordchr_ids
-    dev_inp_etc = dev_data.sentence_etc
-    dev_out = dev_data.sentence_tag
-    print('max_sentence_length = %d' % dev_data.max_sentence_length)
-    test_data = Input(test_file, config)
-    test_inp_word_ids = test_data.sentence_word_ids
-    test_inp_wordchr_ids = test_data.sentence_wordchr_ids
-    test_inp_etc = test_data.sentence_etc
-    test_out = test_data.sentence_tag
-    print('max_sentence_length = %d' % test_data.max_sentence_length)
-    print('loading input data ... done')
-
-    # Create model
-    model = Model(config)
-
-    # Training
+def do_train(model, train_data, dev_data, test_data):
     maximum = 0
-    with tf.Session() as sess:
+    session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
+    sess = tf.Session(config=session_conf)
+    with sess.as_default():
         sess.run(tf.global_variables_initializer())
         saver = tf.train.Saver()
         if config.restore is not None:
@@ -50,38 +20,57 @@ def train(config):
             print('model restored')
         for e in range(config.epoch):
             idx = 0
-            for ptr in range(0, len(train_inp_word_ids), config.batch_size):
-                print('%s-th batch in %s(size of train_inp)' % (idx, len(train_inp_word_ids)))
-                feed_dict={model.input_data_word_ids: train_inp_word_ids[ptr:ptr + config.batch_size],
-                           model.input_data_wordchr_ids: train_inp_wordchr_ids[ptr:ptr + config.batch_size],
-                           model.input_data_etc: train_inp_etc[ptr:ptr + config.batch_size],
-                           model.output_data: train_out[ptr:ptr + config.batch_size]}
+            for ptr in range(0, len(train_data.sentence_word_ids), config.batch_size):
+                print('%s-th batch in %s(size of train_inp)' % (idx, len(train_data.sentence_word_ids)))
+                feed_dict={model.input_data_word_ids: train_data.sentence_word_ids[ptr:ptr + config.batch_size],
+                           model.input_data_wordchr_ids: train_data.sentence_wordchr_ids[ptr:ptr + config.batch_size],
+                           model.input_data_etc: train_data.sentence_etc[ptr:ptr + config.batch_size],
+                           model.output_data: train_data.sentence_tag[ptr:ptr + config.batch_size]}
                 _, train_loss = sess.run([model.train_op, model.loss], feed_dict=feed_dict)
                 print('train loss: %s' % (train_loss))
                 idx += 1
             if e % 10 == 0:
                 save_path = saver.save(sess, config.checkpoint_dir + '/' + 'model.ckpt')
                 print('model saved in file: %s' % save_path)
-            feed_dict={model.input_data_word_ids: dev_inp_word_ids,
-                       model.input_data_wordchr_ids: dev_inp_wordchr_ids,
-                       model.input_data_etc: dev_inp_etc,
-                       model.output_data: dev_out}
+            feed_dict={model.input_data_word_ids: dev_data.sentence_word_ids,
+                       model.input_data_wordchr_ids: dev_data.sentence_wordchr_ids,
+                       model.input_data_etc: dev_data.sentence_etc,
+                       model.output_data: dev_data.sentence_tag}
             pred, length, dev_loss = sess.run([model.prediction, model.length, model.loss], feed_dict=feed_dict)
             print('epoch: %d, dev loss: %s' % (e, dev_loss))
             print('dev score:')
-            m = Eval.compute_f1(config.class_size, pred, dev_out, length)
+            m = Eval.compute_f1(config.class_size, pred, dev_data.sentence_tag, length)
             if m > maximum:
                 maximum = m
                 save_path = saver.save(sess, config.checkpoint_dir + '/' + 'model_max.ckpt')
                 print('max model saved in file: %s' % save_path)
-                feed_dict={model.input_data_word_ids: test_inp_word_ids,
-                           model.input_data_wordchr_ids: test_inp_wordchr_ids,
-                           model.input_data_etc: test_inp_etc,
-                           model.output_data: test_out}
+                feed_dict={model.input_data_word_ids: test_data.sentence_word_ids,
+                           model.input_data_wordchr_ids: test_data.sentence_wordchr_ids,
+                           model.input_data_etc: test_data.sentence_etc,
+                           model.output_data: test_data.sentence_tag}
                 pred, length, test_loss = sess.run([model.prediction, model.length, model.loss], feed_dict=feed_dict)
                 print('test score:')
-                Eval.compute_f1(config.class_size, pred, test_out, length)
+                Eval.compute_f1(config.class_size, pred, test_data.sentence_tag, length)
 
+def train(config):
+    # Build input data
+    train_file = 'data/train.txt'
+    dev_file = 'data/dev.txt'
+    test_file = 'data/test.txt'
+    train_data = Input(train_file, config)
+    print('max_sentence_length = %d' % train_data.max_sentence_length)
+    dev_data = Input(dev_file, config)
+    print('max_sentence_length = %d' % dev_data.max_sentence_length)
+    test_data = Input(test_file, config)
+    print('max_sentence_length = %d' % test_data.max_sentence_length)
+    print('loading input data ... done')
+
+    # Create model
+    model = Model(config)
+
+    # Training
+    do_train(model, train_data, dev_data, test_data)
+        
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--emb_path', type=str, help='path to word embedding vector(.pkl)', required=True)

@@ -22,8 +22,11 @@ etagger
     - apply dropout for train() only [done]
     - apply embedding_lookup()
       - word embedding [done]
+        - total fscore : 0.887144259078 (50 epoch)
     - apply character-level embedding
-      - character embedding [doing]
+      - character embedding [done]
+        - total fscore : 0.886939451567 (50 epoch)
+        - total fscore : 0.888190722602 (100 epoch)
     - apply gazetter features
     - apply self-attention
     - apply ELMO embedding

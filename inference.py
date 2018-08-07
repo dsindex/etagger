@@ -22,12 +22,15 @@ def inference_bulk(config):
     # Create model
     model = Model(config)
 
-    with tf.Session() as sess:
+    session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
+    sess = tf.Session(config=session_conf)
+    with sess.as_default():
         sess.run(tf.global_variables_initializer())
         saver = tf.train.Saver()
         saver.restore(sess, config.restore)
         print('model restored')
         feed_dict = {model.input_data_word_ids: test_data.sentence_word_ids,
+                     model.input_data_wordchr_ids: test_data.sentence_wordchr_ids,
                      model.input_data_etc: test_data.sentence_etc,
                      model.output_data: test_data.sentence_tag}
         pred, length, test_loss = sess.run([model.prediction, model.length, model.loss], feed_dict=feed_dict)
@@ -45,7 +48,8 @@ def inference_bucket(config):
     model = Model(config)
 
     # Restore model
-    sess = tf.Session()
+    session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
+    sess = tf.Session(config=session_conf)
     sess.run(tf.global_variables_initializer())
     saver = tf.train.Saver()
     saver.restore(sess, config.restore)
@@ -61,6 +65,7 @@ def inference_bucket(config):
             # Build input data
             inp = Input(bucket, config)
             feed_dict = {model.input_data_word_ids: inp.sentence_word_ids,
+                         model.input_data_wordchr_ids: inp.sentence_wordchr_ids,
                          model.input_data_etc: inp.sentence_etc,
                          model.output_data: inp.sentence_tag}
             pred, length, loss = sess.run([model.prediction, model.length, model.loss], feed_dict=feed_dict)
@@ -75,6 +80,7 @@ def inference_bucket(config):
         # Build input data
         inp = Input(bucket, config)
         feed_dict = {model.input_data_word_ids: inp.sentence_word_ids,
+                     model.input_data_wordchr_ids: inp.sentence_wordchr_ids,
                      model.input_data_etc: inp.sentence_etc,
                      model.output_data: inp.sentence_tag}
         pred, length, loss = sess.run([model.prediction, model.length, model.loss], feed_dict=feed_dict)
@@ -126,7 +132,8 @@ def inference_line(config):
     model = Model(config)
 
     # Restore model
-    sess = tf.Session()
+    session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
+    sess = tf.Session(config=session_conf)
     sess.run(tf.global_variables_initializer())
     saver = tf.train.Saver()
     saver.restore(sess, config.restore)
@@ -146,6 +153,7 @@ def inference_line(config):
         # Build input data
         inp = Input(bucket, config)
         feed_dict = {model.input_data_word_ids: inp.sentence_word_ids,
+                     model.input_data_wordchr_ids: inp.sentence_wordchr_ids,
                      model.input_data_etc: inp.sentence_etc,
                      model.output_data: inp.sentence_tag}
         pred, length, loss = sess.run([model.prediction, model.length, model.loss], feed_dict=feed_dict)
