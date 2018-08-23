@@ -139,10 +139,11 @@ class Model:
 
         with tf.name_scope('loss'):
             self.loss = self.compute_cost()
+            self.global_step = tf.Variable(0, name='global_step', trainable=False)
             optimizer = tf.train.AdamOptimizer(self.__learning_rate)
             tvars = tf.trainable_variables()
             grads, _ = tf.clip_by_global_norm(tf.gradients(self.loss, tvars), 10)
-            self.train_op = optimizer.apply_gradients(zip(grads, tvars))
+            self.train_op = optimizer.apply_gradients(zip(grads, tvars), global_step=self.global_step)
 
     def compute_cost(self):
         '''

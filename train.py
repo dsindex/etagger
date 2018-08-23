@@ -26,8 +26,8 @@ def do_train(model, train_data, dev_data, test_data):
                            model.input_data_wordchr_ids: train_data.sentence_wordchr_ids[ptr:ptr + config.batch_size],
                            model.input_data_etc: train_data.sentence_etc[ptr:ptr + config.batch_size],
                            model.output_data: train_data.sentence_tag[ptr:ptr + config.batch_size]}
-                _, train_loss = sess.run([model.train_op, model.loss], feed_dict=feed_dict)
-                print('train loss: %s' % (train_loss))
+                step, _, train_loss = sess.run([model.global_step, model.train_op, model.loss], feed_dict=feed_dict)
+                print('step: %d, train loss: %s' % (step, train_loss))
                 idx += 1
             if e % 10 == 0:
                 save_path = saver.save(sess, config.checkpoint_dir + '/' + 'model.ckpt')
@@ -36,8 +36,8 @@ def do_train(model, train_data, dev_data, test_data):
                        model.input_data_wordchr_ids: dev_data.sentence_wordchr_ids,
                        model.input_data_etc: dev_data.sentence_etc,
                        model.output_data: dev_data.sentence_tag}
-            pred, length, dev_loss = sess.run([model.prediction, model.length, model.loss], feed_dict=feed_dict)
-            print('epoch: %d, dev loss: %s' % (e, dev_loss))
+            step, pred, length, dev_loss = sess.run([model.global_step, model.prediction, model.length, model.loss], feed_dict=feed_dict)
+            print('epoch: %d, step: %d, dev loss: %s' % (e, step, dev_loss))
             print('dev score:')
             m = Eval.compute_f1(config.class_size, pred, dev_data.sentence_tag, length)
             if m > maximum:

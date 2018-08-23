@@ -12,7 +12,7 @@ ETC_DIM = 5+5+1
 '''
 character dimension
 '''
-CHR_DIM = 20
+CHR_DIM = 64
 
 class Config:
     def __init__(self, args, is_train=1):
