@@ -31,9 +31,6 @@ etagger
         - total fscore : 0.89127483648  (50 epoch, glove300d, chr_dim=96) <-- best
         - total fscore : 0.88627981313  (50 epoch, glove300d, chr_dim=128)
         - total fscore : 0.889806992662 (150 epoch, glove300d, chr_dim=96)
-    - extend linguistic features [undo]
-      - check if last character is capital
-        - total fscore : 0.886075949367 (50 epoch, glove300d, chr_dim=96)
     - apply gazetter features
     - apply self-attention
     - apply ELMO embedding
