@@ -27,6 +27,10 @@ etagger
       - character embedding [done]
         - total fscore : 0.886939451567 (50 epoch, glove50d, chr_dim=20)
         - total fscore : 0.889747837291 (50 epoch, glove100d, chr_dim=64)
+        - total fscore : 0.868482110148 (50 epoch, glove300d, chr_dim=64)
+        - total fscore : 0.89127483648  (50 epoch, glove300d, chr_dim=96)
+        - total fscore : 0.88627981313  (50 epoch, glove300d, chr_dim=128)
+        - total fscore :                (150 epoch, glove300d, chr_dim=96)
     - apply gazetter features
     - apply self-attention
     - apply ELMO embedding
@@ -58,7 +62,9 @@ etagger
 
 - convert word embedding to pickle
 ```
+$ python embvec.py --emb_path embeddings/glove.6B.50d.txt --wrd_dim 50 --train_path data/train.txt
 $ python embvec.py --emb_path embeddings/glove.6B.100d.txt --wrd_dim 100 --train_path data/train.txt
+$ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train_path data/train.txt
 ```
 
 - check max sentence length
@@ -73,23 +79,23 @@ test, max_sentence_length = 124
 
 - train
 ```
-$ python train.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --sentence_length 125 --class_size 9
+$ python train.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --class_size 9
 ```
 
 - inference(bulk)
 ```
-$ python inference.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --sentence_length 125 --class_size 9 --restore checkpoint/model_max.ckpt
+$ python inference.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --class_size 9 --restore checkpoint/model_max.ckpt
 ```
 
 - inference(bucket)
 ```
-$ python inference.py --mode bucket --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --sentence_length 125 --class_size 9 --restore checkpoint/model_max.ckpt < data/test.txt > pred.txt
+$ python inference.py --mode bucket --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --class_size 9 --restore checkpoint/model_max.ckpt < data/test.txt > pred.txt
 $ python eval.py < pred.txt
 ```
 
 - inference(line)
 ```
-$ python inference.py --mode line --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --sentence_length 125 --class_size 9 --restore checkpoint/model_max.ckpt
+$ python inference.py --mode line --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --class_size 9 --restore checkpoint/model_max.ckpt
 ...
 Obama left office in January 2017 with a 60% approval rating and currently resides in Washington, D.C.
 Obama NNP O O B-PER
