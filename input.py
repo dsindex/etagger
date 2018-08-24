@@ -152,10 +152,10 @@ class Input:
 
     @staticmethod
     def capital(word):
+        one_hot = np.zeros(1)
         if ord('A') <= ord(word[0]) <= ord('Z'):
-            return np.array([1])
-        else:
-            return np.array([0])
+            one_hot[0] = 1
+        return one_hot
 
     @staticmethod
     def label(tag, class_size):

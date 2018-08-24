@@ -28,9 +28,12 @@ etagger
         - total fscore : 0.886939451567 (50 epoch, glove50d, chr_dim=20)
         - total fscore : 0.889747837291 (50 epoch, glove100d, chr_dim=64)
         - total fscore : 0.868482110148 (50 epoch, glove300d, chr_dim=64)
-        - total fscore : 0.89127483648  (50 epoch, glove300d, chr_dim=96)
+        - total fscore : 0.89127483648  (50 epoch, glove300d, chr_dim=96) <-- best
         - total fscore : 0.88627981313  (50 epoch, glove300d, chr_dim=128)
-        - total fscore :                (150 epoch, glove300d, chr_dim=96)
+        - total fscore : 0.889806992662 (150 epoch, glove300d, chr_dim=96)
+    - extend linguistic features [undo]
+      - check if last character is capital
+        - total fscore : 0.886075949367 (50 epoch, glove300d, chr_dim=96)
     - apply gazetter features
     - apply self-attention
     - apply ELMO embedding
@@ -132,4 +135,14 @@ Liverpool NNP O B-GPE B-ORG
 in IN O O O
 1960 CD O B-DATE O
 . . O I-DATE O
+```
+
+### etc
+
+- analysis
+```
+f-score (dev)
+  B-PER, I-PER, B-LOC, I-LOC, B-ORG, I-ORG, B-MISC, I-MISC, O
+  0.94833648904517176, 0.95342673229837183, 0.94333424582534897, 0.87739463601532586, 0.86836363636363634, 0.84922244759972954, 0.83786848072562348, 0.7643504531722054, 0.99355724054519234
+  weak points : B-ORG, I-ORG, B-MISC, I-MISC
 ```
