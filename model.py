@@ -55,7 +55,6 @@ class Model:
                 # convolution layer
                 filter_shape = [filter_size, chr_dim, 1, self.__num_filters]
                 W = tf.Variable(tf.truncated_normal(filter_shape, stddev=0.1), name='W')
-                b = tf.Variable(tf.constant(0.1, shape=[self.__num_filters]), name='b')
                 conv = tf.nn.conv2d(
                     self.wordchr_embeddings,
                     W,
@@ -63,6 +62,7 @@ class Model:
                     padding='VALID',
                     name='conv')
                 # apply nonlinearity
+                b = tf.Variable(tf.constant(0.1, shape=[self.__num_filters]), name='b')
                 h = tf.nn.relu(tf.nn.bias_add(conv, b), name='relu')
                 # max-pooling over the outputs
                 pooled = tf.nn.max_pool(
@@ -73,13 +73,16 @@ class Model:
                     name='pool')
                 pooled_outputs.append(pooled) 
                 '''
-                wordchr_embeddings Tensor("wordchr_embeddings/ExpandDims:0", shape=(?, 15, 20, 1), dtype=float32, device=/device:CPU:0)
+                wordchr_embeddings Tensor("wordchr_embeddings/ExpandDims:0", shape=(?, 15, 96, 1), dtype=float32, device=/device:CPU:0)
+                * filter_size : 3
                 conv Tensor("conv-maxpool-3/conv:0", shape=(?, 13, 1, 32), dtype=float32)
                 h Tensor("conv-maxpool-3/relu:0", shape=(?, 13, 1, 32), dtype=float32)
                 pooled Tensor("conv-maxpool-3/pool:0", shape=(?, 1, 1, 32), dtype=float32)
+                * filter_size : 4
                 conv Tensor("conv-maxpool-4/conv:0", shape=(?, 12, 1, 32), dtype=float32)
                 h Tensor("conv-maxpool-4/relu:0", shape=(?, 12, 1, 32), dtype=float32)
                 pooled Tensor("conv-maxpool-4/pool:0", shape=(?, 1, 1, 32), dtype=float32)
+                * filter_size : 5
                 conv Tensor("conv-maxpool-5/conv:0", shape=(?, 11, 1, 32), dtype=float32)
                 h Tensor("conv-maxpool-5/relu:0", shape=(?, 11, 1, 32), dtype=float32)
                 pooled Tensor("conv-maxpool-5/pool:0", shape=(?, 1, 1, 32), dtype=float32)
