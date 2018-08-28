@@ -74,15 +74,15 @@ class Model:
                 pooled_outputs.append(pooled) 
                 '''
                 wordchr_embeddings Tensor("wordchr_embeddings/ExpandDims:0", shape=(?, 15, 96, 1), dtype=float32, device=/device:CPU:0)
-                * filter_size : 3
+                * filter_size : 3, filters : 32
                 conv Tensor("conv-maxpool-3/conv:0", shape=(?, 13, 1, 32), dtype=float32)
                 h Tensor("conv-maxpool-3/relu:0", shape=(?, 13, 1, 32), dtype=float32)
                 pooled Tensor("conv-maxpool-3/pool:0", shape=(?, 1, 1, 32), dtype=float32)
-                * filter_size : 4
+                * filter_size : 4, filters : 32
                 conv Tensor("conv-maxpool-4/conv:0", shape=(?, 12, 1, 32), dtype=float32)
                 h Tensor("conv-maxpool-4/relu:0", shape=(?, 12, 1, 32), dtype=float32)
                 pooled Tensor("conv-maxpool-4/pool:0", shape=(?, 1, 1, 32), dtype=float32)
-                * filter_size : 5
+                * filter_size : 5, filters : 32
                 conv Tensor("conv-maxpool-5/conv:0", shape=(?, 11, 1, 32), dtype=float32)
                 h Tensor("conv-maxpool-5/relu:0", shape=(?, 11, 1, 32), dtype=float32)
                 pooled Tensor("conv-maxpool-5/pool:0", shape=(?, 1, 1, 32), dtype=float32)
