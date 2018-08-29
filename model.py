@@ -19,6 +19,7 @@ class Model:
         '''
         Initialize RNN model
         '''
+        self.set_cuda_visible_devices() 
         embvec = config.embvec
         sentence_length = config.sentence_length
         word_length = config.word_length
@@ -197,3 +198,9 @@ class Model:
         bias = tf.constant(0.1, shape=[out_size])
         return tf.Variable(weight, name='projection_weight'), tf.Variable(bias, name='projection_bias')
 
+    @staticmethod
+    def set_cuda_visible_devices():
+        import os
+        os.environ["CUDA_VISIBLE_DEVICES"]="1"
+        from tensorflow.python.client import device_lib
+        print(device_lib.list_local_devices())
