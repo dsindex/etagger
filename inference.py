@@ -69,9 +69,9 @@ def inference_bucket(config):
                          model.input_data_etc: inp.sentence_etc,
                          model.output_data: inp.sentence_tag}
             pred, length, loss = sess.run([model.prediction, model.length, model.loss], feed_dict=feed_dict)
-            labels = Input.pred_to_label(pred[0], length[0])
+            tags = Input.pred_to_tags(pred[0], length[0])
             for i in range(len(bucket)):
-                out = bucket[i] + ' ' + labels[i]
+                out = bucket[i] + ' ' + tags[i]
                 sys.stdout.write(out + '\n')
             sys.stdout.write('\n')
             bucket = []
@@ -84,9 +84,9 @@ def inference_bucket(config):
                      model.input_data_etc: inp.sentence_etc,
                      model.output_data: inp.sentence_tag}
         pred, length, loss = sess.run([model.prediction, model.length, model.loss], feed_dict=feed_dict)
-        labels = Input.pred_to_label(pred[0], length[0])
+        tags = Input.pred_to_tags(pred[0], length[0])
         for i in range(len(bucket)):
-            out = bucket[i] + ' ' + labels[i]
+            out = bucket[i] + ' ' + tags[i]
             sys.stdout.write(out + '\n')
         sys.stdout.write('\n')
 
@@ -157,9 +157,9 @@ def inference_line(config):
                      model.input_data_etc: inp.sentence_etc,
                      model.output_data: inp.sentence_tag}
         pred, length, loss = sess.run([model.prediction, model.length, model.loss], feed_dict=feed_dict)
-        labels = Input.pred_to_label(pred[0], length[0])
+        tags = Input.pred_to_tags(pred[0], length[0])
         for i in range(len(bucket)):
-            out = bucket[i] + ' ' + labels[i]
+            out = bucket[i] + ' ' + tags[i]
             sys.stdout.write(out + '\n')
         sys.stdout.write('\n')
 

@@ -53,7 +53,14 @@ class EmbVec:
                 if ch not in self.cvocab:
                     self.cvocab[ch] = cid
                     cid += 1
-
+        # TODO build tag dictionary
+        # TODO build gazetteer
+        for line in open(args.train_path):
+            tokens = line.split()
+            if len(tokens) != 4: continue
+            word = tokens[0]
+            tag = tokens[3]
+        
     def get_wid(self, word):
         word = word.lower()
         if word in self.wvocab:
@@ -72,7 +79,6 @@ class EmbVec:
         except KeyError:
             vec = np.array([random() for i in range(self.wrd_dim)])
             return vec
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

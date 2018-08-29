@@ -25,7 +25,7 @@ class Input:
             self.sentence_word_ids.append(word_ids)
             wordchr_ids = self.__create_wordchr_ids(bucket)
             self.sentence_wordchr_ids.append(wordchr_ids)
-            etc, tag = self.__create_etc(bucket)
+            etc, tag = self.__create_etc_and_tag(bucket)
             self.sentence_etc.append(etc)
             self.sentence_tag.append(tag)
         else:                  # treat data as file path
@@ -37,7 +37,7 @@ class Input:
                     self.sentence_word_ids.append(word_ids)
                     wordchr_ids = self.__create_wordchr_ids(bucket)
                     self.sentence_wordchr_ids.append(wordchr_ids)
-                    etc, tag = self.__create_etc(bucket)
+                    etc, tag = self.__create_etc_tag(bucket)
                     self.sentence_etc.append(etc)
                     self.sentence_tag.append(tag)
                     bucket = []
@@ -86,7 +86,7 @@ class Input:
             wordchr_ids.append(chr_ids)
         return wordchr_ids
 
-    def __create_etc(self, bucket):
+    def __create_etc_and_tag(self, bucket):
         etc = []
         tag  = []
         sentence_length = 0
@@ -94,11 +94,12 @@ class Input:
             tokens = line.split()
             assert (len(tokens) == 4)
             sentence_length += 1
-            temp = self.pos(tokens[1])                                # adding pos one-hot(5)
-            temp = np.append(temp, self.chunk(tokens[2]))             # adding chunk one-hot(5)
-            temp = np.append(temp, self.capital(tokens[0]))           # adding capital one-hot(1)
+            temp = self.pos_vec(tokens[1])                                # adding pos one-hot(5)
+            temp = np.append(temp, self.chunk_vec(tokens[2]))             # adding chunk one-hot(5)
+            temp = np.append(temp, self.capital_vec(tokens[0]))           # adding capital one-hot(1)
+            # TODO gazetteer features
             etc.append(temp)
-            tag.append(self.label(tokens[3], self.config.class_size)) # label one-hot(9)
+            tag.append(self.tag_vec(tokens[3], self.config.class_size))   # tag one-hot(9)
             if sentence_length == self.max_sentence_length: break
         # padding with 0s
         for _ in range(self.max_sentence_length - sentence_length):
@@ -121,44 +122,47 @@ class Input:
         return max_length
 
     @staticmethod
-    def pos(tag):
+    def pos_vec(t):
+        # language specific features
         one_hot = np.zeros(5)
-        if tag == 'NN' or tag == 'NNS':
+        if t == 'NN' or t == 'NNS':
             one_hot[0] = 1
-        elif tag == 'FW':
+        elif t == 'FW':
             one_hot[1] = 1
-        elif tag == 'NNP' or tag == 'NNPS':
+        elif t == 'NNP' or t == 'NNPS':
             one_hot[2] = 1
-        elif 'VB' in tag:
+        elif 'VB' in t:
             one_hot[3] = 1
         else:
             one_hot[4] = 1
         return one_hot
 
     @staticmethod
-    def chunk(tag):
+    def chunk_vec(t):
+        # language specific features
         one_hot = np.zeros(5)
-        if 'NP' in tag:
+        if 'NP' in t:
             one_hot[0] = 1
-        elif 'VP' in tag:
+        elif 'VP' in t:
             one_hot[1] = 1
-        elif 'PP' in tag:
+        elif 'PP' in t:
             one_hot[2] = 1
-        elif tag == 'O':
+        elif t == 'O':
             one_hot[3] = 1
         else:
             one_hot[4] = 1
         return one_hot
 
     @staticmethod
-    def capital(word):
+    def capital_vec(word):
+        # language specific features
         one_hot = np.zeros(1)
         if ord('A') <= ord(word[0]) <= ord('Z'):
             one_hot[0] = 1
         return one_hot
 
     @staticmethod
-    def label(tag, class_size):
+    def tag_vec(tag, class_size):
         one_hot = np.zeros(class_size)
         if tag == 'B-PER':
             one_hot[0] = 1
@@ -181,7 +185,7 @@ class Input:
         return one_hot
 
     @staticmethod
-    def pred_to_label(pred, length):
+    def pred_to_tags(pred, length):
         '''
         pred : [senence_length, class_size]
         length : int
@@ -189,16 +193,16 @@ class Input:
         pred = pred[0:length]
         # [length]
         pred_list = np.argmax(pred, 1).tolist()
-        labels = []
+        tags = []
         for i in pred_list:
-            if i == 0: labels.append('B-PER')
-            elif i == 1: labels.append('I-PER')
-            elif i == 2: labels.append('B-LOC')
-            elif i == 3: labels.append('I-LOC')
-            elif i == 4: labels.append('B-ORG')
-            elif i == 5: labels.append('I-ORG')
-            elif i == 6: labels.append('B-MISC')
-            elif i == 7: labels.append('I-MISC')
-            else: labels.append('O')
-        return labels
+            if i == 0: tags.append('B-PER')
+            elif i == 1: tags.append('I-PER')
+            elif i == 2: tags.append('B-LOC')
+            elif i == 3: tags.append('I-LOC')
+            elif i == 4: tags.append('B-ORG')
+            elif i == 5: tags.append('I-ORG')
+            elif i == 6: tags.append('B-MISC')
+            elif i == 7: tags.append('I-MISC')
+            else: tags.append('O')
+        return tags
 
