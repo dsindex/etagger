@@ -37,7 +37,7 @@ class Input:
                     self.sentence_word_ids.append(word_ids)
                     wordchr_ids = self.__create_wordchr_ids(bucket)
                     self.sentence_wordchr_ids.append(wordchr_ids)
-                    etc, tag = self.__create_etc_tag(bucket)
+                    etc, tag = self.__create_etc_and_tag(bucket)
                     self.sentence_etc.append(etc)
                     self.sentence_tag.append(tag)
                     bucket = []
