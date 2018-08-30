@@ -108,6 +108,26 @@ class Input:
             tag.append(np.array([0] * self.config.class_size))
         return etc, tag
 
+    def tag_vec(self, tag, class_size):
+        one_hot = np.zeros(class_size)
+        tid = self.config.embvec.get_tid(tag)
+        one_hot[tid] = 1
+        return one_hot
+
+    def pred_to_tags(self, pred, length):
+        '''
+        pred : [senence_length, class_size]
+        length : int
+        '''
+        pred = pred[0:length]
+        # [length]
+        pred_list = np.argmax(pred, 1).tolist()
+        tags = []
+        for tid in pred_list:
+            tag = self.config.embvec.get_tag(tid)
+            tags.append(tag)
+        return tags
+
     @staticmethod
     def find_max_length(file_name):
         temp_len = 0
@@ -161,48 +181,4 @@ class Input:
             one_hot[0] = 1
         return one_hot
 
-    @staticmethod
-    def tag_vec(tag, class_size):
-        one_hot = np.zeros(class_size)
-        if tag == 'B-PER':
-            one_hot[0] = 1
-        elif tag == 'I-PER':
-            one_hot[1] = 1
-        elif tag == 'B-LOC':
-            one_hot[2] = 1
-        elif tag == 'I-LOC':
-            one_hot[3] = 1
-        elif tag == 'B-ORG':
-            one_hot[4] = 1
-        elif tag == 'I-ORG':
-            one_hot[5] = 1
-        elif tag == 'B-MISC':
-            one_hot[6] = 1
-        elif tag == 'I-MISC':
-            one_hot[7] = 1
-        else:
-            one_hot[8] = 1
-        return one_hot
-
-    @staticmethod
-    def pred_to_tags(pred, length):
-        '''
-        pred : [senence_length, class_size]
-        length : int
-        '''
-        pred = pred[0:length]
-        # [length]
-        pred_list = np.argmax(pred, 1).tolist()
-        tags = []
-        for i in pred_list:
-            if i == 0: tags.append('B-PER')
-            elif i == 1: tags.append('I-PER')
-            elif i == 2: tags.append('B-LOC')
-            elif i == 3: tags.append('I-LOC')
-            elif i == 4: tags.append('B-ORG')
-            elif i == 5: tags.append('I-ORG')
-            elif i == 6: tags.append('B-MISC')
-            elif i == 7: tags.append('I-MISC')
-            else: tags.append('O')
-        return tags
 

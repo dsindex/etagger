@@ -8,18 +8,20 @@ class EmbVec:
     def __init__(self, args):
         self.pad = '#PAD#'
         self.unk = '#UNK#'
-        self.wvocab = {}
+        self.wvocab = {}      # word vocab
         self.embeddings = []
         self.wrd_dim = args.wrd_dim
-        self.pad_wid = 0  # for padding word embedding
-        self.unk_wid = 1  # for unknown word
+        self.pad_wid = 0      # for padding word embedding
+        self.unk_wid = 1      # for unknown word
         self.wvocab[self.pad] = self.pad_wid
         self.wvocab[self.unk] = self.unk_wid
-        self.cvocab = {}
-        self.pad_cid = 0  # for padding char embedding
-        self.unk_cid = 1  # for unknown char
+        self.cvocab = {}      # character vocab
+        self.pad_cid = 0      # for padding char embedding
+        self.unk_cid = 1      # for unknown char
         self.cvocab[self.pad] = self.pad_cid
         self.cvocab[self.unk] = self.unk_cid
+        self.tag_vocab = {}   # tag vocab (tag -> id)
+        self.itag_vocab = {}  # inverse tag vocab (id -> tag)
 
         invalid = 0
         # 0 id for padding
@@ -45,21 +47,23 @@ class EmbVec:
         sys.stderr.write('invalid entries %d' % (invalid) + '\n')
         # 2 cid ~ for normal characters
         cid = self.unk_cid + 1
+        tid = 0
         for line in open(args.train_path):
             tokens = line.split()
             if len(tokens) != 4: continue
             word = tokens[0]
+            tag  = tokens[3]
+            # character vocab
             for ch in word:
                 if ch not in self.cvocab:
                     self.cvocab[ch] = cid
                     cid += 1
-        # TODO build tag dictionary
-        # TODO build gazetteer
-        for line in open(args.train_path):
-            tokens = line.split()
-            if len(tokens) != 4: continue
-            word = tokens[0]
-            tag = tokens[3]
+            # tag, itag vocab
+            if tag not in self.tag_vocab:
+                self.tag_vocab[tag] = tid
+                self.itag_vocab[tid] = tag
+                tid += 1
+            # TODO build gazetteer
         
     def get_wid(self, word):
         word = word.lower()
@@ -72,6 +76,16 @@ class EmbVec:
         if ch in self.cvocab:
             return self.cvocab[ch]
         return self.unk_cid
+
+    def get_tid(self, tag):
+        if tag in self.tag_vocab:
+            return self.tag_vocab[tag]
+        raise ValueError('unknown tag : %s' % (tag))
+
+    def get_tag(self, tid):
+        if tid in self.itag_vocab:
+            return self.itag_vocab[tid]
+        raise ValueError('unknown tag id : %d' % (tid))
 
     def __getitem__(self, wid):
         try:

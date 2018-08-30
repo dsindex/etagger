@@ -18,19 +18,12 @@ etagger
       - inference bulk [done]
       - inference bucket [done]
       - inference line using spacy [done]
-    - extend 5 class to 9 class [done]
+    - extend 5 class to 9 class(automatically) [done]
     - apply dropout for train() only [done]
     - apply embedding_lookup()
       - word embedding [done]
-        - total fscore : 0.887144259078 (50 epoch, glove50d)
     - apply character-level embedding
-      - character embedding [done]
-        - total fscore : 0.886939451567 (50 epoch, glove50d, chr_dim=20)
-        - total fscore : 0.889747837291 (50 epoch, glove100d, chr_dim=64)
-        - total fscore : 0.868482110148 (50 epoch, glove300d, chr_dim=64)
-        - total fscore : 0.89127483648  (50 epoch, glove300d, chr_dim=96) <-- best
-        - total fscore : 0.88627981313  (50 epoch, glove300d, chr_dim=128)
-        - total fscore : 0.889806992662 (150 epoch, glove300d, chr_dim=96)
+      - character embedding [doing]
     - apply gazetter features
     - apply self-attention
     - apply ELMO embedding
@@ -39,6 +32,7 @@ etagger
   - https://web.stanford.edu/class/cs224n/reports/6896582.pdf
   - http://www.wildml.com/2015/12/implementing-a-cnn-for-text-classification-in-tensorflow/
   - https://github.com/cuteboydot/Sentence-Classification-using-Char-CNN-and-RNN
+  - https://github.com/carpedm20/lstm-char-cnn-tensorflow/blob/master/models/LSTMTDNN.py
   - https://github.com/DongjunLee/transformer-tensorflow/blob/master/transformer/attention.py
 
 ### pre-requisites
@@ -79,23 +73,23 @@ test, max_sentence_length = 124
 
 - train
 ```
-$ python train.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --class_size 9
+$ python train.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125
 ```
 
 - inference(bulk)
 ```
-$ python inference.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --class_size 9 --restore checkpoint/model_max.ckpt
+$ python inference.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --restore checkpoint/model_max.ckpt
 ```
 
 - inference(bucket)
 ```
-$ python inference.py --mode bucket --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --class_size 9 --restore checkpoint/model_max.ckpt < data/test.txt > pred.txt
+$ python inference.py --mode bucket --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --restore checkpoint/model_max.ckpt < data/test.txt > pred.txt
 $ python eval.py < pred.txt
 ```
 
 - inference(line)
 ```
-$ python inference.py --mode line --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --class_size 9 --restore checkpoint/model_max.ckpt
+$ python inference.py --mode line --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --restore checkpoint/model_max.ckpt
 ...
 Obama left office in January 2017 with a 60% approval rating and currently resides in Washington, D.C.
 Obama NNP O O B-PER
