@@ -20,8 +20,12 @@ class EmbVec:
         self.unk_cid = 1      # for unknown char
         self.cvocab[self.pad] = self.pad_cid
         self.cvocab[self.unk] = self.unk_cid
+        self.oot_tid = 0      # out of tag id
+        self.oot_tag = 'O'    # out of tag, this is fixed for convenience
         self.tag_vocab = {}   # tag vocab (tag -> id)
         self.itag_vocab = {}  # inverse tag vocab (id -> tag)
+        self.tag_vocab[self.oot_tag] = self.oot_tid
+        self.itag_vocab[0] = self.oot_tag
 
         invalid = 0
         # 0 id for padding
@@ -47,7 +51,7 @@ class EmbVec:
         sys.stderr.write('invalid entries %d' % (invalid) + '\n')
         # 2 cid ~ for normal characters
         cid = self.unk_cid + 1
-        tid = 0
+        tid = self.oot_tid + 1
         for line in open(args.train_path):
             tokens = line.split()
             if len(tokens) != 4: continue
@@ -80,12 +84,12 @@ class EmbVec:
     def get_tid(self, tag):
         if tag in self.tag_vocab:
             return self.tag_vocab[tag]
-        raise ValueError('unknown tag : %s' % (tag))
+        return self.oot_tid
 
     def get_tag(self, tid):
         if tid in self.itag_vocab:
             return self.itag_vocab[tid]
-        raise ValueError('unknown tag id : %d' % (tid))
+        return self.oot_tag
 
     def __getitem__(self, wid):
         try:
