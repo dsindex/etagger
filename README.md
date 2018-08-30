@@ -18,7 +18,8 @@ etagger
       - inference bulk [done]
       - inference bucket [done]
       - inference line using spacy [done]
-    - extend 5 class to 9 class(automatically) [done]
+    - extend 5 tag(class) to 9 (automatically) [done]
+      - out of tag(class) 'O' and its id '0' are fixed
     - apply dropout for train() only [done]
     - apply embedding_lookup()
       - word embedding [done]

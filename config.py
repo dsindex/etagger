@@ -5,7 +5,7 @@ import pickle as pkl
 
 '''
 etc dimension
-  : you should define etc dimension by refering __create_etc() of input.txt
+  : you should define etc dimension by refering __create_etc_and_tag() of input.txt
 '''
 ETC_DIM = 5+5+1
 
