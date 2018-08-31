@@ -8,7 +8,7 @@ from input import *
 import sys
 import argparse
 
-def do_train(model, train_data, dev_data, test_data):
+def do_train(model, config, train_data, dev_data, test_data):
     maximum = 0
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     sess = tf.Session(config=session_conf)
@@ -18,6 +18,18 @@ def do_train(model, train_data, dev_data, test_data):
         if config.restore is not None:
             saver.restore(sess, config.restore)
             print('model restored')
+        # summary for loss, accuracy
+        loss_summary = tf.summary.scalar('loss', model.loss)
+        acc_summary = tf.summary.scalar('accuracy', model.accuracy)
+        # train summary
+        train_summary_op = tf.summary.merge([loss_summary, acc_summary])
+        train_summary_dir = os.path.join(config.summary_dir, 'summaries', 'train')
+        train_summary_writer = tf.summary.FileWriter(train_summary_dir, sess.graph)
+        # dev summary
+        dev_summary_op = tf.summary.merge([loss_summary, acc_summary])
+        dev_summary_dir = os.path.join(config.summary_dir, 'summaries', 'dev')
+        dev_summary_writer = tf.summary.FileWriter(dev_summary_dir, sess.graph)
+        # training steps
         for e in range(config.epoch):
             idx = 0
             for ptr in range(0, len(train_data.sentence_word_ids), config.batch_size):
@@ -26,8 +38,9 @@ def do_train(model, train_data, dev_data, test_data):
                            model.input_data_wordchr_ids: train_data.sentence_wordchr_ids[ptr:ptr + config.batch_size],
                            model.input_data_etc: train_data.sentence_etc[ptr:ptr + config.batch_size],
                            model.output_data: train_data.sentence_tag[ptr:ptr + config.batch_size]}
-                step, _, train_loss = sess.run([model.global_step, model.train_op, model.loss], feed_dict=feed_dict)
+                step, train_summaries, _, train_loss = sess.run([model.global_step, train_summary_op, model.train_op, model.loss], feed_dict=feed_dict)
                 print('step: %d, train loss: %s' % (step, train_loss))
+                train_summary_writer.add_summary(train_summaries, step)
                 idx += 1
             if e % 10 == 0:
                 save_path = saver.save(sess, config.checkpoint_dir + '/' + 'model.ckpt')
@@ -36,8 +49,9 @@ def do_train(model, train_data, dev_data, test_data):
                        model.input_data_wordchr_ids: dev_data.sentence_wordchr_ids,
                        model.input_data_etc: dev_data.sentence_etc,
                        model.output_data: dev_data.sentence_tag}
-            step, pred, length, dev_loss = sess.run([model.global_step, model.prediction, model.length, model.loss], feed_dict=feed_dict)
+            step, dev_summaries, pred, length, dev_loss = sess.run([model.global_step, dev_summary_op, model.prediction, model.length, model.loss], feed_dict=feed_dict)
             print('epoch: %d, step: %d, dev loss: %s' % (e, step, dev_loss))
+            dev_summary_writer.add_summary(dev_summaries, step)
             print('dev score:')
             m = Eval.compute_f1(config.class_size, pred, dev_data.sentence_tag, length)
             if m > maximum:
@@ -69,7 +83,7 @@ def train(config):
     model = Model(config)
 
     # Training
-    do_train(model, train_data, dev_data, test_data)
+    do_train(model, config, train_data, dev_data, test_data)
         
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -79,8 +93,9 @@ if __name__ == '__main__':
     parser.add_argument('--word_length', type=int, default=15, help='max word length')
     parser.add_argument('--batch_size', type=int, default=128, help='batch size of training')
     parser.add_argument('--epoch', type=int, default=50, help='number of epochs')
-    parser.add_argument('--checkpoint_dir', type=str, default='./checkpoint', help='path of saved model(ex, ./checkpoint/model.ckpt)')
+    parser.add_argument('--checkpoint_dir', type=str, default='./checkpoint', help='dir path to save model(ex, ./checkpoint)')
     parser.add_argument('--restore', type=str, default=None, help='path to saved model(ex, ./checkpoint/model.ckpt)')
+    parser.add_argument('--summary_dir', type=str, default='./runs', help='path to save summary(ex, ./runs)')
 
     args = parser.parse_args()
     config = Config(args, is_train=1)

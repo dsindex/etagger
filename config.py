@@ -29,4 +29,5 @@ class Config:
             self.epoch = args.epoch
             self.batch_size = args.batch_size
             self.checkpoint_dir = args.checkpoint_dir
+            self.summary_dir = args.summary_dir
         self.is_train = is_train

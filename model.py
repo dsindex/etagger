@@ -8,18 +8,19 @@ class Model:
     RNN model for sequence tagging
     '''
 
-    __rnn_size = 256           # size of RNN hidden unit
-    __num_layers = 2           # number of RNN layers
-    __keep_prob = 0.5          # keep probability for dropout
-    __learning_rate = 0.003    # learning rate
-    __filter_sizes = [3, 4, 5] # filter sizes
-    __num_filters = 32         # number of filters
+    __rnn_size = 256               # size of RNN hidden unit
+    __num_layers = 2               # number of RNN layers
+    __keep_prob = 0.5              # keep probability for dropout
+    __learning_rate = 0.003        # learning rate
+    __filter_sizes = [3, 4, 5]     # filter sizes
+    __num_filters = 32             # number of filters
+    #__chr_embedding_type = 'max'   # 'max' | 'conv', default is max
+    __chr_embedding_type = 'conv'   # 'max' | 'conv', default is max
 
     def __init__(self, config):
         '''
         Initialize RNN model
         '''
-        self.set_cuda_visible_devices() 
         embvec = config.embvec
         sentence_length = config.sentence_length
         word_length = config.word_length
@@ -28,6 +29,7 @@ class Model:
         etc_dim = config.etc_dim
         class_size = config.class_size
         is_train = config.is_train
+        self.set_cuda_visible_devices(is_train)
 
         # Input layer
 
@@ -42,74 +44,69 @@ class Model:
 
         # character embedding features
         self.input_data_wordchr_ids = tf.placeholder(tf.int32, shape=[None, sentence_length, word_length], name='input_data_wordchr_ids')
-        with tf.device('/cpu:0'), tf.name_scope('wordchr-embeddings'):
-            chr_embeddings = tf.Variable(tf.random_uniform([cvocab_size, chr_dim], -1.0, 1.0), name='chr_embeddings')
-            # embedding_lookup([None, sentence_length, word_length]) -> [None, sentence_length, word_length, chr_dim]
-            self.wordchr_embeddings = tf.nn.embedding_lookup(chr_embeddings, self.input_data_wordchr_ids, name='wordchr_embeddings')
-            # reshape([None, sentence_length, word_length, chr_dim]) -> [None, word_length, chr_dim]
-            self.wordchr_embeddings = tf.reshape(self.wordchr_embeddings, [-1, word_length, chr_dim])
-            # expaned_dims([None, word_length, chr_dim]) -> [None, word_length, chr_dim, 1]
-            self.wordchr_embeddings = tf.expand_dims(self.wordchr_embeddings, -1)
-        pooled_outputs = []
-        for i, filter_size in enumerate(self.__filter_sizes):
-            with tf.name_scope('conv-maxpool-%s' % filter_size):
-                # convolution layer
-                filter_shape = [filter_size, chr_dim, 1, self.__num_filters]
-                W = tf.Variable(tf.truncated_normal(filter_shape, stddev=0.1), name='W')
-                conv = tf.nn.conv2d(
-                    self.wordchr_embeddings,
-                    W,
-                    strides=[1, 1, 1, 1],
-                    padding='VALID',
-                    name='conv')
-                # apply nonlinearity
-                b = tf.Variable(tf.constant(0.1, shape=[self.__num_filters]), name='b')
-                h = tf.nn.relu(tf.nn.bias_add(conv, b), name='relu')
-                # max-pooling over the outputs
-                pooled = tf.nn.max_pool(
-                    h,
-                    ksize=[1, word_length - filter_size + 1, 1, 1],
-                    strides=[1, 1, 1, 1],
-                    padding='VALID',
-                    name='pool')
-                pooled_outputs.append(pooled) 
+        with tf.name_scope('wordchr-embeddings'):
+            with tf.device('/cpu:0'):
+                chr_embeddings = tf.Variable(tf.random_uniform([cvocab_size, chr_dim], -1.0, 1.0), name='chr_embeddings')
+                # embedding_lookup([None, sentence_length, word_length]) -> [None, sentence_length, word_length, chr_dim]
+                self.wordchr_embeddings = tf.nn.embedding_lookup(chr_embeddings, self.input_data_wordchr_ids, name='wordchr_embeddings')
+                # reshape([None, sentence_length, word_length, chr_dim]) -> [None, word_length, chr_dim]
+                self.wordchr_embeddings = tf.reshape(self.wordchr_embeddings, [-1, word_length, chr_dim])
+                if self.__chr_embedding_type == 'conv':
+                    # expaned_dims([None, word_length, chr_dim]) -> [None, word_length, chr_dim, 1]
+                    self.wordchr_embeddings = tf.expand_dims(self.wordchr_embeddings, -1)
+            if self.__chr_embedding_type == 'conv':
+                pooled_outputs = []
+                for i, filter_size in enumerate(self.__filter_sizes):
+                    with tf.name_scope('conv-maxpool-%s' % filter_size):
+                        # convolution layer
+                        filter_shape = [filter_size, chr_dim, 1, self.__num_filters]
+                        W = tf.Variable(tf.truncated_normal(filter_shape, stddev=0.1), name='W')
+                        conv = tf.nn.conv2d(
+                            self.wordchr_embeddings,
+                            W,
+                            strides=[1, 1, 1, 1],
+                            padding='VALID',
+                            name='conv')
+                        # apply nonlinearity
+                        b = tf.Variable(tf.constant(0.1, shape=[self.__num_filters]), name='b')
+                        h = tf.nn.relu(tf.nn.bias_add(conv, b), name='relu')
+                        # max-pooling over the outputs
+                        pooled = tf.nn.max_pool(
+                            h,
+                            ksize=[1, word_length - filter_size + 1, 1, 1],
+                            strides=[1, 1, 1, 1],
+                            padding='VALID',
+                            name='pool')
+                        pooled_outputs.append(pooled)
+                        ''' for filter size 3 
+                        conv Tensor("conv-maxpool-3/conv:0", shape=(?, 13, 1, 32), dtype=float32)
+                        pooled Tensor("conv-maxpool-3/pool:0", shape=(?, 1, 1, 32), dtype=float32)
+                        '''
+                # combine all the pooled features
+                num_filters_total = self.__num_filters * len(self.__filter_sizes)
+                self.h_pool = tf.concat(pooled_outputs, axis=-1)
+                self.h_pool_flat = tf.reshape(self.h_pool, [-1, num_filters_total])
                 '''
-                wordchr_embeddings Tensor("wordchr_embeddings/ExpandDims:0", shape=(?, 15, 96, 1), dtype=float32, device=/device:CPU:0)
-                * filter_size : 3, filters : 32
-                conv Tensor("conv-maxpool-3/conv:0", shape=(?, 13, 1, 32), dtype=float32)
-                h Tensor("conv-maxpool-3/relu:0", shape=(?, 13, 1, 32), dtype=float32)
-                pooled Tensor("conv-maxpool-3/pool:0", shape=(?, 1, 1, 32), dtype=float32)
-                * filter_size : 4, filters : 32
-                conv Tensor("conv-maxpool-4/conv:0", shape=(?, 12, 1, 32), dtype=float32)
-                h Tensor("conv-maxpool-4/relu:0", shape=(?, 12, 1, 32), dtype=float32)
-                pooled Tensor("conv-maxpool-4/pool:0", shape=(?, 1, 1, 32), dtype=float32)
-                * filter_size : 5, filters : 32
-                conv Tensor("conv-maxpool-5/conv:0", shape=(?, 11, 1, 32), dtype=float32)
-                h Tensor("conv-maxpool-5/relu:0", shape=(?, 11, 1, 32), dtype=float32)
-                pooled Tensor("conv-maxpool-5/pool:0", shape=(?, 1, 1, 32), dtype=float32)
+                h_pool Tensor("concat:0", shape=(?, 1, 1, 96), dtype=float32)
+                h_pool_flat Tensor("Reshape:0", shape=(?, 96), dtype=float32)
                 '''
-        with tf.name_scope('conv-combine'):
-            # combine all the pooled features
-            num_filters_total = self.__num_filters * len(self.__filter_sizes)
-            self.h_pool = tf.concat(pooled_outputs, axis=-1)
-            self.h_pool_flat = tf.reshape(self.h_pool, [-1, num_filters_total])
-            if is_train == 'train': keep_prob = self.__keep_prob
-            else: keep_prob = 1.0 # do not apply dropout for inference
-            self.h_drop = tf.nn.dropout(self.h_pool_flat, keep_prob)
-            # reshape([-1, num_filters_total]) -> [None, sentence_length, num_filters_total]
-            self.wordchr_embeddings_conv = tf.reshape(self.h_drop, [-1, sentence_length, num_filters_total])
-            '''
-            h_pool Tensor("concat:0", shape=(?, 1, 1, 96), dtype=float32)
-            h_pool_flat Tensor("Reshape:0", shape=(?, 96), dtype=float32)
-            wordchr_embeddings_conv Tensor("Reshape_1:0", shape=(?, 125, 96), dtype=float32)
-            '''
+                if is_train: keep_prob = self.__keep_prob
+                else: keep_prob = 1.0 # do not apply dropout for inference
+                self.h_drop = tf.nn.dropout(self.h_pool_flat, keep_prob)
+                # reshape([-1, num_filters_total]) -> [None, sentence_length, num_filters_total]
+                self.wordchr_embeddings = tf.reshape(self.h_drop, [-1, sentence_length, num_filters_total])
+            else: # simple character embedding by reduce_max
+                # reduce_max([None, word_length, chr_dim]) -> [None, chr_dim]
+                self.wordchr_embeddings = tf.reduce_max(self.wordchr_embeddings, reduction_indices=1)
+            # reshape([None, chr_dim]) -> [None, sentence_length, chr_dim]
+            self.wordchr_embeddings = tf.reshape(self.wordchr_embeddings, [-1, sentence_length, chr_dim])
 
         with tf.name_scope('etc'):
             # etc features 
             self.input_data_etc = tf.placeholder(tf.float32, shape=[None, sentence_length, etc_dim], name='input_data_etc')
 
-        # concat([None, sentence_length, wrd_dim], [None, sentence_length, etc_dim], [None, sentence_length, num_filters_total]) -> [None, sentence_length, unit_dim]
-        self.input_data = tf.concat([self.word_embeddings, self.input_data_etc, self.wordchr_embeddings_conv], axis=-1, name='input_data')
+        # concat([None, sentence_length, wrd_dim], [None, sentence_length, etc_dim], [None, sentence_length, chr_dim]) -> [None, sentence_length, unit_dim]
+        self.input_data = tf.concat([self.word_embeddings, self.input_data_etc, self.wordchr_embeddings], axis=-1, name='input_data')
 
         # Answer
 
@@ -118,7 +115,7 @@ class Model:
         # RNN layer
 
         with tf.name_scope('rnn'):
-            if is_train == 'train': keep_prob = self.__keep_prob
+            if is_train: keep_prob = self.__keep_prob
             else: keep_prob = 1.0 # do not apply dropout for inference 
             fw_cell = tf.contrib.rnn.MultiRNNCell([self.create_cell(self.__rnn_size, keep_prob=keep_prob) for _ in range(self.__num_layers)], state_is_tuple=True)
             bw_cell = tf.contrib.rnn.MultiRNNCell([self.create_cell(self.__rnn_size, keep_prob=keep_prob) for _ in range(self.__num_layers)], state_is_tuple=True)
@@ -139,10 +136,16 @@ class Model:
             # reshape([None, class_size]) -> [None, sentence_length, class_size]
             self.prediction = tf.reshape(prediction, [-1, sentence_length, class_size])
 
-        # Loss and Optimization
+        # Loss, Accuracy, Optimization
 
         with tf.name_scope('loss'):
             self.loss = self.compute_cost()
+
+        with tf.name_scope('accuracy'):
+            correct_prediction = tf.equal(tf.argmax(self.prediction, 2), tf.argmax(self.output_data, 2))
+            self.accuracy = tf.reduce_mean(tf.cast(correct_prediction, 'float'), name='accuracy')
+
+        with tf.name_scope('optimization'):
             self.global_step = tf.Variable(0, name='global_step', trainable=False)
             optimizer = tf.train.AdamOptimizer(self.__learning_rate)
             tvars = tf.trainable_variables()
@@ -199,8 +202,9 @@ class Model:
         return tf.Variable(weight, name='projection_weight'), tf.Variable(bias, name='projection_bias')
 
     @staticmethod
-    def set_cuda_visible_devices():
+    def set_cuda_visible_devices(is_train):
         import os
         os.environ["CUDA_VISIBLE_DEVICES"]="1"
-        from tensorflow.python.client import device_lib
-        print(device_lib.list_local_devices())
+        if is_train:
+            from tensorflow.python.client import device_lib
+            print(device_lib.list_local_devices())
