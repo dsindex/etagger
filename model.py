@@ -98,8 +98,8 @@ class Model:
             else: # simple character embedding by reduce_max
                 # reduce_max([None, word_length, chr_dim]) -> [None, chr_dim]
                 self.wordchr_embeddings = tf.reduce_max(self.wordchr_embeddings, reduction_indices=1)
-            # reshape([None, chr_dim]) -> [None, sentence_length, chr_dim]
-            self.wordchr_embeddings = tf.reshape(self.wordchr_embeddings, [-1, sentence_length, chr_dim])
+                # reshape([None, chr_dim]) -> [None, sentence_length, chr_dim]
+                self.wordchr_embeddings = tf.reshape(self.wordchr_embeddings, [-1, sentence_length, chr_dim])
 
         with tf.name_scope('etc'):
             # etc features 
