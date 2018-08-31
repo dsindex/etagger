@@ -76,6 +76,7 @@ test, max_sentence_length = 124
 - train
 ```
 $ python train.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125
+$ tensorboard --logdir runs/summaries/
 ```
 
 - inference(bulk)
