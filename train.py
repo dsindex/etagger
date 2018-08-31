@@ -5,6 +5,7 @@ from config import Config
 from model import Model
 from eval  import Eval
 from input import *
+import os
 import sys
 import argparse
 
