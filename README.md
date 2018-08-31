@@ -26,6 +26,7 @@ etagger
     - apply character-level embedding
       - using convolution [done]
       - using reduce_max only [done]
+      ![graph-1](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1.png)
     - apply gazetter features
     - apply self-attention
     - apply ELMO embedding
