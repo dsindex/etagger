@@ -11,10 +11,9 @@ class Model:
     __rnn_size = 256               # size of RNN hidden unit
     __num_layers = 2               # number of RNN layers
     __keep_prob = 0.5              # keep probability for dropout
-    __learning_rate = 0.003        # learning rate
+    __learning_rate = 0.001        # learning rate
     __filter_sizes = [3, 4, 5]     # filter sizes
     __num_filters = 32             # number of filters
-    #__chr_embedding_type = 'max'   # 'max' | 'conv', default is max
     __chr_embedding_type = 'conv'   # 'max' | 'conv', default is max
 
     def __init__(self, config):
