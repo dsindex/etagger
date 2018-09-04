@@ -39,8 +39,8 @@ def do_train(model, config, train_data, dev_data, test_data):
                            model.input_data_wordchr_ids: train_data.sentence_wordchr_ids[ptr:ptr + config.batch_size],
                            model.input_data_etc: train_data.sentence_etc[ptr:ptr + config.batch_size],
                            model.output_data: train_data.sentence_tag[ptr:ptr + config.batch_size]}
-                step, train_summaries, _, train_loss = sess.run([model.global_step, train_summary_op, model.train_op, model.loss], feed_dict=feed_dict)
-                print('step: %d, train loss: %s' % (step, train_loss))
+                step, train_summaries, _, train_loss, train_accuracy = sess.run([model.global_step, train_summary_op, model.train_op, model.loss, model.accuracy], feed_dict=feed_dict)
+                print('step: %d, train loss: %s, train accuracy: %s' % (step, train_loss, train_accuracy))
                 train_summary_writer.add_summary(train_summaries, step)
                 idx += 1
             if e % 10 == 0:
@@ -50,10 +50,10 @@ def do_train(model, config, train_data, dev_data, test_data):
                        model.input_data_wordchr_ids: dev_data.sentence_wordchr_ids,
                        model.input_data_etc: dev_data.sentence_etc,
                        model.output_data: dev_data.sentence_tag}
-            step, dev_summaries, pred, length, dev_loss = sess.run([model.global_step, dev_summary_op, model.prediction, model.length, model.loss], feed_dict=feed_dict)
-            print('epoch: %d, step: %d, dev loss: %s' % (e, step, dev_loss))
+            step, dev_summaries, pred, length, dev_loss, dev_accuracy = sess.run([model.global_step, dev_summary_op, model.prediction, model.length, model.loss, model.accuracy], feed_dict=feed_dict)
+            print('epoch: %d, step: %d, dev loss: %s, dev accuracy: %s' % (e, step, dev_loss, dev_accuracy))
             dev_summary_writer.add_summary(dev_summaries, step)
-            print('dev score:')
+            print('dev precision, recall, f1:')
             m = Eval.compute_f1(config.class_size, pred, dev_data.sentence_tag, length)
             if m > maximum:
                 maximum = m
@@ -63,8 +63,9 @@ def do_train(model, config, train_data, dev_data, test_data):
                            model.input_data_wordchr_ids: test_data.sentence_wordchr_ids,
                            model.input_data_etc: test_data.sentence_etc,
                            model.output_data: test_data.sentence_tag}
-                pred, length, test_loss = sess.run([model.prediction, model.length, model.loss], feed_dict=feed_dict)
-                print('test score:')
+                step, pred, length, test_loss, test_accuracy = sess.run([model.global_step, model.prediction, model.length, model.loss, model.accuracy], feed_dict=feed_dict)
+                print('epoch: %d, step: %d, test loss: %s, test accuracy: %s' % (e, step, test_loss, test_accuracy))
+                print('test precision, recall, f1:')
                 Eval.compute_f1(config.class_size, pred, test_data.sentence_tag, length)
 
 def train(config):

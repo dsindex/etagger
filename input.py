@@ -94,10 +94,11 @@ class Input:
             tokens = line.split()
             assert (len(tokens) == 4)
             sentence_length += 1
+            word = tokens[0].lower()
             temp = self.pos_vec(tokens[1])                                # adding pos one-hot(5)
             temp = np.append(temp, self.chunk_vec(tokens[2]))             # adding chunk one-hot(5)
             temp = np.append(temp, self.capital_vec(tokens[0]))           # adding capital one-hot(1)
-            # TODO gazetteer features
+            #temp = np.append(temp, self.config.embvec.get_gaz(word))      # adding gazetteer feature
             etc.append(temp)
             tag.append(self.tag_vec(tokens[3], self.config.class_size))   # tag one-hot(9)
             if sentence_length == self.max_sentence_length: break
@@ -107,6 +108,43 @@ class Input:
             etc.append(temp)
             tag.append(np.array([0] * self.config.class_size))
         return etc, tag
+
+    def pos_vec(self, t):
+        # language specific features
+        one_hot = np.zeros(5)
+        if t == 'NN' or t == 'NNS':
+            one_hot[0] = 1
+        elif t == 'FW':
+            one_hot[1] = 1
+        elif t == 'NNP' or t == 'NNPS':
+            one_hot[2] = 1
+        elif 'VB' in t:
+            one_hot[3] = 1
+        else:
+            one_hot[4] = 1
+        return one_hot
+
+    def chunk_vec(self, t):
+        # language specific features
+        one_hot = np.zeros(5)
+        if 'NP' in t:
+            one_hot[0] = 1
+        elif 'VP' in t:
+            one_hot[1] = 1
+        elif 'PP' in t:
+            one_hot[2] = 1
+        elif t == 'O':
+            one_hot[3] = 1
+        else:
+            one_hot[4] = 1
+        return one_hot
+
+    def capital_vec(self, word):
+        # language specific features
+        one_hot = np.zeros(1)
+        if ord('A') <= ord(word[0]) <= ord('Z'):
+            one_hot[0] = 1
+        return one_hot
 
     def tag_vec(self, tag, class_size):
         one_hot = np.zeros(class_size)
@@ -140,45 +178,4 @@ class Input:
             else:
                 temp_len += 1
         return max_length
-
-    @staticmethod
-    def pos_vec(t):
-        # language specific features
-        one_hot = np.zeros(5)
-        if t == 'NN' or t == 'NNS':
-            one_hot[0] = 1
-        elif t == 'FW':
-            one_hot[1] = 1
-        elif t == 'NNP' or t == 'NNPS':
-            one_hot[2] = 1
-        elif 'VB' in t:
-            one_hot[3] = 1
-        else:
-            one_hot[4] = 1
-        return one_hot
-
-    @staticmethod
-    def chunk_vec(t):
-        # language specific features
-        one_hot = np.zeros(5)
-        if 'NP' in t:
-            one_hot[0] = 1
-        elif 'VP' in t:
-            one_hot[1] = 1
-        elif 'PP' in t:
-            one_hot[2] = 1
-        elif t == 'O':
-            one_hot[3] = 1
-        else:
-            one_hot[4] = 1
-        return one_hot
-
-    @staticmethod
-    def capital_vec(word):
-        # language specific features
-        one_hot = np.zeros(1)
-        if ord('A') <= ord(word[0]) <= ord('Z'):
-            one_hot[0] = 1
-        return one_hot
-
 

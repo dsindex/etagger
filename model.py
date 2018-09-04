@@ -14,7 +14,7 @@ class Model:
     __learning_rate = 0.001        # learning rate
     __filter_sizes = [3, 4, 5]     # filter sizes
     __num_filters = 32             # number of filters
-    __chr_embedding_type = 'conv'   # 'max' | 'conv', default is max
+    __chr_embedding_type = 'conv'  # 'max' | 'conv', default is max
 
     def __init__(self, config):
         '''
@@ -118,7 +118,7 @@ class Model:
             else: keep_prob = 1.0 # do not apply dropout for inference 
             fw_cell = tf.contrib.rnn.MultiRNNCell([self.create_cell(self.__rnn_size, keep_prob=keep_prob) for _ in range(self.__num_layers)], state_is_tuple=True)
             bw_cell = tf.contrib.rnn.MultiRNNCell([self.create_cell(self.__rnn_size, keep_prob=keep_prob) for _ in range(self.__num_layers)], state_is_tuple=True)
-            self.length = self.compute_length(self.input_data_etc) # for efficiency
+            self.length = self.compute_length(self.output_data)
             # transpose([None, sentence_length, unit_dim]) -> unstack([sentence_length, None, unit_dim]) -> list of [None, unit_dim]
             output, _, _ = tf.contrib.rnn.static_bidirectional_rnn(fw_cell, bw_cell,
                                                    tf.unstack(tf.transpose(self.input_data, perm=[1, 0, 2])),
@@ -141,8 +141,13 @@ class Model:
             self.loss = self.compute_cost()
 
         with tf.name_scope('accuracy'):
-            correct_prediction = tf.equal(tf.argmax(self.prediction, 2), tf.argmax(self.output_data, 2))
-            self.accuracy = tf.reduce_mean(tf.cast(correct_prediction, 'float'), name='accuracy')
+            # argmax([None, sentence_length, class_size]) -> equal([None, sentence_length])
+            # cast([None, sentence_length]) -> [None, sentence_length]
+            correct_prediction = tf.cast(tf.equal(tf.argmax(self.prediction, 2), tf.argmax(self.output_data, 2)), 'float')
+            # ignore padding by masking
+            mask = tf.sign(tf.reduce_max(tf.abs(self.output_data), reduction_indices=2))
+            correct_prediction *= mask
+            self.accuracy = tf.reduce_mean(correct_prediction, name='accuracy')
 
         with tf.name_scope('optimization'):
             self.global_step = tf.Variable(0, name='global_step', trainable=False)
@@ -159,6 +164,7 @@ class Model:
         # reduce_sum([None, sentence_length, class_size]) -> [None, sentence_length] = [ [0.8, 0.2, ..., 0], [0, 0.7, 0.3, ..., 0], ... ]
         cross_entropy = self.output_data * tf.log(self.prediction)
         cross_entropy = -tf.reduce_sum(cross_entropy, reduction_indices=2)
+        # ignore padding by masking
         # reduce_max(abs([None, sentence_length, class_size])) -> sign([None, sentence_length]) = [ [1, 0, 0, ..., 0], [0, 1, 1, ..., 0], ... ]
         # [None, sentence_length] * [None, sentence_length] -> [None, sentence_length] (masked)
         mask = tf.sign(tf.reduce_max(tf.abs(self.output_data), reduction_indices=2))
@@ -181,13 +187,13 @@ class Model:
         return drop
 
     @staticmethod
-    def compute_length(input_data):
+    def compute_length(output_data):
         '''
         Compute each sentence length
         '''
         # reduce_max(abs([None, sentence_length, dim])) -> sign([None, sentence_length]) = [ [1, 1, 1, ..., 0], [1, 1, 1, ..., 0], ... ] 
         # reduce_sum([None, sentence_length]) -> [None] = [11, 16, 13, ..., 123] (batch_size)
-        words_used_in_sent = tf.sign(tf.reduce_max(tf.abs(input_data), reduction_indices=2))
+        words_used_in_sent = tf.sign(tf.reduce_max(tf.abs(output_data), reduction_indices=2))
         length = tf.cast(tf.reduce_sum(words_used_in_sent, reduction_indices=1), tf.int32)
         return length
 

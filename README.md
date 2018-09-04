@@ -27,7 +27,7 @@ etagger
       - using convolution [done]
       - using reduce_max only [done]
       ![graph-1](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1.png)
-    - apply gazetter features
+    - apply gazetter features [doing]
     - apply self-attention
     - apply ELMO embedding
     - serve api
@@ -136,18 +136,16 @@ in IN O O O
 
 - analysis
 ```
-* weak points : B-ORG, I-ORG, B-MISC, I-MISC
+* weak entity types : B-ORG, I-ORG, B-MISC, I-MISC
 
 * chr_embedding : max
-...
-total fscore:
 0.892409321671
 
 * chr embedding : conv
-...
-total fscore:
 0.895172667607
-...
-total fscore:
 0.893800406329
+0.892967114177
+
+* gazetteer feature
+0.855807086614 why?
 ```

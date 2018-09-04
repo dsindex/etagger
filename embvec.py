@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 import pickle as pkl
 from random import random
@@ -26,6 +27,7 @@ class EmbVec:
         self.itag_vocab = {}  # inverse tag vocab (id -> tag)
         self.tag_vocab[self.oot_tag] = self.oot_tid
         self.itag_vocab[0] = self.oot_tag
+        self.gaz_vocab = {}   # gazetteer vocab
 
         invalid = 0
         # 0 id for padding
@@ -67,7 +69,20 @@ class EmbVec:
                 self.tag_vocab[tag] = tid
                 self.itag_vocab[tid] = tag
                 tid += 1
-            # TODO build gazetteer
+        # build gazetteer features
+        for line in open(args.train_path):
+            tokens = line.split()
+            if len(tokens) != 4: continue
+            word = tokens[0].lower()
+            tag  = tokens[3]
+            if word in self.gaz_vocab:
+                gaz = self.gaz_vocab[word]
+                tid = self.tag_vocab[tag]
+                gaz[tid] = 1
+            else:
+                self.gaz_vocab[word] = np.zeros(len(self.tag_vocab))
+                tid = self.tag_vocab[tag]
+                self.gaz_vocab[word][tid] = 1
         
     def get_wid(self, word):
         word = word.lower()
@@ -90,6 +105,12 @@ class EmbVec:
         if tid in self.itag_vocab:
             return self.itag_vocab[tid]
         return self.oot_tag
+
+    def get_gaz(self, word):
+        word = word.lower()
+        if word in self.gaz_vocab:
+            return self.gaz_vocab[word]
+        return np.zeros(len(self.tag_vocab))
 
     def __getitem__(self, wid):
         try:

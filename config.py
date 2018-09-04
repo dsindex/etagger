@@ -6,6 +6,7 @@ import pickle as pkl
 '''
 etc dimension
   : you should define etc dimension by refering __create_etc_and_tag() of input.txt
+  : pos one-hot(5) + chunk one-hot(5) + capital one-hot(1) + gazetteer feature
 '''
 ETC_DIM = 5+5+1
 
@@ -19,6 +20,8 @@ class Config:
         self.emb_path = args.emb_path
         self.embvec = pkl.load(open(self.emb_path, 'rb'))
         self.wrd_dim = args.wrd_dim
+        # basic features + gazetteer feature
+        #self.etc_dim = ETC_DIM + len(self.embvec.tag_vocab)
         self.etc_dim = ETC_DIM
         self.chr_dim = CHR_DIM
         self.class_size = len(self.embvec.tag_vocab)
