@@ -8,7 +8,7 @@ class Model:
     RNN model for sequence tagging
     '''
 
-    __rnn_size = 256               # size of RNN hidden unit
+    __rnn_size = 512               # size of RNN hidden unit
     __num_layers = 2               # number of RNN layers
     __keep_prob = 0.5              # keep probability for dropout
     __learning_rate = 0.001        # learning rate
@@ -141,13 +141,7 @@ class Model:
             self.loss = self.compute_cost()
 
         with tf.name_scope('accuracy'):
-            # argmax([None, sentence_length, class_size]) -> equal([None, sentence_length])
-            # cast([None, sentence_length]) -> [None, sentence_length]
-            correct_prediction = tf.cast(tf.equal(tf.argmax(self.prediction, 2), tf.argmax(self.output_data, 2)), 'float')
-            # ignore padding by masking
-            mask = tf.sign(tf.reduce_max(tf.abs(self.output_data), reduction_indices=2))
-            correct_prediction *= mask
-            self.accuracy = tf.reduce_mean(correct_prediction, name='accuracy')
+            self.accuracy = self.compute_accuracy()
 
         with tf.name_scope('optimization'):
             self.global_step = tf.Variable(0, name='global_step', trainable=False)
@@ -165,7 +159,7 @@ class Model:
         cross_entropy = self.output_data * tf.log(self.prediction)
         cross_entropy = -tf.reduce_sum(cross_entropy, reduction_indices=2)
         # ignore padding by masking
-        # reduce_max(abs([None, sentence_length, class_size])) -> sign([None, sentence_length]) = [ [1, 0, 0, ..., 0], [0, 1, 1, ..., 0], ... ]
+        # reduce_max(abs([None, sentence_length, class_size])) -> sign([None, sentence_length]) = [ [1, 1, 1,..., 0,..., 0], [1, 1, 1,...,0,..., 0], ... ]
         # [None, sentence_length] * [None, sentence_length] -> [None, sentence_length] (masked)
         mask = tf.sign(tf.reduce_max(tf.abs(self.output_data), reduction_indices=2))
         cross_entropy *= mask
@@ -176,6 +170,16 @@ class Model:
         cross_entropy = tf.reduce_sum(cross_entropy, reduction_indices=1)
         cross_entropy /= tf.cast(self.length, tf.float32)
         return tf.reduce_mean(cross_entropy)
+
+    def compute_accuracy(self):
+        # argmax([None, sentence_length, class_size]) -> equal([None, sentence_length]) -> cast([None, sentence_length]) -> [None, sentence_length]
+        correct_prediction = tf.cast(tf.equal(tf.argmax(self.prediction, 2), tf.argmax(self.output_data, 2)), 'float')
+        # ignore padding by masking
+        mask = tf.sign(tf.reduce_max(tf.abs(self.output_data), reduction_indices=2))
+        correct_prediction *= mask
+        correct_prediction = tf.reduce_sum(correct_prediction, reduction_indices=1)
+        correct_prediction /= tf.cast(self.length, tf.float32)
+        return tf.reduce_mean(correct_prediction)
 
     @staticmethod
     def create_cell(rnn_size, keep_prob):
