@@ -75,6 +75,12 @@ class EmbVec:
             if len(tokens) != 4: continue
             word = tokens[0].lower()
             tag  = tokens[3]
+            # 1|0 setting
+            if tag == self.oot_tag: continue
+            if word not in self.gaz_vocab:
+                self.gaz_vocab[word] = np.zeros(1)
+                self.gaz_vocab[word][0] = 1
+            '''
             if word in self.gaz_vocab:
                 gaz = self.gaz_vocab[word]
                 tid = self.tag_vocab[tag]
@@ -83,6 +89,7 @@ class EmbVec:
                 self.gaz_vocab[word] = np.zeros(len(self.tag_vocab))
                 tid = self.tag_vocab[tag]
                 self.gaz_vocab[word][tid] = 1
+            '''
         
     def get_wid(self, word):
         word = word.lower()
@@ -110,7 +117,11 @@ class EmbVec:
         word = word.lower()
         if word in self.gaz_vocab:
             return self.gaz_vocab[word]
+        # 1|0 setting
+        return np.zeros(1)
+        '''
         return np.zeros(len(self.tag_vocab))
+        '''
 
     def __getitem__(self, wid):
         try:

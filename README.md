@@ -139,13 +139,31 @@ in IN O O O
 * weak entity types : B-ORG, I-ORG, B-MISC, I-MISC
 
 * chr_embedding : max
+rnn_size : 256, dropout_rate : 0.5, chr_embedding : max
 0.892409321671
 
 * chr embedding : conv
-0.895172667607
+rnn_size : 256, dropout_rate : 0.5, chr_embedding : conv
+0.895172667607 <-- best
 0.893800406329
 0.892967114177
+rnn_size : 512, dropout_rate : 0.15, chr_embedding : conv
+0.878538026089
+rnn_size : 128, dropout_rate : 0.3, chr_embedding : conv
+0.886479827533
 
 * gazetteer feature
-0.855807086614 why?
+rnn_size : 256, dropout_rate : 0.5, chr_embedding : conv, gazetteer : 1/0s vector
+0.855807086614
+rnn_size : 512, dropout_rate : 0.5, chr_embedding : conv, gazetteer : 1/0s vector
+0.873537604457
+rnn_size : 512, dropout_rate : 0.3, chr_embedding : conv, gazetteer : count vector
+0.849502098077
+rnn_size : 128, dropout_rate : 0.3, chr_embedding : conv, gazetteer : 1/0s vector
+0.856015779093
+
+why?
+
+rnn_size : 256, dropout_rate : 0.5, chr_embedding : conv, gazetteer : 0|1
+
 ```
