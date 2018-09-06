@@ -162,8 +162,8 @@ rnn_size : 512, dropout_rate : 0.3, chr_embedding : conv, gazetteer : count vect
 rnn_size : 128, dropout_rate : 0.3, chr_embedding : conv, gazetteer : 1/0s vector
 0.856015779093
 
-why?
-
+even if we use '0|1' indicating gazetteer or not, it is worse than basic models. why?
+the loss is even increasing along steps.
 rnn_size : 256, dropout_rate : 0.5, chr_embedding : conv, gazetteer : 0|1
-
+0.877048661647
 ```
