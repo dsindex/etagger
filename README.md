@@ -139,35 +139,29 @@ in IN O O O
 * weak entity types : B-ORG, I-ORG, B-MISC, I-MISC
 
 * chr_embedding : max
-rnn_size : 256, dropout_rate : 0.5, chr_embedding : max
+rnn_size : 256, keep_prob : 0.5, chr_embedding : max
 0.892409321671
 
 * chr embedding : conv
-rnn_size : 256, dropout_rate : 0.5, chr_embedding : conv
+rnn_size : 256, keep_prob : 0.5, chr_embedding : conv
 0.895172667607 <-- best
 0.893800406329
 0.892967114177
 0.893781430148
-rnn_size : 512, dropout_rate : 0.15, chr_embedding : conv
-0.878538026089
-rnn_size : 128, dropout_rate : 0.3, chr_embedding : conv
-0.886479827533
+rnn_size : 256, cnn_keep_prob : 0.7, rnn_keep_prob : 0.8, chr_embedding : conv
 
 * gazetteer feature
-rnn_size : 256, dropout_rate : 0.5, chr_embedding : conv, gazetteer : 1/0s vector
+rnn_size : 256, keep_prob : 0.5, chr_embedding : conv, gazetteer : 1/0s vector
 0.855807086614
-rnn_size : 512, dropout_rate : 0.5, chr_embedding : conv, gazetteer : 1/0s vector
+rnn_size : 512, keep_prob : 0.5, chr_embedding : conv, gazetteer : 1/0s vector
 0.873537604457
-rnn_size : 512, dropout_rate : 0.3, chr_embedding : conv, gazetteer : count vector
-0.849502098077
-rnn_size : 128, dropout_rate : 0.3, chr_embedding : conv, gazetteer : 1/0s vector
-0.856015779093
-
-even if we use '0|1' indicating gazetteer or not, it is worse than basic models. why?
-the loss is even increasing along steps.
-rnn_size : 256, dropout_rate : 0.5, chr_embedding : conv, gazetteer : 0|1
+rnn_size : 256, keep_prob : 0.5, chr_embedding : conv, gazetteer : 0|1
 0.877048661647
 
-rnn_size : 256, cnn_dropout_rate : 0.3, rnn_dropout_rate : 0.4, chr_embedding : conv, gazetteer : 0|1
+if we use '0|1' indicating gazetteer, it is worse than basic models.
+the loss is even increasing along steps. why?
 
+try to adjust keep_probs.
+rnn_size : 256, cnn_keep_prob : 0.8, rnn_keep_prob : 0.8, chr_embedding : conv, gazetteer : 0|1
+0.879918632001
 ```

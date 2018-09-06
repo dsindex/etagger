@@ -10,8 +10,8 @@ class Model:
 
     __rnn_size = 256               # size of RNN hidden unit
     __num_layers = 2               # number of RNN layers
-    __cnn_keep_prob = 0.3          # keep probability for dropout(cnn)
-    __rnn_keep_prob = 0.4          # keep probability for dropout(rnn)
+    __cnn_keep_prob = 0.7          # keep probability for dropout(cnn)
+    __rnn_keep_prob = 0.8          # keep probability for dropout(rnn)
     __learning_rate = 0.001        # learning rate
     __filter_sizes = [3, 4, 5]     # filter sizes
     __num_filters = 32             # number of filters
