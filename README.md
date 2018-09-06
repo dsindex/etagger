@@ -164,4 +164,8 @@ the loss is even increasing along steps. why?
 try to adjust keep_probs.
 rnn_size : 256, cnn_keep_prob : 0.8, rnn_keep_prob : 0.8, chr_embedding : conv, gazetteer : 0|1
 0.879918632001
+
+try to filter digit, ascii words from gazetteer vocab.
+rnn_size : 256, cnn_keep_prob : 0.8, rnn_keep_prob : 0.8, chr_embedding : conv, gazetteer : 0|1
+
 ```

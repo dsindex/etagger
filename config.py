@@ -23,9 +23,9 @@ class Config:
         # basic features + gazetteer feature
         '''
         self.etc_dim = ETC_DIM + len(self.embvec.tag_vocab)
-        self.etc_dim = ETC_DIM + 1
-        '''
         self.etc_dim = ETC_DIM
+        '''
+        self.etc_dim = ETC_DIM + 1
         self.chr_dim = CHR_DIM
         self.class_size = len(self.embvec.tag_vocab)
         self.sentence_length = args.sentence_length

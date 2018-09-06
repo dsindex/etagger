@@ -79,6 +79,8 @@ class EmbVec:
             tag  = tokens[3]
             # 1|0 setting
             if tag == self.oot_tag: continue
+            if word[0].isdigit(): continue
+            if ord(word[0]) < 128: continue
             if word not in self.gaz_vocab:
                 self.gaz_vocab[word] = np.zeros(1)
                 self.gaz_vocab[word][0] = 1
