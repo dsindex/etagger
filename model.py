@@ -10,7 +10,8 @@ class Model:
 
     __rnn_size = 256               # size of RNN hidden unit
     __num_layers = 2               # number of RNN layers
-    __keep_prob = 0.5              # keep probability for dropout
+    __cnn_keep_prob = 0.3          # keep probability for dropout(cnn)
+    __rnn_keep_prob = 0.4          # keep probability for dropout(rnn)
     __learning_rate = 0.001        # learning rate
     __filter_sizes = [3, 4, 5]     # filter sizes
     __num_filters = 32             # number of filters
@@ -89,7 +90,7 @@ class Model:
                 h_pool Tensor("concat:0", shape=(?, 1, 1, 96), dtype=float32)
                 h_pool_flat Tensor("Reshape:0", shape=(?, 96), dtype=float32)
                 '''
-                if is_train: keep_prob = self.__keep_prob
+                if is_train: keep_prob = self.__cnn_keep_prob
                 else: keep_prob = 1.0 # do not apply dropout for inference
                 self.h_drop = tf.nn.dropout(self.h_pool_flat, keep_prob)
                 # reshape([-1, num_filters_total]) -> [None, sentence_length, num_filters_total]
@@ -104,8 +105,8 @@ class Model:
             # etc features 
             self.input_data_etc = tf.placeholder(tf.float32, shape=[None, sentence_length, etc_dim], name='input_data_etc')
 
-        # concat([None, sentence_length, wrd_dim], [None, sentence_length, etc_dim], [None, sentence_length, chr_dim]) -> [None, sentence_length, unit_dim]
-        self.input_data = tf.concat([self.word_embeddings, self.input_data_etc, self.wordchr_embeddings], axis=-1, name='input_data')
+        # concat([None, sentence_length, wrd_dim], [None, sentence_length, chr_dim], [None, sentence_length, etc_dim]) -> [None, sentence_length, unit_dim]
+        self.input_data = tf.concat([self.word_embeddings, self.wordchr_embeddings, self.input_data_etc], axis=-1, name='input_data')
 
         # Answer
 
@@ -114,7 +115,7 @@ class Model:
         # RNN layer
 
         with tf.name_scope('rnn'):
-            if is_train: keep_prob = self.__keep_prob
+            if is_train: keep_prob = self.__rnn_keep_prob
             else: keep_prob = 1.0 # do not apply dropout for inference 
             fw_cell = tf.contrib.rnn.MultiRNNCell([self.create_cell(self.__rnn_size, keep_prob=keep_prob) for _ in range(self.__num_layers)], state_is_tuple=True)
             bw_cell = tf.contrib.rnn.MultiRNNCell([self.create_cell(self.__rnn_size, keep_prob=keep_prob) for _ in range(self.__num_layers)], state_is_tuple=True)

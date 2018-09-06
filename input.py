@@ -48,6 +48,7 @@ class Input:
         word_ids = []
         sentence_length = 0
         for line in bucket:
+            line = line.strip()
             tokens = line.split()
             assert (len(tokens) == 4)
             sentence_length += 1
@@ -63,6 +64,7 @@ class Input:
         wordchr_ids = []
         sentence_length = 0
         for line in bucket:
+            line = line.strip()
             tokens = line.split()
             assert (len(tokens) == 4)
             sentence_length += 1
@@ -91,6 +93,7 @@ class Input:
         tag  = []
         sentence_length = 0
         for line in bucket:
+            line = line.strip()
             tokens = line.split()
             assert (len(tokens) == 4)
             sentence_length += 1
@@ -98,7 +101,11 @@ class Input:
             temp = self.pos_vec(tokens[1])                                # adding pos one-hot(5)
             temp = np.append(temp, self.chunk_vec(tokens[2]))             # adding chunk one-hot(5)
             temp = np.append(temp, self.capital_vec(tokens[0]))           # adding capital one-hot(1)
-            #temp = np.append(temp, self.config.embvec.get_gaz(word))      # adding gazetteer feature
+            temp = np.append(temp, self.config.embvec.get_gaz(word))      # adding gazetteer feature
+            '''
+            [ 0.  0.  1.  0.  0.  1.  0.  0.  0.  0.  1.  0.]
+            [ 0.  0.  0.  0.  1.  0.  0.  0.  1.  0.  0.  1.]
+            '''
             etc.append(temp)
             tag.append(self.tag_vec(tokens[3], self.config.class_size))   # tag one-hot(9)
             if sentence_length == self.max_sentence_length: break

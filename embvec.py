@@ -41,6 +41,7 @@ class EmbVec:
         # 2 wid ~ for normal entries
         wid = self.unk_wid + 1
         for line in open(args.emb_path):
+            line = line.strip()
             line = line.split()
             word = line[0].lower()
             vector = np.array([float(val) for val in line[1:]])
@@ -71,6 +72,7 @@ class EmbVec:
                 tid += 1
         # build gazetteer features
         for line in open(args.train_path):
+            line = line.strip()
             tokens = line.split()
             if len(tokens) != 4: continue
             word = tokens[0].lower()

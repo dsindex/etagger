@@ -147,6 +147,7 @@ rnn_size : 256, dropout_rate : 0.5, chr_embedding : conv
 0.895172667607 <-- best
 0.893800406329
 0.892967114177
+0.893781430148
 rnn_size : 512, dropout_rate : 0.15, chr_embedding : conv
 0.878538026089
 rnn_size : 128, dropout_rate : 0.3, chr_embedding : conv
@@ -166,4 +167,7 @@ even if we use '0|1' indicating gazetteer or not, it is worse than basic models.
 the loss is even increasing along steps.
 rnn_size : 256, dropout_rate : 0.5, chr_embedding : conv, gazetteer : 0|1
 0.877048661647
+
+rnn_size : 256, cnn_dropout_rate : 0.3, rnn_dropout_rate : 0.4, chr_embedding : conv, gazetteer : 0|1
+
 ```
