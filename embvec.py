@@ -120,16 +120,13 @@ class EmbVec:
             return self.itag_vocab[tid]
         return self.oot_tag
 
-    def get_gaz_bit(self, word):
+    def get_gaz(self, word):
+        '''
+        # 0|1 setting
         word = word.lower()
         if word in self.gaz_vocab:
             return self.gaz_vocab[word]
         return np.zeros(1)
-
-    def get_gaz(self, word):
-        '''
-        # 0|1 setting
-        return self.get_gaz_bit(word)
         '''
         # m-hot setting
         word = word.lower()
