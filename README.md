@@ -149,23 +149,32 @@ rnn_size : 256, keep_prob : 0.5, chr_embedding : conv
 0.892967114177
 0.893781430148
 rnn_size : 256, cnn_keep_prob : 0.7, rnn_keep_prob : 0.8, chr_embedding : conv
+0.892371739929
 
 * gazetteer feature
-rnn_size : 256, keep_prob : 0.5, chr_embedding : conv, gazetteer : 1/0s vector
+rnn_size : 256, keep_prob : 0.5, chr_embedding : conv, gazetteer : m-hot vector
 0.855807086614
-rnn_size : 512, keep_prob : 0.5, chr_embedding : conv, gazetteer : 1/0s vector
+rnn_size : 512, keep_prob : 0.5, chr_embedding : conv, gazetteer : m-hot vector
 0.873537604457
 rnn_size : 256, keep_prob : 0.5, chr_embedding : conv, gazetteer : 0|1
 0.877048661647
 
-if we use '0|1' indicating gazetteer, it is worse than basic models.
+even though we use '0|1' indicating gazetteer, it is worse than basic models.
 the loss is even increasing along steps. why?
 
 try to adjust keep_probs.
 rnn_size : 256, cnn_keep_prob : 0.8, rnn_keep_prob : 0.8, chr_embedding : conv, gazetteer : 0|1
 0.879918632001
 
-try to filter digit, ascii words from gazetteer vocab.
+try to filter digit/ascii symbol/short word from gazetteer vocab.
 rnn_size : 256, cnn_keep_prob : 0.8, rnn_keep_prob : 0.8, chr_embedding : conv, gazetteer : 0|1
+0.877144298688
+
+use m-hot vector and apply unambiguous gazetteer only
+rnn_size : 256, cnn_keep_prob : 0.8, rnn_keep_prob : 0.8, chr_embedding : conv, gazetteer : m-hot vector
+0.883349826818
+
++ including unambiguous 'O' gazetteer
+rnn_size : 256, cnn_keep_prob : 0.8, rnn_keep_prob : 0.8, chr_embedding : conv, gazetteer : m-hot vector
 
 ```

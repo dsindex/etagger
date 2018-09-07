@@ -77,14 +77,18 @@ class EmbVec:
             if len(tokens) != 4: continue
             word = tokens[0].lower()
             tag  = tokens[3]
+            # filtering
+            if word[0].isdigit(): continue
+            if not word[0].isalpha(): continue
+            if len(word) <= 2: continue
+            '''
             # 1|0 setting
             if tag == self.oot_tag: continue
-            if word[0].isdigit(): continue
-            if ord(word[0]) < 128: continue
             if word not in self.gaz_vocab:
                 self.gaz_vocab[word] = np.zeros(1)
                 self.gaz_vocab[word][0] = 1
             '''
+            # m-hot setting
             if word in self.gaz_vocab:
                 gaz = self.gaz_vocab[word]
                 tid = self.tag_vocab[tag]
@@ -93,7 +97,6 @@ class EmbVec:
                 self.gaz_vocab[word] = np.zeros(len(self.tag_vocab))
                 tid = self.tag_vocab[tag]
                 self.gaz_vocab[word][tid] = 1
-            '''
         
     def get_wid(self, word):
         word = word.lower()
@@ -117,15 +120,28 @@ class EmbVec:
             return self.itag_vocab[tid]
         return self.oot_tag
 
-    def get_gaz(self, word):
+    def get_gaz_bit(self, word):
         word = word.lower()
         if word in self.gaz_vocab:
             return self.gaz_vocab[word]
-        # 1|0 setting
         return np.zeros(1)
+
+    def get_gaz(self, word):
         '''
+        # 0|1 setting
+        return self.get_gaz_bit(word)
+        '''
+        # m-hot setting
+        word = word.lower()
+        if word in self.gaz_vocab:
+            # check ambiguity
+            vec = self.gaz_vocab[word]
+            count = 0
+            for i in range(len(vec)):
+                if vec[i]: count += 1
+            if count >= 2: return np.zeros(len(self.tag_vocab))
+            return vec
         return np.zeros(len(self.tag_vocab))
-        '''
 
     def __getitem__(self, wid):
         try:
@@ -142,3 +158,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     embvec = EmbVec(args)
     pkl.dump(embvec, open(args.emb_path + '.pkl', 'wb'))
+    '''
+    for word, _ in embvec.gaz_vocab.iteritems():
+        print(word, embvec.get_gaz(word))
+    '''
