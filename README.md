@@ -31,6 +31,7 @@ etagger
     - apply self-attention
     - apply ELMO embedding
     - serve api
+
 - references
   - https://web.stanford.edu/class/cs224n/reports/6896582.pdf
   - http://www.wildml.com/2015/12/implementing-a-cnn-for-text-classification-in-tensorflow/
@@ -39,6 +40,10 @@ etagger
   - https://github.com/DongjunLee/transformer-tensorflow/blob/master/transformer/attention.py
 
 ### pre-requisites
+
+- tensorflow >= 1.4
+
+- numpy
 
 - data
   - [download](https://github.com/mxhofer/Named-Entity-Recognition-BidirectionalLSTM-CNN-CoNLL/tree/master/data) 
