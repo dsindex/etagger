@@ -2,7 +2,9 @@ from __future__ import print_function
 import tensorflow as tf
 import numpy as np
 from embvec import EmbVec
+from shuffle import Shuffle
 import sys
+import re
 
 class Input:
     def __init__(self, data, config):
@@ -30,6 +32,11 @@ class Input:
             self.sentence_tag.append(tag)
         else:                  # treat data as file path
             path = data
+            if config.is_train:
+                sp = Shuffle()
+                sp.add(path)
+                path = path + '.shuffle'
+                sp.shuffle(path)
             bucket = []
             for line in open(path):
                 if line in ['\n', '\r\n']:
@@ -52,7 +59,8 @@ class Input:
             tokens = line.split()
             assert (len(tokens) == 4)
             sentence_length += 1
-            wid = self.config.embvec.get_wid(tokens[0])
+            word = self.replace_digits(tokens[0])
+            wid = self.config.embvec.get_wid(word)
             word_ids.append(wid)
             if sentence_length == self.max_sentence_length: break
         # padding with pad wid
@@ -70,7 +78,8 @@ class Input:
             sentence_length += 1
             chr_ids = []
             word_length = 0
-            for ch in tokens[0]:
+            word = self.replace_digits(tokens[0])
+            for ch in word:
                 word_length += 1 
                 cid = self.config.embvec.get_cid(ch)
                 chr_ids.append(cid)
@@ -97,11 +106,11 @@ class Input:
             tokens = line.split()
             assert (len(tokens) == 4)
             sentence_length += 1
-            word = tokens[0].lower()
+            word = self.replace_digits(tokens[0]).lower()
             temp = self.pos_vec(tokens[1])                                # adding pos one-hot(5)
             temp = np.append(temp, self.chunk_vec(tokens[2]))             # adding chunk one-hot(5)
             temp = np.append(temp, self.capital_vec(tokens[0]))           # adding capital one-hot(1)
-            temp = np.append(temp, self.config.embvec.get_gaz(word))      # adding gazetteer feature
+            #temp = np.append(temp, self.config.embvec.get_gaz(word))      # adding gazetteer feature
             '''
             [ 0.  0.  1.  0.  0.  1.  0.  0.  0.  0.  1.  0.]
             [ 0.  0.  0.  0.  1.  0.  0.  0.  1.  0.  0.  1.]
@@ -185,4 +194,8 @@ class Input:
             else:
                 temp_len += 1
         return max_length
+
+    @staticmethod
+    def replace_digits(string):
+        return re.sub('[0-9]', '0', string)
 

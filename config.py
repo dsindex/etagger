@@ -13,7 +13,7 @@ ETC_DIM = 5+5+1
 '''
 character dimension
 '''
-CHR_DIM = 96
+CHR_DIM = 53
 
 class Config:
     def __init__(self, args, is_train=1):
@@ -25,7 +25,7 @@ class Config:
         self.etc_dim = ETC_DIM + len(self.embvec.tag_vocab)
         self.etc_dim = ETC_DIM + 1
         '''
-        self.etc_dim = ETC_DIM + len(self.embvec.tag_vocab)
+        self.etc_dim = ETC_DIM
         self.chr_dim = CHR_DIM
         self.class_size = len(self.embvec.tag_vocab)
         self.sentence_length = args.sentence_length

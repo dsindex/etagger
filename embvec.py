@@ -81,14 +81,7 @@ class EmbVec:
             if word[0].isdigit(): continue
             if not word[0].isalpha(): continue
             if len(word) <= 2: continue
-            '''
-            # 1|0 setting
             if tag == self.oot_tag: continue
-            if word not in self.gaz_vocab:
-                self.gaz_vocab[word] = np.zeros(1)
-                self.gaz_vocab[word][0] = 1
-            '''
-            # m-hot setting
             if word in self.gaz_vocab:
                 gaz = self.gaz_vocab[word]
                 tid = self.tag_vocab[tag]
@@ -121,14 +114,6 @@ class EmbVec:
         return self.oot_tag
 
     def get_gaz(self, word):
-        '''
-        # 0|1 setting
-        word = word.lower()
-        if word in self.gaz_vocab:
-            return self.gaz_vocab[word]
-        return np.zeros(1)
-        '''
-        # m-hot setting
         word = word.lower()
         if word in self.gaz_vocab:
             # check ambiguity

@@ -35,11 +35,13 @@ etagger
     - serve api
 
 - references
-  - https://web.stanford.edu/class/cs224n/reports/6896582.pdf
-  - http://www.wildml.com/2015/12/implementing-a-cnn-for-text-classification-in-tensorflow/
-  - https://github.com/cuteboydot/Sentence-Classification-using-Char-CNN-and-RNN
-  - https://github.com/carpedm20/lstm-char-cnn-tensorflow/blob/master/models/LSTMTDNN.py
-  - https://github.com/DongjunLee/transformer-tensorflow/blob/master/transformer/attention.py
+  - [Named Entity Recognition with Bidirectional LSTM-CNNs](https://www.aclweb.org/anthology/Q16-1026)
+  - [Towards Deep Learning in Hindi NER: An approach to tackle the Labelled Data Scarcity](https://arxiv.org/pdf/1610.09756.pdf)
+  - [Exploring neural architectures for NER](https://web.stanford.edu/class/cs224n/reports/6896582.pdf)
+  - [Implementing a CNN for Text Classification in TensorFlow](http://www.wildml.com/2015/12/implementing-a-cnn-for-text-classification-in-tensorflow/)
+  - [Implementing a sentence classification using Char level CNN & RNN](https://github.com/cuteboydot/Sentence-Classification-using-Char-CNN-and-RNN)
+  - [lstm-char-cnn-tensorflow/models/LSTMTDNN.py](https://github.com/carpedm20/lstm-char-cnn-tensorflow/blob/master/models/LSTMTDNN.py)
+  - [transformer-tensorflow/transformer/attention.py](https://github.com/DongjunLee/transformer-tensorflow/blob/master/transformer/attention.py)
 
 ### pre-requisites
 
@@ -83,24 +85,24 @@ test, max_sentence_length = 124
 
 - train
 ```
-$ python train.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125
+$ python train.py --emb_path embeddings/glove.6B.50d.txt.pkl --wrd_dim 50 --sentence_length 125
 $ rm -rf runs; tensorboard --logdir runs/summaries/
 ```
 
 - inference(bulk)
 ```
-$ python inference.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --restore checkpoint/model_max.ckpt
+$ python inference.py --emb_path embeddings/glove.6B.50d.txt.pkl --wrd_dim 50 --sentence_length 125 --restore checkpoint/model_max.ckpt
 ```
 
 - inference(bucket)
 ```
-$ python inference.py --mode bucket --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --restore checkpoint/model_max.ckpt < data/test.txt > pred.txt
+$ python inference.py --mode bucket --emb_path embeddings/glove.6B.50d.txt.pkl --wrd_dim 50 --sentence_length 125 --restore checkpoint/model_max.ckpt < data/test.txt > pred.txt
 $ python eval.py < pred.txt
 ```
 
 - inference(line)
 ```
-$ python inference.py --mode line --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --restore checkpoint/model_max.ckpt
+$ python inference.py --mode line --emb_path embeddings/glove.6B.50d.txt.pkl --wrd_dim 50 --sentence_length 125 --restore checkpoint/model_max.ckpt
 ...
 Obama left office in January 2017 with a 60% approval rating and currently resides in Washington, D.C.
 Obama NNP O O B-PER
@@ -141,29 +143,57 @@ in IN O O O
 
 ### etc
 
-- analysis
+- experiments 2
+```
+* setting
+replace all digit to '0'
+random shuffling
+word embedding size : 50
+chracter embedding size : 53
+chracter embedding random init : -0.5 ~ 0.5
+filter_size : 3
+num_filters : 48
+rnn_size : 275
+num_layers : 1
+learning_rate : 0.0105
+epoch : 80
+cnn_keep_prob : 0.32
+rnn_keep_prob : 0.32
+batch_size : 9
+
+```
+
+- experiments 1
 ```
 * weak entity types : B-ORG, I-ORG, B-MISC, I-MISC
 
 * chr_embedding : max
+
 rnn_size : 256, keep_prob : 0.5, chr_embedding : max
 0.892409321671
 
 * chr embedding : conv
+
 rnn_size : 256, keep_prob : 0.5, chr_embedding : conv
 0.895172667607 <-- best
 0.893800406329
 0.892967114177
 0.893781430148
+
 rnn_size : 256, cnn_keep_prob : 0.7, rnn_keep_prob : 0.8, chr_embedding : conv
 0.892371739929
+
 rnn_size : 256, cnn_keep_prob : 0.6, rnn_keep_prob : 0.6, chr_embedding : conv
+0.893224198412
 
 * gazetteer feature
+
 rnn_size : 256, keep_prob : 0.5, chr_embedding : conv, gazetteer : m-hot vector
 0.855807086614
+
 rnn_size : 512, keep_prob : 0.5, chr_embedding : conv, gazetteer : m-hot vector
 0.873537604457
+
 rnn_size : 256, keep_prob : 0.5, chr_embedding : conv, gazetteer : 0|1
 0.877048661647
 
@@ -182,7 +212,7 @@ use m-hot vector and apply unambiguous gazetteer only
 rnn_size : 256, cnn_keep_prob : 0.8, rnn_keep_prob : 0.8, chr_embedding : conv, gazetteer : m-hot vector
 0.883349826818
 
-+ including unambiguous 'O' gazetteer
+including unambiguous 'O' gazetteer
 rnn_size : 256, cnn_keep_prob : 0.8, rnn_keep_prob : 0.8, chr_embedding : conv, gazetteer : m-hot vector
 0.878849345381
 ```
