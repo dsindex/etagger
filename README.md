@@ -157,7 +157,7 @@ rnn_size : 256, keep_prob : 0.5, chr_embedding : conv
 0.893781430148
 rnn_size : 256, cnn_keep_prob : 0.7, rnn_keep_prob : 0.8, chr_embedding : conv
 0.892371739929
-rnn_size : 256, cnn_keep_prob : 0.6, rnn_keep_prob : 0.6, chr_embedding : conv, wrd_embedding : trainable
+rnn_size : 256, cnn_keep_prob : 0.6, rnn_keep_prob : 0.6, chr_embedding : conv
 
 * gazetteer feature
 rnn_size : 256, keep_prob : 0.5, chr_embedding : conv, gazetteer : m-hot vector
