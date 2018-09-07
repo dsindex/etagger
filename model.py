@@ -24,7 +24,7 @@ class Model:
         embvec = config.embvec
         sentence_length = config.sentence_length
         word_length = config.word_length
-        cvocab_size = len(embvec.cvocab)
+        chr_vocab_size = len(embvec.chr_vocab)
         chr_dim = config.chr_dim
         etc_dim = config.etc_dim
         class_size = config.class_size
@@ -36,17 +36,17 @@ class Model:
         self.input_data_word_ids = tf.placeholder(tf.int32, shape=[None, sentence_length], name='input_data_word_ids')
         # word embedding features
         with tf.device('/cpu:0'), tf.name_scope('word-embedding'):
-            embed_arr = np.array(embvec.embeddings)
+            embed_arr = np.array(embvec.wrd_embeddings)
             embed_init = tf.constant_initializer(embed_arr)
-            embeddings = tf.get_variable(name='embeddings', initializer=embed_init, shape=embed_arr.shape, trainable=False)
+            wrd_embeddings = tf.get_variable(name='wrd_embeddings', initializer=embed_init, shape=embed_arr.shape, trainable=False)
             # embedding_lookup([None, sentence_length]) -> [None, sentence_length, wrd_dim]
-            self.word_embeddings = tf.nn.embedding_lookup(embeddings, self.input_data_word_ids, name='word_embeddings')
+            self.word_embeddings = tf.nn.embedding_lookup(wrd_embeddings, self.input_data_word_ids, name='word_embeddings')
 
         # character embedding features
         self.input_data_wordchr_ids = tf.placeholder(tf.int32, shape=[None, sentence_length, word_length], name='input_data_wordchr_ids')
         with tf.name_scope('wordchr-embeddings'):
             with tf.device('/cpu:0'):
-                chr_embeddings = tf.Variable(tf.random_uniform([cvocab_size, chr_dim], -1.0, 1.0), name='chr_embeddings')
+                chr_embeddings = tf.Variable(tf.random_uniform([chr_vocab_size, chr_dim], -1.0, 1.0), name='chr_embeddings')
                 # embedding_lookup([None, sentence_length, word_length]) -> [None, sentence_length, word_length, chr_dim]
                 self.wordchr_embeddings = tf.nn.embedding_lookup(chr_embeddings, self.input_data_wordchr_ids, name='wordchr_embeddings')
                 # reshape([None, sentence_length, word_length, chr_dim]) -> [None, word_length, chr_dim]

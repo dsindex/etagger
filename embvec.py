@@ -9,18 +9,18 @@ class EmbVec:
     def __init__(self, args):
         self.pad = '#PAD#'
         self.unk = '#UNK#'
-        self.wvocab = {}      # word vocab
-        self.embeddings = []
+        self.wrd_vocab = {}      # word vocab
+        self.wrd_embeddings = []
         self.wrd_dim = args.wrd_dim
         self.pad_wid = 0      # for padding word embedding
         self.unk_wid = 1      # for unknown word
-        self.wvocab[self.pad] = self.pad_wid
-        self.wvocab[self.unk] = self.unk_wid
-        self.cvocab = {}      # character vocab
+        self.wrd_vocab[self.pad] = self.pad_wid
+        self.wrd_vocab[self.unk] = self.unk_wid
+        self.chr_vocab = {}      # character vocab
         self.pad_cid = 0      # for padding char embedding
         self.unk_cid = 1      # for unknown char
-        self.cvocab[self.pad] = self.pad_cid
-        self.cvocab[self.unk] = self.unk_cid
+        self.chr_vocab[self.pad] = self.pad_cid
+        self.chr_vocab[self.unk] = self.unk_cid
         self.oot_tid = 0      # out of tag id
         self.oot_tag = 'O'    # out of tag, this is fixed for convenience
         self.tag_vocab = {}   # tag vocab (tag -> id)
@@ -33,11 +33,11 @@ class EmbVec:
         # 0 id for padding
         vector = np.array([float(0) for i in range(self.wrd_dim)])
         assert(len(vector) == self.wrd_dim)
-        self.embeddings.append(vector)
+        self.wrd_embeddings.append(vector)
         # 1 wid for unknown
         vector = np.array([random() for i in range(self.wrd_dim)])
         assert(len(vector) == self.wrd_dim)
-        self.embeddings.append(vector)
+        self.wrd_embeddings.append(vector)
         # 2 wid ~ for normal entries
         wid = self.unk_wid + 1
         for line in open(args.emb_path):
@@ -48,8 +48,8 @@ class EmbVec:
             if len(vector) != self.wrd_dim:
                 invalid += 1
                 continue
-            self.wvocab[word] = wid
-            self.embeddings.append(vector)
+            self.wrd_vocab[word] = wid
+            self.wrd_embeddings.append(vector)
             wid += 1
         sys.stderr.write('invalid entries %d' % (invalid) + '\n')
         # 2 cid ~ for normal characters
@@ -62,8 +62,8 @@ class EmbVec:
             tag  = tokens[3]
             # character vocab
             for ch in word:
-                if ch not in self.cvocab:
-                    self.cvocab[ch] = cid
+                if ch not in self.chr_vocab:
+                    self.chr_vocab[ch] = cid
                     cid += 1
             # tag, itag vocab
             if tag not in self.tag_vocab:
@@ -100,14 +100,14 @@ class EmbVec:
         
     def get_wid(self, word):
         word = word.lower()
-        if word in self.wvocab:
-            return self.wvocab[word]
+        if word in self.wrd_vocab:
+            return self.wrd_vocab[word]
         return self.unk_wid
 
     def get_cid(self, ch):
         ch = ch.lower()
-        if ch in self.cvocab:
-            return self.cvocab[ch]
+        if ch in self.chr_vocab:
+            return self.chr_vocab[ch]
         return self.unk_cid
 
     def get_tid(self, tag):
@@ -142,7 +142,7 @@ class EmbVec:
 
     def __getitem__(self, wid):
         try:
-            return self.embeddings[wid]
+            return self.wrd_embeddings[wid]
         except KeyError:
             vec = np.array([random() for i in range(self.wrd_dim)])
             return vec

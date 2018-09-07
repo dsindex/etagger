@@ -12,7 +12,7 @@ etagger
   - modified for tf version(1.4)
   - removed unnecessary files
   - fixed bugs for MultiRNNCell()
-  - refactoring .... ing
+  - refactoring
     - implement input.py, config.py [done]
     - split model.py to model.py, train.py, inference.py [done]
       - inference bulk [done]
@@ -28,6 +28,8 @@ etagger
       - using reduce_max only [done]
       ![graph-1](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1.png)
     - apply gazetter features [doing]
+      - using fixed features [doing]
+      - using embedding [doing]
     - apply self-attention
     - apply ELMO embedding
     - serve api
@@ -155,6 +157,7 @@ rnn_size : 256, keep_prob : 0.5, chr_embedding : conv
 0.893781430148
 rnn_size : 256, cnn_keep_prob : 0.7, rnn_keep_prob : 0.8, chr_embedding : conv
 0.892371739929
+rnn_size : 256, cnn_keep_prob : 0.6, rnn_keep_prob : 0.6, chr_embedding : conv, wrd_embedding : trainable
 
 * gazetteer feature
 rnn_size : 256, keep_prob : 0.5, chr_embedding : conv, gazetteer : m-hot vector
@@ -181,5 +184,5 @@ rnn_size : 256, cnn_keep_prob : 0.8, rnn_keep_prob : 0.8, chr_embedding : conv, 
 
 + including unambiguous 'O' gazetteer
 rnn_size : 256, cnn_keep_prob : 0.8, rnn_keep_prob : 0.8, chr_embedding : conv, gazetteer : m-hot vector
-
+0.878849345381
 ```
