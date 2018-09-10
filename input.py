@@ -32,11 +32,13 @@ class Input:
             self.sentence_tag.append(tag)
         else:                  # treat data as file path
             path = data
+            '''
             if config.is_train:
                 sp = Shuffle()
                 sp.add(path)
                 path = path + '.shuffle'
                 sp.shuffle(path)
+            '''
             bucket = []
             for line in open(path):
                 if line in ['\n', '\r\n']:
@@ -100,21 +102,31 @@ class Input:
     def __create_etc_and_tag(self, bucket):
         etc = []
         tag  = []
-        sentence_length = 0
+        nbucket = []
+        # apply gazetteer feature
         for line in bucket:
             line = line.strip()
             tokens = line.split()
             assert (len(tokens) == 4)
+            gvec = np.zeros(self.config.class_size)
+            tokens.append(gvec)
+            nbucket.append(tokens)
+        bucket_size = len(nbucket)
+        i = 0
+        while 1:
+            if i >= bucket_size: break
+            tokens = nbucket[i]
+            j = self.config.embvec.apply_gaz(nbucket, bucket_size, i)
+            i += j # jump
+            i += 1
+        sentence_length = 0
+        for tokens in nbucket:
             sentence_length += 1
             word = self.replace_digits(tokens[0]).lower()
             temp = self.pos_vec(tokens[1])                                # adding pos one-hot(5)
             temp = np.append(temp, self.chunk_vec(tokens[2]))             # adding chunk one-hot(5)
             temp = np.append(temp, self.capital_vec(tokens[0]))           # adding capital one-hot(1)
-            #temp = np.append(temp, self.config.embvec.get_gaz(word))      # adding gazetteer feature
-            '''
-            [ 0.  0.  1.  0.  0.  1.  0.  0.  0.  0.  1.  0.]
-            [ 0.  0.  0.  0.  1.  0.  0.  0.  1.  0.  0.  1.]
-            '''
+            #temp = np.append(temp, tokens[4])                             # adding gazetteer feature
             etc.append(temp)
             tag.append(self.tag_vec(tokens[3], self.config.class_size))   # tag one-hot(9)
             if sentence_length == self.max_sentence_length: break

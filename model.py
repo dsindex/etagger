@@ -8,13 +8,13 @@ class Model:
     RNN model for sequence tagging
     '''
 
-    __rnn_size = 275               # size of RNN hidden unit
-    __num_layers = 1               # number of RNN layers
-    __cnn_keep_prob = 0.32         # keep probability for dropout(cnn)
-    __rnn_keep_prob = 0.32         # keep probability for dropout(rnn)
-    __learning_rate = 0.0105       # learning rate
-    __filter_sizes = [3]           # filter sizes
-    __num_filters = 48             # number of filters
+    __rnn_size = 256               # size of RNN hidden unit
+    __num_layers = 2               # number of RNN layers
+    __cnn_keep_prob = 0.5          # keep probability for dropout(cnn)
+    __rnn_keep_prob = 0.5          # keep probability for dropout(rnn)
+    __learning_rate = 0.001        # learning rate
+    __filter_sizes = [3,4,5]       # filter sizes
+    __num_filters = 32             # number of filters
     __chr_embedding_type = 'conv'  # 'max' | 'conv', default is max
 
     def __init__(self, config):
@@ -46,7 +46,7 @@ class Model:
         self.input_data_wordchr_ids = tf.placeholder(tf.int32, shape=[None, sentence_length, word_length], name='input_data_wordchr_ids')
         with tf.name_scope('wordchr-embeddings'):
             with tf.device('/cpu:0'):
-                chr_embeddings = tf.Variable(tf.random_uniform([chr_vocab_size, chr_dim], -0.5, 0.5), name='chr_embeddings')
+                chr_embeddings = tf.Variable(tf.random_uniform([chr_vocab_size, chr_dim], -1.0, 1.0), name='chr_embeddings')
                 # embedding_lookup([None, sentence_length, word_length]) -> [None, sentence_length, word_length, chr_dim]
                 self.wordchr_embeddings = tf.nn.embedding_lookup(chr_embeddings, self.input_data_wordchr_ids, name='wordchr_embeddings')
                 # reshape([None, sentence_length, word_length, chr_dim]) -> [None, word_length, chr_dim]

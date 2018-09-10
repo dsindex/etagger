@@ -28,8 +28,6 @@ etagger
       - using reduce_max only [done]
       ![graph-1](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1.png)
     - apply gazetter features [doing]
-      - using fixed features [doing]
-      - using embedding [doing]
     - apply self-attention
     - apply ELMO embedding
     - serve api
@@ -85,24 +83,24 @@ test, max_sentence_length = 124
 
 - train
 ```
-$ python train.py --emb_path embeddings/glove.6B.50d.txt.pkl --wrd_dim 50 --sentence_length 125
+$ python train.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125
 $ rm -rf runs; tensorboard --logdir runs/summaries/
 ```
 
 - inference(bulk)
 ```
-$ python inference.py --emb_path embeddings/glove.6B.50d.txt.pkl --wrd_dim 50 --sentence_length 125 --restore checkpoint/model_max.ckpt
+$ python inference.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --restore checkpoint/model_max.ckpt
 ```
 
 - inference(bucket)
 ```
-$ python inference.py --mode bucket --emb_path embeddings/glove.6B.50d.txt.pkl --wrd_dim 50 --sentence_length 125 --restore checkpoint/model_max.ckpt < data/test.txt > pred.txt
+$ python inference.py --mode bucket --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --restore checkpoint/model_max.ckpt < data/test.txt > pred.txt
 $ python eval.py < pred.txt
 ```
 
 - inference(line)
 ```
-$ python inference.py --mode line --emb_path embeddings/glove.6B.50d.txt.pkl --wrd_dim 50 --sentence_length 125 --restore checkpoint/model_max.ckpt
+$ python inference.py --mode line --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --restore checkpoint/model_max.ckpt
 ...
 Obama left office in January 2017 with a 60% approval rating and currently resides in Washington, D.C.
 Obama NNP O O B-PER
@@ -145,21 +143,77 @@ in IN O O O
 
 - experiments 2
 ```
-* setting
+* test 4
+replace all digit to '0'
+word embedding size : 300
+chracter embedding size : 96
+chracter embedding random init : -1.0 ~ 1.0
+filter_size : 3,4,5
+num_filters : 32
+rnn_size : 256
+num_layers : 2
+learning_rate : 0.001
+cnn_keep_prob : 0.5
+rnn_keep_prob : 0.5
+epoch : 50
+batch_size : 128
+
+
+* test 3
+replace all digit to '0'
+random shuffling
+word embedding size : 300
+chracter embedding size : 53
+chracter embedding random init : -1.0 ~ 1.0
+filter_size : 3,4,5
+num_filters : 32
+rnn_size : 256
+num_layers : 2
+learning_rate : 0.001
+cnn_keep_prob : 0.5
+rnn_keep_prob : 0.5
+epoch : 50
+batch_size : 64
++
+longest matching gazetteer feature
+
+0.87932312253
+
+* test 2
 replace all digit to '0'
 random shuffling
 word embedding size : 50
-chracter embedding size : 53
+chracter embedding size : 64
+chracter embedding random init : -0.5 ~ 0.5
+filter_size : 3,4,5
+num_filters : 32
+rnn_size : 256
+num_layers : 2
+learning_rate : 0.001
+cnn_keep_prob : 0.32
+rnn_keep_prob : 0.32
+epoch : 50
+batch_size : 64
+
+0.881000551775
+
+* test 1
+replace all digit to '0'
+random shuffling
+word embedding size : 50
+chracter embedding size : 64
 chracter embedding random init : -0.5 ~ 0.5
 filter_size : 3
 num_filters : 48
-rnn_size : 275
+rnn_size : 256
 num_layers : 1
-learning_rate : 0.0105
-epoch : 80
+learning_rate : 0.001
 cnn_keep_prob : 0.32
 rnn_keep_prob : 0.32
-batch_size : 9
+epoch : 64
+batch_size : 64
+
+0.884797152151
 
 ```
 
@@ -188,31 +242,31 @@ rnn_size : 256, cnn_keep_prob : 0.6, rnn_keep_prob : 0.6, chr_embedding : conv
 
 * gazetteer feature
 
-rnn_size : 256, keep_prob : 0.5, chr_embedding : conv, gazetteer : m-hot vector
+rnn_size : 256, keep_prob : 0.5, chr_embedding : conv, gazetteer : token-based m-hot vector
 0.855807086614
 
-rnn_size : 512, keep_prob : 0.5, chr_embedding : conv, gazetteer : m-hot vector
+rnn_size : 512, keep_prob : 0.5, chr_embedding : conv, gazetteer : token-based m-hot vector
 0.873537604457
 
-rnn_size : 256, keep_prob : 0.5, chr_embedding : conv, gazetteer : 0|1
+rnn_size : 256, keep_prob : 0.5, chr_embedding : conv, gazetteer : token-based 0|1
 0.877048661647
 
 even though we use '0|1' indicating gazetteer, it is worse than basic models.
 the loss is even increasing along steps. why?
 
 try to adjust keep_probs.
-rnn_size : 256, cnn_keep_prob : 0.8, rnn_keep_prob : 0.8, chr_embedding : conv, gazetteer : 0|1
+rnn_size : 256, cnn_keep_prob : 0.8, rnn_keep_prob : 0.8, chr_embedding : conv, gazetteer : token-based 0|1
 0.879918632001
 
 try to filter digit/ascii symbol/short word from gazetteer vocab.
-rnn_size : 256, cnn_keep_prob : 0.8, rnn_keep_prob : 0.8, chr_embedding : conv, gazetteer : 0|1
+rnn_size : 256, cnn_keep_prob : 0.8, rnn_keep_prob : 0.8, chr_embedding : conv, gazetteer : token-based 0|1
 0.877144298688
 
 use m-hot vector and apply unambiguous gazetteer only
-rnn_size : 256, cnn_keep_prob : 0.8, rnn_keep_prob : 0.8, chr_embedding : conv, gazetteer : m-hot vector
+rnn_size : 256, cnn_keep_prob : 0.8, rnn_keep_prob : 0.8, chr_embedding : conv, gazetteer : token-based m-hot vector
 0.883349826818
 
 including unambiguous 'O' gazetteer
-rnn_size : 256, cnn_keep_prob : 0.8, rnn_keep_prob : 0.8, chr_embedding : conv, gazetteer : m-hot vector
+rnn_size : 256, cnn_keep_prob : 0.8, rnn_keep_prob : 0.8, chr_embedding : conv, gazetteer : token-based m-hot vector
 0.878849345381
 ```
