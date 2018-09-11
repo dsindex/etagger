@@ -88,7 +88,8 @@ class EmbVec:
                     if not segment: continue
                     tag_suffix = tag.split('-')[1]
                     # noise filtering
-                    if len(segment) <= 3: continue
+                    #if len(segment) <= 3: continue
+                    if len(segment) <= 10: continue
                     if segment not in self.gaz_vocab:
                         self.gaz_vocab[segment] = {}
                         self.gaz_vocab[segment][tag_suffix] = 1

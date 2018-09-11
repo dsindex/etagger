@@ -24,7 +24,7 @@ class Config:
         '''
         self.etc_dim = ETC_DIM + len(self.embvec.tag_vocab)
         '''
-        self.etc_dim = ETC_DIM
+        self.etc_dim = ETC_DIM + len(self.embvec.tag_vocab)
         self.chr_dim = CHR_DIM
         self.class_size = len(self.embvec.tag_vocab)
         self.sentence_length = args.sentence_length
