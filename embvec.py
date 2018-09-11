@@ -86,9 +86,9 @@ class EmbVec:
                     if self.tag_prefix_b not in tag: continue
                     segment = self.get_segment(bucket, bucket_size, i)
                     if not segment: continue
-                    # filtering
-                    if len(segment) <= 3: continue
                     tag_suffix = tag.split('-')[1]
+                    # noise filtering
+                    if len(segment) <= 3: continue
                     if segment not in self.gaz_vocab:
                         self.gaz_vocab[segment] = {}
                         self.gaz_vocab[segment][tag_suffix] = 1

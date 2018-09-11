@@ -12,7 +12,6 @@ class Model:
     __num_layers = 2               # number of RNN layers
     __cnn_keep_prob = 0.5          # keep probability for dropout(cnn)
     __rnn_keep_prob = 0.5          # keep probability for dropout(rnn)
-    __learning_rate = 0.001        # learning rate
     __filter_sizes = [3,4,5]       # filter sizes
     __num_filters = 32             # number of filters
     __chr_embedding_type = 'conv'  # 'max' | 'conv', default is max
@@ -40,7 +39,7 @@ class Model:
             embed_init = tf.constant_initializer(embed_arr)
             wrd_embeddings = tf.get_variable(name='wrd_embeddings', initializer=embed_init, shape=embed_arr.shape, trainable=False)
             # embedding_lookup([None, sentence_length]) -> [None, sentence_length, wrd_dim]
-            self.word_embeddings = tf.nn.embedding_lookup(wrd_embeddings, self.input_data_word_ids, name='word_embeddings')
+            self.word_embeddings = tf.nn.embedding_lookup(wrd_embeddings, self.input_data_word_ids)
 
         # character embedding features
         self.input_data_wordchr_ids = tf.placeholder(tf.int32, shape=[None, sentence_length, word_length], name='input_data_wordchr_ids')
@@ -48,7 +47,7 @@ class Model:
             with tf.device('/cpu:0'):
                 chr_embeddings = tf.Variable(tf.random_uniform([chr_vocab_size, chr_dim], -1.0, 1.0), name='chr_embeddings')
                 # embedding_lookup([None, sentence_length, word_length]) -> [None, sentence_length, word_length, chr_dim]
-                self.wordchr_embeddings = tf.nn.embedding_lookup(chr_embeddings, self.input_data_wordchr_ids, name='wordchr_embeddings')
+                self.wordchr_embeddings = tf.nn.embedding_lookup(chr_embeddings, self.input_data_wordchr_ids)
                 # reshape([None, sentence_length, word_length, chr_dim]) -> [None, word_length, chr_dim]
                 self.wordchr_embeddings = tf.reshape(self.wordchr_embeddings, [-1, word_length, chr_dim])
                 if self.__chr_embedding_type == 'conv':
@@ -146,7 +145,8 @@ class Model:
 
         with tf.name_scope('optimization'):
             self.global_step = tf.Variable(0, name='global_step', trainable=False)
-            optimizer = tf.train.AdamOptimizer(self.__learning_rate)
+            self.learning_rate = tf.placeholder(tf.float32, shape=[], name='learning_rate')
+            optimizer = tf.train.AdamOptimizer(self.learning_rate)
             tvars = tf.trainable_variables()
             grads, _ = tf.clip_by_global_norm(tf.gradients(self.loss, tvars), 10)
             self.train_op = optimizer.apply_gradients(zip(grads, tvars), global_step=self.global_step)
