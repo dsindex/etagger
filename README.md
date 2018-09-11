@@ -32,6 +32,7 @@ etagger
     - apply self-attention [doing]
     - apply ELMO embedding
     - serve api
+      - freeze model and serve
 
 - references
   - [Named Entity Recognition with Bidirectional LSTM-CNNs](https://www.aclweb.org/anthology/Q16-1026)
