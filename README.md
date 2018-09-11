@@ -27,8 +27,8 @@ etagger
       - using convolution [done]
       - using reduce_max only [done]
       ![graph-1](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1.png)
-    - apply gazetter features [doing]
-    - apply self-attention
+    - apply gazetteer features [done]
+    - apply self-attention [doing]
     - apply ELMO embedding
     - serve api
 
@@ -143,6 +143,61 @@ in IN O O O
 
 - experiments 2
 ```
+* test 7
+word embedding size : 300
+chracter embedding size : 96
+chracter embedding random init : -1.0 ~ 1.0
+filter_size : 3,4,5
+num_filters : 32
+rnn_size : 256
+num_layers : 2
+learning_rate : 0.001
+cnn_keep_prob : 0.5
+rnn_keep_prob : 0.5
+epoch : 50
+batch_size : 128
+
+* test 6
+replace all digit to '0'
+word embedding size : 300
+chracter embedding size : 96
+chracter embedding random init : -1.0 ~ 1.0
+filter_size : 3,4,5
+num_filters : 32
+rnn_size : 256
+num_layers : 2
+learning_rate : 0.001
+cnn_keep_prob : 0.5
+rnn_keep_prob : 0.5
+epoch : 50
+batch_size : 128
++
+longest matching gazetteer feature(from test data)
+
+0.913716137712
+
+=> ok. this result supports that gazetteer features are very helpful. but, 
+if we construct gazetteer vocab from the training data, the f-score decreases.
+
+* test 5
+replace all digit to '0'
+word embedding size : 300
+chracter embedding size : 96
+chracter embedding random init : -1.0 ~ 1.0
+filter_size : 3,4,5
+num_filters : 32
+rnn_size : 256
+num_layers : 2
+learning_rate : 0.001
+cnn_keep_prob : 0.5
+rnn_keep_prob : 0.5
+epoch : 50
+batch_size : 128
++
+longest matching gazetteer feature
+
+0.870375031462
+
 * test 4
 replace all digit to '0'
 word embedding size : 300
@@ -158,6 +213,7 @@ rnn_keep_prob : 0.5
 epoch : 50
 batch_size : 128
 
+0.890053001356
 
 * test 3
 replace all digit to '0'

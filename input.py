@@ -126,7 +126,9 @@ class Input:
             temp = self.pos_vec(tokens[1])                                # adding pos one-hot(5)
             temp = np.append(temp, self.chunk_vec(tokens[2]))             # adding chunk one-hot(5)
             temp = np.append(temp, self.capital_vec(tokens[0]))           # adding capital one-hot(1)
-            #temp = np.append(temp, tokens[4])                             # adding gazetteer feature
+            '''
+            temp = np.append(temp, tokens[4])                             # adding gazetteer feature
+            '''
             etc.append(temp)
             tag.append(self.tag_vec(tokens[3], self.config.class_size))   # tag one-hot(9)
             if sentence_length == self.max_sentence_length: break
@@ -209,5 +211,8 @@ class Input:
 
     @staticmethod
     def replace_digits(string):
+        return string
+        '''
         return re.sub('[0-9]', '0', string)
+        '''
 

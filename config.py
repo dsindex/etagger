@@ -23,7 +23,6 @@ class Config:
         # basic features + gazetteer feature
         '''
         self.etc_dim = ETC_DIM + len(self.embvec.tag_vocab)
-        self.etc_dim = ETC_DIM + 1
         '''
         self.etc_dim = ETC_DIM
         self.chr_dim = CHR_DIM

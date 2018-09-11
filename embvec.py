@@ -144,8 +144,8 @@ class EmbVec:
         return None
 
     def apply_gaz(self, bucket, bucket_size, i):
-        # 2gram ~ 5gram
-        for j in range(5, 1, -1): # max ngram size == 5
+        # 1gram ~ 5gram
+        for j in range(5, 0, -1): # max ngram size == 5
             if i+5 >= bucket_size: continue
             segment = []
             # bucket[i+0][0] ~ bucket[i+k][0]
