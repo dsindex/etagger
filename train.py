@@ -10,11 +10,10 @@ import sys
 import argparse
 
 def do_train(model, config, train_data, dev_data, test_data):
-    # learning rate warmup
-    learning_rate_init=0.001 # initial
-    learning_rate_final=0.001 # final
+    learning_rate_init=0.001  # initial
+    learning_rate_final=0.002 # final
     learning_rate=learning_rate_init
-    intermid_step = 1000     # after this step, increase learning rate
+    intermid_epoch = 15       # after this epoch, increase learning rate
     maximum = 0
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     sess = tf.Session(config=session_conf)
@@ -48,8 +47,9 @@ def do_train(model, config, train_data, dev_data, test_data):
                 step, train_summaries, _, train_loss, train_accuracy = sess.run([model.global_step, train_summary_op, model.train_op, model.loss, model.accuracy], feed_dict=feed_dict)
                 print('step: %d, train loss: %s, train accuracy: %s' % (step, train_loss, train_accuracy))
                 train_summary_writer.add_summary(train_summaries, step)
-                if step > intermid_step: learning_rate=learning_rate_final
                 idx += 1
+            # learning rate warmup
+            if e > intermid_epoch: learning_rate=learning_rate_final
             if e % 10 == 0:
                 save_path = saver.save(sess, config.checkpoint_dir + '/' + 'model.ckpt')
                 print('model saved in file: %s' % save_path)

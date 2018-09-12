@@ -1,6 +1,22 @@
 
 - experiments 2
 ```
+* test 12
+word embedding size : 300
+chracter embedding size : 96
+chracter embedding random init : -1.0 ~ 1.0
+filter_size : 3,4,5
+num_filters : 32
+rnn_size : 256
+num_layers : 2
+learning_rate : 0.001 -> 0.002 (warmup), intermid_epoch = 15
+cnn_keep_prob : 0.5
+rnn_keep_prob : 0.5
+epoch : 50
+batch_size : 128
+
+0.895851286471 <- best
+
 * test 11
 word embedding size : 300
 chracter embedding size : 96
@@ -17,6 +33,7 @@ batch_size : 128
 +
 longest matching gazetteer feature(ignore length less than 10)
 
+0.876311566473
 
 * test 10
 word embedding size : 300
@@ -26,7 +43,7 @@ filter_size : 3,4,5
 num_filters : 32
 rnn_size : 256
 num_layers : 2
-learning_rate : 0.001 -> 0.002 (warmup)
+learning_rate : 0.001 -> 0.002 (warmup), intermid_step = 1000
 cnn_keep_prob : 0.5
 rnn_keep_prob : 0.5
 epoch : 50
@@ -44,7 +61,7 @@ filter_size : 3,4,5
 num_filters : 32
 rnn_size : 256
 num_layers : 2
-learning_rate : 0.0001 -> 0.001 (warmup)
+learning_rate : 0.0001 -> 0.001 (warmup), intermid_step = 1000
 cnn_keep_prob : 0.5
 rnn_keep_prob : 0.5
 epoch : 50
@@ -214,7 +231,7 @@ rnn_size : 256, keep_prob : 0.5, chr_embedding : max
 * chr embedding : conv
 
 rnn_size : 256, keep_prob : 0.5, chr_embedding : conv
-0.895172667607 <-- best
+0.895172667607
 0.893800406329
 0.892967114177
 0.893781430148
