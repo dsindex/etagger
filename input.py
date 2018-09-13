@@ -147,7 +147,7 @@ class Input:
             word = self.replace_digits(tokens[0]).lower()
             temp = self.pos_vec(tokens[1])                                # adding pos one-hot(5)
             temp = np.append(temp, self.chunk_vec(tokens[2]))             # adding chunk one-hot(5)
-            temp = np.append(temp, self.capital_vec(tokens[0]))           # adding capital one-hot(1)
+            temp = np.append(temp, self.shape_vec(tokens[0]))             # adding shape vec(5)
             '''
             temp = np.append(temp, tokens[4])                             # adding gazetteer feature
             '''
@@ -191,11 +191,26 @@ class Input:
             one_hot[4] = 1
         return one_hot
 
-    def capital_vec(self, word):
+    def shape_vec(self, word):
         # language specific features
-        one_hot = np.zeros(1)
-        if ord('A') <= ord(word[0]) <= ord('Z'):
+        def is_capital(ch):
+            if ord('A') <= ord(ch) <= ord('Z'): return True
+            return False
+        one_hot = np.zeros(5)
+        if not word.isalpha():
             one_hot[0] = 1
+        else:
+            # upperInitial
+            if is_capital(word[0]): one_hot[1] = 1
+            n_caps = 0
+            size = len(word)
+            for i in range(size):
+                if is_capital(word[i]): n_caps += 1
+            if n_caps == 0:
+                one_hot[2] = 1                    # lowercase
+            else:
+                if size == n_caps: one_hot[3] = 1 # allCaps
+                else: one_hot[4] = 1              # mixedCaps
         return one_hot
 
     def tag_vec(self, tag, class_size):

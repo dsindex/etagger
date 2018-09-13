@@ -29,7 +29,8 @@ etagger
       ![graph-1](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1.png)
     - apply gazetteer features [done]
     - apply learning-rate warm up [done]
-    - apply pos embedding [doing]
+    - apply pos embedding [done]
+    - extend language specific features [doing]
     - apply self-attention [doing]
     - apply ELMO embedding
     - serve api

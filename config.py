@@ -16,9 +16,9 @@ POS_DIM = 5
 '''
 etc dimension
   : you should define etc dimension by refering __create_etc_and_tag() of input.txt
-  : pos one-hot(5) + chunk one-hot(5) + capital one-hot(1) + gazetteer dimension
+  : pos one-hot(5) + chunk one-hot(5) + shape vec(5) + gazetteer vec
 '''
-ETC_DIM = 5 + 5 + 1
+ETC_DIM = 5 + 5 + 5
 
 class Config:
     def __init__(self, args, is_train=1):

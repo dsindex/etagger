@@ -1,9 +1,47 @@
 
 - experiments 2
 ```
+* test 17
+word embedding size : 300
+pos vec
+chracter embedding size : 96
+chracter embedding random init : -1.0 ~ 1.0
+shape vec
+filter_size : 3,4,5
+num_filters : 32
+rnn_size : 256
+num_layers : 2
+learning_rate : 0.001 -> 0.002 (warmup), intermid_epoch = 15
+cnn_keep_prob : 0.5
+rnn_keep_prob : 0.5
+epoch : 50
+batch_size : 128
+
+0.890206249228
+
+* test 17
+word embedding size : 300
+pos vec
+pos embedding size : 5
+chracter embedding size : 96
+chracter embedding random init : -1.0 ~ 1.0
+shape vec
+filter_size : 3,4,5
+num_filters : 32
+rnn_size : 256
+num_layers : 2
+learning_rate : 0.001 -> 0.002 (warmup), intermid_epoch = 15
+cnn_keep_prob : 0.5
+rnn_keep_prob : 0.5
+epoch : 50
+batch_size : 128
+
+0.893637926799 -> good
+
 * test 16
 word embedding size : 300
-pos vec and pos embedding size : 10
+pos vec
+pos embedding size : 5
 chracter embedding size : 96
 chracter embedding random init : -1.0 ~ 1.0
 filter_size : 3,4,5
@@ -16,9 +54,12 @@ rnn_keep_prob : 0.5
 epoch : 50
 batch_size : 128
 
+0.891214677092
+
 * test 15
 word embedding size : 300
-remove pos vec and pos embedding size : 10
+remove pos vec
+pos embedding size : 10
 chracter embedding size : 96
 chracter embedding random init : -1.0 ~ 1.0
 filter_size : 3,4,5
@@ -35,7 +76,8 @@ batch_size : 128
 
 * test 14
 word embedding size : 300
-remove pos vec and pos embedding size : 50
+remove pos vec
+pos embedding size : 50
 chracter embedding size : 96
 chracter embedding random init : -1.0 ~ 1.0
 filter_size : 3,4,5
