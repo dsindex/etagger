@@ -10,6 +10,7 @@ class Input:
     def __init__(self, data, config):
         self.sentence_word_ids = []      # [None, sentence_length]
         self.sentence_wordchr_ids = []   # [None, sentence_length, word_length]
+        self.sentence_pos_ids = []       # [None, sentence_length]
         self.sentence_etc = []           # [None, sentence_length, etc_dim]
         self.sentence_tag = []
         self.config = config
@@ -27,6 +28,8 @@ class Input:
             self.sentence_word_ids.append(word_ids)
             wordchr_ids = self.__create_wordchr_ids(bucket)
             self.sentence_wordchr_ids.append(wordchr_ids)
+            pos_ids = self.__create_pos_ids(bucket)
+            self.sentence_pos_ids.append(pos_ids)
             etc, tag = self.__create_etc_and_tag(bucket)
             self.sentence_etc.append(etc)
             self.sentence_tag.append(tag)
@@ -46,6 +49,8 @@ class Input:
                     self.sentence_word_ids.append(word_ids)
                     wordchr_ids = self.__create_wordchr_ids(bucket)
                     self.sentence_wordchr_ids.append(wordchr_ids)
+                    pos_ids = self.__create_pos_ids(bucket)
+                    self.sentence_pos_ids.append(pos_ids)
                     etc, tag = self.__create_etc_and_tag(bucket)
                     self.sentence_etc.append(etc)
                     self.sentence_tag.append(tag)
@@ -98,6 +103,23 @@ class Input:
                 chr_ids.append(self.config.embvec.pad_cid)
             wordchr_ids.append(chr_ids)
         return wordchr_ids
+
+    def __create_pos_ids(self, bucket):
+        pos_ids = []
+        sentence_length = 0
+        for line in bucket:
+            line = line.strip()
+            tokens = line.split()
+            assert (len(tokens) == 4)
+            sentence_length += 1
+            pos = tokens[1]
+            pid = self.config.embvec.get_pid(pos)
+            pos_ids.append(pid)
+            if sentence_length == self.max_sentence_length: break
+        # padding with pad pid
+        for _ in range(self.max_sentence_length - sentence_length):
+            pos_ids.append(self.config.embvec.pad_pid)
+        return pos_ids
 
     def __create_etc_and_tag(self, bucket):
         etc = []

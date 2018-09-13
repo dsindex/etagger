@@ -25,6 +25,8 @@ class Model:
         word_length = config.word_length
         chr_vocab_size = len(embvec.chr_vocab)
         chr_dim = config.chr_dim
+        pos_vocab_size = len(embvec.pos_vocab)
+        pos_dim = config.pos_dim
         etc_dim = config.etc_dim
         class_size = config.class_size
         is_train = config.is_train
@@ -32,8 +34,8 @@ class Model:
 
         # Input layer
 
-        self.input_data_word_ids = tf.placeholder(tf.int32, shape=[None, sentence_length], name='input_data_word_ids')
         # word embedding features
+        self.input_data_word_ids = tf.placeholder(tf.int32, shape=[None, sentence_length], name='input_data_word_ids')
         with tf.device('/cpu:0'), tf.name_scope('word-embedding'):
             embed_arr = np.array(embvec.wrd_embeddings)
             embed_init = tf.constant_initializer(embed_arr)
@@ -100,12 +102,20 @@ class Model:
                 # reshape([None, chr_dim]) -> [None, sentence_length, chr_dim]
                 self.wordchr_embeddings = tf.reshape(self.wordchr_embeddings, [-1, sentence_length, chr_dim])
 
+        # pos embedding features
+        self.input_data_pos_ids = tf.placeholder(tf.int32, shape=[None, sentence_length], name='input_data_pos_ids')
+        with tf.name_scope('pos-embeddings'):
+            with tf.device('/cpu:0'):
+                pos_embeddings = tf.Variable(tf.random_uniform([pos_vocab_size, pos_dim], -0.5, 0.5), name='pos_embeddings')
+                # embedding_lookup([None, sentence_length]) -> [None, sentence_length, pos_dim]
+                self.pos_embeddings = tf.nn.embedding_lookup(pos_embeddings, self.input_data_pos_ids)
+
         with tf.name_scope('etc'):
             # etc features 
             self.input_data_etc = tf.placeholder(tf.float32, shape=[None, sentence_length, etc_dim], name='input_data_etc')
 
-        # concat([None, sentence_length, wrd_dim], [None, sentence_length, chr_dim], [None, sentence_length, etc_dim]) -> [None, sentence_length, unit_dim]
-        self.input_data = tf.concat([self.word_embeddings, self.wordchr_embeddings, self.input_data_etc], axis=-1, name='input_data')
+        # concat([None, sentence_length, wrd_dim], [None, sentence_length, chr_dim], [None, sentence_length, pos_dim], [None, sentence_length, etc_dim]) -> [None, sentence_length, unit_dim]
+        self.input_data = tf.concat([self.word_embeddings, self.wordchr_embeddings, self.pos_embeddings, self.input_data_etc], axis=-1, name='input_data')
 
         # Answer
 

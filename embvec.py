@@ -21,6 +21,11 @@ class EmbVec:
         self.unk_cid = 1         # for unknown char
         self.chr_vocab[self.pad] = self.pad_cid
         self.chr_vocab[self.unk] = self.unk_cid
+        self.pos_vocab = {}      # pos vocab
+        self.pad_pid = 0         # for padding pos embedding
+        self.unk_pid = 1         # for unknown pos
+        self.pos_vocab[self.pad] = self.pad_pid
+        self.pos_vocab[self.unk] = self.unk_pid
         self.oot_tid = 0         # out of tag id
         self.oot_tag = 'O'       # out of tag, this is fixed for convenience
         self.tag_vocab = {}      # tag vocab (tag -> id)
@@ -40,7 +45,7 @@ class EmbVec:
         vector = np.array([random() for i in range(self.wrd_dim)])
         assert(len(vector) == self.wrd_dim)
         self.wrd_embeddings.append(vector)
-        # 2 wid ~ for normal entries
+        # build word vocab
         wid = self.unk_wid + 1
         for line in open(args.emb_path):
             line = line.strip()
@@ -54,8 +59,9 @@ class EmbVec:
             self.wrd_embeddings.append(vector)
             wid += 1
         sys.stderr.write('invalid entries %d' % (invalid) + '\n')
-        # 2 cid ~ for normal characters
+        # build character/pos/tag vocab
         cid = self.unk_cid + 1
+        pid = self.unk_pid + 1
         tid = self.oot_tid + 1
         for line in open(args.train_path):
             line = line.strip()
@@ -63,12 +69,17 @@ class EmbVec:
             tokens = line.split()
             assert(len(tokens) == 4)
             word = tokens[0]
+            pos  = tokens[1]
             tag  = tokens[3]
             # character vocab
             for ch in word:
                 if ch not in self.chr_vocab:
                     self.chr_vocab[ch] = cid
                     cid += 1
+            # pos vocab
+            if pos not in self.pos_vocab:
+                self.pos_vocab[pos] = pid
+                pid += 1
             # tag, itag vocab
             if tag not in self.tag_vocab:
                 self.tag_vocab[tag] = tid
@@ -112,6 +123,11 @@ class EmbVec:
         if ch in self.chr_vocab:
             return self.chr_vocab[ch]
         return self.unk_cid
+
+    def get_pid(self, pos):
+        if pos in self.pos_vocab:
+            return self.pos_vocab[pos]
+        return self.unk_pid
 
     def get_tid(self, tag):
         if tag in self.tag_vocab:
