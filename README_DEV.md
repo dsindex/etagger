@@ -12,7 +12,7 @@ filter_size : 3,4,5
 num_filters : 32
 rnn_size : 256
 num_layers : 2
-learning_rate : 0.001 -> 0.002 (warmup), intermid_epoch = 15
+learning_rate : 0.001
 cnn_keep_prob : 0.5
 rnn_keep_prob : 0.5
 pos_keep_prob : 0.5

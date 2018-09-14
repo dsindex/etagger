@@ -36,7 +36,8 @@ etagger
       - pos one-hot vector + pos embedding
     - extend language specific features [done]
       - initialCaps, allCaps, lowercase, mixedCaps, non-info
-    - apply self-attention [doing]
+    - apply multi-head self-attention [doing]
+      - without learning-rate warm up
     - apply ELMO embedding
     - serve api
       - freeze model and serve
