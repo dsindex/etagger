@@ -7,6 +7,7 @@ etagger
 
 - base repository
   - https://github.com/monikkinom/ner-lstm
+  - https://github.com/dennybritz/cnn-text-classification-tf/blob/master/text_cnn.py
   - https://github.com/DongjunLee/transformer-tensorflow/blob/master/transformer/attention.py
 
 - modification
