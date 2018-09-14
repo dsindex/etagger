@@ -5,8 +5,9 @@ etagger
 
 - named entity tagger using multi-layer Bidirectional LSTM
 
-- original git repository
+- base repository
   - https://github.com/monikkinom/ner-lstm
+  - https://github.com/DongjunLee/transformer-tensorflow/blob/master/transformer/attention.py
 
 - modification
   - modified for tf version(1.4)

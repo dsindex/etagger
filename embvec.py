@@ -95,7 +95,7 @@ class EmbVec:
                     word = tokens[0].lower()
                     tag  = tokens[3]
                     if self.tag_prefix_b not in tag: continue
-                    segment = self.get_segment(bucket, bucket_size, i)
+                    segment = self.__get_segment(bucket, bucket_size, i)
                     if not segment: continue
                     tag_suffix = tag.split('-')[1]
                     # noise filtering
@@ -139,7 +139,7 @@ class EmbVec:
             return self.itag_vocab[tid]
         return self.oot_tag
 
-    def get_segment(self, bucket, bucket_size, i):
+    def __get_segment(self, bucket, bucket_size, i):
         segment = []
         for j in range(i, bucket_size):
             tokens = bucket[j]

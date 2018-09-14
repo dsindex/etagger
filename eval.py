@@ -13,7 +13,7 @@ class Eval:
         self.recall = {}
         self.fscore = {}
 
-    def eval_bucket(self, bucket):
+    def __eval_bucket(self, bucket):
         for line in bucket:
             tokens = line.split()
             size = len(tokens)
@@ -48,11 +48,11 @@ class Eval:
             if not line: break
             line = line.strip()
             if not line and len(bucket) >= 1:
-                self.eval_bucket(bucket)
+                self.__eval_bucket(bucket)
                 bucket = []
             if line : bucket.append(line)
         if len(bucket) != 0:
-            self.eval_bucket(bucket)
+            self.__eval_bucket(bucket)
 
         # in_class vs out_class
         in_class  = 'I'

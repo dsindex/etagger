@@ -1,4 +1,33 @@
 
+- experiments 3
+```
+* test 1
+word embedding size : 300
+pos vec
+pos embedding size : 5
+chracter embedding size : 96
+chracter embedding random init : -1.0 ~ 1.0
+shape vec
+filter_size : 3,4,5
+num_filters : 32
+rnn_size : 256
+num_layers : 2
+learning_rate : 0.001 -> 0.002 (warmup), intermid_epoch = 15
+cnn_keep_prob : 0.5
+rnn_keep_prob : 0.5
+pos_keep_prob : 0.5
+epoch : 50
+batch_size : 128
++
+multi head attention
+num_heads : 1
+mh_num_heads : 1
+mh_linear_key_dim : 64
+mh_linear_val_dim : 64
+mh_dropout : 0.2
+
+```
+
 - experiments 2
 ```
 * test 17

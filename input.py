@@ -145,14 +145,14 @@ class Input:
         for tokens in nbucket:
             sentence_length += 1
             word = self.replace_digits(tokens[0]).lower()
-            temp = self.pos_vec(tokens[1])                                # adding pos one-hot(5)
-            temp = np.append(temp, self.chunk_vec(tokens[2]))             # adding chunk one-hot(5)
-            temp = np.append(temp, self.shape_vec(tokens[0]))             # adding shape vec(5)
+            temp = self.__pos_vec(tokens[1])                                # adding pos one-hot(5)
+            temp = np.append(temp, self.__chunk_vec(tokens[2]))             # adding chunk one-hot(5)
+            temp = np.append(temp, self.__shape_vec(tokens[0]))             # adding shape vec(5)
             '''
             temp = np.append(temp, tokens[4])                             # adding gazetteer feature
             '''
             etc.append(temp)
-            tag.append(self.tag_vec(tokens[3], self.config.class_size))   # tag one-hot(9)
+            tag.append(self.__tag_vec(tokens[3], self.config.class_size))   # tag one-hot(9)
             if sentence_length == self.max_sentence_length: break
         # padding with 0s
         for _ in range(self.max_sentence_length - sentence_length):
@@ -161,7 +161,7 @@ class Input:
             tag.append(np.array([0] * self.config.class_size))
         return etc, tag
 
-    def pos_vec(self, t):
+    def __pos_vec(self, t):
         # language specific features
         one_hot = np.zeros(5)
         if t == 'NN' or t == 'NNS':
@@ -176,7 +176,7 @@ class Input:
             one_hot[4] = 1
         return one_hot
 
-    def chunk_vec(self, t):
+    def __chunk_vec(self, t):
         # language specific features
         one_hot = np.zeros(5)
         if 'NP' in t:
@@ -191,7 +191,7 @@ class Input:
             one_hot[4] = 1
         return one_hot
 
-    def shape_vec(self, word):
+    def __shape_vec(self, word):
         # language specific features
         def is_capital(ch):
             if ord('A') <= ord(ch) <= ord('Z'): return True
@@ -213,7 +213,7 @@ class Input:
                 else: one_hot[4] = 1              # mixedCaps
         return one_hot
 
-    def tag_vec(self, tag, class_size):
+    def __tag_vec(self, tag, class_size):
         one_hot = np.zeros(class_size)
         tid = self.config.embvec.get_tid(tag)
         one_hot[tid] = 1

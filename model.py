@@ -2,6 +2,7 @@ from __future__ import print_function
 import tensorflow as tf
 import numpy as np
 from embvec import EmbVec
+from attention import Attention
 
 class Model:
     '''
@@ -10,11 +11,16 @@ class Model:
 
     __rnn_size = 256               # size of RNN hidden unit
     __num_layers = 2               # number of RNN layers
-    __cnn_keep_prob = 0.5          # keep probability for dropout(cnn)
-    __rnn_keep_prob = 0.5          # keep probability for dropout(rnn)
+    __cnn_keep_prob = 0.5          # keep probability for dropout(cnn character embedding)
+    __rnn_keep_prob = 0.5          # keep probability for dropout(rnn cell)
+    __pos_keep_prob = 0.5          # keep probability for dropout(pos embedding)
     __filter_sizes = [3,4,5]       # filter sizes
     __num_filters = 32             # number of filters
     __chr_embedding_type = 'conv'  # 'max' | 'conv', default is max
+    __mh_num_heads = 1             # number of head for multi head attention
+    __mh_linear_key_dim = 64       # dk for multi head attention
+    __mh_linear_val_dim = 64       # dv for multi head attention
+    __mh_dropout = 0.2             # dropout probability for multi head attention
 
     def __init__(self, config):
         '''
@@ -109,6 +115,9 @@ class Model:
                 pos_embeddings = tf.Variable(tf.random_uniform([pos_vocab_size, pos_dim], -0.5, 0.5), name='pos_embeddings')
                 # embedding_lookup([None, sentence_length]) -> [None, sentence_length, pos_dim]
                 self.pos_embeddings = tf.nn.embedding_lookup(pos_embeddings, self.input_data_pos_ids)
+                if is_train: keep_prob = self.__pos_keep_prob
+                else: keep_prob = 1.0 # do not apply dropout for inference
+                self.pos_embeddings = tf.nn.dropout(self.pos_embeddings, keep_prob)
 
         with tf.name_scope('etc'):
             # etc features 
@@ -126,32 +135,38 @@ class Model:
         with tf.name_scope('rnn'):
             if is_train: keep_prob = self.__rnn_keep_prob
             else: keep_prob = 1.0 # do not apply dropout for inference 
-            fw_cell = tf.contrib.rnn.MultiRNNCell([self.create_cell(self.__rnn_size, keep_prob=keep_prob) for _ in range(self.__num_layers)], state_is_tuple=True)
-            bw_cell = tf.contrib.rnn.MultiRNNCell([self.create_cell(self.__rnn_size, keep_prob=keep_prob) for _ in range(self.__num_layers)], state_is_tuple=True)
-            self.length = self.compute_length(self.output_data)
+            fw_cell = tf.contrib.rnn.MultiRNNCell([self.__create_cell(self.__rnn_size, keep_prob=keep_prob) for _ in range(self.__num_layers)], state_is_tuple=True)
+            bw_cell = tf.contrib.rnn.MultiRNNCell([self.__create_cell(self.__rnn_size, keep_prob=keep_prob) for _ in range(self.__num_layers)], state_is_tuple=True)
+            self.length = self.__compute_length(self.output_data)
             # transpose([None, sentence_length, unit_dim]) -> unstack([sentence_length, None, unit_dim]) -> list of [None, unit_dim]
             output, _, _ = tf.contrib.rnn.static_bidirectional_rnn(fw_cell, bw_cell,
                                                    tf.unstack(tf.transpose(self.input_data, perm=[1, 0, 2])),
                                                    dtype=tf.float32, sequence_length=self.length)
-            # stack(list of [None, 2*self.__rnn_size]) -> transpose([sentence_length, None, 2*self.__rnn_size]) -> reshpae([None, sentence_length, 2*self.__rnn_size]) -> [None, 2*self.__rnn_size]
-            output = tf.reshape(tf.transpose(tf.stack(output), perm=[1, 0, 2]), [-1, 2*self.__rnn_size])
+            # stack(list of [None, 2*self.__rnn_size]) -> transpose([sentence_length, None, 2*self.__rnn_size]) -> [None, sentence_length, 2*self.__rnn_size]
+            output = tf.transpose(tf.stack(output), perm=[1, 0, 2])
+
+        # Attention layer
+
+        attended_output = self.__apply_self_attention(output, 2*self.__rnn_size)
 
         # Projection layer
 
         with tf.name_scope('projection'):
-            weight, bias = self.create_weight_and_bias(2*self.__rnn_size, class_size)
-            # [None, 2*self.__rnn_size] x [2*self.__rnn_size, class_size] + [class_size]  -> softmax([None, class_size]) -> [None, class_size]
-            prediction = tf.nn.softmax(tf.matmul(output, weight) + bias)
+            weight, bias = self.__create_weight_and_bias(2*self.__rnn_size, class_size)
+            # reshape([None, sentence_length, 2*self.__rnn_size]) -> [None, 2*self.__rnn_size]
+            attended_output = tf.reshape(attended_output, [-1, 2*self.__rnn_size])
+            # [None, 2*self.__rnn_size] x [2*self.__rnn_size, class_size] + [class_size] -> softmax([None, class_size])
+            self.prediction = tf.nn.softmax(tf.matmul(attended_output, weight) + bias)
             # reshape([None, class_size]) -> [None, sentence_length, class_size]
-            self.prediction = tf.reshape(prediction, [-1, sentence_length, class_size])
+            self.prediction = tf.reshape(self.prediction, [-1, sentence_length, class_size])
 
         # Loss, Accuracy, Optimization
 
         with tf.name_scope('loss'):
-            self.loss = self.compute_cost()
+            self.loss = self.__compute_cost()
 
         with tf.name_scope('accuracy'):
-            self.accuracy = self.compute_accuracy()
+            self.accuracy = self.__compute_accuracy()
 
         with tf.name_scope('optimization'):
             self.global_step = tf.Variable(0, name='global_step', trainable=False)
@@ -161,7 +176,28 @@ class Model:
             grads, _ = tf.clip_by_global_norm(tf.gradients(self.loss, tvars), 10)
             self.train_op = optimizer.apply_gradients(zip(grads, tvars), global_step=self.global_step)
 
-    def compute_cost(self):
+    def __apply_self_attention(self, inputs, model_dim):
+        with tf.variable_scope('apply-self-attention'):
+            o1 = tf.identity(inputs)
+            # [None, sentence_length, class_size] -> [None, sentence_length, class_size]
+            o2 = self.__add_and_norm(o1, self.__masked_self_attention(o1, o1, o1, model_dim))
+            return o2
+
+    def __masked_self_attention(self, q, k, v, model_dim):
+        with tf.variable_scope('masked-self-attention'):
+            attention = Attention(num_heads=self.__mh_num_heads,
+                                  masked=False,
+                                  linear_key_dim=self.__mh_linear_key_dim,
+                                  linear_value_dim=self.__mh_linear_val_dim,
+                                  model_dim=model_dim,
+                                  dropout=self.__mh_dropout)
+            return attention.multi_head(q, k, v)
+
+    def __add_and_norm(self, x, sub_layer_x):
+        with tf.variable_scope('add-and-norm'):
+            return tf.contrib.layers.layer_norm(tf.add(x, sub_layer_x))
+
+    def __compute_cost(self):
         '''
         Compute cross entropy(self.output_data, self.prediction)
         '''
@@ -182,7 +218,7 @@ class Model:
         cross_entropy /= tf.cast(self.length, tf.float32)
         return tf.reduce_mean(cross_entropy)
 
-    def compute_accuracy(self):
+    def __compute_accuracy(self):
         # argmax([None, sentence_length, class_size]) -> equal([None, sentence_length]) -> cast([None, sentence_length]) -> [None, sentence_length]
         correct_prediction = tf.cast(tf.equal(tf.argmax(self.prediction, 2), tf.argmax(self.output_data, 2)), 'float')
         # ignore padding by masking
@@ -192,8 +228,7 @@ class Model:
         correct_prediction /= tf.cast(self.length, tf.float32)
         return tf.reduce_mean(correct_prediction)
 
-    @staticmethod
-    def create_cell(rnn_size, keep_prob):
+    def __create_cell(self, rnn_size, keep_prob):
         '''
         Create a RNN cell
         '''
@@ -201,8 +236,7 @@ class Model:
         drop = tf.contrib.rnn.DropoutWrapper(cell, output_keep_prob=keep_prob)
         return drop
 
-    @staticmethod
-    def compute_length(output_data):
+    def __compute_length(self, output_data):
         '''
         Compute each sentence length
         '''
@@ -212,8 +246,7 @@ class Model:
         length = tf.cast(tf.reduce_sum(words_used_in_sent, reduction_indices=1), tf.int32)
         return length
 
-    @staticmethod
-    def create_weight_and_bias(in_size, out_size):
+    def __create_weight_and_bias(self, in_size, out_size):
         '''
         Create weight matrix and bias
         '''
