@@ -20,11 +20,10 @@ epoch : 50
 batch_size : 128
 +
 multi head attention
-num_heads : 1
 mh_num_heads : 1
-mh_linear_key_dim : 64
-mh_linear_val_dim : 64
-mh_dropout : 0.2
+mh_linear_key_dim : 32
+mh_linear_val_dim : 32
+mh_dropout : 0.5
 
 ```
 

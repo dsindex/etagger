@@ -18,9 +18,9 @@ class Model:
     __num_filters = 32             # number of filters
     __chr_embedding_type = 'conv'  # 'max' | 'conv', default is max
     __mh_num_heads = 1             # number of head for multi head attention
-    __mh_linear_key_dim = 64       # dk for multi head attention
-    __mh_linear_val_dim = 64       # dv for multi head attention
-    __mh_dropout = 0.2             # dropout probability for multi head attention
+    __mh_linear_key_dim = 32       # dk for multi head attention
+    __mh_linear_val_dim = 32       # dv for multi head attention
+    __mh_dropout = 0.5             # dropout probability for multi head attention
 
     def __init__(self, config):
         '''
@@ -28,6 +28,7 @@ class Model:
         '''
         embvec = config.embvec
         sentence_length = config.sentence_length
+        self.sentence_length = sentence_length
         word_length = config.word_length
         chr_vocab_size = len(embvec.chr_vocab)
         chr_dim = config.chr_dim
@@ -179,7 +180,7 @@ class Model:
     def __apply_self_attention(self, inputs, model_dim):
         with tf.variable_scope('apply-self-attention'):
             o1 = tf.identity(inputs)
-            # [None, sentence_length, class_size] -> [None, sentence_length, class_size]
+            # [None, sentence_length, model_dim] -> [None, sentence_length, model_dim]
             o2 = self.__add_and_norm(o1, self.__masked_self_attention(o1, o1, o1, model_dim))
             return o2
 
@@ -190,7 +191,9 @@ class Model:
                                   linear_key_dim=self.__mh_linear_key_dim,
                                   linear_value_dim=self.__mh_linear_val_dim,
                                   model_dim=model_dim,
-                                  dropout=self.__mh_dropout)
+                                  dropout=self.__mh_dropout,
+                                  lengths=self.length,
+                                  max_length=self.sentence_length)
             return attention.multi_head(q, k, v)
 
     def __add_and_norm(self, x, sub_layer_x):
