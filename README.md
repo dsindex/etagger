@@ -150,6 +150,6 @@ in IN O O O
 . . O I-DATE O
 ```
 
-### etc
+### experiments
 
 - [README_DEV.md](https://github.com/dsindex/etagger/blob/master/README_DEV.md) 
