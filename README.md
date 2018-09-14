@@ -27,7 +27,6 @@ etagger
     - apply character-level embedding
       - using convolution [done]
       - using reduce_max only [done]
-      ![graph-1](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1.png)
     - apply gazetteer features [done]
       - if we construct the gazetteer vocab from the training data, the performance is decreasing.
       - recommend constructing the gazetteer vocab from other sources.
@@ -38,6 +37,7 @@ etagger
       - initialCaps, allCaps, lowercase, mixedCaps, non-info
     - apply multi-head self-attention [doing]
       - without learning-rate warm up
+      ![graph-1](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1.png)
     - apply ELMO embedding
     - serve api
       - freeze model and serve
