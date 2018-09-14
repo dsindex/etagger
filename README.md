@@ -9,6 +9,7 @@ etagger
   - https://github.com/monikkinom/ner-lstm
   - https://github.com/dennybritz/cnn-text-classification-tf/blob/master/text_cnn.py
   - https://github.com/DongjunLee/transformer-tensorflow/blob/master/transformer/attention.py
+  - https://github.com/Kyubyong/transformer/blob/master/modules.py
 
 - modification
   - modified for tf version(1.4)
@@ -52,6 +53,7 @@ etagger
   - [Implementing a sentence classification using Char level CNN & RNN](https://github.com/cuteboydot/Sentence-Classification-using-Char-CNN-and-RNN)
   - [lstm-char-cnn-tensorflow/models/LSTMTDNN.py](https://github.com/carpedm20/lstm-char-cnn-tensorflow/blob/master/models/LSTMTDNN.py)
   - [transformer-tensorflow/transformer/attention.py](https://github.com/DongjunLee/transformer-tensorflow/blob/master/transformer/attention.py)
+  - [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py)
 
 ### pre-requisites
 
