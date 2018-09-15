@@ -4,6 +4,10 @@ import numpy as np
 from embvec import EmbVec
 from attention import Attention
 
+__all__ = [
+    'Model'
+]
+
 class Model:
     '''
     RNN model for sequence tagging
@@ -17,7 +21,7 @@ class Model:
     __filter_sizes = [3,4,5]       # filter sizes
     __num_filters = 32             # number of filters
     __chr_embedding_type = 'conv'  # 'max' | 'conv', default is max
-    __mh_num_heads = 1             # number of head for multi head attention
+    __mh_num_heads = 2             # number of head for multi head attention
     __mh_linear_key_dim = 32       # dk for multi head attention
     __mh_linear_val_dim = 32       # dv for multi head attention
     __mh_dropout = 0.5             # dropout probability for multi head attention
@@ -177,6 +181,35 @@ class Model:
             grads, _ = tf.clip_by_global_norm(tf.gradients(self.loss, tvars), 10)
             self.train_op = optimizer.apply_gradients(zip(grads, tvars), global_step=self.global_step)
 
+    def __mask_for_lengths(self, lengths, max_length=None, mask_right=True, value=-1000.0):
+        '''
+        Creates a [batch_size x max_length] mask.
+        Args:
+            lengths: int32 1-dim tensor of batch_size lengths
+            max_length: int32 0-dim tensor or python int
+            mask_right: if True, everything before "lengths" becomes zero and the
+                rest "value", else vice versa
+            value: value for the mask
+        Returns:
+            [batch_size x max_length] mask of zeros and "value"s
+        (source from https://www.programcreek.com/python/example/90548/tensorflow.sequence_mask)
+        '''
+        mask = tf.sequence_mask(lengths, max_length, dtype=tf.float32)
+        if mask_right:
+            mask = 1.0 - mask
+        mask *= value
+        return mask 
+
+    def __mask_for_padding(self, inputs):
+        last_dim = tf.shape(inputs)[-1]
+        # [None, sentence_length]
+        mask = self.mask_for_lengths(self.length, self.sentence_length, mask_right=True, value=-float('inf'))
+        # [None, sentence_length, 1]
+        mask = tf.expand_dims(mask, -1)
+        # [None, sentence_length, last_dim]
+        mask = tf.tile(mask, [1, 1, q_last_dim])
+        return inputs + mask
+
     def __apply_self_attention(self, inputs, model_dim):
         with tf.variable_scope('apply-self-attention'):
             o1 = tf.identity(inputs)
@@ -191,9 +224,7 @@ class Model:
                                   linear_key_dim=self.__mh_linear_key_dim,
                                   linear_value_dim=self.__mh_linear_val_dim,
                                   model_dim=model_dim,
-                                  dropout=self.__mh_dropout,
-                                  lengths=self.length,
-                                  max_length=self.sentence_length)
+                                  dropout=self.__mh_dropout)
             return attention.multi_head(q, k, v)
 
     def __add_and_norm(self, x, sub_layer_x):
@@ -260,7 +291,7 @@ class Model:
     @staticmethod
     def set_cuda_visible_devices(is_train):
         import os
-        os.environ["CUDA_VISIBLE_DEVICES"]="1"
+        os.environ['CUDA_VISIBLE_DEVICES']='1'
         if is_train:
             from tensorflow.python.client import device_lib
             print(device_lib.list_local_devices())

@@ -1,13 +1,12 @@
 # source from 
 # : https://github.com/DongjunLee/transformer-tensorflow/blob/master/transformer/attention.py
-# : https://www.programcreek.com/python/example/90548/tensorflow.sequence_mask
 
 from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
 __all__ = [
-    "positional_encoding", "mask_for_lengths", "Attention"
+    "positional_encoding", "Attention"
 ]
 
 def positional_encoding(dim, sentence_length, dtype=tf.float32):
@@ -18,24 +17,6 @@ def positional_encoding(dim, sentence_length, dtype=tf.float32):
 
     return tf.convert_to_tensor(encoded_vec.reshape([sentence_length, dim]), dtype=dtype)
 
-def mask_for_lengths(lengths, max_length=None, mask_right=True, value=-1000.0):
-    """
-    Creates a [batch_size x max_length] mask.
-    Args:
-        lengths: int32 1-dim tensor of batch_size lengths
-        max_length: int32 0-dim tensor or python int
-        mask_right: if True, everything before "lengths" becomes zero and the
-            rest "value", else vice versa
-        value: value for the mask
-    Returns:
-        [batch_size x max_length] mask of zeros and "value"s
-    """
-    mask = tf.sequence_mask(lengths, max_length, dtype=tf.float32)
-    if mask_right:
-        mask = 1.0 - mask
-    mask *= value
-    return mask 
-
 class Attention:
     """Attention class"""
 
@@ -45,9 +26,7 @@ class Attention:
                  linear_key_dim=50,
                  linear_value_dim=50,
                  model_dim=100,
-                 dropout=0.2,
-                 lengths=None,
-                 max_length=None):
+                 dropout=0.2):
 
         assert linear_key_dim % num_heads == 0
         assert linear_value_dim % num_heads == 0
@@ -58,14 +37,8 @@ class Attention:
         self.linear_value_dim = linear_value_dim
         self.model_dim = model_dim
         self.dropout = dropout
-        self.lengths = lengths
-        self.max_length = max_length
 
     def multi_head(self, q, k, v):
-        '''
-        # self attention only
-        q, k, v = self._mask_for_padding(q, k, v)
-        '''
         q, k, v = self._linear_projection(q, k, v)
         qs, ks, vs = self._split_heads(q, k, v)
         outputs = self._scaled_dot_product(qs, ks, vs)
@@ -73,21 +46,6 @@ class Attention:
         output = tf.layers.dense(output, self.model_dim)
 
         return tf.nn.dropout(output, 1.0 - self.dropout)
-
-    def _mask_for_padding(self, q, k, v):
-        q_last_dim = tf.shape(q)[-1]
-        # [None, max_length]
-        mask = mask_for_lengths(self.lengths, self.max_length, mask_right=True, value=-float('inf'))
-        # [None, max_length, 1]
-        mask = tf.expand_dims(mask, -1)
-        # [max, max_length, q_last_dim]
-        mask_q = tf.tile(mask, [1, 1, q_last_dim])
-        mask_k = mask_q
-        mask_v = mask_q
-        q = q + mask_q
-        k = k + mask_k
-        v = v + mask_v
-        return q, k, v
 
     def _linear_projection(self, q, k, v):
         q = tf.layers.dense(q, self.linear_key_dim, use_bias=False)

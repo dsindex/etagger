@@ -5,6 +5,10 @@ from random import random
 import sys
 import argparse
 
+__all__ = [
+    'EmbVec'
+]
+
 class EmbVec:
     def __init__(self, args):
         self.pad = '#PAD#'

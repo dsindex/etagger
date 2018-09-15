@@ -25,6 +25,8 @@ mh_linear_key_dim : 32
 mh_linear_val_dim : 32
 mh_dropout : 0.5
 
+0.894368789106 -> good
+
 ```
 
 - experiments 2
