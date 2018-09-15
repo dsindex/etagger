@@ -113,7 +113,7 @@ $ rm -rf runs; tensorboard --logdir runs/summaries/
 ```
   - accuracy and loss
   ![graph-2](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-2.png)
-  - abnormal case when using multi-headd(2)
+  - abnormal case when using multi-head(2)
   ![graph-3](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-3.png)
     - i guess that the softmax(applied in multi-head attention functions) was corrupted by paddings
 
