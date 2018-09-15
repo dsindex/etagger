@@ -49,6 +49,10 @@ etagger
 - model
   ![graph-1](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1.png)
 
+- f-score
+  - 0.8943
+  - [experiments](https://github.com/dsindex/etagger/blob/master/README_DEV.md)
+
 - references
   - [Named Entity Recognition with Bidirectional LSTM-CNNs](https://www.aclweb.org/anthology/Q16-1026)
     - [keras implementation](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
@@ -161,6 +165,3 @@ in IN O O O
 . . O I-DATE O
 ```
 
-### experiments
-
-- [README_DEV.md](https://github.com/dsindex/etagger/blob/master/README_DEV.md) 
