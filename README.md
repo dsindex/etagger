@@ -4,6 +4,10 @@ etagger
 ### description
 
 - named entity tagger using multi-layer Bidirectional LSTM
+  - + character convolutional embedding
+  - + gazetteer features
+  - + pos embedding
+  - + multi-head attention
 
 - base repository
   - https://github.com/monikkinom/ner-lstm
