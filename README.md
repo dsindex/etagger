@@ -38,10 +38,12 @@ etagger
       - initialCaps, allCaps, lowercase, mixedCaps, non-info
     - apply multi-head self-attention [doing]
       - without learning-rate warm up
-      ![graph-1](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1.png)
     - apply ELMO embedding
     - serve api
       - freeze model and serve
+
+- model
+  ![graph-1](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1.png)
 
 - references
   - [Named Entity Recognition with Bidirectional LSTM-CNNs](https://www.aclweb.org/anthology/Q16-1026)
@@ -101,6 +103,7 @@ test, max_sentence_length = 124
 $ python train.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125
 $ rm -rf runs; tensorboard --logdir runs/summaries/
 ```
+![graph-2](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-2.png)
 
 - inference(bulk)
 ```
