@@ -25,6 +25,7 @@ mh_linear_key_dim : 32
 mh_linear_val_dim : 32
 mh_dropout : 0.5
 
+0.896346749226 -> best
 
 * test 1
 word embedding size : 300
@@ -50,7 +51,7 @@ mh_linear_key_dim : 32
 mh_linear_val_dim : 32
 mh_dropout : 0.5
 
-0.894368789106 -> good
+0.894368789106
 
 ```
 
@@ -91,7 +92,7 @@ rnn_keep_prob : 0.5
 epoch : 50
 batch_size : 128
 
-0.893637926799 -> good
+0.893637926799
 
 * test 16
 word embedding size : 300
@@ -162,7 +163,7 @@ rnn_keep_prob : 0.5
 epoch : 50
 batch_size : 128
 
-0.859092036715 -> worst
+0.859092036715
 
 
 * test 12
@@ -179,7 +180,7 @@ rnn_keep_prob : 0.5
 epoch : 50
 batch_size : 128
 
-0.895851286471 <- best
+0.895851286471
 
 * test 11
 word embedding size : 300

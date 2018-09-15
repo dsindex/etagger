@@ -50,7 +50,7 @@ etagger
   ![graph-1](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1.png)
 
 - f-score
-  - 0.8943
+  - best : 0.896346749226
   - [experiments](https://github.com/dsindex/etagger/blob/master/README_DEV.md)
 
 - references
@@ -111,7 +111,11 @@ test, max_sentence_length = 124
 $ python train.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125
 $ rm -rf runs; tensorboard --logdir runs/summaries/
 ```
-![graph-2](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-2.png)
+  - accuracy and loss
+  ![graph-2](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-2.png)
+  - abnormal case when using multi-headd(2)
+  ![graph-3](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-3.png)
+    - i guess that the softmax(applied in multi-head attention functions) was corrupted by paddings
 
 - inference(bulk)
 ```
