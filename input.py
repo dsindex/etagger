@@ -6,10 +6,6 @@ from shuffle import Shuffle
 import sys
 import re
 
-__all__ = [
-    'Input'
-]
-
 class Input:
     def __init__(self, data, config):
         self.sentence_word_ids = []      # [None, sentence_length]

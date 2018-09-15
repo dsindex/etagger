@@ -3,10 +3,6 @@ import numpy as np
 import sys
 import argparse
 
-__all__ = [
-    'Eval'
-]
-
 class Eval:
     def __init__(self):
         self.cls = {}

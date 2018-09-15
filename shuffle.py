@@ -2,10 +2,6 @@ import sys
 import argparse
 import random
 
-__all__ = [
-    'Shuffle'
-]
-
 class Shuffle :
     def __init__(self) :
         self.buckets = []

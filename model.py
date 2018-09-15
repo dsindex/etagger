@@ -4,10 +4,6 @@ import numpy as np
 from embvec import EmbVec
 from attention import Attention
 
-__all__ = [
-    'Model'
-]
-
 class Model:
     '''
     RNN model for sequence tagging

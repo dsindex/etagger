@@ -3,10 +3,6 @@ import tensorflow as tf
 import numpy as np
 import pickle as pkl
 
-__all__ = [
-    'Config'
-]
-
 '''
 character dimension
 '''
