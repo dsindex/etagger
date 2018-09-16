@@ -117,8 +117,10 @@ test, max_sentence_length = 124
   ![graph-2](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-2.png)
   - abnormal case when using multi-head(2)
   ![graph-3](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-3.png)
-    - i guess that the softmax(applied in multi-head attention functions) was corrupted by paddings
-    - so, i replaced the multi-head attention module to [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py).
+    - i guess that the softmax(applied in multi-head attention functions) was corrupted by paddings.
+    - replaced the multi-head attention module to [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py).
+    - simillar corruption was happended even though i used softmax masking.
+    - try to adjust learning rate, number of heads and model dimensions of multi head attention.
 
 - inference(bulk)
 ```
