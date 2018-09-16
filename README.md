@@ -43,6 +43,8 @@ etagger
       - initialCaps, allCaps, lowercase, mixedCaps, non-info
     - apply multi-head self-attention [done]
       - softmax with query, key masking
+    - apply curriculum learning [doing]
+      - sort the training data ascending order by average entropy(calculated at the end of layers) 
     - apply ELMO embedding
     - serve api
       - freeze model and serve
