@@ -11,7 +11,7 @@ import argparse
 
 def do_train(model, config, train_data, dev_data, test_data):
     learning_rate_init=0.001  # initial
-    learning_rate_final=0.001 # final
+    learning_rate_final=0.0001 # final
     learning_rate=learning_rate_init
     intermid_epoch = 20       # after this epoch, change learning rate
     maximum = 0
