@@ -9,9 +9,8 @@ import sys
 import argparse
 
 def inference_bulk(config):
-    '''
-    inference for test file
-    '''
+    """Inference for test file
+    """
 
     # Build input data
     test_file = 'data/test.txt'
@@ -41,9 +40,8 @@ def inference_bulk(config):
         print(fscore)
 
 def inference_bucket(config):
-    '''
-    inference for bucket
-    '''
+    """Inference for bucket
+    """
 
     # Create model
     model = Model(config)
@@ -96,9 +94,8 @@ def inference_bucket(config):
     sess.close()
 
 def inference_line(config):
-    '''
-    inference for raw string
-    '''
+    """Inference for raw string
+    """
     def get_entity(doc, begin, end):
         for ent in doc.ents:
             # check included
@@ -179,7 +176,7 @@ if __name__ == '__main__':
     parser.add_argument('--mode', type=str, default='bulk', help='bulk, bucket, line')
 
     args = parser.parse_args()
-    config = Config(args, is_train=0)
+    config = Config(args, is_train=False)
     if args.mode == 'bulk':   inference_bulk(config)
     if args.mode == 'bucket': inference_bucket(config)
     if args.mode == 'line':   inference_line(config)

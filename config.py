@@ -3,25 +3,25 @@ import tensorflow as tf
 import numpy as np
 import pickle as pkl
 
-'''
+"""
 character dimension
-'''
+"""
 CHR_DIM = 96
 
-'''
+"""
 pos dimension
-'''
+"""
 POS_DIM = 5
 
-'''
+"""
 etc dimension
-  : you should define etc dimension by refering __create_etc_and_tag() of input.txt
-  : pos one-hot(5) + chunk one-hot(5) + shape vec(5) + gazetteer vec
-'''
+    you should define etc dimension by refering __create_etc_and_tag() of input.txt
+    pos one-hot(5) + chunk one-hot(5) + shape vec(5) + gazetteer vec
+"""
 ETC_DIM = 5 + 5 + 5
 
 class Config:
-    def __init__(self, args, is_train=1):
+    def __init__(self, args, is_train=True):
         self.emb_path = args.emb_path
         self.embvec = pkl.load(open(self.emb_path, 'rb'))
         self.wrd_dim = args.wrd_dim

@@ -13,6 +13,7 @@ etagger
   - [ner-lstm](https://github.com/monikkinom/ner-lstm)
   - [cnn-text-classification-tf](https://github.com/dennybritz/cnn-text-classification-tf/blob/master/text_cnn.py)
   - [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py)
+  - [transformer-tensorflow/transformer/attention.py](https://github.com/DongjunLee/transformer-tensorflow/blob/master/transformer/attention.py)
 
 - modification
   - modified for tf version(1.4)
@@ -41,7 +42,6 @@ etagger
     - extend language specific features [done]
       - initialCaps, allCaps, lowercase, mixedCaps, non-info
     - apply multi-head self-attention [doing]
-      - without learning-rate warm up
       - softmax with query, key masking
     - apply ELMO embedding
     - serve api
@@ -64,8 +64,8 @@ etagger
     - [Implementing a sentence classification using Char level CNN & RNN](https://github.com/cuteboydot/Sentence-Classification-using-Char-CNN-and-RNN)
     - [lstm-char-cnn-tensorflow/models/LSTMTDNN.py](https://github.com/carpedm20/lstm-char-cnn-tensorflow/blob/master/models/LSTMTDNN.py)
   - multi-head attention
-    - [transformer-tensorflow/transformer/attention.py](https://github.com/DongjunLee/transformer-tensorflow/blob/master/transformer/attention.py)
     - [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py)
+    - [transformer-tensorflow/transformer/attention.py](https://github.com/DongjunLee/transformer-tensorflow/blob/master/transformer/attention.py)
 
 ### pre-requisites
 
@@ -108,15 +108,17 @@ test, max_sentence_length = 124
 ```
 
 - train
-```
-$ python train.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125
-$ rm -rf runs; tensorboard --logdir runs/summaries/
-```
+  - command
+  ```
+  $ python train.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125
+  $ rm -rf runs; tensorboard --logdir runs/summaries/
+  ```
   - accuracy and loss
   ![graph-2](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-2.png)
   - abnormal case when using multi-head(2)
   ![graph-3](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-3.png)
     - i guess that the softmax(applied in multi-head attention functions) was corrupted by paddings
+    - so, i replaced the multi-head attention module to [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py).
 
 - inference(bulk)
 ```

@@ -2,12 +2,9 @@ from __future__ import print_function
 import tensorflow as tf
 import numpy as np
 from embvec import EmbVec
-from attention import Attention
+from attention import multihead_attention
 
 class Model:
-    '''
-    RNN model for sequence tagging
-    '''
 
     __rnn_size = 256               # size of RNN hidden unit
     __num_layers = 2               # number of RNN layers
@@ -18,17 +15,12 @@ class Model:
     __num_filters = 32             # number of filters
     __chr_embedding_type = 'conv'  # 'max' | 'conv', default is max
     __mh_num_heads = 2             # number of head for multi head attention
-    __mh_linear_key_dim = 32       # dk for multi head attention
-    __mh_linear_val_dim = 32       # dv for multi head attention
-    __mh_dropout = 0.5             # dropout probability for multi head attention
+    __mh_num_units = 32            # Q,K,V dimension for multi head attention
+    __mh_dropout = 0.2             # dropout probability for multi head attention
 
     def __init__(self, config):
-        '''
-        Initialize RNN model
-        '''
         embvec = config.embvec
         sentence_length = config.sentence_length
-        self.sentence_length = sentence_length
         word_length = config.word_length
         chr_vocab_size = len(embvec.chr_vocab)
         chr_dim = config.chr_dim
@@ -36,11 +28,12 @@ class Model:
         pos_dim = config.pos_dim
         etc_dim = config.etc_dim
         class_size = config.class_size
-        is_train = config.is_train
-        self.set_cuda_visible_devices(is_train)
+        self.is_train = config.is_train
+        self.set_cuda_visible_devices(self.is_train)
 
-        # Input layer
-
+        """
+        Input layer
+        """
         # word embedding features
         self.input_data_word_ids = tf.placeholder(tf.int32, shape=[None, sentence_length], name='input_data_word_ids')
         with tf.device('/cpu:0'), tf.name_scope('word-embedding'):
@@ -98,7 +91,7 @@ class Model:
                 h_pool Tensor("concat:0", shape=(?, 1, 1, num_filters_total), dtype=float32)
                 h_pool_flat Tensor("Reshape:0", shape=(?, num_filters_total), dtype=float32)
                 '''
-                if is_train: keep_prob = self.__cnn_keep_prob
+                if self.is_train: keep_prob = self.__cnn_keep_prob
                 else: keep_prob = 1.0 # do not apply dropout for inference
                 self.h_drop = tf.nn.dropout(self.h_pool_flat, keep_prob)
                 # reshape([-1, num_filters_total]) -> [None, sentence_length, num_filters_total]
@@ -116,53 +109,58 @@ class Model:
                 pos_embeddings = tf.Variable(tf.random_uniform([pos_vocab_size, pos_dim], -0.5, 0.5), name='pos_embeddings')
                 # embedding_lookup([None, sentence_length]) -> [None, sentence_length, pos_dim]
                 self.pos_embeddings = tf.nn.embedding_lookup(pos_embeddings, self.input_data_pos_ids)
-                if is_train: keep_prob = self.__pos_keep_prob
+                if self.is_train: keep_prob = self.__pos_keep_prob
                 else: keep_prob = 1.0 # do not apply dropout for inference
                 self.pos_embeddings = tf.nn.dropout(self.pos_embeddings, keep_prob)
 
+        # etc features 
         with tf.name_scope('etc'):
-            # etc features 
             self.input_data_etc = tf.placeholder(tf.float32, shape=[None, sentence_length, etc_dim], name='input_data_etc')
 
         # concat([None, sentence_length, wrd_dim], [None, sentence_length, chr_dim], [None, sentence_length, pos_dim], [None, sentence_length, etc_dim]) -> [None, sentence_length, unit_dim]
         self.input_data = tf.concat([self.word_embeddings, self.wordchr_embeddings, self.pos_embeddings, self.input_data_etc], axis=-1, name='input_data')
 
-        # Answer
-
-        self.output_data = tf.placeholder(tf.float32, shape=[None, sentence_length, class_size], name='output_data')
-
-        # RNN layer
-
+        """
+        RNN layer
+        """
+        self.length = self.__compute_length(self.input_data_etc)
         with tf.name_scope('rnn'):
-            if is_train: keep_prob = self.__rnn_keep_prob
+            if self.is_train: keep_prob = self.__rnn_keep_prob
             else: keep_prob = 1.0 # do not apply dropout for inference 
             fw_cell = tf.contrib.rnn.MultiRNNCell([self.__create_cell(self.__rnn_size, keep_prob=keep_prob) for _ in range(self.__num_layers)], state_is_tuple=True)
             bw_cell = tf.contrib.rnn.MultiRNNCell([self.__create_cell(self.__rnn_size, keep_prob=keep_prob) for _ in range(self.__num_layers)], state_is_tuple=True)
-            self.length = self.__compute_length(self.output_data)
             # transpose([None, sentence_length, unit_dim]) -> unstack([sentence_length, None, unit_dim]) -> list of [None, unit_dim]
             output, _, _ = tf.contrib.rnn.static_bidirectional_rnn(fw_cell, bw_cell,
                                                    tf.unstack(tf.transpose(self.input_data, perm=[1, 0, 2])),
                                                    dtype=tf.float32, sequence_length=self.length)
             # stack(list of [None, 2*self.__rnn_size]) -> transpose([sentence_length, None, 2*self.__rnn_size]) -> [None, sentence_length, 2*self.__rnn_size]
-            output = tf.transpose(tf.stack(output), perm=[1, 0, 2])
+            self.rnn_output = tf.transpose(tf.stack(output), perm=[1, 0, 2])
 
-        # Attention layer
+        """
+        Attention layer
+        """
+        self.attended_output = self.__self_attention(self.rnn_output, 2*self.__rnn_size)
 
-        attended_output = self.__apply_self_attention(output, 2*self.__rnn_size)
-
-        # Projection layer
-
+        """
+        Projection layer
+        """
         with tf.name_scope('projection'):
             weight, bias = self.__create_weight_and_bias(2*self.__rnn_size, class_size)
             # reshape([None, sentence_length, 2*self.__rnn_size]) -> [None, 2*self.__rnn_size]
-            attended_output = tf.reshape(attended_output, [-1, 2*self.__rnn_size])
+            t_attended_output = tf.reshape(self.attended_output, [-1, 2*self.__rnn_size])
             # [None, 2*self.__rnn_size] x [2*self.__rnn_size, class_size] + [class_size] -> softmax([None, class_size])
-            self.prediction = tf.nn.softmax(tf.matmul(attended_output, weight) + bias)
+            self.prediction = tf.nn.softmax(tf.matmul(t_attended_output, weight) + bias)
             # reshape([None, class_size]) -> [None, sentence_length, class_size]
             self.prediction = tf.reshape(self.prediction, [-1, sentence_length, class_size])
 
-        # Loss, Accuracy, Optimization
+        """
+        Answer
+        """
+        self.output_data = tf.placeholder(tf.float32, shape=[None, sentence_length, class_size], name='output_data')
 
+        """
+        Loss, Accuracy, Optimization
+        """
         with tf.name_scope('loss'):
             self.loss = self.__compute_cost()
 
@@ -177,60 +175,29 @@ class Model:
             grads, _ = tf.clip_by_global_norm(tf.gradients(self.loss, tvars), 10)
             self.train_op = optimizer.apply_gradients(zip(grads, tvars), global_step=self.global_step)
 
-    def __mask_for_lengths(self, lengths, max_length=None, mask_right=True, value=-1000.0):
-        '''
-        Creates a [batch_size x max_length] mask.
-        Args:
-            lengths: int32 1-dim tensor of batch_size lengths
-            max_length: int32 0-dim tensor or python int
-            mask_right: if True, everything before "lengths" becomes zero and the
-                rest "value", else vice versa
-            value: value for the mask
-        Returns:
-            [batch_size x max_length] mask of zeros and "value"s
-        (source from https://www.programcreek.com/python/example/90548/tensorflow.sequence_mask)
-        '''
-        mask = tf.sequence_mask(lengths, max_length, dtype=tf.float32)
-        if mask_right:
-            mask = 1.0 - mask
-        mask *= value
-        return mask 
 
-    def __mask_for_padding(self, inputs):
-        last_dim = tf.shape(inputs)[-1]
-        # [None, sentence_length]
-        mask = self.mask_for_lengths(self.length, self.sentence_length, mask_right=True, value=-float('inf'))
-        # [None, sentence_length, 1]
-        mask = tf.expand_dims(mask, -1)
-        # [None, sentence_length, last_dim]
-        mask = tf.tile(mask, [1, 1, q_last_dim])
-        return inputs + mask
-
-    def __apply_self_attention(self, inputs, model_dim):
-        with tf.variable_scope('apply-self-attention'):
-            o1 = tf.identity(inputs)
-            # [None, sentence_length, model_dim] -> [None, sentence_length, model_dim]
-            o2 = self.__add_and_norm(o1, self.__masked_self_attention(o1, o1, o1, model_dim))
-            return o2
-
-    def __masked_self_attention(self, q, k, v, model_dim):
-        with tf.variable_scope('masked-self-attention'):
-            attention = Attention(num_heads=self.__mh_num_heads,
-                                  masked=False,
-                                  linear_key_dim=self.__mh_linear_key_dim,
-                                  linear_value_dim=self.__mh_linear_val_dim,
-                                  model_dim=model_dim,
-                                  dropout=self.__mh_dropout)
-            return attention.multi_head(q, k, v)
-
-    def __add_and_norm(self, x, sub_layer_x):
-        with tf.variable_scope('add-and-norm'):
-            return tf.contrib.layers.layer_norm(tf.add(x, sub_layer_x))
+    def __self_attention(self, inputs, model_dim):
+        """Apply self attention
+        """
+        with tf.variable_scope('self-attention'):
+            queries = inputs
+            keys = inputs
+            attended_queries = multihead_attention(queries,
+                                                   keys,
+                                                   num_units=self.__mh_num_units,
+                                                   num_heads=self.__mh_num_heads,
+                                                   model_dim=model_dim,
+                                                   dropout_rate=self.__mh_dropout,
+                                                   is_training=self.is_train,
+                                                   causality=False, # no future masking
+                                                   scope='multihead_attention',
+                                                   reuse=None)
+            # residual connection and layer normalization
+            return tf.contrib.layers.layer_norm(tf.add(inputs, attended_queries))
 
     def __compute_cost(self):
-        '''
-        Compute cross entropy(self.output_data, self.prediction)
-        '''
+        """Compute cross entropy(self.output_data, self.prediction)
+        """
         # [None, sentence_length, class_size] * log([None, sentence_length, class_size]) -> [None, sentence_length, class_size]
         # reduce_sum([None, sentence_length, class_size]) -> [None, sentence_length] = [ [0.8, 0.2, ..., 0], [0, 0.7, 0.3, ..., 0], ... ]
         cross_entropy = self.output_data * tf.log(self.prediction)
@@ -249,6 +216,8 @@ class Model:
         return tf.reduce_mean(cross_entropy)
 
     def __compute_accuracy(self):
+        """Compute accuracy(self.output_data, self.prediction)
+        """
         # argmax([None, sentence_length, class_size]) -> equal([None, sentence_length]) -> cast([None, sentence_length]) -> [None, sentence_length]
         correct_prediction = tf.cast(tf.equal(tf.argmax(self.prediction, 2), tf.argmax(self.output_data, 2)), 'float')
         # ignore padding by masking
@@ -259,17 +228,15 @@ class Model:
         return tf.reduce_mean(correct_prediction)
 
     def __create_cell(self, rnn_size, keep_prob):
-        '''
-        Create a RNN cell
-        '''
+        """Create a RNN cell
+        """
         cell = tf.contrib.rnn.LSTMCell(rnn_size, state_is_tuple=True)
         drop = tf.contrib.rnn.DropoutWrapper(cell, output_keep_prob=keep_prob)
         return drop
 
     def __compute_length(self, output_data):
-        '''
-        Compute each sentence length
-        '''
+        """Compute each sentence length
+        """
         # reduce_max(abs([None, sentence_length, dim])) -> sign([None, sentence_length]) = [ [1, 1, 1, ..., 0], [1, 1, 1, ..., 0], ... ] 
         # reduce_sum([None, sentence_length]) -> [None] = [11, 16, 13, ..., 123] (batch_size)
         words_used_in_sent = tf.sign(tf.reduce_max(tf.abs(output_data), reduction_indices=2))
@@ -277,9 +244,8 @@ class Model:
         return length
 
     def __create_weight_and_bias(self, in_size, out_size):
-        '''
-        Create weight matrix and bias
-        '''
+        """Create weight matrix and bias
+        """
         weight = tf.truncated_normal([in_size, out_size], stddev=0.01)
         bias = tf.constant(0.1, shape=[out_size])
         return tf.Variable(weight, name='projection_weight'), tf.Variable(bias, name='projection_bias')
