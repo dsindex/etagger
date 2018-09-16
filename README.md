@@ -41,7 +41,7 @@ etagger
       - pos one-hot vector + pos embedding
     - extend language specific features [done]
       - initialCaps, allCaps, lowercase, mixedCaps, non-info
-    - apply multi-head self-attention [doing]
+    - apply multi-head self-attention [done]
       - softmax with query, key masking
     - apply ELMO embedding
     - serve api
@@ -51,7 +51,7 @@ etagger
   ![graph-1](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1.png)
 
 - f-score
-  - best : 0.896346749226
+  - best : 0.897379106681
   - [experiments](https://github.com/dsindex/etagger/blob/master/README_DEV.md)
 
 - references
@@ -120,7 +120,7 @@ test, max_sentence_length = 124
     - i guess that the softmax(applied in multi-head attention functions) was corrupted by paddings.
     - replaced the multi-head attention module to [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py).
     - simillar corruption was happended even though i used softmax masking.
-    - try to adjust learning rate, number of heads and model dimensions of multi head attention.
+    - try to adjust learning rate / number of heads / model dimensions
 
 - inference(bulk)
 ```
