@@ -42,6 +42,7 @@ etagger
       - initialCaps, allCaps, lowercase, mixedCaps, non-info
     - apply multi-head self-attention [doing]
       - without learning-rate warm up
+      - softmax with query, key masking
     - apply ELMO embedding
     - serve api
       - freeze model and serve
