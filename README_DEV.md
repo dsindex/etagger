@@ -1,6 +1,54 @@
 
 - experiments 3
 ```
+* test 5
+word embedding size : 300
+pos vec
+pos embedding size : 5
+chracter embedding size : 96
+chracter embedding random init : -1.0 ~ 1.0
+shape vec
+filter_size : 3,4,5
+num_filters : 32
+rnn_size : 256
+num_layers : 2
+learning_rate : 0.001 -> 0.0001, intermid_epoch = 20
+cnn_keep_prob : 0.5
+rnn_keep_prob : 0.8
+pos_keep_prob : 0.5
+epoch : 50
+batch_size : 128
++
+multi head attention(softmax with masking)
+mh_num_heads : 2
+mh_num_units : 32
+mh_dropout : 0.5
+
+* test 4
+word embedding size : 300
+pos vec
+pos embedding size : 5
+chracter embedding size : 96
+chracter embedding random init : -1.0 ~ 1.0
+shape vec
+filter_size : 3,4,5
+num_filters : 32
+rnn_size : 256
+num_layers : 2
+learning_rate : 0.001 -> 0.0001, intermid_epoch = 10
+cnn_keep_prob : 0.5
+rnn_keep_prob : 0.5
+pos_keep_prob : 0.5
+epoch : 50
+batch_size : 128
++
+multi head attention(softmax with masking)
+mh_num_heads : 1
+mh_num_units : 32
+mh_dropout : 0.5
+
+0.893447642376 -> good
+
 * test 3
 word embedding size : 300
 pos vec
@@ -24,6 +72,7 @@ mh_num_heads : 2
 mh_num_units : 32
 mh_dropout : 0.2
 
+0.881420496436
 
 * test 2
 word embedding size : 300

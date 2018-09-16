@@ -9,14 +9,14 @@ class Model:
     __rnn_size = 256               # size of RNN hidden unit
     __num_layers = 2               # number of RNN layers
     __cnn_keep_prob = 0.5          # keep probability for dropout(cnn character embedding)
-    __rnn_keep_prob = 0.5          # keep probability for dropout(rnn cell)
+    __rnn_keep_prob = 0.8          # keep probability for dropout(rnn cell)
     __pos_keep_prob = 0.5          # keep probability for dropout(pos embedding)
     __filter_sizes = [3,4,5]       # filter sizes
     __num_filters = 32             # number of filters
     __chr_embedding_type = 'conv'  # 'max' | 'conv', default is max
     __mh_num_heads = 2             # number of head for multi head attention
     __mh_num_units = 32            # Q,K,V dimension for multi head attention
-    __mh_dropout = 0.2             # dropout probability for multi head attention
+    __mh_dropout = 0.5             # dropout probability for multi head attention
 
     def __init__(self, config):
         embvec = config.embvec
