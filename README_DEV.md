@@ -1,10 +1,36 @@
 
 - experiments 3
 ```
+* test 8
+word embedding size : 300
+pos vec
+pos embedding size : 5
+pos embedding random init : -0.5 ~ 0.5
+chracter embedding size : 96
+chracter embedding random init : -1.0 ~ 1.0
+shape vec
+filter_size : 3
+num_filters : 32
+rnn_size : 500
+num_layers : 2
+learning_rate : 0.001 -> 0.0001, intermid_epoch = 20
+cnn_keep_prob : 0.7
+rnn_keep_prob : 0.32
+pos_keep_prob : 0.5
+epoch : 50
+batch_size : 128
++
+multi head attention(softmax with masking)
+mh_num_heads : 2
+mh_num_units : 32
+mh_dropout : 0.5
+
+
 * test 7
 word embedding size : 300
 pos vec
 pos embedding size : 5
+pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96
 chracter embedding random init : -1.0 ~ 1.0
 shape vec
@@ -24,11 +50,13 @@ mh_num_heads : 4
 mh_num_units : 32
 mh_dropout : 0.5
 
+0.895288278904
 
 * test 6
 word embedding size : 300
 pos vec
 pos embedding size : 5
+pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96
 chracter embedding random init : -1.0 ~ 1.0
 shape vec
@@ -54,6 +82,7 @@ mh_dropout : 0.5
 word embedding size : 300
 pos vec
 pos embedding size : 5
+pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96
 chracter embedding random init : -1.0 ~ 1.0
 shape vec
@@ -79,6 +108,7 @@ mh_dropout : 0.5
 word embedding size : 300
 pos vec
 pos embedding size : 5
+pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96
 chracter embedding random init : -1.0 ~ 1.0
 shape vec
@@ -104,6 +134,7 @@ mh_dropout : 0.5
 word embedding size : 300
 pos vec
 pos embedding size : 5
+pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96
 chracter embedding random init : -1.0 ~ 1.0
 shape vec
@@ -129,6 +160,7 @@ mh_dropout : 0.2
 word embedding size : 300
 pos vec
 pos embedding size : 5
+pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96
 chracter embedding random init : -1.0 ~ 1.0
 shape vec
@@ -155,6 +187,7 @@ mh_dropout : 0.5
 word embedding size : 300
 pos vec
 pos embedding size : 5
+pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96
 chracter embedding random init : -1.0 ~ 1.0
 shape vec
@@ -203,6 +236,7 @@ batch_size : 128
 word embedding size : 300
 pos vec
 pos embedding size : 5
+pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96
 chracter embedding random init : -1.0 ~ 1.0
 shape vec
@@ -222,6 +256,7 @@ batch_size : 128
 word embedding size : 300
 pos vec
 pos embedding size : 5
+pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96
 chracter embedding random init : -1.0 ~ 1.0
 filter_size : 3,4,5
@@ -240,6 +275,7 @@ batch_size : 128
 word embedding size : 300
 remove pos vec
 pos embedding size : 10
+pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96
 chracter embedding random init : -1.0 ~ 1.0
 filter_size : 3,4,5
@@ -258,6 +294,7 @@ batch_size : 128
 word embedding size : 300
 remove pos vec
 pos embedding size : 50
+pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96
 chracter embedding random init : -1.0 ~ 1.0
 filter_size : 3,4,5

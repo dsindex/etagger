@@ -38,7 +38,7 @@ class Eval:
             self.cls[tag] = None
 
     def eval(self):
-        """Compute precision, recall, fscore given file
+        """Compute micro precision, recall, fscore given file
         """
         bucket = []
         while 1:
@@ -96,7 +96,7 @@ class Eval:
 
     @staticmethod
     def compute_f1(class_size, prediction, target, length):
-        """Compute F1 measure given prediction and target
+        """Compute micro F1 measure given prediction and target
         """
         tp = np.array([0] * (class_size + 1))
         fp = np.array([0] * (class_size + 1))
