@@ -1,6 +1,78 @@
 
 - experiments 3
 ```
+* test 12
+word embedding size : 100
+pos vec
+pos embedding size : 5
+pos embedding random init : -0.5 ~ 0.5
+chracter embedding size : 96
+chracter embedding random init : -1.0 ~ 1.0
+shape vec
+filter_size : 3
+num_filters : 32
+rnn_size : 256
+num_layers : 2
+learning_rate : 0.001 -> 0.0001, intermid_epoch = 20
+cnn_keep_prob : 0.7
+rnn_keep_prob : 0.32
+pos_keep_prob : 0.5
+epoch : 50
+batch_size : 128
++
+multi head attention(softmax with masking)
+mh_num_heads : 2
+mh_num_units : 32
+mh_dropout : 0.5
+
+
+* test 11
+word embedding size : 100
+pos vec
+pos embedding size : 5
+pos embedding random init : -0.5 ~ 0.5
+chracter embedding size : 96
+chracter embedding random init : -1.0 ~ 1.0
+shape vec
+filter_size : 3
+num_filters : 32
+rnn_size : 500
+num_layers : 2
+learning_rate : 0.001 -> 0.0001, intermid_epoch = 20
+cnn_keep_prob : 0.7
+rnn_keep_prob : 0.32
+pos_keep_prob : 0.5
+epoch : 50
+batch_size : 128
++
+multi head attention(softmax with masking)
+mh_num_heads : 2
+mh_num_units : 32
+mh_dropout : 0.5
+without layer norm
+
+token : 0.889773423148
+chunk : 0.877369302653619
+
+* test 10
+word embedding size : 100
+pos vec
+shape vec
+rnn_size : 256
+num_layers : 2
+learning_rate : 0.001 -> 0.0001, intermid_epoch = 20
+rnn_keep_prob : 0.5
+epoch : 50
+batch_size : 128
++
+multi head attention(softmax with masking)
+mh_num_heads : 2
+mh_num_units : 32
+mh_dropout : 0.5
+
+token : 0.895744811873
+chunk : 0.8798867857774633
+
 * test 9
 word embedding size : 100
 pos vec
@@ -25,6 +97,8 @@ mh_num_heads : 2
 mh_num_units : 32
 mh_dropout : 0.5
 
+token : 0.897407543924     -> best
+chunk : 0.8832155477031802
 
 * test 8
 word embedding size : 300
@@ -50,8 +124,8 @@ mh_num_heads : 2
 mh_num_units : 32
 mh_dropout : 0.5
 
-partial : 0.896001962227 -> good
-exact   : 0.8801692972401023
+token : 0.896001962227
+chunk : 0.8801692972401023
 
 * test 7
 word embedding size : 300
@@ -129,7 +203,7 @@ mh_num_heads : 2
 mh_num_units : 32
 mh_dropout : 0.5
 
-0.897379106681 -> best
+0.897379106681
 
 * test 4
 word embedding size : 300

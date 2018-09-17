@@ -8,6 +8,7 @@ etagger
   - +gazetteer features
   - +pos embedding
   - +multi-head attention
+  - +CRF
 
 - base repository
   - [ner-lstm](https://github.com/monikkinom/ner-lstm)
@@ -43,7 +44,8 @@ etagger
       - initialCaps, allCaps, lowercase, mixedCaps, non-info
     - apply multi-head self-attention [done]
       - softmax with query, key masking
-    - apply curriculum learning [doing]
+    - apply CRF
+    - apply curriculum learning
       - sort the training data ascending order by average entropy(calculated at the end of layers) 
     - apply ELMO embedding
     - serve api
@@ -52,8 +54,9 @@ etagger
 - model
   ![graph-1](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1.png)
 
-- f-score
-  - best : 0.897379106681
+- evaluation
+  - per-token(partial) micro f1 : 0.897407543924
+  - per-chunk(exact)   micro f1 : 0.8801692972401023
   - [experiments](https://github.com/dsindex/etagger/blob/master/README_DEV.md)
 
 - references
@@ -112,32 +115,36 @@ test, max_sentence_length = 124
 - train
   - command
   ```
-  $ python train.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125
+  $ python train.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --sentence_length 125
   $ rm -rf runs; tensorboard --logdir runs/summaries/
   ```
   - accuracy and loss
   ![graph-2](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-2.png)
   - abnormal case when using multi-head(2)
   ![graph-3](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-3.png)
-    - i guess that the softmax(applied in multi-head attention functions) was corrupted by paddings.
-    - replaced the multi-head attention module to [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py).
-    - simillar corruption was happended even though i used softmax masking.
-    - try to adjust learning rate / number of heads / model dimensions
+  ```
+  i guess that the softmax(applied in multi-head attention functions) was corrupted by paddings.
+    -> i replaced the multi-head attention module to [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py).
+    -> however, simillar corruption was happended even though i used softmax masking.
+    -> my colleague adviced me that the tf.contrib.layers.layer_norm() might be the reason of corruption because it does not consider paddings.
+    -> remove the layer_norm().
+  ```
 
 - inference(bulk)
 ```
-$ python inference.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --restore checkpoint/model_max.ckpt
+$ python inference.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --sentence_length 125 --restore checkpoint/model_max.ckpt
 ```
 
 - inference(bucket)
 ```
-$ python inference.py --mode bucket --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --restore checkpoint/model_max.ckpt < data/test.txt > pred.txt
-$ python eval.py < pred.txt
+$ python inference.py --mode bucket --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --sentence_length 125 --restore checkpoint/model_max.ckpt < data/test.txt > pred.txt
+$ python token_eval.py < pred.txt
+$ python chunk_eval.py < pred.txt
 ```
 
 - inference(line)
 ```
-$ python inference.py --mode line --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --restore checkpoint/model_max.ckpt
+$ python inference.py --mode line --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --sentence_length 125 --restore checkpoint/model_max.ckpt
 ...
 Obama left office in January 2017 with a 60% approval rating and currently resides in Washington, D.C.
 Obama NNP O O B-PER

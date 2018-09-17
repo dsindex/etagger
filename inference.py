@@ -3,7 +3,7 @@ import tensorflow as tf
 import numpy as np
 from config import Config
 from model import Model
-from eval  import Eval
+from token_eval  import Eval
 from input import *
 import sys
 import argparse

@@ -2,11 +2,11 @@ from __future__ import print_function
 import tensorflow as tf
 import numpy as np
 from embvec import EmbVec
-from attention import multihead_attention
+from attention import multihead_attention, normalize
 
 class Model:
 
-    __rnn_size = 500               # size of RNN hidden unit
+    __rnn_size = 256               # size of RNN hidden unit
     __num_layers = 2               # number of RNN layers
     __cnn_keep_prob = 0.7          # keep probability for dropout(cnn character embedding)
     __rnn_keep_prob = 0.32         # keep probability for dropout(rnn cell)
@@ -179,7 +179,8 @@ class Model:
                                                    scope='multihead_attention',
                                                    reuse=None)
             # residual connection and layer normalization
-            return tf.contrib.layers.layer_norm(tf.add(inputs, attended_queries))
+            #return tf.contrib.layers.layer_norm(tf.add(inputs, attended_queries))
+            return normalize(tf.add(inputs, attended_queries))
 
     def __compute_cost(self):
         """Compute cross entropy(self.output_data, self.prediction)
