@@ -124,10 +124,12 @@ test, max_sentence_length = 124
   ![graph-3](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-3.png)
   ```
   i guess that the softmax(applied in multi-head attention functions) was corrupted by paddings.
-    -> i replaced the multi-head attention module to [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py).
+    -> i replaced the multi-head attention code to `https://github.com/Kyubyong/transformer/blob/master/modules.py`.
     -> however, simillar corruption was happended even though i used softmax masking.
     -> my colleague adviced me that the tf.contrib.layers.layer_norm() might be the reason of corruption because it does not consider paddings.
     -> remove the layer_norm().
+    -> performance goes down.
+    -> try to use other layer normalization code from `https://github.com/Kyubyong/transformer/blob/master/modules.py`.
   ```
 
 - inference(bulk)
