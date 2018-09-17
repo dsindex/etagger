@@ -130,6 +130,7 @@ test, max_sentence_length = 124
   ![graph-2](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-2.png)
   - abnormal case when using multi-head
   ![graph-3](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-3.png)
+  - why? 
   ```
   i guess that the softmax(applied in multi-head attention functions) was corrupted by paddings.
     -> i replaced the multi-head attention code to `https://github.com/Kyubyong/transformer/blob/master/modules.py`.
@@ -139,6 +140,7 @@ test, max_sentence_length = 124
     -> performance goes down.
     -> try to use other layer normalization code from `https://github.com/Kyubyong/transformer/blob/master/modules.py`.
   ```
+  - after replace layer_norm() to normalize()
   ![graph-4](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-4.png)
 
 - inference(bulk)
