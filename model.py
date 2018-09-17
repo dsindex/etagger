@@ -14,7 +14,7 @@ class Model:
     __filter_sizes = [3]           # filter sizes
     __num_filters = 32             # number of filters
     __chr_embedding_type = 'conv'  # 'max' | 'conv', default is max
-    __mh_num_heads = 2             # number of head for multi head attention
+    __mh_num_heads = 4             # number of head for multi head attention
     __mh_num_units = 32            # Q,K,V dimension for multi head attention
     __mh_dropout = 0.5             # dropout probability for multi head attention
 
@@ -179,7 +179,6 @@ class Model:
                                                    scope='multihead_attention',
                                                    reuse=None)
             # residual connection and layer normalization
-            #return tf.contrib.layers.layer_norm(tf.add(inputs, attended_queries))
             return normalize(tf.add(inputs, attended_queries))
 
     def __compute_cost(self):

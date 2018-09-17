@@ -14,7 +14,6 @@ etagger
   - [ner-lstm](https://github.com/monikkinom/ner-lstm)
   - [cnn-text-classification-tf](https://github.com/dennybritz/cnn-text-classification-tf/blob/master/text_cnn.py)
   - [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py)
-  - [transformer-tensorflow/transformer/attention.py](https://github.com/DongjunLee/transformer-tensorflow/blob/master/transformer/attention.py)
 
 - modification
   - modified for tf version(1.4)
@@ -55,8 +54,8 @@ etagger
   ![graph-1](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1.png)
 
 - evaluation
-  - per-token(partial) micro f1 : 0.897407543924
-  - per-chunk(exact)   micro f1 : 0.883215547703
+  - per-token(partial) micro f1 : 0.898353833915
+  - per-chunk(exact)   micro f1 : 0.885107133409
   - [experiments](https://github.com/dsindex/etagger/blob/master/README_DEV.md)
 
 - references
