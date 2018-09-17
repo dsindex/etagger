@@ -66,7 +66,7 @@ class Eval:
         self.pred_sents.append(pred_sent)
 
     def eval(self):
-        """Compute precision, recall, fscore given file
+        """Compute micro chunk precision, recall, fscore given file
         """
         bucket = []
         while 1:

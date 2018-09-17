@@ -50,6 +50,8 @@ mh_num_heads : 2
 mh_num_units : 32
 mh_dropout : 0.5
 
+partial : 0.896001962227 -> good
+exact   : 0.8801692972401023
 
 * test 7
 word embedding size : 300
