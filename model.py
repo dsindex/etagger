@@ -7,7 +7,7 @@ from attention import multihead_attention, normalize
 class Model:
 
     __rnn_size = 200               # size of RNN hidden unit
-    __num_layers = 1               # number of RNN layers
+    __num_layers = 2               # number of RNN layers
     __cnn_keep_prob = 0.5          # keep probability for dropout(cnn character embedding)
     __rnn_keep_prob = 0.5          # keep probability for dropout(rnn cell)
     __pos_keep_prob = 0.5          # keep probability for dropout(pos embedding)

@@ -14,6 +14,7 @@ etagger
   - [ner-lstm](https://github.com/monikkinom/ner-lstm)
   - [cnn-text-classification-tf](https://github.com/dennybritz/cnn-text-classification-tf/blob/master/text_cnn.py)
   - [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py)
+  - [sequence_tagging/ner_model.py](https://github.com/guillaumegenthial/sequence_tagging/blob/master/model/ner_model.py)
 
 - modification
   - modified for tf version(1.4)
@@ -64,10 +65,11 @@ etagger
       - 70 epoch, per-chunk(exact) micro Prec: 0.887, Rec: 0.902, F1: 0.894
 
 - references
-  - [Named Entity Recognition with Bidirectional LSTM-CNNs](https://www.aclweb.org/anthology/Q16-1026)
-    - [keras implementation](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
-  - [Towards Deep Learning in Hindi NER: An approach to tackle the Labelled Data Scarcity](https://arxiv.org/pdf/1610.09756.pdf)
-  - [Exploring neural architectures for NER](https://web.stanford.edu/class/cs224n/reports/6896582.pdf)
+  - general
+    - [Named Entity Recognition with Bidirectional LSTM-CNNs](https://www.aclweb.org/anthology/Q16-1026)
+      - [keras implementation](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
+    - [Towards Deep Learning in Hindi NER: An approach to tackle the Labelled Data Scarcity](https://arxiv.org/pdf/1610.09756.pdf)
+    - [Exploring neural architectures for NER](https://web.stanford.edu/class/cs224n/reports/6896582.pdf)
   - character convolution
     - [Implementing a CNN for Text Classification in TensorFlow](http://www.wildml.com/2015/12/implementing-a-cnn-for-text-classification-in-tensorflow/)
     - [Implementing a sentence classification using Char level CNN & RNN](https://github.com/cuteboydot/Sentence-Classification-using-Char-CNN-and-RNN)
@@ -75,6 +77,8 @@ etagger
   - multi-head attention
     - [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py)
     - [transformer-tensorflow/transformer/attention.py](https://github.com/DongjunLee/transformer-tensorflow/blob/master/transformer/attention.py)
+  - CRF
+    - [sequence_tagging](https://github.com/guillaumegenthial/sequence_tagging/blob/master/model/ner_model.py)
 
 ### pre-requisites
 
@@ -119,12 +123,12 @@ test, max_sentence_length = 124
 - train
   - command
   ```
-  $ python train.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --sentence_length 125
+  $ python train.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --sentence_length 125 --epoch 70
   $ rm -rf runs; tensorboard --logdir runs/summaries/
   ```
   - accuracy and loss
   ![graph-2](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-2.png)
-  - abnormal case when using multi-head(2)
+  - abnormal case when using multi-head
   ![graph-3](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-3.png)
   ```
   i guess that the softmax(applied in multi-head attention functions) was corrupted by paddings.
@@ -135,6 +139,7 @@ test, max_sentence_length = 124
     -> performance goes down.
     -> try to use other layer normalization code from `https://github.com/Kyubyong/transformer/blob/master/modules.py`.
   ```
+  ![graph-4](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-4.png)
 
 - inference(bulk)
 ```
