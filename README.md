@@ -54,9 +54,14 @@ etagger
   ![graph-1](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1.png)
 
 - evaluation
-  - per-token(partial) micro f1 : 0.900360878341
-  - per-chunk(exact)   micro f1 : 0.886441723196
   - [experiments](https://github.com/dsindex/etagger/blob/master/README_DEV.md)
+  - best fscore
+    - per-token(partial) micro f1 : 0.900360878341
+    - per-chunk(exact)   micro f1 : 0.886441723196
+  - comparision to previous research
+    - [Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
+      - 50 epoch, per-chunk(exact) micro Prec: 0.882, Rec: 0.896, F1: 0.889
+      - 70 epoch, per-chunk(exact) micro Prec: 0.887, Rec: 0.902, F1: 0.894
 
 - references
   - [Named Entity Recognition with Bidirectional LSTM-CNNs](https://www.aclweb.org/anthology/Q16-1026)

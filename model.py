@@ -6,13 +6,13 @@ from attention import multihead_attention, normalize
 
 class Model:
 
-    __rnn_size = 256               # size of RNN hidden unit
-    __num_layers = 2               # number of RNN layers
-    __cnn_keep_prob = 0.7          # keep probability for dropout(cnn character embedding)
-    __rnn_keep_prob = 0.32         # keep probability for dropout(rnn cell)
+    __rnn_size = 200               # size of RNN hidden unit
+    __num_layers = 1               # number of RNN layers
+    __cnn_keep_prob = 0.5          # keep probability for dropout(cnn character embedding)
+    __rnn_keep_prob = 0.5          # keep probability for dropout(rnn cell)
     __pos_keep_prob = 0.5          # keep probability for dropout(pos embedding)
     __filter_sizes = [3]           # filter sizes
-    __num_filters = 32             # number of filters
+    __num_filters = 30             # number of filters
     __chr_embedding_type = 'conv'  # 'max' | 'conv', default is max
     __mh_num_heads = 4             # number of head for multi head attention
     __mh_num_units = 32            # Q,K,V dimension for multi head attention

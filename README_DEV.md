@@ -1,3 +1,32 @@
+- experiments 4
+```
+* test 1
+word embedding size : 100
+pos vec
+pos embedding size : 5
+pos embedding random init : -0.5 ~ 0.5
+chracter embedding size : 96 -> 30
+chracter embedding random init : -1.0 ~ 1.0
+shape vec
+filter_size : 3
+num_filters : 32 -> 30
+rnn_size : 256 -> 200
+num_layers : 2 -> 1
+learning_rate : 0.001 -> 0.0001, intermid_epoch = 20
+cnn_keep_prob : 0.7 -> 0.5
+rnn_keep_prob : 0.32 -> 0.5
+pos_keep_prob : 0.5
+epoch : 50 -> 70
+batch_size : 128
++
+multi head attention(softmax with masking)
+mh_num_heads : 4
+mh_num_units : 32
+mh_dropout : 0.5
+normalize() instead of layer_norm()
+
+
+```
 
 - experiments 3
 ```

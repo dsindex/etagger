@@ -6,7 +6,7 @@ import pickle as pkl
 """
 character dimension
 """
-CHR_DIM = 96
+CHR_DIM = 30
 
 """
 pos dimension
