@@ -26,6 +26,8 @@ mh_num_units : 32
 mh_dropout : 0.5
 normalize() instead of layer_norm()
 
+token : 0.900360878341    -> best
+chunk : 0.8864417231961942
 
 * test 12
 word embedding size : 100
@@ -52,7 +54,7 @@ mh_num_units : 32
 mh_dropout : 0.5
 normalize() instead of layer_norm()
 
-token : 0.898353833915 -> best
+token : 0.898353833915
 chunk : 0.8851071334097523
 
 * test 11

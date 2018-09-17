@@ -54,8 +54,8 @@ etagger
   ![graph-1](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1.png)
 
 - evaluation
-  - per-token(partial) micro f1 : 0.898353833915
-  - per-chunk(exact)   micro f1 : 0.885107133409
+  - per-token(partial) micro f1 : 0.900360878341
+  - per-chunk(exact)   micro f1 : 0.886441723196
   - [experiments](https://github.com/dsindex/etagger/blob/master/README_DEV.md)
 
 - references
