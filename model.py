@@ -15,7 +15,7 @@ class Model:
     __num_filters = 30             # number of filters
     __chr_embedding_type = 'conv'  # 'max' | 'conv', default is max
     __mh_num_heads = 8             # number of head for multi head attention
-    __mh_num_units = 62            # Q,K,V dimension for multi head attention
+    __mh_num_units = 64            # Q,K,V dimension for multi head attention
     __mh_dropout = 0.5             # dropout probability for multi head attention
 
     def __init__(self, config):
