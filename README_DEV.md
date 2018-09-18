@@ -1,5 +1,30 @@
 - experiments 4
 ```
+* test 3
+word embedding size : 100
+pos vec
+pos embedding size : 5
+pos embedding random init : -0.5 ~ 0.5
+chracter embedding size : 30
+chracter embedding random init : -1.0 ~ 1.0
+shape vec
+filter_size : 3
+num_filters : 30
+rnn_size : 200
+num_layers : 2
+learning_rate : 0.001 -> 0.0001, intermid_epoch = 20
+cnn_keep_prob : 0.5
+rnn_keep_prob : 0.5
+pos_keep_prob : 0.5
+epoch : 70
+batch_size : 128
++
+multi head attention(softmax with masking)
+mh_num_heads : 8
+mh_num_units : 64
+mh_dropout : 0.5
+normalize() instead of layer_norm()
+
 * test 2
 word embedding size : 100
 pos vec
@@ -25,6 +50,8 @@ mh_num_units : 32
 mh_dropout : 0.5
 normalize() instead of layer_norm()
 
+token : 0.901651376147 -> best  
+chunk : 0.886935115174 -> best
 
 * test 1
 word embedding size : 100
@@ -51,7 +78,7 @@ mh_num_units : 32
 mh_dropout : 0.5
 normalize() instead of layer_norm()
 
-token : 0.901541674344 -> best
+token : 0.901541674344
 chunk : 0.884938533651
 
 ```
@@ -84,7 +111,7 @@ mh_dropout : 0.5
 normalize() instead of layer_norm()
 
 token : 0.900360878341
-chunk : 0.886441723196  -> best
+chunk : 0.886441723196
 
 * test 12
 word embedding size : 100

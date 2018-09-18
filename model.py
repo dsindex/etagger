@@ -14,8 +14,8 @@ class Model:
     __filter_sizes = [3]           # filter sizes
     __num_filters = 30             # number of filters
     __chr_embedding_type = 'conv'  # 'max' | 'conv', default is max
-    __mh_num_heads = 4             # number of head for multi head attention
-    __mh_num_units = 32            # Q,K,V dimension for multi head attention
+    __mh_num_heads = 8             # number of head for multi head attention
+    __mh_num_units = 62            # Q,K,V dimension for multi head attention
     __mh_dropout = 0.5             # dropout probability for multi head attention
 
     def __init__(self, config):
@@ -176,10 +176,10 @@ class Model:
                                                    dropout_rate=self.__mh_dropout,
                                                    is_training=self.is_train,
                                                    causality=False, # no future masking
-                                                   scope='multihead_attention',
+                                                   scope='multihead-attention',
                                                    reuse=None)
             # residual connection and layer normalization
-            return normalize(tf.add(inputs, attended_queries))
+            return normalize(tf.add(inputs, attended_queries), scope='layer-norm')
 
     def __compute_cost(self):
         """Compute cross entropy(self.output_data, self.prediction)
