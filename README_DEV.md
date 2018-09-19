@@ -1,5 +1,67 @@
+- experiments 5
+```
+* test 1
+word embedding size : 100
+pos embedding
+pos embedding size : 5
+pos embedding random init : -0.5 ~ 0.5
+chracter embedding size : 30
+chracter embedding random init : -1.0 ~ 1.0
+pos one-hot : 5
+#chunk one-hot : 5
+shape vec : 9  -> 9 (disjoint upperInitial and mixedCaps)
+filter_size : 3
+num_filters : 30
+rnn_size : 200
+num_layers : 2
+learning_rate : 0.001 -> 0.0001, intermid_epoch = 20
+cnn_keep_prob : 0.5
+rnn_keep_prob : 0.5
+pos_keep_prob : 0.5
+epoch : 70
+batch_size : 128
++
+multi head attention(softmax with masking)
+mh_num_heads : 4
+mh_num_units : 32
+mh_dropout : 0.5
+normalize() instead of layer_norm()
++
+CRF
+
+```
+
 - experiments 4
 ```
+* test 9
+word embedding size : 100
+pos embedding
+pos embedding size : 5
+pos embedding random init : -0.5 ~ 0.5
+chracter embedding size : 30
+chracter embedding random init : -1.0 ~ 1.0
+pos one-hot : 5
+#chunk one-hot : 5
+shape vec : 9  -> 9 (disjoint upperInitial and mixedCaps)
+filter_size : 3
+num_filters : 30
+rnn_size : 200
+num_layers : 2
+learning_rate : 0.001 -> 0.0001, intermid_epoch = 20
+cnn_keep_prob : 0.5
+rnn_keep_prob : 0.5
+pos_keep_prob : 0.5
+epoch : 70
+batch_size : 128 -> 64
++
+multi head attention(softmax with masking)
+mh_num_heads : 4
+mh_num_units : 32
+mh_dropout : 0.5
+normalize() instead of layer_norm()
+
+token : 0.901891180611
+chunk : 0.886795774647
 
 * test 8
 word embedding size : 100

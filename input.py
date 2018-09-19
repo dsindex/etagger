@@ -206,17 +206,21 @@ class Input:
         one_hot = np.zeros(9)
         size = len(word)
         if word.isdigit():
-            one_hot[1] = 1 
+            one_hot[1] = 1                            # allDigits
         elif word.isalpha():
-            if is_capital(word[0]): one_hot[5] = 1    # upperInitial
             n_caps = 0
             for i in range(size):
                 if is_capital(word[i]): n_caps += 1
             if n_caps == 0:
                 one_hot[6] = 1                        # lowercase
             else:
-                if size == n_caps: one_hot[7] = 1     # allCaps
-                else: one_hot[8] = 1                  # mixedCaps
+                if size == n_caps: 
+                    one_hot[7] = 1                    # allCaps
+                else:
+                    if is_capital(word[0]): 
+                        one_hot[5] = 1                # upperInitial
+                    else:
+                        one_hot[8] = 1                # mixedCaps
         else:
             n_digits = 0
             n_symbols = 0
