@@ -3,12 +3,13 @@ etagger
 
 ### description
 
-- named entity tagger using multi-layer Bidirectional LSTM
-  - +character convolutional embedding
-  - +gazetteer features
-  - +pos embedding
-  - +multi-head attention
-  - +CRF
+- named entity tagger using :
+  - multi-layer Bidirectional LSTM
+  - character convolutional embedding
+  - gazetteer features
+  - pos embedding
+  - multi-head attention
+  - CRF
 
 - base repository
   - [ner-lstm](https://github.com/monikkinom/ner-lstm)
@@ -133,12 +134,14 @@ test, max_sentence_length = 124
   - why? 
   ```
   i guess that the softmax(applied in multi-head attention functions) was corrupted by paddings.
-    -> i replaced the multi-head attention code to `https://github.com/Kyubyong/transformer/blob/master/modules.py`.
-    -> however, simillar corruption was happended even though i used softmax masking.
-    -> it was caused by the layer_norm() which normalizes over [begin_norm_axis ~ R-1] dimensions.
-    -> so, remove the layer_norm().
-    -> performance goes down.
-    -> try to use other layer normalization code from `https://github.com/Kyubyong/transformer/blob/master/modules.py` which normalizes over the last dimension only.
+    -> so, i replaced the multi-head attention code to `https://github.com/Kyubyong/transformer/blob/master/modules.py`
+       which applies key and query masking for paddings.
+    -> however, simillar corruption was happended.
+    -> it was caused by the tf.contrib.layers.layer_norm() which normalizes over [begin_norm_axis ~ R-1] dimensions.
+    -> what about remove the layer_norm()? performance goes down!
+    -> try to use other layer normalization code from `https://github.com/Kyubyong/transformer/blob/master/modules.py`
+       which normalizes over the last dimension only.
+       this code perfectly matches to my intention.
   ```
   - after replace layer_norm() to normalize()
   ![graph-4](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-4.png)
