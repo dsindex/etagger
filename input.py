@@ -145,11 +145,11 @@ class Input:
         for tokens in nbucket:
             sentence_length += 1
             word = self.replace_digits(tokens[0]).lower()
-            temp = self.__pos_vec(tokens[1])                                # adding pos one-hot(5)
-            temp = np.append(temp, self.__chunk_vec(tokens[2]))             # adding chunk one-hot(5)
-            temp = np.append(temp, self.__shape_vec(tokens[0]))             # adding shape vec(5)
+            temp = self.__shape_vec(tokens[0])                              # adding shape vec(5)
+            temp = np.append(temp, self.__pos_vec(tokens[1]))               # adding pos one-hot(5)
             '''
-            temp = np.append(temp, tokens[4])                             # adding gazetteer feature
+            temp = np.append(temp, self.__chunk_vec(tokens[2]))             # adding chunk one-hot(5)
+            temp = np.append(temp, tokens[4])                               # adding gazetteer feature
             '''
             etc.append(temp)
             tag.append(self.__tag_vec(tokens[3], self.config.class_size))   # tag one-hot(9)
@@ -193,24 +193,42 @@ class Input:
 
     def __shape_vec(self, word):
         # language specific features
+        # no-info[0], allDigits[1], mixedDigits[2], allSymbols[3], mixedSymbols[4], upperInitial[5], lowercase[6], allCaps[7], mixedCaps[8]
+
         def is_capital(ch):
             if ord('A') <= ord(ch) <= ord('Z'): return True
             return False
-        one_hot = np.zeros(5)
-        if not word.isalpha():
-            one_hot[0] = 1
-        else:
-            # upperInitial
-            if is_capital(word[0]): one_hot[1] = 1
+
+        def is_symbol(ch):
+            if not ch.isalpha() and not ch.isdigit() : return True
+            return False
+
+        one_hot = np.zeros(9)
+        size = len(word)
+        if word.isdigit():
+            one_hot[1] = 1 
+        elif word.isalpha():
+            if is_capital(word[0]): one_hot[5] = 1    # upperInitial
             n_caps = 0
-            size = len(word)
             for i in range(size):
                 if is_capital(word[i]): n_caps += 1
             if n_caps == 0:
-                one_hot[2] = 1                    # lowercase
+                one_hot[6] = 1                        # lowercase
             else:
-                if size == n_caps: one_hot[3] = 1 # allCaps
-                else: one_hot[4] = 1              # mixedCaps
+                if size == n_caps: one_hot[7] = 1     # allCaps
+                else: one_hot[8] = 1                  # mixedCaps
+        else:
+            n_digits = 0
+            n_symbols = 0
+            for i in range(size):
+                if word[i].isdigit(): n_digits += 1
+                if is_symbol(word[i]): n_symbols += 1
+            if n_digits >= 1: one_hot[2] = 1          # mixedDigits
+            if n_symbols > 0:
+                if size == n_symbols: one_hot[3] = 1  # allSymbols
+                else: one_hot[4] = 1                  # mixedSymbols
+            if n_digits == 0 and n_symbols == 0:
+                one_hot[0] = 1                        # no-info
         return one_hot
 
     def __tag_vec(self, tag, class_size):

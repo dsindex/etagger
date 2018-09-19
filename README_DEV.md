@@ -1,8 +1,157 @@
 - experiments 4
 ```
+
+* test 8
+word embedding size : 100
+pos embedding
+pos embedding size : 5
+pos embedding random init : -0.5 ~ 0.5
+chracter embedding size : 30
+chracter embedding random init : -1.0 ~ 1.0
+pos one-hot : 5
+#chunk one-hot : 5
+shape vec : 9
+filter_size : 3
+num_filters : 30
+rnn_size : 200
+num_layers : 2
+learning_rate : 0.001 -> 0.0001, intermid_epoch = 20
+cnn_keep_prob : 0.5
+rnn_keep_prob : 0.5
+pos_keep_prob : 0.5
+epoch : 70
+batch_size : 128
++
+multi head attention(softmax with masking)
+mh_num_heads : 4
+mh_num_units : 32
+mh_dropout : 0.5
+normalize() instead of layer_norm()
+
+token : 0.903553921569 -> best
+chunk : 0.886343612334
+
+* test 7
+word embedding size : 100
+#pos embedding
+#pos embedding size : 5
+#pos embedding random init : -0.5 ~ 0.5
+chracter embedding size : 30
+chracter embedding random init : -1.0 ~ 1.0
+pos one-hot : 5
+#chunk one-hot : 5
+shape vec : 9
+filter_size : 3
+num_filters : 30
+rnn_size : 200
+num_layers : 2
+learning_rate : 0.001 -> 0.0001, intermid_epoch = 20
+cnn_keep_prob : 0.5
+rnn_keep_prob : 0.5
+#pos_keep_prob : 0.5
+epoch : 70
+batch_size : 128
++
+multi head attention(softmax with masking)
+mh_num_heads : 4
+mh_num_units : 32
+mh_dropout : 0.5
+normalize() instead of layer_norm()
+
+token : 0.900515210991
+chunk : 0.884615384615
+
+* test 6
+word embedding size : 100
+#pos embedding
+#pos embedding size : 5
+#pos embedding random init : -0.5 ~ 0.5
+#chracter embedding size : 30
+#chracter embedding random init : -1.0 ~ 1.0
+pos one-hot : 5
+#chunk one-hot : 5
+shape vec : 9
+#filter_size : 3
+#num_filters : 30
+rnn_size : 200
+num_layers : 2
+learning_rate : 0.001 -> 0.0001, intermid_epoch = 20
+#cnn_keep_prob : 0.5
+rnn_keep_prob : 0.5
+#pos_keep_prob : 0.5
+epoch : 70
+batch_size : 128
++
+multi head attention(softmax with masking)
+mh_num_heads : 4
+mh_num_units : 32
+mh_dropout : 0.5
+normalize() instead of layer_norm()
+
+token : 0.895365211535
+chunk : 0.8775977456851004
+
+* test 5
+word embedding size : 100
+#pos embedding
+#pos embedding size : 5
+#pos embedding random init : -0.5 ~ 0.5
+chracter embedding size : 30
+chracter embedding random init : -1.0 ~ 1.0
+#pos one-hot : 5
+#chunk one-hot : 5
+shape vec : 5 -> 9
+filter_size : 3
+num_filters : 30
+rnn_size : 200
+num_layers : 2
+learning_rate : 0.001 -> 0.0001, intermid_epoch = 20
+cnn_keep_prob : 0.5
+rnn_keep_prob : 0.5
+#pos_keep_prob : 0.5
+epoch : 70 -> 80
+batch_size : 128
++
+multi head attention(softmax with masking)
+mh_num_heads : 4
+mh_num_units : 32
+mh_dropout : 0.5
+normalize() instead of layer_norm()
+
+token : 0.901030169242
+chunk : 0.8844185636139051
+
+* test 4
+word embedding size : 100
+pos embedding
+pos embedding size : 5
+pos embedding random init : -0.5 ~ 0.5
+chracter embedding size : 30
+chracter embedding random init : -1.0 ~ 1.0
+shape vec
+filter_size : 3
+num_filters : 30
+rnn_size : 200
+num_layers : 2
+learning_rate : 0.001 -> 0.0001, intermid_epoch = 20
+cnn_keep_prob : 0.5
+rnn_keep_prob : 0.5
+pos_keep_prob : 0.5
+epoch : 70
+batch_size : 128
++
+multi head attention(softmax with masking)
+mh_num_heads : 8
+mh_num_units : 32
+mh_dropout : 0.5
+normalize() instead of layer_norm()
+
+token : 0.902409196527
+chunk : 0.885191054763
+
 * test 3
 word embedding size : 100
-pos vec
+pos embedding
 pos embedding size : 5
 pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 30
@@ -25,9 +174,12 @@ mh_num_units : 64
 mh_dropout : 0.5
 normalize() instead of layer_norm()
 
+token : 0.899779735683
+chunk : 0.884354938000
+
 * test 2
 word embedding size : 100
-pos vec
+pos embedding
 pos embedding size : 5
 pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 30
@@ -50,12 +202,12 @@ mh_num_units : 32
 mh_dropout : 0.5
 normalize() instead of layer_norm()
 
-token : 0.901651376147 -> best  
+token : 0.901651376147
 chunk : 0.886935115174 -> best
 
 * test 1
 word embedding size : 100
-pos vec
+pos embedding
 pos embedding size : 5
 pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96 -> 30
@@ -87,7 +239,7 @@ chunk : 0.884938533651
 ```
 * test 13
 word embedding size : 100
-pos vec
+pos embedding
 pos embedding size : 5
 pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96
@@ -115,7 +267,7 @@ chunk : 0.886441723196
 
 * test 12
 word embedding size : 100
-pos vec
+pos embedding
 pos embedding size : 5
 pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96
@@ -143,7 +295,7 @@ chunk : 0.8851071334097523
 
 * test 11
 word embedding size : 100
-pos vec
+pos embedding
 pos embedding size : 5
 pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96
@@ -171,7 +323,7 @@ chunk : 0.877369302653619
 
 * test 10
 word embedding size : 100
-pos vec
+pos embedding
 shape vec
 rnn_size : 256
 num_layers : 2
@@ -190,7 +342,7 @@ chunk : 0.8798867857774633
 
 * test 9
 word embedding size : 100
-pos vec
+pos embedding
 pos embedding size : 5
 pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96
@@ -217,7 +369,7 @@ chunk : 0.8832155477031802
 
 * test 8
 word embedding size : 300
-pos vec
+pos embedding
 pos embedding size : 5
 pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96
@@ -244,7 +396,7 @@ chunk : 0.8801692972401023
 
 * test 7
 word embedding size : 300
-pos vec
+pos embedding
 pos embedding size : 5
 pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96
@@ -270,7 +422,7 @@ mh_dropout : 0.5
 
 * test 6
 word embedding size : 300
-pos vec
+pos embedding
 pos embedding size : 5
 pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96
@@ -296,7 +448,7 @@ mh_dropout : 0.5
 
 * test 5
 word embedding size : 300
-pos vec
+pos embedding
 pos embedding size : 5
 pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96
@@ -322,7 +474,7 @@ mh_dropout : 0.5
 
 * test 4
 word embedding size : 300
-pos vec
+pos embedding
 pos embedding size : 5
 pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96
@@ -348,7 +500,7 @@ mh_dropout : 0.5
 
 * test 3
 word embedding size : 300
-pos vec
+pos embedding
 pos embedding size : 5
 pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96
@@ -374,7 +526,7 @@ mh_dropout : 0.2
 
 * test 2
 word embedding size : 300
-pos vec
+pos embedding
 pos embedding size : 5
 pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96
@@ -401,7 +553,7 @@ mh_dropout : 0.5
 
 * test 1
 word embedding size : 300
-pos vec
+pos embedding
 pos embedding size : 5
 pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96
@@ -432,7 +584,7 @@ mh_dropout : 0.5
 ```
 * test 17
 word embedding size : 300
-pos vec
+pos embedding
 chracter embedding size : 96
 chracter embedding random init : -1.0 ~ 1.0
 shape vec
@@ -450,7 +602,7 @@ batch_size : 128
 
 * test 17
 word embedding size : 300
-pos vec
+pos embedding
 pos embedding size : 5
 pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96
@@ -470,7 +622,7 @@ batch_size : 128
 
 * test 16
 word embedding size : 300
-pos vec
+pos embedding
 pos embedding size : 5
 pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96
@@ -489,7 +641,7 @@ batch_size : 128
 
 * test 15
 word embedding size : 300
-remove pos vec
+remove pos embedding
 pos embedding size : 10
 pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96
@@ -508,7 +660,7 @@ batch_size : 128
 
 * test 14
 word embedding size : 300
-remove pos vec
+remove pos embedding
 pos embedding size : 50
 pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 96

@@ -57,7 +57,7 @@ etagger
 - evaluation
   - [experiments](https://github.com/dsindex/etagger/blob/master/README_DEV.md)
   - best fscore
-    - per-token(partial) micro f1 : 0.901651376147
+    - per-token(partial) micro f1 : 0.903553921569
     - per-chunk(exact)   micro f1 : 0.886935115174
   - comparision to previous research
     - [Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
@@ -135,9 +135,10 @@ test, max_sentence_length = 124
   i guess that the softmax(applied in multi-head attention functions) was corrupted by paddings.
     -> i replaced the multi-head attention code to `https://github.com/Kyubyong/transformer/blob/master/modules.py`.
     -> however, simillar corruption was happended even though i used softmax masking.
-    -> remove the layer_norm().
+    -> it was caused by the layer_norm() which normalizes over [begin_norm_axis ~ R-1] dimensions.
+    -> so, remove the layer_norm().
     -> performance goes down.
-    -> try to use other layer normalization code from `https://github.com/Kyubyong/transformer/blob/master/modules.py`.
+    -> try to use other layer normalization code from `https://github.com/Kyubyong/transformer/blob/master/modules.py` which normalizes over the last dimension only.
   ```
   - after replace layer_norm() to normalize()
   ![graph-4](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-4.png)
