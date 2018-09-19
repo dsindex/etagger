@@ -29,6 +29,7 @@ class Model:
         etc_dim = config.etc_dim
         class_size = config.class_size
         self.is_train = config.is_train
+        self.use_crf = config.use_crf
         self.set_cuda_visible_devices(self.is_train)
 
         """
@@ -148,7 +149,7 @@ class Model:
         Loss, Accuracy, Optimization
         """
         with tf.name_scope('loss'):
-            self.loss = self.__compute_cost()
+            self.loss = self.__compute_loss()
 
         with tf.name_scope('accuracy'):
             self.accuracy = self.__compute_accuracy()
@@ -181,17 +182,22 @@ class Model:
             # residual connection and layer normalization
             return normalize(tf.add(inputs, attended_queries), scope='layer-norm')
 
-    def __compute_cost(self):
-        """Compute cross entropy(self.output_data, self.prediction)
+    def __compute_loss(self):
+        """Compute loss(self.output_data, self.prediction)
         """
-        cross_entropy = self.output_data * tf.log(self.prediction)                   # (batch_size, sentence_length, class_size)
-        cross_entropy = -tf.reduce_sum(cross_entropy, reduction_indices=2)           # (batch_size, sentence_length)
-        # ignore padding by masking
-        mask = tf.sign(tf.reduce_max(tf.abs(self.output_data), reduction_indices=2)) # (batch_size, sentence_length)
-        cross_entropy *= mask
-        cross_entropy = tf.reduce_sum(cross_entropy, reduction_indices=1)            # (batch_size)
-        cross_entropy /= tf.cast(self.length, tf.float32)                            # (batch_size)
-        return tf.reduce_mean(cross_entropy)
+        if self.use_crf:
+            log_likelihood, trans_params = tf.contrib.crf.crf_log_likelihood(self.prediction, self.output, self.length)
+            self.trans_params = trans_params # need to evaludate it for decoding
+            return tf.reduce_mean(-log_likelihood)
+        else:
+            cross_entropy = self.output_data * tf.log(self.prediction)                   # (batch_size, sentence_length, class_size)
+            cross_entropy = -tf.reduce_sum(cross_entropy, reduction_indices=2)           # (batch_size, sentence_length)
+            # ignore padding by masking
+            mask = tf.sign(tf.reduce_max(tf.abs(self.output_data), reduction_indices=2)) # (batch_size, sentence_length)
+            cross_entropy *= mask
+            cross_entropy = tf.reduce_sum(cross_entropy, reduction_indices=1)            # (batch_size)
+            cross_entropy /= tf.cast(self.length, tf.float32)                            # (batch_size)
+            return tf.reduce_mean(cross_entropy)
 
     def __compute_accuracy(self):
         """Compute accuracy(self.output_data, self.prediction)

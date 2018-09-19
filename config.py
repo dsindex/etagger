@@ -21,7 +21,7 @@ etc dimension
 ETC_DIM = 9 + 5
 
 class Config:
-    def __init__(self, args, is_train=True):
+    def __init__(self, args, is_train=True, use_crf=True):
         self.emb_path = args.emb_path
         self.embvec = pkl.load(open(self.emb_path, 'rb'))
         self.wrd_dim = args.wrd_dim
@@ -36,6 +36,7 @@ class Config:
         self.sentence_length = args.sentence_length
         self.word_length = args.word_length
         self.restore = args.restore
+        self.use_crf = use_crf
         if is_train:
             self.epoch = args.epoch
             self.batch_size = args.batch_size
