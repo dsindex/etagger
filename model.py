@@ -228,7 +228,7 @@ class Model:
     @staticmethod
     def set_cuda_visible_devices(is_train):
         import os
-        os.environ['CUDA_VISIBLE_DEVICES']='1'
+        os.environ['CUDA_VISIBLE_DEVICES']='2'
         if is_train:
             from tensorflow.python.client import device_lib
             print(device_lib.list_local_devices())

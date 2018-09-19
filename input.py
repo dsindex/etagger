@@ -1,10 +1,10 @@
 from __future__ import print_function
+import sys
+import re
 import tensorflow as tf
 import numpy as np
 from embvec import EmbVec
 from shuffle import Shuffle
-import sys
-import re
 
 class Input:
     def __init__(self, data, config):

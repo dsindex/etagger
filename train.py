@@ -1,10 +1,12 @@
 from __future__ import print_function
 import tensorflow as tf
 import numpy as np
+from embvec import EmbVec
 from config import Config
 from model import Model
+from input import Input
 from token_eval  import Eval
-from input import *
+from general_utils import Progbar
 import os
 import sys
 import argparse
@@ -23,49 +25,47 @@ def do_train(model, config, train_data, dev_data, test_data):
         if config.restore is not None:
             saver.restore(sess, config.restore)
             print('model restored')
-        # summary for loss, accuracy
+        # summary setting
         loss_summary = tf.summary.scalar('loss', model.loss)
         acc_summary = tf.summary.scalar('accuracy', model.accuracy)
-        # train summary
         train_summary_op = tf.summary.merge([loss_summary, acc_summary])
         train_summary_dir = os.path.join(config.summary_dir, 'summaries', 'train')
         train_summary_writer = tf.summary.FileWriter(train_summary_dir, sess.graph)
-        # dev summary
         dev_summary_op = tf.summary.merge([loss_summary, acc_summary])
         dev_summary_dir = os.path.join(config.summary_dir, 'summaries', 'dev')
         dev_summary_writer = tf.summary.FileWriter(dev_summary_dir, sess.graph)
         # training steps
         for e in range(config.epoch):
+            # run epoch
             idx = 0
+            nbatches = (len(train_data.sentence_word_ids) + config.batch_size - 1) // config.batch_size
+            prog = Progbar(target=nbatches)
             for ptr in range(0, len(train_data.sentence_word_ids), config.batch_size):
-                print('%s-th batch in %s(size of train_inp)' % (idx, len(train_data.sentence_word_ids)))
                 feed_dict={model.input_data_word_ids: train_data.sentence_word_ids[ptr:ptr + config.batch_size],
                            model.input_data_wordchr_ids: train_data.sentence_wordchr_ids[ptr:ptr + config.batch_size],
                            model.input_data_pos_ids: train_data.sentence_pos_ids[ptr:ptr + config.batch_size],
                            model.input_data_etc: train_data.sentence_etc[ptr:ptr + config.batch_size],
                            model.output_data: train_data.sentence_tag[ptr:ptr + config.batch_size],
                            model.learning_rate:learning_rate}
-                step, train_summaries, _, train_loss, train_accuracy, rnn_output, attended_output = \
-                           sess.run([model.global_step, train_summary_op, model.train_op, model.loss, model.accuracy, model.rnn_output, model.attended_output], feed_dict=feed_dict)
-                print('step: %d, train loss: %s, train accuracy: %s' % (step, train_loss, train_accuracy))
+                step, train_summaries, _, train_loss, train_accuracy = \
+                           sess.run([model.global_step, train_summary_op, model.train_op, model.loss, model.accuracy], feed_dict=feed_dict)
+                prog.update(idx + 1, [('train loss', train_loss), ('train accuracy', train_accuracy)])
                 train_summary_writer.add_summary(train_summaries, step)
                 idx += 1
-            # learning rate warmup
-            if e > intermid_epoch: learning_rate=learning_rate_final
-            if e % 10 == 0:
-                save_path = saver.save(sess, config.checkpoint_dir + '/' + 'model.ckpt')
-                print('model saved in file: %s' % save_path)
+            # evaluate on dev data
             feed_dict={model.input_data_word_ids: dev_data.sentence_word_ids,
                        model.input_data_wordchr_ids: dev_data.sentence_wordchr_ids,
                        model.input_data_pos_ids: dev_data.sentence_pos_ids,
                        model.input_data_etc: dev_data.sentence_etc,
                        model.output_data: dev_data.sentence_tag}
             step, dev_summaries, pred, length, dev_loss, dev_accuracy = sess.run([model.global_step, dev_summary_op, model.prediction, model.length, model.loss, model.accuracy], feed_dict=feed_dict)
-            print('epoch: %d, step: %d, dev loss: %s, dev accuracy: %s' % (e, step, dev_loss, dev_accuracy))
+            print('epoch: %d / %d, step: %d, dev loss: %s, dev accuracy: %s' % (e, config.epoch, step, dev_loss, dev_accuracy))
             dev_summary_writer.add_summary(dev_summaries, step)
             print('dev precision, recall, f1:')
             m = Eval.compute_f1(config.class_size, pred, dev_data.sentence_tag, length)
+            # save best model
             if m > maximum:
+                print('new best score!')
                 maximum = m
                 save_path = saver.save(sess, config.checkpoint_dir + '/' + 'model_max.ckpt')
                 print('max model saved in file: %s' % save_path)
@@ -75,9 +75,11 @@ def do_train(model, config, train_data, dev_data, test_data):
                            model.input_data_etc: test_data.sentence_etc,
                            model.output_data: test_data.sentence_tag}
                 step, pred, length, test_loss, test_accuracy = sess.run([model.global_step, model.prediction, model.length, model.loss, model.accuracy], feed_dict=feed_dict)
-                print('epoch: %d, step: %d, test loss: %s, test accuracy: %s' % (e, step, test_loss, test_accuracy))
+                print('epoch: %d / %d, step: %d, test loss: %s, test accuracy: %s' % (e, config.epoch, step, test_loss, test_accuracy))
                 print('test precision, recall, f1:')
                 Eval.compute_f1(config.class_size, pred, test_data.sentence_tag, length)
+            # learning rate warmup
+            if e > intermid_epoch: learning_rate=learning_rate_final
 
 def train(config):
     # Build input data
