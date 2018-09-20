@@ -65,17 +65,22 @@ def do_train(model, config, train_data, dev_data, test_data):
             print('epoch: %d / %d, step: %d, dev loss: %s, dev accuracy: %s' % (e, config.epoch, step, dev_loss, dev_accuracy))
             dev_summary_writer.add_summary(dev_summaries, step)
             if config.use_crf:
-                print('logits', logits)
-                print('trans_params', trans_params)
+                print('dev precision, recall, f1(token): ')
+                TokenEval.compute_f1(config.class_size, logits, dev_data.sentence_tag, length)
                 viterbi_sequences = viterbi_decode(logits, trans_params, length)
                 tag_preds = dev_data.logits_indices_to_tags_seq(viterbi_sequences, length)
                 tag_corrects = dev_data.logits_indices_to_tags_seq(output_data_indices, length)
                 dev_prec, dev_rec, dev_f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
                 m = dev_f1
-                print('dev precision, recall, f1: ', dev_prec, dev_rec, dev_f1)
+                print('dev precision, recall, f1(chunk): ', dev_prec, dev_rec, dev_f1)
             else:
-                print('dev precision, recall, f1: ')
-                m = TokenEval.compute_f1(config.class_size, logits, dev_data.sentence_tag, length)
+                print('dev precision, recall, f1(token): ')
+                TokenEval.compute_f1(config.class_size, logits, dev_data.sentence_tag, length)
+                tag_preds = dev_data.logits_indices_to_tags_seq(logits_indices, length)
+                tag_corrects = dev_data.logits_indices_to_tags_seq(output_data_indices, length)
+                dev_prec, dev_rec, dev_f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
+                m = dev_f1
+                print('dev precision, recall, f1(chunk): ', dev_prec, dev_rec, dev_f1)
             # save best model
             if m > maximum:
                 print('new best f1 score!')
@@ -91,16 +96,21 @@ def do_train(model, config, train_data, dev_data, test_data):
                            sess.run([model.global_step, model.logits, model.logits_indices, model.trans_params, model.output_data_indices, model.length, model.loss, model.accuracy], feed_dict=feed_dict)
                 print('epoch: %d / %d, step: %d, test loss: %s, test accuracy: %s' % (e, config.epoch, step, test_loss, test_accuracy))
                 if config.use_crf:
+                    print('test precision, recall, f1(token): ')
+                    TokenEval.compute_f1(config.class_size, logits, test_data.sentence_tag, length)
                     viterbi_sequences = viterbi_decode(logits, trans_params, length)
                     tag_preds = test_data.logits_indices_to_tags_seq(viterbi_sequences, length)
                     tag_corrects = test_data.logits_indices_to_tags_seq(output_data_indices)
                     test_prec, test_rec, test_f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
-                    m = test_f1
-                    print('test precision, recall, f1: ', test_prec, test_rec, test_f1)
+                    print('test precision, recall, f1(chunk): ', test_prec, test_rec, test_f1)
                 else:
-                    print('test precision, recall, f1: ')
+                    print('test precision, recall, f1(token): ')
                     TokenEval.compute_f1(config.class_size, logits, test_data.sentence_tag, length)
-            # learning rate warmup
+                    tag_preds = test_data.logits_indices_to_tags_seq(logits_indices, length)
+                    tag_corrects = test_data.logits_indices_to_tags_seq(output_data_indices, length)
+                    test_prec, test_rec, test_f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
+                    print('test precision, recall, f1(chunk): ', test_prec, test_rec, test_f1)
+            # learning rate change
             if e > intermid_epoch: learning_rate=learning_rate_final
 
 def train(config):
@@ -135,5 +145,5 @@ if __name__ == '__main__':
     parser.add_argument('--summary_dir', type=str, default='./runs', help='path to save summary(ex, ./runs)')
 
     args = parser.parse_args()
-    config = Config(args, is_train=True, use_crf=True)
+    config = Config(args, is_train=True, use_crf=False)
     train(config)

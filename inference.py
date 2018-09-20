@@ -179,7 +179,7 @@ if __name__ == '__main__':
     parser.add_argument('--mode', type=str, default='bulk', help='bulk, bucket, line')
 
     args = parser.parse_args()
-    config = Config(args, is_train=False, use_crf=True)
+    config = Config(args, is_train=False, use_crf=False)
     if args.mode == 'bulk':   inference_bulk(config)
     if args.mode == 'bucket': inference_bucket(config)
     if args.mode == 'line':   inference_line(config)

@@ -27,9 +27,7 @@ mh_num_units : 32
 mh_dropout : 0.5
 normalize() instead of layer_norm()
 +
-modified projection layer(trainable bias)
-+
-CRF (change loss only)
+CRF(loss only)
 
 * test 1
 word embedding size : 100
@@ -58,8 +56,7 @@ mh_num_units : 32
 mh_dropout : 0.5
 normalize() instead of layer_norm()
 +
-modified projection layer(trainable bias)
-
+save model by f1(chunk)
 
 ```
 
@@ -634,7 +631,7 @@ filter_size : 3,4,5
 num_filters : 32
 rnn_size : 256
 num_layers : 2
-learning_rate : 0.0001 -> 0.0002 (warmup), intermid_epoch = 15
+learning_rate : 0.0001 -> 0.0002 (change), intermid_epoch = 15
 cnn_keep_prob : 0.5
 rnn_keep_prob : 0.5
 pos_keep_prob : 0.5
@@ -716,7 +713,7 @@ filter_size : 3,4,5
 num_filters : 32
 rnn_size : 256
 num_layers : 2
-learning_rate : 0.001 -> 0.002 (warmup), intermid_epoch = 15
+learning_rate : 0.001 -> 0.002 (change), intermid_epoch = 15
 cnn_keep_prob : 0.5
 rnn_keep_prob : 0.5
 epoch : 50
@@ -736,7 +733,7 @@ filter_size : 3,4,5
 num_filters : 32
 rnn_size : 256
 num_layers : 2
-learning_rate : 0.001 -> 0.002 (warmup), intermid_epoch = 15
+learning_rate : 0.001 -> 0.002 (change), intermid_epoch = 15
 cnn_keep_prob : 0.5
 rnn_keep_prob : 0.5
 epoch : 50
@@ -755,7 +752,7 @@ filter_size : 3,4,5
 num_filters : 32
 rnn_size : 256
 num_layers : 2
-learning_rate : 0.001 -> 0.002 (warmup), intermid_epoch = 15
+learning_rate : 0.001 -> 0.002 (change), intermid_epoch = 15
 cnn_keep_prob : 0.5
 rnn_keep_prob : 0.5
 epoch : 50
@@ -774,7 +771,7 @@ filter_size : 3,4,5
 num_filters : 32
 rnn_size : 256
 num_layers : 2
-learning_rate : 0.001 -> 0.002 (warmup), intermid_epoch = 15
+learning_rate : 0.001 -> 0.002 (change), intermid_epoch = 15
 cnn_keep_prob : 0.5
 rnn_keep_prob : 0.5
 epoch : 50
@@ -793,7 +790,7 @@ filter_size : 3,4,5
 num_filters : 32
 rnn_size : 256
 num_layers : 2
-learning_rate : 0.001 -> 0.002 (warmup), intermid_epoch = 15
+learning_rate : 0.001 -> 0.002 (change), intermid_epoch = 15
 cnn_keep_prob : 0.5
 rnn_keep_prob : 0.5
 epoch : 50
@@ -810,7 +807,7 @@ filter_size : 3,4,5
 num_filters : 32
 rnn_size : 256
 num_layers : 2
-learning_rate : 0.001 -> 0.002 (warmup), intermid_epoch = 15
+learning_rate : 0.001 -> 0.002 (change), intermid_epoch = 15
 cnn_keep_prob : 0.5
 rnn_keep_prob : 0.5
 epoch : 50
@@ -827,7 +824,7 @@ filter_size : 3,4,5
 num_filters : 32
 rnn_size : 256
 num_layers : 2
-learning_rate : 0.001 -> 0.002 (warmup), intermid_epoch = 15
+learning_rate : 0.001 -> 0.002 (change), intermid_epoch = 15
 cnn_keep_prob : 0.5
 rnn_keep_prob : 0.5
 epoch : 50
@@ -861,7 +858,7 @@ filter_size : 3,4,5
 num_filters : 32
 rnn_size : 256
 num_layers : 2
-learning_rate : 0.001 -> 0.002 (warmup), intermid_step = 1000
+learning_rate : 0.001 -> 0.002 (change), intermid_step = 1000
 cnn_keep_prob : 0.5
 rnn_keep_prob : 0.5
 epoch : 50
@@ -879,7 +876,7 @@ filter_size : 3,4,5
 num_filters : 32
 rnn_size : 256
 num_layers : 2
-learning_rate : 0.0001 -> 0.001 (warmup), intermid_step = 1000
+learning_rate : 0.0001 -> 0.001 (change), intermid_step = 1000
 cnn_keep_prob : 0.5
 rnn_keep_prob : 0.5
 epoch : 50

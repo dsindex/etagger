@@ -27,7 +27,7 @@ class Model:
         pos_vocab_size = len(embvec.pos_vocab)
         pos_dim = config.pos_dim
         etc_dim = config.etc_dim
-        class_size = config.class_size
+        self.class_size = config.class_size
         self.is_train = config.is_train
         self.use_crf = config.use_crf
         self.set_cuda_visible_devices(self.is_train)
@@ -41,7 +41,7 @@ class Model:
             embed_arr = np.array(embvec.wrd_embeddings)
             embed_init = tf.constant_initializer(embed_arr)
             wrd_embeddings = tf.get_variable(name='wrd_embeddings', initializer=embed_init, shape=embed_arr.shape, trainable=False)
-            self.word_embeddings = tf.nn.embedding_lookup(wrd_embeddings, self.input_data_word_ids) # (batch_size, sentence_length, wrd_dim)
+            self.word_embeddings = tf.nn.embedding_lookup(wrd_embeddings, self.input_data_word_ids)           # (batch_size, sentence_length, wrd_dim)
 
         # character embedding features
         self.input_data_wordchr_ids = tf.placeholder(tf.int32, shape=[None, sentence_length, word_length], name='input_data_wordchr_ids')
@@ -101,7 +101,7 @@ class Model:
         with tf.name_scope('pos-embeddings'):
             with tf.device('/cpu:0'):
                 pos_embeddings = tf.Variable(tf.random_uniform([pos_vocab_size, pos_dim], -0.5, 0.5), name='pos_embeddings')
-                self.pos_embeddings = tf.nn.embedding_lookup(pos_embeddings, self.input_data_pos_ids) # (batch_size, sentence_length, pos_dim)
+                self.pos_embeddings = tf.nn.embedding_lookup(pos_embeddings, self.input_data_pos_ids)         # (batch_size, sentence_length, pos_dim)
                 keep_prob = self.__pos_keep_prob if self.is_train else 1.0
                 self.pos_embeddings = tf.nn.dropout(self.pos_embeddings, keep_prob)
 
@@ -129,23 +129,24 @@ class Model:
         """
         Attention layer
         """
-        self.attended_output = self.__self_attention(self.rnn_output, 2*self.__rnn_size)
+        with tf.variable_scope('self-attention'):
+            self.attended_output = self.__self_attention(self.rnn_output, 2*self.__rnn_size)
 
         """
         Projection layer
         """
         with tf.name_scope('projection'):
-            weight = tf.get_variable('W', dtype=tf.float32, shape=[2*self.__rnn_size, class_size])
-            bias = tf.get_variable('b', dtype=tf.float32, shape=[class_size])
+            weight = tf.Variable(tf.truncated_normal([2*self.__rnn_size, self.class_size], stddev=0.01), name='W')
+            bias = tf.Variable(tf.constant(0.1, shape=[self.class_size]), name='b')
             t_attended_output = tf.reshape(self.attended_output, [-1, 2*self.__rnn_size])     # (batch_size*sentence_length, 2*self.__rnn_size)
             self.logits = tf.matmul(t_attended_output, weight) + bias                         # (batch_size*sentence_length, class_size)
-            self.logits = tf.reshape(self.logits, [-1, sentence_length, class_size])          # (batch_size, sentence_length, class_size)
+            self.logits = tf.reshape(self.logits, [-1, sentence_length, self.class_size])     # (batch_size, sentence_length, class_size)
             self.logits_indices = tf.cast(tf.argmax(self.logits, 2), tf.int32)                # (batch_size, sentence_length)
 
         """
         Output answer
         """
-        self.output_data = tf.placeholder(tf.float32, shape=[None, sentence_length, class_size], name='output_data')
+        self.output_data = tf.placeholder(tf.float32, shape=[None, sentence_length, self.class_size], name='output_data')
         self.output_data_indices = tf.cast(tf.argmax(self.output_data, 2), tf.int32)          # (batch_size, sentence_length)
 
         """
@@ -169,21 +170,20 @@ class Model:
     def __self_attention(self, inputs, model_dim):
         """Apply self attention
         """
-        with tf.variable_scope('self-attention'):
-            queries = inputs
-            keys = inputs
-            attended_queries = multihead_attention(queries,
-                                                   keys,
-                                                   num_units=self.__mh_num_units,
-                                                   num_heads=self.__mh_num_heads,
-                                                   model_dim=model_dim,
-                                                   dropout_rate=self.__mh_dropout,
-                                                   is_training=self.is_train,
-                                                   causality=False, # no future masking
-                                                   scope='multihead-attention',
-                                                   reuse=None)
-            # residual connection and layer normalization
-            return normalize(tf.add(inputs, attended_queries), scope='layer-norm')
+        queries = inputs
+        keys = inputs
+        attended_queries = multihead_attention(queries,
+                                               keys,
+                                               num_units=self.__mh_num_units,
+                                               num_heads=self.__mh_num_heads,
+                                               model_dim=model_dim,
+                                               dropout_rate=self.__mh_dropout,
+                                               is_training=self.is_train,
+                                               causality=False, # no future masking
+                                               scope='multihead-attention',
+                                               reuse=None)
+        # residual connection and layer normalization
+        return normalize(tf.add(inputs, attended_queries), scope='layer-norm')
 
     def __compute_loss(self):
         """Compute loss(self.output_data, self.logits)
@@ -193,14 +193,14 @@ class Model:
             self.trans_params = trans_params # need to evaludate it for decoding
             return tf.reduce_mean(-log_likelihood)
         else:
-            cross_entropy = self.output_data * tf.log(self.logits)                       # (batch_size, sentence_length, class_size)
+            cross_entropy = self.output_data * tf.log(tf.nn.softmax(self.logits))        # (batch_size, sentence_length, class_size)
             cross_entropy = -tf.reduce_sum(cross_entropy, reduction_indices=2)           # (batch_size, sentence_length)
             # ignore padding by masking
             mask = tf.sign(tf.reduce_max(tf.abs(self.output_data), reduction_indices=2)) # (batch_size, sentence_length)
             cross_entropy *= mask
             cross_entropy = tf.reduce_sum(cross_entropy, reduction_indices=1)            # (batch_size)
             cross_entropy /= tf.cast(self.length, tf.float32)                            # (batch_size)
-            self.trans_params = tf.constant(0.0, shape=[class_size, class_size])
+            self.trans_params = tf.constant(0.0, shape=[self.class_size, self.class_size])
             return tf.reduce_mean(cross_entropy)
 
     def __compute_accuracy(self):
@@ -208,10 +208,10 @@ class Model:
         """
         correct_prediction = tf.cast(tf.equal(self.logits_indices, self.output_data_indices), tf.float32)  # (batch_size, sentence_length)
         # ignore padding by masking
-        mask = tf.sign(tf.reduce_max(tf.abs(self.output_data), reduction_indices=2))          # (batch_size, sentence_length)
+        mask = tf.sign(tf.reduce_max(tf.abs(self.output_data), reduction_indices=2))                       # (batch_size, sentence_length)
         correct_prediction *= mask
-        correct_prediction = tf.reduce_sum(correct_prediction, reduction_indices=1)           # (batch_size)
-        correct_prediction /= tf.cast(self.length, tf.float32)                                # (batch_size)
+        correct_prediction = tf.reduce_sum(correct_prediction, reduction_indices=1)                        # (batch_size)
+        correct_prediction /= tf.cast(self.length, tf.float32)                                             # (batch_size)
         return tf.reduce_mean(correct_prediction)
 
     def __create_cell(self, rnn_size, keep_prob):

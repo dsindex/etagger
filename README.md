@@ -38,7 +38,7 @@ etagger
     - apply gazetteer features [done]
       - if we construct the gazetteer vocab from the training data, the performance is decreasing.
       - recommend constructing the gazetteer vocab from other sources.
-    - apply learning-rate warm up [done]
+    - apply learning-rate change [done]
     - apply pos embedding [done]
       - pos one-hot vector + pos embedding
     - extend language specific features [done]
