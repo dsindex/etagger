@@ -135,15 +135,18 @@ class Model:
         Projection layer
         """
         with tf.name_scope('projection'):
-            weight, bias = self.__create_weight_and_bias(2*self.__rnn_size, class_size)
-            t_attended_output = tf.reshape(self.attended_output, [-1, 2*self.__rnn_size])    # (batch_size*sentence_length, 2*self.__rnn_size)
-            self.prediction = tf.nn.softmax(tf.matmul(t_attended_output, weight) + bias)     # (batch_size*sentence_length, class_size)
-            self.prediction = tf.reshape(self.prediction, [-1, sentence_length, class_size]) # (batch_size, sentence_length, class_size)
+            weight = tf.get_variable('W', dtype=tf.float32, shape=[2*self.__rnn_size, class_size])
+            bias = tf.get_variable('b', dtype=tf.float32, shape=[class_size])
+            t_attended_output = tf.reshape(self.attended_output, [-1, 2*self.__rnn_size])     # (batch_size*sentence_length, 2*self.__rnn_size)
+            self.logits = tf.matmul(t_attended_output, weight) + bias                         # (batch_size*sentence_length, class_size)
+            self.logits = tf.reshape(self.logits, [-1, sentence_length, class_size])          # (batch_size, sentence_length, class_size)
+            self.logits_indices = tf.cast(tf.argmax(self.logits, 2), tf.int32)                # (batch_size, sentence_length)
 
         """
-        Answer
+        Output answer
         """
         self.output_data = tf.placeholder(tf.float32, shape=[None, sentence_length, class_size], name='output_data')
+        self.output_data_indices = tf.cast(tf.argmax(self.output_data, 2), tf.int32)          # (batch_size, sentence_length)
 
         """
         Loss, Accuracy, Optimization
@@ -183,31 +186,32 @@ class Model:
             return normalize(tf.add(inputs, attended_queries), scope='layer-norm')
 
     def __compute_loss(self):
-        """Compute loss(self.output_data, self.prediction)
+        """Compute loss(self.output_data, self.logits)
         """
         if self.use_crf:
-            log_likelihood, trans_params = tf.contrib.crf.crf_log_likelihood(self.prediction, self.output, self.length)
+            log_likelihood, trans_params = tf.contrib.crf.crf_log_likelihood(self.logits, self.output_data_indices, self.length)
             self.trans_params = trans_params # need to evaludate it for decoding
             return tf.reduce_mean(-log_likelihood)
         else:
-            cross_entropy = self.output_data * tf.log(self.prediction)                   # (batch_size, sentence_length, class_size)
+            cross_entropy = self.output_data * tf.log(self.logits)                       # (batch_size, sentence_length, class_size)
             cross_entropy = -tf.reduce_sum(cross_entropy, reduction_indices=2)           # (batch_size, sentence_length)
             # ignore padding by masking
             mask = tf.sign(tf.reduce_max(tf.abs(self.output_data), reduction_indices=2)) # (batch_size, sentence_length)
             cross_entropy *= mask
             cross_entropy = tf.reduce_sum(cross_entropy, reduction_indices=1)            # (batch_size)
             cross_entropy /= tf.cast(self.length, tf.float32)                            # (batch_size)
+            self.trans_params = tf.constant(0.0, shape=[class_size, class_size])
             return tf.reduce_mean(cross_entropy)
 
     def __compute_accuracy(self):
-        """Compute accuracy(self.output_data, self.prediction)
+        """Compute accuracy(self.output_data, self.logits)
         """
-        correct_prediction = tf.cast(tf.equal(tf.argmax(self.prediction, 2), tf.argmax(self.output_data, 2)), 'float') # (batch_size, sentence_length)
+        correct_prediction = tf.cast(tf.equal(self.logits_indices, self.output_data_indices), tf.float32)  # (batch_size, sentence_length)
         # ignore padding by masking
-        mask = tf.sign(tf.reduce_max(tf.abs(self.output_data), reduction_indices=2)) # (batch_size, sentence_length)
+        mask = tf.sign(tf.reduce_max(tf.abs(self.output_data), reduction_indices=2))          # (batch_size, sentence_length)
         correct_prediction *= mask
-        correct_prediction = tf.reduce_sum(correct_prediction, reduction_indices=1)  # (batch_size)
-        correct_prediction /= tf.cast(self.length, tf.float32)                       # (batch_size)
+        correct_prediction = tf.reduce_sum(correct_prediction, reduction_indices=1)           # (batch_size)
+        correct_prediction /= tf.cast(self.length, tf.float32)                                # (batch_size)
         return tf.reduce_mean(correct_prediction)
 
     def __create_cell(self, rnn_size, keep_prob):
@@ -223,13 +227,6 @@ class Model:
         words_used_in_sent = tf.sign(tf.reduce_max(tf.abs(output_data), reduction_indices=2)) # (batch_size, sentence_length)
         length = tf.cast(tf.reduce_sum(words_used_in_sent, reduction_indices=1), tf.int32)    # (batch_size)
         return length
-
-    def __create_weight_and_bias(self, in_size, out_size):
-        """Create weight matrix and bias
-        """
-        weight = tf.truncated_normal([in_size, out_size], stddev=0.01)
-        bias = tf.constant(0.1, shape=[out_size])
-        return tf.Variable(weight, name='projection_weight'), tf.Variable(bias, name='projection_bias')
 
     @staticmethod
     def set_cuda_visible_devices(is_train):

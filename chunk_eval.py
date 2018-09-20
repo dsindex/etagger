@@ -2,48 +2,7 @@ from __future__ import print_function
 import sys
 import argparse
 
-def compute_f1(label_preds, label_corrects): 
-    prec = compute_precision(label_preds, label_corrects)
-    rec = compute_precision(label_corrects, label_preds)
-    f1 = 0
-    if (rec+prec) > 0:
-        f1 = 2.0 * prec * rec / (prec + rec);
-    return prec, rec, f1
-
-def compute_precision(guessed_sentences, correct_sentences):
-    assert(len(guessed_sentences) == len(correct_sentences))
-    correctCount = 0
-    count = 0
-    for sentenceIdx in range(len(guessed_sentences)):
-        guessed = guessed_sentences[sentenceIdx]
-        correct = correct_sentences[sentenceIdx]
-        assert(len(guessed) == len(correct))
-        idx = 0
-        while idx < len(guessed):
-            if guessed[idx][0] == 'B': # A new chunk starts
-                count += 1
-                if guessed[idx] == correct[idx]:
-                    idx += 1
-                    correctlyFound = True
-                    while idx < len(guessed) and guessed[idx][0] == 'I': # Scan until it no longer starts with I
-                        if guessed[idx] != correct[idx]:
-                            correctlyFound = False
-                        idx += 1
-                    if idx < len(guessed):
-                        if correct[idx][0] == 'I': # The chunk in correct was longer
-                            correctlyFound = False
-                    if correctlyFound:
-                        correctCount += 1
-                else:
-                    idx += 1
-            else:  
-                idx += 1
-    precision = 0
-    if count > 0:    
-        precision = float(correctCount) / count
-    return precision
-
-class Eval:
+class ChunkEval:
     def __init__(self):
         self.tag_sents = []
         self.pred_sents = []
@@ -80,13 +39,60 @@ class Eval:
             if line : bucket.append(line)
         if len(bucket) != 0:
             self.__eval_bucket(bucket)
-        fscore = compute_f1(self.pred_sents, self.tag_sents)
+        fscore = self.compute_f1(self.pred_sents, self.tag_sents)
         print('precision, recall, fscore = ', fscore)
+
+    @staticmethod
+    def compute_precision(guessed_sentences, correct_sentences):
+        assert(len(guessed_sentences) == len(correct_sentences))
+        correctCount = 0
+        count = 0
+        for sentenceIdx in range(len(guessed_sentences)):
+            guessed = guessed_sentences[sentenceIdx]
+            correct = correct_sentences[sentenceIdx]
+            assert(len(guessed) == len(correct))
+            idx = 0
+            while idx < len(guessed):
+                if guessed[idx][0] == 'B': # A new chunk starts
+                    count += 1
+                    #print('guessed, correct : ', guessed[idx], correct[idx])
+                    if guessed[idx] == correct[idx]:
+                        idx += 1
+                        correctlyFound = True
+                        while idx < len(guessed) and guessed[idx][0] == 'I': # Scan until it no longer starts with I
+                            if guessed[idx] != correct[idx]:
+                                correctlyFound = False
+                            idx += 1
+                        if idx < len(guessed):
+                            if correct[idx][0] == 'I': # The chunk in correct was longer
+                                correctlyFound = False
+                        if correctlyFound:
+                            correctCount += 1
+                    else:
+                        idx += 1
+                else:  
+                    idx += 1
+        precision = 0
+        if count > 0:    
+            precision = float(correctCount) / count
+        return precision
+
+    @staticmethod
+    def compute_f1(tag_preds, tag_corrects): 
+        """Compute micro F1 measure given tag-predictions and tag-corrects
+        """
+        prec = ChunkEval.compute_precision(tag_preds, tag_corrects)
+        rec = ChunkEval.compute_precision(tag_corrects, tag_preds)
+        f1 = 0
+        if (rec+prec) > 0:
+            f1 = 2.0 * prec * rec / (prec + rec);
+        return prec, rec, f1
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     args = parser.parse_args()
 
-    ev = Eval()
+    ev = ChunkEval()
     ev.eval()

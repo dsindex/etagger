@@ -58,7 +58,7 @@ def multihead_attention(queries,
       reuse: Boolean, whether to reuse the weights of a previous layer
         by the same name.
         
-    Returns
+    Returns:
       A 3d tensor with shape of (N, T_q, M)  
     """
     with tf.variable_scope(scope, reuse=reuse):

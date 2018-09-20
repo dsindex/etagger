@@ -8,11 +8,11 @@ from shuffle import Shuffle
 
 class Input:
     def __init__(self, data, config):
-        self.sentence_word_ids = []      # [None, sentence_length]
-        self.sentence_wordchr_ids = []   # [None, sentence_length, word_length]
-        self.sentence_pos_ids = []       # [None, sentence_length]
-        self.sentence_etc = []           # [None, sentence_length, etc_dim]
-        self.sentence_tag = []
+        self.sentence_word_ids = []      # [batch_size, sentence_length]
+        self.sentence_wordchr_ids = []   # [batch_size, sentence_length, word_length]
+        self.sentence_pos_ids = []       # [batch_size, sentence_length]
+        self.sentence_etc = []           # [batch_size, sentence_length, etc_dim]
+        self.sentence_tag = []           # [batch_size, sentence_length, class_size] 
         self.config = config
         if config.sentence_length == -1:
             if type(data) is list:
@@ -59,6 +59,8 @@ class Input:
                     bucket.append(line)
 
     def __create_word_ids(self, bucket):
+        """Create an word id vector
+        """
         word_ids = []
         sentence_length = 0
         for line in bucket:
@@ -76,6 +78,8 @@ class Input:
         return word_ids
 
     def __create_wordchr_ids(self, bucket):
+        """Create a vector of a character id vector
+        """
         wordchr_ids = []
         sentence_length = 0
         for line in bucket:
@@ -105,6 +109,8 @@ class Input:
         return wordchr_ids
 
     def __create_pos_ids(self, bucket):
+        """Create a pos id vector
+        """
         pos_ids = []
         sentence_length = 0
         for line in bucket:
@@ -122,6 +128,8 @@ class Input:
         return pos_ids
 
     def __create_etc_and_tag(self, bucket):
+        """Create a vector of a etc vector and an one-hot tag vector
+        """
         etc = []
         tag  = []
         nbucket = []
@@ -162,7 +170,10 @@ class Input:
         return etc, tag
 
     def __pos_vec(self, t):
-        # language specific features
+        """Build one-hot for pos
+
+        build language specific features
+        """
         one_hot = np.zeros(5)
         if t == 'NN' or t == 'NNS':
             one_hot[0] = 1
@@ -177,7 +188,10 @@ class Input:
         return one_hot
 
     def __chunk_vec(self, t):
-        # language specific features
+        """Build one-hot for chunk
+
+        build language specific features
+        """
         one_hot = np.zeros(5)
         if 'NP' in t:
             one_hot[0] = 1
@@ -192,8 +206,12 @@ class Input:
         return one_hot
 
     def __shape_vec(self, word):
-        # language specific features
-        # no-info[0], allDigits[1], mixedDigits[2], allSymbols[3], mixedSymbols[4], upperInitial[5], lowercase[6], allCaps[7], mixedCaps[8]
+        """Build shape vector
+
+        build language specific features:
+          no-info[0], allDigits[1], mixedDigits[2], allSymbols[3],
+          mixedSymbols[4], upperInitial[5], lowercase[6], allCaps[7], mixedCaps[8]
+        """
 
         def is_capital(ch):
             if ord('A') <= ord(ch) <= ord('Z'): return True
@@ -236,24 +254,64 @@ class Input:
         return one_hot
 
     def __tag_vec(self, tag, class_size):
+        """Build one-hot for tag
+        """
         one_hot = np.zeros(class_size)
         tid = self.config.embvec.get_tid(tag)
         one_hot[tid] = 1
         return one_hot
 
-    def pred_to_tags(self, pred, length):
-        '''
-        pred : [senence_length, class_size]
-        length : int
-        '''
-        pred = pred[0:length]
+    def logit_to_tags(self, logit, length):
+        """Convert logit to tags
+
+        Args:
+          logit: [sentence_length, class_size]
+          length: int
+
+        Returns:
+          tag sequence(size length)
+        """
+        logit = logit[0:length]
         # [length]
-        pred_list = np.argmax(pred, 1).tolist()
+        pred_list = np.argmax(logit, 1).tolist()
         tags = []
         for tid in pred_list:
             tag = self.config.embvec.get_tag(tid)
             tags.append(tag)
         return tags
+
+    def logit_indices_to_tags(self, logit_indices, length):
+        """Convert logit_indices to tags
+
+        Args:
+          logit_indices: [sentence_length]
+          length: int
+
+        Returns:
+          tag sequence(size length)
+        """
+        pred_list = logit_indices[0:length]
+        tags = []
+        for tid in pred_list:
+            tag = self.config.embvec.get_tag(tid)
+            tags.append(tag)
+        return tags
+
+    def logits_indices_to_tags_seq(self, logits_indices, lengths):
+        """Convert logits_indices to tags sequence
+
+        Args:
+          logits_indices: [batch_size, sentence_length]
+          lengths: [batch_size]
+
+        Returns:
+          sequence of tag sequence
+        """
+        tags_seq = []
+        for logit_indices, length in zip(logits_indices, lengths):
+            tags = self.logit_indices_to_tags(logit_indices, length)
+            tags_seq.append(tags)
+        return tags_seq
 
     @staticmethod
     def find_max_length(file_name):

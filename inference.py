@@ -4,7 +4,9 @@ import numpy as np
 from embvec import EmbVec
 from config import Config
 from model import Model
-from token_eval  import Eval
+from token_eval  import TokenEval
+from chunk_eval  import ChunkEval
+from viterbi import viterbi_decode
 from input import Input
 import sys
 import argparse
@@ -34,9 +36,9 @@ def inference_bulk(config):
                      model.input_data_pos_ids: test_data.sentence_pos_ids,
                      model.input_data_etc: test_data.sentence_etc,
                      model.output_data: test_data.sentence_tag}
-        pred, length, test_loss = sess.run([model.prediction, model.length, model.loss], feed_dict=feed_dict)
+        logits, length, test_loss = sess.run([model.logits, model.length, model.loss], feed_dict=feed_dict)
         print('test score:')
-        fscore = Eval.compute_f1(config.class_size, pred, test_data.sentence_tag, length)
+        fscore = TokenEval.compute_f1(config.class_size, logits, test_data.sentence_tag, length)
         print('total fscore:')
         print(fscore)
 
@@ -69,8 +71,8 @@ def inference_bucket(config):
                          model.input_data_pos_ids: inp.sentence_pos_ids,
                          model.input_data_etc: inp.sentence_etc,
                          model.output_data: inp.sentence_tag}
-            pred, length, loss = sess.run([model.prediction, model.length, model.loss], feed_dict=feed_dict)
-            tags = inp.pred_to_tags(pred[0], length[0])
+            logits, length, loss = sess.run([model.logits, model.length, model.loss], feed_dict=feed_dict)
+            tags = inp.logit_to_tags(logits[0], length[0])
             for i in range(len(bucket)):
                 out = bucket[i] + ' ' + tags[i]
                 sys.stdout.write(out + '\n')
@@ -85,8 +87,8 @@ def inference_bucket(config):
                      model.input_data_pos_ids: inp.sentence_pos_ids,
                      model.input_data_etc: inp.sentence_etc,
                      model.output_data: inp.sentence_tag}
-        pred, length, loss = sess.run([model.prediction, model.length, model.loss], feed_dict=feed_dict)
-        tags = inp.pred_to_tags(pred[0], length[0])
+        logits, length, loss = sess.run([model.logits, model.length, model.loss], feed_dict=feed_dict)
+        tags = inp.logit_to_tags(logits[0], length[0])
         for i in range(len(bucket)):
             out = bucket[i] + ' ' + tags[i]
             sys.stdout.write(out + '\n')
@@ -158,8 +160,8 @@ def inference_line(config):
                      model.input_data_pos_ids: inp.sentence_pos_ids,
                      model.input_data_etc: inp.sentence_etc,
                      model.output_data: inp.sentence_tag}
-        pred, length, loss = sess.run([model.prediction, model.length, model.loss], feed_dict=feed_dict)
-        tags = inp.pred_to_tags(pred[0], length[0])
+        logits, length, loss = sess.run([model.logits, model.length, model.loss], feed_dict=feed_dict)
+        tags = inp.logit_to_tags(logits[0], length[0])
         for i in range(len(bucket)):
             out = bucket[i] + ' ' + tags[i]
             sys.stdout.write(out + '\n')
@@ -177,7 +179,7 @@ if __name__ == '__main__':
     parser.add_argument('--mode', type=str, default='bulk', help='bulk, bucket, line')
 
     args = parser.parse_args()
-    config = Config(args, is_train=False, use_crf=False)
+    config = Config(args, is_train=False, use_crf=True)
     if args.mode == 'bulk':   inference_bulk(config)
     if args.mode == 'bucket': inference_bucket(config)
     if args.mode == 'line':   inference_line(config)

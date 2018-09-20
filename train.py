@@ -5,7 +5,9 @@ from embvec import EmbVec
 from config import Config
 from model import Model
 from input import Input
-from token_eval  import Eval
+from token_eval  import TokenEval
+from chunk_eval  import ChunkEval
+from viterbi import viterbi_decode
 from general_utils import Progbar
 import os
 import sys
@@ -58,14 +60,25 @@ def do_train(model, config, train_data, dev_data, test_data):
                        model.input_data_pos_ids: dev_data.sentence_pos_ids,
                        model.input_data_etc: dev_data.sentence_etc,
                        model.output_data: dev_data.sentence_tag}
-            step, dev_summaries, pred, length, dev_loss, dev_accuracy = sess.run([model.global_step, dev_summary_op, model.prediction, model.length, model.loss, model.accuracy], feed_dict=feed_dict)
+            step, dev_summaries, logits, logits_indices, trans_params, output_data_indices, length, dev_loss, dev_accuracy = \
+                       sess.run([model.global_step, dev_summary_op, model.logits, model.logits_indices, model.trans_params, model.output_data_indices, model.length, model.loss, model.accuracy], feed_dict=feed_dict)
             print('epoch: %d / %d, step: %d, dev loss: %s, dev accuracy: %s' % (e, config.epoch, step, dev_loss, dev_accuracy))
             dev_summary_writer.add_summary(dev_summaries, step)
-            print('dev precision, recall, f1:')
-            m = Eval.compute_f1(config.class_size, pred, dev_data.sentence_tag, length)
+            if config.use_crf:
+                print('logits', logits)
+                print('trans_params', trans_params)
+                viterbi_sequences = viterbi_decode(logits, trans_params, length)
+                tag_preds = dev_data.logits_indices_to_tags_seq(viterbi_sequences, length)
+                tag_corrects = dev_data.logits_indices_to_tags_seq(output_data_indices, length)
+                dev_prec, dev_rec, dev_f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
+                m = dev_f1
+                print('dev precision, recall, f1: ', dev_prec, dev_rec, dev_f1)
+            else:
+                print('dev precision, recall, f1: ')
+                m = TokenEval.compute_f1(config.class_size, logits, dev_data.sentence_tag, length)
             # save best model
             if m > maximum:
-                print('new best score!')
+                print('new best f1 score!')
                 maximum = m
                 save_path = saver.save(sess, config.checkpoint_dir + '/' + 'model_max.ckpt')
                 print('max model saved in file: %s' % save_path)
@@ -74,10 +87,19 @@ def do_train(model, config, train_data, dev_data, test_data):
                            model.input_data_pos_ids: test_data.sentence_pos_ids,
                            model.input_data_etc: test_data.sentence_etc,
                            model.output_data: test_data.sentence_tag}
-                step, pred, length, test_loss, test_accuracy = sess.run([model.global_step, model.prediction, model.length, model.loss, model.accuracy], feed_dict=feed_dict)
+                step, logits, logits_indices, trans_params, output_data_indices, length, test_loss, test_accuracy = \
+                           sess.run([model.global_step, model.logits, model.logits_indices, model.trans_params, model.output_data_indices, model.length, model.loss, model.accuracy], feed_dict=feed_dict)
                 print('epoch: %d / %d, step: %d, test loss: %s, test accuracy: %s' % (e, config.epoch, step, test_loss, test_accuracy))
-                print('test precision, recall, f1:')
-                Eval.compute_f1(config.class_size, pred, test_data.sentence_tag, length)
+                if config.use_crf:
+                    viterbi_sequences = viterbi_decode(logits, trans_params, length)
+                    tag_preds = test_data.logits_indices_to_tags_seq(viterbi_sequences, length)
+                    tag_corrects = test_data.logits_indices_to_tags_seq(output_data_indices)
+                    test_prec, test_rec, test_f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
+                    m = test_f1
+                    print('test precision, recall, f1: ', test_prec, test_rec, test_f1)
+                else:
+                    print('test precision, recall, f1: ')
+                    TokenEval.compute_f1(config.class_size, logits, test_data.sentence_tag, length)
             # learning rate warmup
             if e > intermid_epoch: learning_rate=learning_rate_final
 
@@ -113,5 +135,5 @@ if __name__ == '__main__':
     parser.add_argument('--summary_dir', type=str, default='./runs', help='path to save summary(ex, ./runs)')
 
     args = parser.parse_args()
-    config = Config(args, is_train=True, use_crf=False)
+    config = Config(args, is_train=True, use_crf=True)
     train(config)

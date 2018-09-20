@@ -15,8 +15,8 @@ POS_DIM = 5
 
 """
 etc dimension
-    you should define etc dimension by refering __create_etc_and_tag() of input.txt
-    shape vec(9) + pos one-hot(5) + [optional] chunk one-hot(5)
+  you should define etc dimension by refering __create_etc_and_tag() of input.txt
+  shape vec(9) + pos one-hot(5) + [optional] chunk one-hot(5)
 """
 ETC_DIM = 9 + 5
 

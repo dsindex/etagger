@@ -45,7 +45,7 @@ etagger
       - initialCaps, allCaps, lowercase, mixedCaps, non-info
     - apply multi-head self-attention [done]
       - softmax with query, key masking
-    - apply CRF
+    - apply CRF [doing]
     - apply curriculum learning
       - sort the training data ascending order by average entropy(calculated at the end of layers) 
     - apply ELMO embedding
@@ -82,6 +82,8 @@ etagger
     - [transformer-tensorflow/transformer/attention.py](https://github.com/DongjunLee/transformer-tensorflow/blob/master/transformer/attention.py)
   - CRF
     - [sequence_tagging](https://github.com/guillaumegenthial/sequence_tagging/blob/master/model/ner_model.py)
+    - [tensorflow/contrib/python/opps/crf.py](https://github.com/tensorflow/tensorflow/blob/r1.10/tensorflow/contrib/crf/python/ops/crf.py)
+    - [ADVANCED: MAKING DYNAMIC DECISIONS AND THE BI-LSTM CRF](https://pytorch.org/tutorials/beginner/nlp/advanced_tutorial.html)
 
 ### pre-requisites
 
@@ -126,7 +128,7 @@ test, max_sentence_length = 124
 - train
   - command
   ```
-  $ python train.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --sentence_length 125 --epoch 70
+  $ python train.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --sentence_length 125 --batch_size 20 --epoch 70
   $ rm -rf runs; tensorboard --logdir runs/summaries/
   ```
   - accuracy and loss

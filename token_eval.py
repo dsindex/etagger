@@ -3,7 +3,7 @@ import numpy as np
 import sys
 import argparse
 
-class Eval:
+class TokenEval:
     def __init__(self):
         self.cls = {}
         self.tp = {}
@@ -134,5 +134,5 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    ev = Eval()
+    ev = TokenEval()
     ev.eval()
