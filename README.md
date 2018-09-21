@@ -4,7 +4,7 @@ etagger
 ### description
 
 - named entity tagger using
-  - word embedding(GLOVE)
+  - word embedding(glove)
   - character convolutional embedding
   - pos embedding
   - gazetteer features
