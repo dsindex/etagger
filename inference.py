@@ -9,6 +9,7 @@ from chunk_eval  import ChunkEval
 from viterbi import viterbi_decode
 from input import Input
 import sys
+import time
 import argparse
 
 def inference_bulk(config):
@@ -36,11 +37,18 @@ def inference_bulk(config):
                      model.input_data_pos_ids: test_data.sentence_pos_ids,
                      model.input_data_etc: test_data.sentence_etc,
                      model.output_data: test_data.sentence_tag}
-        logits, length, test_loss = sess.run([model.logits, model.length, model.loss], feed_dict=feed_dict)
-        print('test score:')
-        fscore = TokenEval.compute_f1(config.class_size, logits, test_data.sentence_tag, length)
-        print('total fscore:')
-        print(fscore)
+        logits, logits_indices, trans_params, output_data_indices, length, test_loss = \
+                     sess.run([model.logits, model.logits_indices, model.trans_params, model.output_data_indices, model.length, model.loss], feed_dict=feed_dict)
+        print('test precision, recall, f1(token): ')
+        TokenEval.compute_f1(config.class_size, logits, test_data.sentence_tag, length)
+        if config.use_crf:
+            viterbi_sequences = viterbi_decode(logits, trans_params, length)
+            tag_preds = test_data.logits_indices_to_tags_seq(viterbi_sequences, length)
+        else:
+            tag_preds = test_data.logits_indices_to_tags_seq(logits_indices, length)
+        tag_corrects = test_data.logits_indices_to_tags_seq(output_data_indices, length)
+        test_prec, test_rec, test_f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
+        print('test precision, recall, f1(chunk): ', test_prec, test_rec, test_f1)
 
 def inference_bucket(config):
     """Inference for bucket
@@ -64,6 +72,7 @@ def inference_bucket(config):
         if not line: break
         line = line.strip()
         if not line and len(bucket) >= 1:
+            start_time = time.time()
             # Build input data
             inp = Input(bucket, config)
             feed_dict = {model.input_data_word_ids: inp.sentence_word_ids,
@@ -71,15 +80,24 @@ def inference_bucket(config):
                          model.input_data_pos_ids: inp.sentence_pos_ids,
                          model.input_data_etc: inp.sentence_etc,
                          model.output_data: inp.sentence_tag}
-            logits, length, loss = sess.run([model.logits, model.length, model.loss], feed_dict=feed_dict)
-            tags = inp.logit_to_tags(logits[0], length[0])
+            logits, trans_params, length, loss = \
+                         sess.run([model.logits, model.trans_params, model.length, model.loss], feed_dict=feed_dict)
+            if config.use_crf:
+                viterbi_sequences = viterbi_decode(logits, trans_params, length)
+                tags = inp.logit_indices_to_tags(viterbi_sequences[0], length[0])
+            else:
+                tags = inp.logit_to_tags(logits[0], length[0])
             for i in range(len(bucket)):
                 out = bucket[i] + ' ' + tags[i]
                 sys.stdout.write(out + '\n')
             sys.stdout.write('\n')
             bucket = []
+            duration_time = time.time() - start_time
+            out = 'duration_time : ' + str(duration_time) + ' sec'
+            sys.stderr.write(out + '\n')
         if line : bucket.append(line)
     if len(bucket) != 0:
+        start_time = time.time()
         # Build input data
         inp = Input(bucket, config)
         feed_dict = {model.input_data_word_ids: inp.sentence_word_ids,
@@ -87,12 +105,20 @@ def inference_bucket(config):
                      model.input_data_pos_ids: inp.sentence_pos_ids,
                      model.input_data_etc: inp.sentence_etc,
                      model.output_data: inp.sentence_tag}
-        logits, length, loss = sess.run([model.logits, model.length, model.loss], feed_dict=feed_dict)
-        tags = inp.logit_to_tags(logits[0], length[0])
+        logits, trans_params, length, loss = \
+                     sess.run([model.logits, model.trans_params, model.length, model.loss], feed_dict=feed_dict)
+        if config.use_crf:
+            viterbi_sequences = viterbi_decode(logits, trans_params, length)
+            tags = inp.logit_indices_to_tags(viterbi_sequences[0], length[0])
+        else:
+            tags = inp.logit_to_tags(logits[0], length[0])
         for i in range(len(bucket)):
             out = bucket[i] + ' ' + tags[i]
             sys.stdout.write(out + '\n')
         sys.stdout.write('\n')
+        duration_time = time.time() - start_time
+        out = 'duration_time : ' + str(duration_time) + ' sec'
+        sys.stderr.write(out + '\n')
 
     sess.close()
 
@@ -160,8 +186,13 @@ def inference_line(config):
                      model.input_data_pos_ids: inp.sentence_pos_ids,
                      model.input_data_etc: inp.sentence_etc,
                      model.output_data: inp.sentence_tag}
-        logits, length, loss = sess.run([model.logits, model.length, model.loss], feed_dict=feed_dict)
-        tags = inp.logit_to_tags(logits[0], length[0])
+        logits, trans_params, length, loss = \
+                     sess.run([model.logits, model.trans_params, model.length, model.loss], feed_dict=feed_dict)
+        if config.use_crf:
+            viterbi_sequences = viterbi_decode(logits, trans_params, length)
+            tags = inp.logit_indices_to_tags(viterbi_sequences[0], length[0])
+        else:
+            tags = inp.logit_to_tags(logits[0], length[0])
         for i in range(len(bucket)):
             out = bucket[i] + ' ' + tags[i]
             sys.stdout.write(out + '\n')
@@ -179,7 +210,7 @@ if __name__ == '__main__':
     parser.add_argument('--mode', type=str, default='bulk', help='bulk, bucket, line')
 
     args = parser.parse_args()
-    config = Config(args, is_train=False, use_crf=False)
+    config = Config(args, is_train=False, use_crf=True)
     if args.mode == 'bulk':   inference_bulk(config)
     if args.mode == 'bucket': inference_bucket(config)
     if args.mode == 'line':   inference_line(config)

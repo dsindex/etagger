@@ -76,7 +76,8 @@ def do_train(model, config, train_data, dev_data, test_data):
             print('dev precision, recall, f1(chunk): ', dev_prec, dev_rec, dev_f1)
             chunk_f1 = dev_f1
             # save best model
-            m = token_f1
+            # XXX m = token_f1
+            m = chunk_f1
             if m > maximum:
                 print('new best f1 score!')
                 maximum = m

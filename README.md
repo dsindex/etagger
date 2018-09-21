@@ -3,13 +3,14 @@ etagger
 
 ### description
 
-- named entity tagger using :
-  - multi-layer Bidirectional LSTM
+- named entity tagger using
+  - word embedding(GLOVE)
   - character convolutional embedding
-  - gazetteer features
   - pos embedding
+  - gazetteer features
+  - multi-layer Bidirectional LSTM
   - multi-head attention
-  - CRF
+  - CRF decoder
 
 - base repository
   - [ner-lstm](https://github.com/monikkinom/ner-lstm)
@@ -58,8 +59,8 @@ etagger
 - evaluation
   - [experiments](https://github.com/dsindex/etagger/blob/master/README_DEV.md)
   - best fscore
-    - 70 epoch, per-token(partial) micro f1 : 0.906612635845
-    - 70 epoch, per-chunk(exact)   micro f1 : 0.895862800565
+    - 70 epoch, per-token(partial) micro f1 : 0.909514467876
+    - 70 epoch, per-chunk(exact)   micro f1 : 0.901569941788
   - comparision to previous research
     - [Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
       - 70 epoch, per-chunk(exact) micro Prec: 0.887, Rec: 0.902, F1: 0.894
