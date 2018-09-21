@@ -27,7 +27,10 @@ mh_num_units : 32
 mh_dropout : 0.5
 normalize() instead of layer_norm()
 +
+save model by f1(token)
++
 CRF(loss only)
+
 
 * test 1
 word embedding size : 100
@@ -57,6 +60,9 @@ mh_dropout : 0.5
 normalize() instead of layer_norm()
 +
 save model by f1(chunk)
+
+token : 0.906159975483
+chunk : 0.890888242039
 
 ```
 
@@ -88,6 +94,8 @@ mh_num_heads : 4
 mh_num_units : 32
 mh_dropout : 0.5
 normalize() instead of layer_norm()
++
+save model by f1(token)
 
 token : 0.906612635845 -> best
 chunk : 0.895862800565 -> best
