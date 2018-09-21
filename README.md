@@ -23,34 +23,36 @@ etagger
   - removed unnecessary files
   - fixed bugs for MultiRNNCell()
   - refactoring
-    - implement input.py, config.py [done]
-    - split model.py to model.py, train.py, inference.py [done]
-      - inference bulk [done]
-      - inference bucket [done]
-      - inference line using spacy [done]
-    - extend 5 tag(class) to 9 (automatically) [done]
+    - [x] implement input.py, config.py
+    - [x] split model.py to model.py, train.py, inference.py
+      - inference bulk
+      - inference bucket
+      - inference line using spacy
+    - [x] extend 5 tag(class) to 9 (automatically)
       - out of tag(class) 'O' and its id '0' are fixed
-    - apply dropout for train() only [done]
-    - apply embedding_lookup()
-      - word embedding [done]
-    - apply character-level embedding
-      - using convolution [done]
-      - using reduce_max only [done]
-    - apply gazetteer features [done]
+    - [x] apply dropout for train() only
+    - [x] apply embedding_lookup()
+      - word embedding(glove)
+    - [x] apply character-level embedding
+      - using convolution
+      - using reduce_max only
+    - [x] apply gazetteer features
       - if we construct the gazetteer vocab from the training data, the performance is decreasing.
       - recommend constructing the gazetteer vocab from other sources.
-    - apply learning-rate change [done]
-    - apply pos embedding [done]
+    - [x] apply learning-rate change
+    - [x] apply pos embedding
       - pos one-hot vector + pos embedding
-    - extend language specific features [done]
+    - [x] extend language specific features
       - initialCaps, allCaps, lowercase, mixedCaps, non-info
-    - apply multi-head self-attention [done]
+    - [x] apply multi-head self-attention
       - softmax with query, key masking
-    - apply CRF [doing]
-    - apply curriculum learning
+    - [ ] apply CRF [done]
+      - train by crf_log_likelihood()
+      - inference by viterbi_decode()
+    - [ ] apply curriculum learning
       - sort the training data ascending order by average entropy(calculated at the end of layers) 
-    - apply ELMO embedding
-    - serve api
+    - [ ] apply ELMO embedding
+    - [ ] serve api
       - freeze model and serve
 
 - model
@@ -60,7 +62,7 @@ etagger
   - [experiments](https://github.com/dsindex/etagger/blob/master/README_DEV.md)
   - best fscore
     - 70 epoch, per-token(partial) micro f1 : 0.909514467876
-    - 70 epoch, per-chunk(exact)   micro f1 : *0.901569941788*
+    - 70 epoch, per-chunk(exact)   micro f1 : **0.901569941788**
   - comparision to previous research
     - [Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
       - 70 epoch, per-chunk(exact) micro Prec: 0.887, Rec: 0.902, F1: 0.894
