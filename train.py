@@ -76,7 +76,7 @@ def do_train(model, config, train_data, dev_data, test_data):
             print('dev precision, recall, f1(chunk): ', dev_prec, dev_rec, dev_f1)
             chunk_f1 = dev_f1
             # save best model
-            m = chunk_f1
+            m = token_f1
             if m > maximum:
                 print('new best f1 score!')
                 maximum = m
@@ -97,7 +97,7 @@ def do_train(model, config, train_data, dev_data, test_data):
                     tag_preds = test_data.logits_indices_to_tags_seq(viterbi_sequences, length)
                 else:
                     tag_preds = test_data.logits_indices_to_tags_seq(logits_indices, length)
-                tag_corrects = test_data.logits_indices_to_tags_seq(output_data_indices)
+                tag_corrects = test_data.logits_indices_to_tags_seq(output_data_indices, length)
                 test_prec, test_rec, test_f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
                 print('test precision, recall, f1(chunk): ', test_prec, test_rec, test_f1)
             # learning rate change
@@ -135,5 +135,5 @@ if __name__ == '__main__':
     parser.add_argument('--summary_dir', type=str, default='./runs', help='path to save summary(ex, ./runs)')
 
     args = parser.parse_args()
-    config = Config(args, is_train=True, use_crf=False)
+    config = Config(args, is_train=True, use_crf=True)
     train(config)

@@ -1,5 +1,37 @@
 - experiments 5
 ```
+* test 3
+word embedding size : 100
+pos embedding
+pos embedding size : 5
+pos embedding random init : -0.5 ~ 0.5
+chracter embedding size : 30
+chracter embedding random init : -1.0 ~ 1.0
+pos one-hot : 5
+#chunk one-hot : 5
+shape vec : 9  -> 9 (disjoint upperInitial and mixedCaps)
+filter_size : 3
+num_filters : 30
+rnn_size : 200
+num_layers : 2
+learning_rate : 0.001 -> 0.0001, intermid_epoch = 20
+cnn_keep_prob : 0.5
+rnn_keep_prob : 0.5
+pos_keep_prob : 0.5
+epoch : 70
+batch_size : 20
++
+multi head attention(softmax with masking)
+mh_num_heads : 4
+mh_num_units : 32
+mh_dropout : 0.5
+normalize() instead of layer_norm()
++
+save model by f1(chunk)
++
+CRF(loss only)
+
+
 * test 2
 word embedding size : 100
 pos embedding
@@ -27,7 +59,7 @@ mh_num_units : 32
 mh_dropout : 0.5
 normalize() instead of layer_norm()
 +
-save model by f1(token)
+save model by f1(token), bug fix for token_eval.compute_f1()
 +
 CRF(loss only)
 
@@ -95,7 +127,7 @@ mh_num_units : 32
 mh_dropout : 0.5
 normalize() instead of layer_norm()
 +
-save model by f1(token)
+save model by f1(token), mis-setting for out of class id in token_eval.compute_f1()
 
 token : 0.906612635845 -> best
 chunk : 0.895862800565 -> best
