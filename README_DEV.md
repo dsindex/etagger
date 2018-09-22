@@ -1,5 +1,31 @@
 - experiments 5
 ```
+
+* test 5
+word embedding size : 100
+pos embedding
+pos embedding size : 5
+pos embedding random init : -0.5 ~ 0.5
+chracter embedding size : 30
+chracter embedding random init : -1.0 ~ 1.0
+pos one-hot : 5
+#chunk one-hot : 5
+shape vec : 9  -> 9 (disjoint upperInitial and mixedCaps)
+filter_size : 3
+num_filters : 30
+rnn_size : 200
+num_layers : 2
+learning_rate : 0.001 -> 0.0001, intermid_epoch = 20
+cnn_keep_prob : 0.5
+rnn_keep_prob : 0.5
+pos_keep_prob : 0.5
+epoch : 70
+batch_size : 20
++
+save model by f1(token)
++
+CRF
+
 * test 4
 word embedding size : 100
 pos embedding
@@ -30,6 +56,9 @@ normalize() instead of layer_norm()
 save model by f1(chunk)
 +
 CRF
+
+token : 0.908800785565
+chunk : 0.900097164561
 
 * test 3
 word embedding size : 100

@@ -17,6 +17,7 @@ etagger
   - [cnn-text-classification-tf](https://github.com/dennybritz/cnn-text-classification-tf/blob/master/text_cnn.py)
   - [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py)
   - [sequence_tagging/ner_model.py](https://github.com/guillaumegenthial/sequence_tagging/blob/master/model/ner_model.py)
+  - [bilm](https://github.com/allenai/bilm-tf)
 
 - modification
   - modified for tf version(1.4)
@@ -46,12 +47,12 @@ etagger
       - initialCaps, allCaps, lowercase, mixedCaps, non-info
     - [x] apply multi-head self-attention
       - softmax with query, key masking
-    - [ ] apply CRF [done]
+    - [x] apply CRF
       - train by crf_log_likelihood()
       - inference by viterbi_decode()
+    - [ ] apply ELMO embedding
     - [ ] apply curriculum learning
       - sort the training data ascending order by average entropy(calculated at the end of layers) 
-    - [ ] apply ELMO embedding
     - [ ] serve api
       - freeze model and serve
 
@@ -60,33 +61,55 @@ etagger
 
 - evaluation
   - [experiments](https://github.com/dsindex/etagger/blob/master/README_DEV.md)
-  - best fscore
+  - fscore
     - 70 epoch, per-token(partial) micro f1 : 0.909514467876
     - 70 epoch, per-chunk(exact)   micro f1 : **0.901569941788**
   - comparision to previous research
-    - [Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
-      - 70 epoch, per-chunk(exact) micro Prec: 0.887, Rec: 0.902, F1: 0.894
-    - [sequence_tagging](https://github.com/guillaumegenthial/sequence_tagging)
-      - 15 epoch, per-chunk(exact) miscro F1: 0.8998
-        - early stopping 3 epochs without improvement
+    - reproduction
+      - [Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
+        - 70 epoch, per-chunk(exact) micro Prec: 0.887, Rec: 0.902, F1: 0.894
+      - [sequence_tagging](https://github.com/guillaumegenthial/sequence_tagging)
+        - 15 epoch, per-chunk(exact) miscro F1: 0.8998
+          - early stopping 3 epochs without improvement
+    - SOTA
+      - [Deep contextualized word representations](https://arxiv.org/pdf/1802.05365.pdf)
+        - F1 : 0.9222
+      - [Semi-supervised sequence tagging with bidirectional language models](https://arxiv.org/pdf/1705.00108.pdf)
+        - F1 : 0.9193
 
 - references
   - general
-    - [Named Entity Recognition with Bidirectional LSTM-CNNs](https://www.aclweb.org/anthology/Q16-1026)
+    - articles
+      - [Named Entity Recognition with Bidirectional LSTM-CNNs](https://www.aclweb.org/anthology/Q16-1026)
+      - [Towards Deep Learning in Hindi NER: An approach to tackle the Labelled Data Scarcity](https://arxiv.org/pdf/1610.09756.pdf)
+      - [Exploring neural architectures for NER](https://web.stanford.edu/class/cs224n/reports/6896582.pdf)
+    - tensorflow impl
+      - [ner-lstm](https://github.com/monikkinom/ner-lstm)
+    - keras impl
       - [keras implementation](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
-    - [Towards Deep Learning in Hindi NER: An approach to tackle the Labelled Data Scarcity](https://arxiv.org/pdf/1610.09756.pdf)
-    - [Exploring neural architectures for NER](https://web.stanford.edu/class/cs224n/reports/6896582.pdf)
   - character convolution
-    - [Implementing a CNN for Text Classification in TensorFlow](http://www.wildml.com/2015/12/implementing-a-cnn-for-text-classification-in-tensorflow/)
-    - [Implementing a sentence classification using Char level CNN & RNN](https://github.com/cuteboydot/Sentence-Classification-using-Char-CNN-and-RNN)
-    - [lstm-char-cnn-tensorflow/models/LSTMTDNN.py](https://github.com/carpedm20/lstm-char-cnn-tensorflow/blob/master/models/LSTMTDNN.py)
+    - articles
+      - [Implementing a CNN for Text Classification in TensorFlow](http://www.wildml.com/2015/12/implementing-a-cnn-for-text-classification-in-tensorflow/)
+      - [Implementing a sentence classification using Char level CNN & RNN](https://github.com/cuteboydot/Sentence-Classification-using-Char-CNN-and-RNN)
+    - tensorflow impl
+      - [cnn-text-classification-tf](https://github.com/dennybritz/cnn-text-classification-tf/blob/master/text_cnn.py)
+      - [lstm-char-cnn-tensorflow/models/LSTMTDNN.py](https://github.com/carpedm20/lstm-char-cnn-tensorflow/blob/master/models/LSTMTDNN.py)
   - multi-head attention
-    - [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py)
-    - [transformer-tensorflow/transformer/attention.py](https://github.com/DongjunLee/transformer-tensorflow/blob/master/transformer/attention.py)
+    - tensorflow impl
+      - [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py)
+      - [transformer-tensorflow/transformer/attention.py](https://github.com/DongjunLee/transformer-tensorflow/blob/master/transformer/attention.py)
   - CRF
-    - [sequence_tagging](https://github.com/guillaumegenthial/sequence_tagging/blob/master/model/ner_model.py)
-    - [tensorflow/contrib/python/opps/crf.py](https://github.com/tensorflow/tensorflow/blob/r1.10/tensorflow/contrib/crf/python/ops/crf.py)
-    - [ADVANCED: MAKING DYNAMIC DECISIONS AND THE BI-LSTM CRF](https://pytorch.org/tutorials/beginner/nlp/advanced_tutorial.html)
+    - articles
+      - [Sequence Tagging with Tensorflow](https://guillaumegenthial.github.io/sequence-tagging-with-tensorflow.html)
+      - [ADVANCED: MAKING DYNAMIC DECISIONS AND THE BI-LSTM CRF](https://pytorch.org/tutorials/beginner/nlp/advanced_tutorial.html)
+    - tensorflow impl
+      - [sequence_tagging](https://github.com/guillaumegenthial/sequence_tagging/blob/master/model/ner_model.py)
+      - [tensorflow/contrib/python/opps/crf.py](https://github.com/tensorflow/tensorflow/blob/r1.10/tensorflow/contrib/crf/python/ops/crf.py)
+  - ELMO
+    - articles
+      - [Deep contextualized word representations](https://arxiv.org/pdf/1802.05365.pdf)
+    - tensorflow impl
+      - [bilm](https://github.com/allenai/bilm-tf)
 
 ### pre-requisites
 
@@ -170,6 +193,7 @@ $ python chunk_eval.py < pred.txt
 $ python inference.py --mode line --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --sentence_length 125 --restore checkpoint/model_max.ckpt
 ...
 Obama left office in January 2017 with a 60% approval rating and currently resides in Washington, D.C.
+
 Obama NNP O O B-PER
 left VBD O O O
 office NN O O O
@@ -188,11 +212,12 @@ resides VBZ O O O
 in IN O O O
 Washington NNP O B-GPE B-LOC
 , , O I-GPE O
-D.C. NNP O B-GPE I-LOC
+D.C. NNP O B-GPE B-LOC
 
 The Beatles were an English rock band formed in Liverpool in 1960.
+
 The DT O O O
-Beatles NNPS O B-PERSON O
+Beatles NNPS O B-PERSON B-MISC
 were VBD O O O
 an DT O O O
 English JJ O B-LANGUAGE B-MISC
@@ -200,7 +225,7 @@ rock NN O O O
 band NN O O O
 formed VBN O O O
 in IN O O O
-Liverpool NNP O B-GPE B-ORG
+Liverpool NNP O B-GPE B-LOC
 in IN O O O
 1960 CD O B-DATE O
 . . O I-DATE O
