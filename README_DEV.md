@@ -1,5 +1,36 @@
 - experiments 5
 ```
+* test 6
+word embedding size : 100 -> 200
+pos embedding
+pos embedding size : 5
+pos embedding random init : -0.5 ~ 0.5
+chracter embedding size : 30
+chracter embedding random init : -1.0 ~ 1.0
+pos one-hot : 5
+#chunk one-hot : 5
+shape vec : 9
+filter_size : 3
+num_filters : 30
+rnn_size : 200
+num_layers : 2
+learning_rate : 0.001 -> 0.0001, intermid_epoch = 20
+cnn_keep_prob : 0.5
+rnn_keep_prob : 0.5
+pos_keep_prob : 0.5
+epoch : 70
+batch_size : 20
++
+multi head attention(softmax with masking)
+mh_num_heads : 4
+mh_num_units : 32
+mh_dropout : 0.5
+normalize() instead of layer_norm()
++
+save model by f1(token)
++
+CRF
+
 
 * test 5
 word embedding size : 100
@@ -10,7 +41,7 @@ chracter embedding size : 30
 chracter embedding random init : -1.0 ~ 1.0
 pos one-hot : 5
 #chunk one-hot : 5
-shape vec : 9  -> 9 (disjoint upperInitial and mixedCaps)
+shape vec : 9
 filter_size : 3
 num_filters : 30
 rnn_size : 200
@@ -26,6 +57,9 @@ save model by f1(token)
 +
 CRF
 
+token : 0.905106800884
+chunk : 0.898973814578
+
 * test 4
 word embedding size : 100
 pos embedding
@@ -35,7 +69,7 @@ chracter embedding size : 30
 chracter embedding random init : -1.0 ~ 1.0
 pos one-hot : 5
 #chunk one-hot : 5
-shape vec : 9  -> 9 (disjoint upperInitial and mixedCaps)
+shape vec : 9
 filter_size : 3
 num_filters : 30
 rnn_size : 200
@@ -69,7 +103,7 @@ chracter embedding size : 30
 chracter embedding random init : -1.0 ~ 1.0
 pos one-hot : 5
 #chunk one-hot : 5
-shape vec : 9  -> 9 (disjoint upperInitial and mixedCaps)
+shape vec : 9
 filter_size : 3
 num_filters : 30
 rnn_size : 200
@@ -103,7 +137,7 @@ chracter embedding size : 30
 chracter embedding random init : -1.0 ~ 1.0
 pos one-hot : 5
 #chunk one-hot : 5
-shape vec : 9  -> 9 (disjoint upperInitial and mixedCaps)
+shape vec : 9
 filter_size : 3
 num_filters : 30
 rnn_size : 200
@@ -137,7 +171,7 @@ chracter embedding size : 30
 chracter embedding random init : -1.0 ~ 1.0
 pos one-hot : 5
 #chunk one-hot : 5
-shape vec : 9  -> 9 (disjoint upperInitial and mixedCaps)
+shape vec : 9
 filter_size : 3
 num_filters : 30
 rnn_size : 200
@@ -173,7 +207,7 @@ chracter embedding size : 30
 chracter embedding random init : -1.0 ~ 1.0
 pos one-hot : 5
 #chunk one-hot : 5
-shape vec : 9  -> 9 (disjoint upperInitial and mixedCaps)
+shape vec : 9
 filter_size : 3
 num_filters : 30
 rnn_size : 200
@@ -205,7 +239,7 @@ chracter embedding size : 30
 chracter embedding random init : -1.0 ~ 1.0
 pos one-hot : 5
 #chunk one-hot : 5
-shape vec : 9  -> 9 (disjoint upperInitial and mixedCaps)
+shape vec : 9  -> 9 (disjoint upperInitial and mixedCaps), fixed after this setting
 filter_size : 3
 num_filters : 30
 rnn_size : 200
