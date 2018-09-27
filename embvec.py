@@ -170,7 +170,7 @@ class EmbVec:
             if key in self.gaz_vocab:
                 for k in range(j):
                     gvec = bucket[i+k][4]
-                    for tag_suffix, _ in self.gaz_vocab[key].iteritems():
+                    for tag_suffix, _ in self.gaz_vocab[key].items():
                         if k == 0: tag = self.tag_prefix_b + tag_suffix
                         else: tag = self.tag_prefix_i + tag_suffix
                         tid = self.get_tid(tag)
@@ -197,9 +197,9 @@ if __name__ == '__main__':
     pkl.dump(embvec, open(args.emb_path + '.pkl', 'wb'))
     '''
     # check gazetteer vocab
-    for word, tags in embvec.gaz_vocab.iteritems():
+    for word, tags in embvec.gaz_vocab.items():
         print(word)
-        for tag, _ in tags.iteritems(): print(tag)
+        for tag, _ in tags.items(): print(tag)
     '''
     # test before applying gazetteer feature
     bucket = []
