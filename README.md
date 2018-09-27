@@ -113,6 +113,9 @@ etagger
 
 ### pre-requisites
 
+- python >= 3.6
+  - this is due to bilm.
+
 - tensorflow >= 1.4
 
 - numpy
@@ -124,6 +127,14 @@ etagger
 - glove embedding
   - [download](http://nlp.stanford.edu/data/glove.6B.zip)
   - unzip to 'embeddings' dir
+
+- bilm
+  - install [bilm](https://github.com/allenai/bilm-tf)
+  - download [ELMO weights and options](https://allennlp.org/elmo)
+  ```
+  $ ls embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_*
+  embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json  embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5
+  ``` 
 
 - spacy [optional]
   - if you want to analyze input string and see how it detects entities, then you need to install spacy lib.
