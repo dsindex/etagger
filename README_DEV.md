@@ -21,7 +21,7 @@ more epochs and stop." (https://arxiv.org/pdf/1705.00108.pdf)
 ```
 * test 7
 word embedding size : 100
-wrd_keep_prob : 0.5 -> new
+wrd_keep_prob : 0.5 -> new (loss decreases more smoothly)
 chracter embedding size : 30
 chracter embedding random init : -1.0 ~ 1.0
 filter_sizes : [3]

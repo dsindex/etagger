@@ -4,8 +4,9 @@ etagger
 ### description
 
 - named entity tagger using
-  - word embedding(glove)
-  - character convolutional embedding
+  - embedding
+    - word embedding(glove) and character convolutional embedding
+    - ELMO embedding
   - pos embedding
   - gazetteer features
   - multi-layer Bidirectional LSTM
