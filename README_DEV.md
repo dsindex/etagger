@@ -1,5 +1,56 @@
+- etc
+```
+**learning rate annealing**
+"we also
+use early stopping to prevent over-fitting and use
+the following process to determine when to stop
+training. We first train with a constant learning
+rate α = 0.001 on the training data and monitor
+the development set performance at each epoch.
+Then, at the epoch with the highest development
+performance, we start a simple learning rate annealing
+schedule: decrease α an order of magnitude
+(i.e., divide by ten), train for five epochs, decrease
+α an order of magnitude again, train for five
+more epochs and stop." (https://arxiv.org/pdf/1705.00108.pdf)
+-> how to determine the highest developement performance?
+
+```
+
 - experiments 5
 ```
+* test 7
+word embedding size : 100
+wrd_keep_prob : 0.5 -> new
+chracter embedding size : 30
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 30
+chr_keep_prob : 0.5
+pos embedding size : 5
+pos embedding random init : -0.5 ~ 0.5
+pos_keep_prob : 0.5
+pos one-hot : 5
+#chunk one-hot : 5
+shape vec : 9
+rnn_size : 200
+num_layers : 2 -> use multiple bidirectional_dynamic_rnn()
+learning_rate : 0.001 -> 0.0001, intermid_epoch = 20
+rnn_keep_prob : 0.5
+epoch : 70
+batch_size : 20
++
+multi head attention(softmax with masking)
+mh_num_heads : 4
+mh_num_units : 32
+mh_dropout : 0.5
+normalize() instead of layer_norm()
++
+save model by f1(token)
++
+CRF
+
+
 * test 6
 word embedding size : 100 -> 200
 pos embedding
@@ -14,7 +65,7 @@ filter_size : 3
 num_filters : 30
 rnn_size : 200
 num_layers : 2
-learning_rate : 0.001 -> 0.0001, intermid_epoch = 20
+learning_rate : 0.001 (fixed)
 cnn_keep_prob : 0.5
 rnn_keep_prob : 0.5
 pos_keep_prob : 0.5
@@ -31,6 +82,8 @@ save model by f1(token)
 +
 CRF
 
+token : 0.900907530047
+chunk : 0.891468060600
 
 * test 5
 word embedding size : 100

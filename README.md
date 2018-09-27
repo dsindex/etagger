@@ -20,9 +20,6 @@ etagger
   - [bilm](https://github.com/allenai/bilm-tf)
 
 - modification
-  - modified for tf version(1.4)
-  - removed unnecessary files
-  - fixed bugs for MultiRNNCell()
   - refactoring
     - [x] implement input.py, config.py
     - [x] split model.py to model.py, train.py, inference.py
@@ -41,6 +38,7 @@ etagger
       - if we construct the gazetteer vocab from the training data, the performance is decreasing.
       - recommend constructing the gazetteer vocab from other sources.
     - [x] apply learning-rate change
+      - simply, 0.001 -> 0.0001 at 20 epoch
     - [x] apply pos embedding
       - pos one-hot vector + pos embedding
     - [x] extend language specific features
@@ -72,6 +70,8 @@ etagger
         - 15 epoch, per-chunk(exact) miscro F1: 0.8998
           - early stopping 3 epochs without improvement
     - SOTA
+      - [Semi-Supervised Sequence Modeling with Cross-View Training](https://arxiv.org/pdf/1809.08370.pdf)
+        - F1 : 0.926
       - [Deep contextualized word representations](https://arxiv.org/pdf/1802.05365.pdf)
         - F1 : 0.9222
       - [Semi-supervised sequence tagging with bidirectional language models](https://arxiv.org/pdf/1705.00108.pdf)
