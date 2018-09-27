@@ -59,7 +59,7 @@ class TokenEval:
         self.tp[in_class] = 0
         self.fp[in_class] = 0
         self.fn[in_class] = 0
-        for c, _ in self.cls.iteritems():
+        for c, _ in self.cls.items():
             if c != out_class:
                 self.tp[in_class] += self.tp[c]
                 self.fp[in_class] += self.fp[c]
@@ -70,7 +70,7 @@ class TokenEval:
         print(self.fp)
         print(self.fn)
 
-        for c, _ in self.cls.iteritems():
+        for c, _ in self.cls.items():
             if self.tp[c] + self.fp[c] != 0: self.precision[c] = self.tp[c]*1.0 / (self.tp[c] + self.fp[c])
             else: self.precision[c] = 0
             if self.tp[c] + self.fn[c] != 0: self.recall[c] = self.tp[c]*1.0 / (self.tp[c] + self.fn[c])
@@ -80,15 +80,15 @@ class TokenEval:
 
         print('')
         print('precision:')
-        for c, _ in self.precision.iteritems():
+        for c, _ in self.precision.items():
             print(c + ',' + str(self.precision[c]))
         print('')
         print('recall:')
-        for c, _ in self.recall.iteritems():
+        for c, _ in self.recall.items():
             print(c + ',' + str(self.recall[c]))
         print('')
         print('fscore:')
-        for c, _ in self.fscore.iteritems():
+        for c, _ in self.fscore.items():
             print(c + ',' + str(self.fscore[c]))
         print('')
         print('total fscore:')
