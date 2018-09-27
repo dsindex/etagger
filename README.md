@@ -186,7 +186,7 @@ test, max_sentence_length = 124
        which normalizes over the last dimension only.
        this code perfectly matches to my intention.
   ```
-  - after replace layer_norm() to normalize()
+  - after replacing layer_norm() to normalize() and applying the dropout of word embeddings
   ![graph-4](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-4.png)
 
 - inference(bulk)
