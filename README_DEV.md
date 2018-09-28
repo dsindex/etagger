@@ -17,8 +17,108 @@ more epochs and stop." (https://arxiv.org/pdf/1705.00108.pdf)
 
 ```
 
+- experiments 6
+```
+
+* test 2
+word embedding size : 100 -> 300 (Glove840B)
+wrd_keep_prob : 0.5
+chracter embedding size : 30 -> 100
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 30 -> 50
+chr_keep_prob : 0.5
+pos embedding size : 5
+pos embedding random init : -0.5 ~ 0.5
+pos_keep_prob : 0.5
+pos one-hot : 5
+#chunk one-hot : 5
+shape vec : 9
+rnn_size : 200 -> 100
+num_layers : 2
+learning_rate : 0.001 -> 0.0001, intermid_epoch = 20
+rnn_keep_prob : 0.5
+epoch : 70
+batch_size : 20
++
+multi head attention(softmax with masking)
+mh_num_heads : 4
+mh_num_units : 32
+mh_dropout : 0.5
+normalize() instead of layer_norm()
++
+save model by f1(token)
++
+CRF
+
+
+* test 1
+word embedding size : 100 -> 300 (Glove840B)
+wrd_keep_prob : 0.5
+chracter embedding size : 30
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 30
+chr_keep_prob : 0.5
+pos embedding size : 5
+pos embedding random init : -0.5 ~ 0.5
+pos_keep_prob : 0.5
+pos one-hot : 5
+#chunk one-hot : 5
+shape vec : 9
+rnn_size : 200
+num_layers : 2
+learning_rate : 0.001 -> 0.0001, intermid_epoch = 20
+rnn_keep_prob : 0.5
+epoch : 70
+batch_size : 20
++
+multi head attention(softmax with masking)
+mh_num_heads : 4
+mh_num_units : 32
+mh_dropout : 0.5
+normalize() instead of layer_norm()
++
+save model by f1(token)
++
+CRF
+
+```
+
 - experiments 5
 ```
+* test 8
+word embedding size : 100
+wrd_keep_prob : 0.5
+chracter embedding size : 30
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 30
+chr_keep_prob : 0.5
+pos embedding size : 5
+pos embedding random init : -0.5 ~ 0.5
+pos_keep_prob : 0.5
+pos one-hot : 5
+#chunk one-hot : 5
+shape vec : 9
+rnn_size : 200
+num_layers : 2 -> 1
+learning_rate : 0.001 -> 0.0001, intermid_epoch = 20
+rnn_keep_prob : 0.5
+epoch : 70
+batch_size : 20
++
+multi head attention(softmax with masking)
+mh_num_heads : 4
+mh_num_units : 32
+mh_dropout : 0.5
+normalize() instead of layer_norm()
++
+save model by f1(token)
++
+CRF
+
+
 * test 7
 word embedding size : 100
 wrd_keep_prob : 0.5 -> new (loss decreases more smoothly)

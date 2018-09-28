@@ -49,6 +49,8 @@ etagger
     - [x] apply CRF
       - train by crf_log_likelihood()
       - inference by viterbi_decode()
+    - [ ] apply Glove840B vectors
+    - [ ] apply IOBES tagging schemes
     - [ ] apply ELMO embedding
     - [ ] apply curriculum learning
       - sort the training data ascending order by average entropy(calculated at the end of layers) 
@@ -64,12 +66,20 @@ etagger
     - 70 epoch, per-token(partial) micro f1 : 0.91112196313
     - 70 epoch, per-chunk(exact)   micro f1 : **0.90743845407**
   - comparision to previous research
-    - reproduction
+    - implementations
       - [Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
+        - tested
+        - Glove6B.100
         - 70 epoch, per-chunk(exact) micro Prec: 0.887, Rec: 0.902, F1: 0.894
       - [sequence_tagging](https://github.com/guillaumegenthial/sequence_tagging)
+        - tested
+        - Glove6B.100
         - 15 epoch, per-chunk(exact) miscro F1: 0.8998
           - early stopping 3 epochs without improvement
+      - [tf_ner](https://github.com/guillaumegenthial/tf_ner)
+        - not yet tested
+        - Glove840B.300
+        - F1 : 0.9121
     - SOTA
       - [Semi-Supervised Sequence Modeling with Cross-View Training](https://arxiv.org/pdf/1809.08370.pdf)
         - F1 : 0.926
@@ -105,6 +115,7 @@ etagger
       - [ADVANCED: MAKING DYNAMIC DECISIONS AND THE BI-LSTM CRF](https://pytorch.org/tutorials/beginner/nlp/advanced_tutorial.html)
     - tensorflow impl
       - [sequence_tagging](https://github.com/guillaumegenthial/sequence_tagging/blob/master/model/ner_model.py)
+      - [tf_ner](https://github.com/guillaumegenthial/tf_ner)
       - [tensorflow/contrib/python/opps/crf.py](https://github.com/tensorflow/tensorflow/blob/r1.10/tensorflow/contrib/crf/python/ops/crf.py)
   - ELMO
     - articles
@@ -122,11 +133,12 @@ etagger
 - numpy
 
 - data
-  - [download](https://github.com/mxhofer/Named-Entity-Recognition-BidirectionalLSTM-CNN-CoNLL/tree/master/data) 
+  - [download data of CoNLL 2003 shared task](https://github.com/mxhofer/Named-Entity-Recognition-BidirectionalLSTM-CNN-CoNLL/tree/master/data) 
   - place train.txt, dev.txt, test.txt in data dir
 
 - glove embedding
-  - [download](http://nlp.stanford.edu/data/glove.6B.zip)
+  - [download Glove6B](http://nlp.stanford.edu/data/glove.6B.zip)
+  - [download Glove840B](http://nlp.stanford.edu/data/glove.840B.300d.zip)
   - unzip to 'embeddings' dir
 
 - bilm
@@ -152,6 +164,7 @@ $ python embvec.py --emb_path embeddings/glove.6B.50d.txt --wrd_dim 50 --train_p
 $ python embvec.py --emb_path embeddings/glove.6B.100d.txt --wrd_dim 100 --train_path data/train.txt
 $ python embvec.py --emb_path embeddings/glove.6B.200d.txt --wrd_dim 200 --train_path data/train.txt
 $ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train_path data/train.txt
+$ python embvec.py --emb_path embeddings/glove.840B.300d.txt --wrd_dim 300 --train_path data/train.txt
 ```
 
 - check max sentence length
