@@ -83,6 +83,11 @@ save model by f1(token)
 +
 CRF
 
+-> wrd_embeddings = tf.get_variable(name='wrd_embeddings', initializer=embed_init, shape=embed_arr.shape, trainable=False)
+-> File "~/lib64/python3.6/site-packages/tensorflow/python/framework/tensor_util.py", line 447, in make_tensor_proto
+    "Cannot create a tensor proto whose content is larger than 2GB.")
+   ValueError: Cannot create a tensor proto whose content is larger than 2GB.
+
 ```
 
 - experiments 5
