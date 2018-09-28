@@ -118,6 +118,8 @@ save model by f1(token)
 +
 CRF
 
+token : 0.9107797604497677
+chunk : 0.9061231692253398
 
 * test 7
 word embedding size : 100
