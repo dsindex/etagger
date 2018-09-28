@@ -34,7 +34,7 @@ pos one-hot : 5
 #chunk one-hot : 5
 shape vec : 9
 rnn_size : 200
-num_layers : 2 -> use multiple bidirectional_dynamic_rnn()
+num_layers : 2 -> use multiple bidirectional_dynamic_rnn() -> 2 times slower than tf.contrib.rnn.MultiRNNCell() with tf.contrib.rnn.static_bidirectional_rnn()
 learning_rate : 0.001 -> 0.0001, intermid_epoch = 20
 rnn_keep_prob : 0.5
 epoch : 70
@@ -49,6 +49,9 @@ normalize() instead of layer_norm()
 save model by f1(token)
 +
 CRF
+
+token : 0.91112196313 -> best
+chunk : 0.90743845407 -> best
 
 
 * test 6
@@ -178,8 +181,8 @@ save model by f1(token), bug fix for token_eval.compute_f1()
 +
 CRF
 
-token : 0.909514467876 -> best
-chunk : 0.901569941788 -> best
+token : 0.909514467876
+chunk : 0.901569941788
 
 * test 2
 word embedding size : 100

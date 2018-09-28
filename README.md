@@ -61,8 +61,8 @@ etagger
 - evaluation
   - [experiments](https://github.com/dsindex/etagger/blob/master/README_DEV.md)
   - fscore
-    - 70 epoch, per-token(partial) micro f1 : 0.909514467876
-    - 70 epoch, per-chunk(exact)   micro f1 : **0.901569941788**
+    - 70 epoch, per-token(partial) micro f1 : 0.91112196313
+    - 70 epoch, per-chunk(exact)   micro f1 : **0.90743845407**
   - comparision to previous research
     - reproduction
       - [Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
