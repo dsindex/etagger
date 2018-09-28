@@ -49,9 +49,16 @@ class EmbVec:
         wid = self.unk_wid + 1
         for line in open(args.emb_path):
             line = line.strip()
-            line = line.split()
-            word = line[0].lower()
-            vector = np.array([float(val) for val in line[1:]])
+            tokens = line.split()
+            word = tokens[0].lower()
+            try:
+                vector = np.array([float(val) for val in tokens[1:]])
+            except:
+                '''
+                sys.stderr.write(line + '\n')
+                '''
+                invalid += 1
+                continue
             if len(vector) != self.wrd_dim:
                 invalid += 1
                 continue
@@ -175,7 +182,9 @@ class EmbVec:
                         else: tag = self.tag_prefix_i + tag_suffix
                         tid = self.get_tid(tag)
                         gvec[tid] = 1
-                    #print(bucket[i+k])
+                    '''
+                    print(bucket[i+k])
+                    '''
                 # longest prefer
                 return j
         return 0
