@@ -110,7 +110,6 @@ class TokenEval:
                 else:
                     fp[prediction[i, j]] += 1
                     fn[target[i, j]] += 1
-        # out_of_class = class_size - 1  -> XXX BUG
         out_of_class = 0 # SEE EmbVec.oot_tid
         for i in range(class_size):
             if i != out_of_class:
