@@ -46,8 +46,8 @@ def do_train(model, config, train_data, dev_data, test_data):
                 feed_dict={model.input_data_word_ids: train_data.sentence_word_ids[ptr:ptr + config.batch_size],
                            model.input_data_wordchr_ids: train_data.sentence_wordchr_ids[ptr:ptr + config.batch_size],
                            model.input_data_pos_ids: train_data.sentence_pos_ids[ptr:ptr + config.batch_size],
-                           model.input_data_etc: train_data.sentence_etc[ptr:ptr + config.batch_size],
-                           model.output_data: train_data.sentence_tag[ptr:ptr + config.batch_size],
+                           model.input_data_etc: train_data.sentence_etcs[ptr:ptr + config.batch_size],
+                           model.output_data: train_data.sentence_tags[ptr:ptr + config.batch_size],
                            model.learning_rate:learning_rate}
                 step, train_summaries, _, train_loss, train_accuracy = \
                            sess.run([model.global_step, train_summary_op, model.train_op, model.loss, model.accuracy], feed_dict=feed_dict)
@@ -58,8 +58,8 @@ def do_train(model, config, train_data, dev_data, test_data):
             feed_dict={model.input_data_word_ids: dev_data.sentence_word_ids,
                        model.input_data_wordchr_ids: dev_data.sentence_wordchr_ids,
                        model.input_data_pos_ids: dev_data.sentence_pos_ids,
-                       model.input_data_etc: dev_data.sentence_etc,
-                       model.output_data: dev_data.sentence_tag}
+                       model.input_data_etc: dev_data.sentence_etcs,
+                       model.output_data: dev_data.sentence_tags}
             step, dev_summaries, logits, logits_indices, trans_params, output_data_indices, sentence_lengths, dev_loss, dev_accuracy = \
                        sess.run([model.global_step, dev_summary_op, model.logits, model.logits_indices, \
                                  model.trans_params, model.output_data_indices, model.sentence_lengths, model.loss, model.accuracy], \
@@ -67,7 +67,7 @@ def do_train(model, config, train_data, dev_data, test_data):
             print('epoch: %d / %d, step: %d, dev loss: %s, dev accuracy: %s' % (e, config.epoch, step, dev_loss, dev_accuracy))
             dev_summary_writer.add_summary(dev_summaries, step)
             print('dev precision, recall, f1(token): ')
-            token_f1 = TokenEval.compute_f1(config.class_size, logits, dev_data.sentence_tag, sentence_lengths)
+            token_f1 = TokenEval.compute_f1(config.class_size, logits, dev_data.sentence_tags, sentence_lengths)
             if config.use_crf:
                 viterbi_sequences = viterbi_decode(logits, trans_params, sentence_lengths)
                 tag_preds = dev_data.logits_indices_to_tags_seq(viterbi_sequences, sentence_lengths)
@@ -90,15 +90,15 @@ def do_train(model, config, train_data, dev_data, test_data):
                 feed_dict={model.input_data_word_ids: test_data.sentence_word_ids,
                            model.input_data_wordchr_ids: test_data.sentence_wordchr_ids,
                            model.input_data_pos_ids: test_data.sentence_pos_ids,
-                           model.input_data_etc: test_data.sentence_etc,
-                           model.output_data: test_data.sentence_tag}
+                           model.input_data_etc: test_data.sentence_etcs,
+                           model.output_data: test_data.sentence_tags}
                 step, logits, logits_indices, trans_params, output_data_indices, sentence_lengths, test_loss, test_accuracy = \
                            sess.run([model.global_step, model.logits, model.logits_indices, \
                                      model.trans_params, model.output_data_indices, model.sentence_lengths, model.loss, model.accuracy], \
                                      feed_dict=feed_dict)
                 print('epoch: %d / %d, step: %d, test loss: %s, test accuracy: %s' % (e, config.epoch, step, test_loss, test_accuracy))
                 print('test precision, recall, f1(token): ')
-                TokenEval.compute_f1(config.class_size, logits, test_data.sentence_tag, sentence_lengths)
+                TokenEval.compute_f1(config.class_size, logits, test_data.sentence_tags, sentence_lengths)
                 if config.use_crf:
                     viterbi_sequences = viterbi_decode(logits, trans_params, sentence_lengths)
                     tag_preds = test_data.logits_indices_to_tags_seq(viterbi_sequences, sentence_lengths)

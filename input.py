@@ -11,8 +11,8 @@ class Input:
         self.sentence_word_ids = []      # [batch_size, sentence_length]
         self.sentence_wordchr_ids = []   # [batch_size, sentence_length, word_length]
         self.sentence_pos_ids = []       # [batch_size, sentence_length]
-        self.sentence_etc = []           # [batch_size, sentence_length, etc_dim]
-        self.sentence_tag = []           # [batch_size, sentence_length, class_size] 
+        self.sentence_etcs = []          # [batch_size, sentence_length, etc_dim]
+        self.sentence_tags = []          # [batch_size, sentence_length, class_size] 
         self.config = config
         if config.sentence_length == -1:
             if type(data) is list:
@@ -31,8 +31,8 @@ class Input:
             pos_ids = self.__create_pos_ids(bucket)
             self.sentence_pos_ids.append(pos_ids)
             etc, tag = self.__create_etc_and_tag(bucket)
-            self.sentence_etc.append(etc)
-            self.sentence_tag.append(tag)
+            self.sentence_etcs.append(etc)
+            self.sentence_tags.append(tag)
         else:                  # treat data as file path
             path = data
             '''
@@ -52,8 +52,8 @@ class Input:
                     pos_ids = self.__create_pos_ids(bucket)
                     self.sentence_pos_ids.append(pos_ids)
                     etc, tag = self.__create_etc_and_tag(bucket)
-                    self.sentence_etc.append(etc)
-                    self.sentence_tag.append(tag)
+                    self.sentence_etcs.append(etc)
+                    self.sentence_tags.append(tag)
                     bucket = []
                 else:
                     bucket.append(line)

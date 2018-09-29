@@ -35,14 +35,14 @@ def inference_bulk(config):
         feed_dict = {model.input_data_word_ids: test_data.sentence_word_ids,
                      model.input_data_wordchr_ids: test_data.sentence_wordchr_ids,
                      model.input_data_pos_ids: test_data.sentence_pos_ids,
-                     model.input_data_etc: test_data.sentence_etc,
-                     model.output_data: test_data.sentence_tag}
+                     model.input_data_etc: test_data.sentence_etcs,
+                     model.output_data: test_data.sentence_tags}
         logits, logits_indices, trans_params, output_data_indices, sentence_lengths, test_loss = \
                      sess.run([model.logits, model.logits_indices, \
                                model.trans_params, model.output_data_indices, model.sentence_lengths, model.loss], \
                                feed_dict=feed_dict)
         print('test precision, recall, f1(token): ')
-        TokenEval.compute_f1(config.class_size, logits, test_data.sentence_tag, sentence_lengths)
+        TokenEval.compute_f1(config.class_size, logits, test_data.sentence_tags, sentence_lengths)
         if config.use_crf:
             viterbi_sequences = viterbi_decode(logits, trans_params, sentence_lengths)
             tag_preds = test_data.logits_indices_to_tags_seq(viterbi_sequences, sentence_lengths)
@@ -80,8 +80,8 @@ def inference_bucket(config):
             feed_dict = {model.input_data_word_ids: inp.sentence_word_ids,
                          model.input_data_wordchr_ids: inp.sentence_wordchr_ids,
                          model.input_data_pos_ids: inp.sentence_pos_ids,
-                         model.input_data_etc: inp.sentence_etc,
-                         model.output_data: inp.sentence_tag}
+                         model.input_data_etc: inp.sentence_etcs,
+                         model.output_data: inp.sentence_tags}
             logits, trans_params, sentence_lengths, loss = \
                          sess.run([model.logits, \
                                    model.trans_params, model.sentence_lengths, model.loss], \
@@ -109,8 +109,8 @@ def inference_bucket(config):
         feed_dict = {model.input_data_word_ids: inp.sentence_word_ids,
                      model.input_data_wordchr_ids: inp.sentence_wordchr_ids,
                      model.input_data_pos_ids: inp.sentence_pos_ids,
-                     model.input_data_etc: inp.sentence_etc,
-                     model.output_data: inp.sentence_tag}
+                     model.input_data_etc: inp.sentence_etcs,
+                     model.output_data: inp.sentence_tags}
         logits, trans_params, sentence_lengths, loss = \
                      sess.run([model.logits, \
                                model.trans_params, model.sentence_lengths, model.loss], \
@@ -194,8 +194,8 @@ def inference_line(config):
         feed_dict = {model.input_data_word_ids: inp.sentence_word_ids,
                      model.input_data_wordchr_ids: inp.sentence_wordchr_ids,
                      model.input_data_pos_ids: inp.sentence_pos_ids,
-                     model.input_data_etc: inp.sentence_etc,
-                     model.output_data: inp.sentence_tag}
+                     model.input_data_etc: inp.sentence_etcs,
+                     model.output_data: inp.sentence_tags}
         logits, trans_params, sentence_lengths, loss = \
                      sess.run([model.logits, \
                                model.trans_params, model.sentence_lengths, model.loss], \
