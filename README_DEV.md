@@ -1,56 +1,16 @@
-- etc
-```
-**learning rate annealing**
-"we also
-use early stopping to prevent over-fitting and use
-the following process to determine when to stop
-training. We first train with a constant learning
-rate α = 0.001 on the training data and monitor
-the development set performance at each epoch.
-Then, at the epoch with the highest development
-performance, we start a simple learning rate annealing
-schedule: decrease α an order of magnitude
-(i.e., divide by ten), train for five epochs, decrease
-α an order of magnitude again, train for five
-more epochs and stop." (https://arxiv.org/pdf/1705.00108.pdf)
--> how to determine the highest developement performance?
-
-```
 
 - experiments 6
 ```
 
-* test 3
-word embedding size : 300 (Glove840B)
-wrd_keep_prob : 0.5
-chracter embedding size : 30 -> 100
-chracter embedding random init : -1.0 ~ 1.0
-filter_sizes : [3]
-num_filters : 30 -> 50
-chr_keep_prob : 0.5
-pos embedding size : 5
-pos embedding random init : -0.5 ~ 0.5
-pos_keep_prob : 0.5
-pos one-hot : 5
-#chunk one-hot : 5
-shape vec : 9
-rnn_size : 200 -> 100
-num_layers : 2
-learning_rate : 0.015
-decay_rate : 0.05 (0.95), using tf.train.exponential_decay()
-rnn_keep_prob : 0.5
-epoch : 70
-batch_size : 20
-+
-multi head attention(softmax with masking)
-mh_num_heads : 4
-mh_num_units : 32
-mh_dropout : 0.5
-normalize() instead of layer_norm()
-+
-save model by f1(token)
-+
-CRF
+* additional test
+  1. only use word and character embedding + lstm + crf
+    - word : 300
+    - character : 100, 50
+    - lstm : 100, 1 bidirectional
+    - crf
+  2. learning_rate decay
+  3. early stopping
+  4. shuffling at every epoch
 
 * test 2
 word embedding size : 100 -> 300 (Glove840B)
@@ -60,24 +20,26 @@ chracter embedding random init : -1.0 ~ 1.0
 filter_sizes : [3]
 num_filters : 30 -> 50
 chr_keep_prob : 0.5
-pos embedding size : 5
-pos embedding random init : -0.5 ~ 0.5
+#pos embedding size : 5
+#pos embedding random init : -0.5 ~ 0.5
 pos_keep_prob : 0.5
 pos one-hot : 5
 #chunk one-hot : 5
-shape vec : 9
+#shape vec : 9
 rnn_size : 200 -> 100
-num_layers : 2
-learning_rate : 0.001 -> 0.0001, intermid_epoch = 20
+num_layers : 2 -> 1
+learning_rate : 0.015
+decay_rate : 0.05 (0.95), using tf.train.exponential_decay()
+early stopping : 10
 rnn_keep_prob : 0.5
 epoch : 70
-batch_size : 20
+batch_size : 20 -> 10
 +
-multi head attention(softmax with masking)
-mh_num_heads : 4
-mh_num_units : 32
-mh_dropout : 0.5
-normalize() instead of layer_norm()
+#multi head attention(softmax with masking)
+#mh_num_heads : 4
+#mh_num_units : 32
+#mh_dropout : 0.5
+#normalize() instead of layer_norm()
 +
 save model by f1(token)
 +
