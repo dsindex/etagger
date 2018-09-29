@@ -4,7 +4,6 @@ import re
 import tensorflow as tf
 import numpy as np
 from embvec import EmbVec
-from shuffle import Shuffle
 
 class Input:
     def __init__(self, data, config):
@@ -35,13 +34,6 @@ class Input:
             self.sentence_tags.append(tag)
         else:                  # treat data as file path
             path = data
-            '''
-            if config.is_train:
-                sp = Shuffle()
-                sp.add(path)
-                path = path + '.shuffle'
-                sp.shuffle(path)
-            '''
             bucket = []
             for line in open(path):
                 if line in ['\n', '\r\n']:
