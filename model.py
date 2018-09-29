@@ -124,10 +124,11 @@ class Model:
         with tf.variable_scope(scope):
             with tf.device('/cpu:0'):
                 chr_embeddings = tf.Variable(tf.random_uniform([self.chr_vocab_size, self.chr_dim], -1.0, 1.0), name='chr_embeddings')
-                wordchr_embeddings = tf.nn.embedding_lookup(chr_embeddings, inputs)                         # (batch_size, sentence_length, word_length, chr_dim)
-                wordchr_embeddings = tf.reshape(wordchr_embeddings, [-1, self.word_length, self.chr_dim])   # (batch_size*sentence_length, word_length, chr_dim)
+                wordchr_embeddings_t = tf.nn.embedding_lookup(chr_embeddings, inputs)                           # (batch_size, sentence_length, word_length, chr_dim)
+                wordchr_embeddings_t = tf.reshape(wordchr_embeddings_t, [-1, self.word_length, self.chr_dim])   # (batch_size*sentence_length, word_length, chr_dim)
+                self.wordchr_embeddings_t = wordchr_embeddings_t # backup for computing word lengths
                 if self.__chr_embedding_type == 'conv':
-                    wordchr_embeddings = tf.expand_dims(wordchr_embeddings, -1)                             # (batch_size*sentence_length, word_length, chr_dim, 1)
+                    wordchr_embeddings = tf.expand_dims(wordchr_embeddings_t, -1)                               # (batch_size*sentence_length, word_length, chr_dim, 1)
             if self.__chr_embedding_type == 'conv':
                 pooled_outputs = []
                 for i, filter_size in enumerate(self.__filter_sizes):
@@ -168,7 +169,7 @@ class Model:
                 # (batch_size*sentence_length, num_filters_total) -> (batch_size, sentence_length, num_filters_total)
                 wordchr_embeddings = tf.reshape(h_drop, [-1, self.sentence_length, num_filters_total])
             else: # simple character embedding by reduce_max
-                wordchr_embeddings = tf.reduce_max(wordchr_embeddings, reduction_indices=1)                   # (batch_size*sentence_length, chr_dim)
+                wordchr_embeddings = tf.reduce_max(wordchr_embeddings_t, reduction_indices=1)                   # (batch_size*sentence_length, chr_dim)
                 wordchr_embeddings = tf.reshape(wordchr_embeddings, [-1, self.sentence_length, self.chr_dim]) # (batch_size, sentence_length, chr_dim)
                 wordchr_embeddings = tf.nn.dropout(wordchr_embeddings, keep_prob)
             return wordchr_embeddings
@@ -238,11 +239,17 @@ class Model:
         correct_prediction /= tf.cast(self.sentence_lengths, tf.float32)                                   # (batch_size)
         return tf.reduce_mean(correct_prediction)
 
-    def __compute_sentence_lengths(self, output_data):
+    def __compute_sentence_lengths(self, input_data_etcs):
         """Compute each sentence lengths
         """
-        words_used_in_sent = tf.sign(tf.reduce_max(tf.abs(output_data), reduction_indices=2)) # (batch_size, sentence_length)
-        return tf.cast(tf.reduce_sum(words_used_in_sent, reduction_indices=1), tf.int32)      # (batch_size)
+        words_used_in_sent = tf.sign(tf.reduce_max(tf.abs(input_data_etcs), reduction_indices=2))          # (batch_size, sentence_length, etc_dim) -> (batch_size, sentence_length)
+        return tf.cast(tf.reduce_sum(words_used_in_sent, reduction_indices=1), tf.int32)                   # (batch_size)
+
+    def __compute_word_lengths(self, wordchr_embeddings_t):
+        """Compute each word lengths
+        """
+        chrs_used_in_word = tf.sign(tf.reduce_max(tf.abs(wordchr_embeddings_t), reduction_indices=2))     # (batch_size*sentence_length, word_length, chr_dim) -> (batch_size*sentence_length, word_length)
+        return tf.cast(tf.reduce_sum(chrs_used_in_word, reduction_indices=1), tf.int32)                   # (batch_size*sentence_length)
 
     @staticmethod
     def set_cuda_visible_devices(is_train):
