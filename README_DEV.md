@@ -10,11 +10,15 @@
     - crf
   2. learning_rate decay
   3. early stopping
-  4. shuffling at every epoch
+  4. use special begin, end marker for character embedding
+  5. small batch size
+  6. shuffling at every epoch
+  7. do i need to mask for character convolution?
 
 * test 2
 word embedding size : 100 -> 300 (Glove840B)
 wrd_keep_prob : 0.5
+character begin, end marker : <b>, </b>
 chracter embedding size : 30 -> 100
 chracter embedding random init : -1.0 ~ 1.0
 filter_sizes : [3]
@@ -22,8 +26,8 @@ num_filters : 30 -> 50
 chr_keep_prob : 0.5
 #pos embedding size : 5
 #pos embedding random init : -0.5 ~ 0.5
-pos_keep_prob : 0.5
-pos one-hot : 5
+#pos_keep_prob : 0.5
+#pos one-hot : 5
 #chunk one-hot : 5
 #shape vec : 9
 rnn_size : 200 -> 100
