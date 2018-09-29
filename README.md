@@ -38,8 +38,9 @@ etagger
     - [x] apply gazetteer features
       - if we construct the gazetteer vocab from the training data, the performance is decreasing.
       - recommend constructing the gazetteer vocab from other sources.
-    - [x] apply learning-rate change
+    - [x] apply learning-rate decay
       - simply, 0.001 -> 0.0001 at 20 epoch
+      - using tf.train.exponential_decay()
     - [x] apply pos embedding
       - pos one-hot vector + pos embedding
     - [x] extend language specific features
@@ -49,7 +50,7 @@ etagger
     - [x] apply CRF
       - train by crf_log_likelihood()
       - inference by viterbi_decode()
-    - [ ] apply Glove840B vectors
+    - [x] apply Glove840B vectors
     - [ ] apply IOBES tagging schemes
     - [ ] apply ELMO embedding
     - [ ] apply curriculum learning
@@ -94,6 +95,8 @@ etagger
       - [Named Entity Recognition with Bidirectional LSTM-CNNs](https://www.aclweb.org/anthology/Q16-1026)
       - [Towards Deep Learning in Hindi NER: An approach to tackle the Labelled Data Scarcity](https://arxiv.org/pdf/1610.09756.pdf)
       - [Exploring neural architectures for NER](https://web.stanford.edu/class/cs224n/reports/6896582.pdf)
+      - [Early Stopping(in Korean)](http://forensics.tistory.com/29)
+      - [Learning Rate Decay(in Korean)](http://twinw.tistory.com/243)
     - tensorflow impl
       - [ner-lstm](https://github.com/monikkinom/ner-lstm)
     - keras impl
