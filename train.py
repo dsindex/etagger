@@ -22,7 +22,7 @@ def do_train(model, config, train_data, dev_data, test_data):
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     sess = tf.Session(config=session_conf)
     with sess.as_default():
-        sess.run(tf.global_variables_initializer())
+        sess.run(tf.global_variables_initializer(), feed_dict={model.wrd_embeddings_init: config.embvec.wrd_embeddings}) # feed large embedding data
         saver = tf.train.Saver()
         if config.restore is not None:
             saver.restore(sess, config.restore)

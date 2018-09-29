@@ -28,7 +28,7 @@ def inference_bulk(config):
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     sess = tf.Session(config=session_conf)
     with sess.as_default():
-        sess.run(tf.global_variables_initializer())
+        sess.run(tf.global_variables_initializer(), feed_dict={model.wrd_embeddings_init: config.embvec.wrd_embeddings})
         saver = tf.train.Saver()
         saver.restore(sess, config.restore)
         print('model restored')
@@ -60,7 +60,7 @@ def inference_bucket(config):
     # Restore model
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     sess = tf.Session(config=session_conf)
-    sess.run(tf.global_variables_initializer())
+    sess.run(tf.global_variables_initializer(), feed_dict={model.wrd_embeddings_init: config.embvec.wrd_embeddings})
     saver = tf.train.Saver()
     saver.restore(sess, config.restore)
     sys.stderr.write('model restored' +'\n')
@@ -167,7 +167,7 @@ def inference_line(config):
     # Restore model
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     sess = tf.Session(config=session_conf)
-    sess.run(tf.global_variables_initializer())
+    sess.run(tf.global_variables_initializer(), feed_dict={model.wrd_embeddings_init: config.embvec.wrd_embeddings})
     saver = tf.train.Saver()
     saver.restore(sess, config.restore)
     sys.stderr.write('model restored' +'\n')

@@ -22,6 +22,8 @@ class Model:
     def __init__(self, config):
         self.embvec = config.embvec
         self.sentence_length = config.sentence_length
+        self.wrd_vocab_size = len(self.embvec.wrd_embeddings)
+        self.wrd_dim = config.wrd_dim
         self.word_length = config.word_length
         self.chr_vocab_size = len(self.embvec.chr_vocab)
         self.chr_dim = config.chr_dim
@@ -36,11 +38,13 @@ class Model:
         """
         Input layer
         """
+        # (large) word embedding data
+        self.wrd_embeddings_init = tf.placeholder(tf.float32, shape=[self.wrd_vocab_size, self.wrd_dim])
+        self.wrd_embeddings = tf.Variable(self.wrd_embeddings_init, name='wrd_embeddings', trainable=False)
         # word embedding features
         self.input_data_word_ids = tf.placeholder(tf.int32, shape=[None, self.sentence_length], name='input_data_word_ids')
         keep_prob = self.__wrd_keep_prob if self.is_train else 1.0
         self.word_embeddings = self.__word_embedding(self.input_data_word_ids, keep_prob=keep_prob, scope='word-embedding')
-
         # character embedding features
         self.input_data_wordchr_ids = tf.placeholder(tf.int32, shape=[None, self.sentence_length, self.word_length], name='input_data_wordchr_ids')
         keep_prob = self.__chr_keep_prob if self.is_train else 1.0
@@ -111,10 +115,7 @@ class Model:
         """
         with tf.variable_scope(scope):
             with tf.device('/cpu:0'):
-                embed_arr = np.array(self.embvec.wrd_embeddings)
-                embed_init = tf.constant_initializer(embed_arr)
-                wrd_embeddings = tf.get_variable(name='wrd_embeddings', initializer=embed_init, shape=embed_arr.shape, trainable=False)
-                word_embeddings = tf.nn.embedding_lookup(wrd_embeddings, inputs)   # (batch_size, sentence_length, wrd_dim)
+                word_embeddings = tf.nn.embedding_lookup(self.wrd_embeddings, inputs)   # (batch_size, sentence_length, wrd_dim)
             return tf.nn.dropout(word_embeddings, keep_prob)
 
     def __wordchr_embedding(self, inputs, keep_prob=0.5, scope='wordchr-embedding'):
