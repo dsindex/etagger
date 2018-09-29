@@ -60,18 +60,20 @@ def do_train(model, config, train_data, dev_data, test_data):
                        model.input_data_pos_ids: dev_data.sentence_pos_ids,
                        model.input_data_etc: dev_data.sentence_etc,
                        model.output_data: dev_data.sentence_tag}
-            step, dev_summaries, logits, logits_indices, trans_params, output_data_indices, length, dev_loss, dev_accuracy = \
-                       sess.run([model.global_step, dev_summary_op, model.logits, model.logits_indices, model.trans_params, model.output_data_indices, model.length, model.loss, model.accuracy], feed_dict=feed_dict)
+            step, dev_summaries, logits, logits_indices, trans_params, output_data_indices, sentence_lengths, dev_loss, dev_accuracy = \
+                       sess.run([model.global_step, dev_summary_op, model.logits, model.logits_indices, \
+                                 model.trans_params, model.output_data_indices, model.sentence_lengths, model.loss, model.accuracy], \
+                                 feed_dict=feed_dict)
             print('epoch: %d / %d, step: %d, dev loss: %s, dev accuracy: %s' % (e, config.epoch, step, dev_loss, dev_accuracy))
             dev_summary_writer.add_summary(dev_summaries, step)
             print('dev precision, recall, f1(token): ')
-            token_f1 = TokenEval.compute_f1(config.class_size, logits, dev_data.sentence_tag, length)
+            token_f1 = TokenEval.compute_f1(config.class_size, logits, dev_data.sentence_tag, sentence_lengths)
             if config.use_crf:
-                viterbi_sequences = viterbi_decode(logits, trans_params, length)
-                tag_preds = dev_data.logits_indices_to_tags_seq(viterbi_sequences, length)
+                viterbi_sequences = viterbi_decode(logits, trans_params, sentence_lengths)
+                tag_preds = dev_data.logits_indices_to_tags_seq(viterbi_sequences, sentence_lengths)
             else:
-                tag_preds = dev_data.logits_indices_to_tags_seq(logits_indices, length)
-            tag_corrects = dev_data.logits_indices_to_tags_seq(output_data_indices, length)
+                tag_preds = dev_data.logits_indices_to_tags_seq(logits_indices, sentence_lengths)
+            tag_corrects = dev_data.logits_indices_to_tags_seq(output_data_indices, sentence_lengths)
             dev_prec, dev_rec, dev_f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
             print('dev precision, recall, f1(chunk): ', dev_prec, dev_rec, dev_f1)
             chunk_f1 = dev_f1
@@ -90,17 +92,19 @@ def do_train(model, config, train_data, dev_data, test_data):
                            model.input_data_pos_ids: test_data.sentence_pos_ids,
                            model.input_data_etc: test_data.sentence_etc,
                            model.output_data: test_data.sentence_tag}
-                step, logits, logits_indices, trans_params, output_data_indices, length, test_loss, test_accuracy = \
-                           sess.run([model.global_step, model.logits, model.logits_indices, model.trans_params, model.output_data_indices, model.length, model.loss, model.accuracy], feed_dict=feed_dict)
+                step, logits, logits_indices, trans_params, output_data_indices, sentence_lengths, test_loss, test_accuracy = \
+                           sess.run([model.global_step, model.logits, model.logits_indices, \
+                                     model.trans_params, model.output_data_indices, model.sentence_lengths, model.loss, model.accuracy], \
+                                     feed_dict=feed_dict)
                 print('epoch: %d / %d, step: %d, test loss: %s, test accuracy: %s' % (e, config.epoch, step, test_loss, test_accuracy))
                 print('test precision, recall, f1(token): ')
-                TokenEval.compute_f1(config.class_size, logits, test_data.sentence_tag, length)
+                TokenEval.compute_f1(config.class_size, logits, test_data.sentence_tag, sentence_lengths)
                 if config.use_crf:
-                    viterbi_sequences = viterbi_decode(logits, trans_params, length)
-                    tag_preds = test_data.logits_indices_to_tags_seq(viterbi_sequences, length)
+                    viterbi_sequences = viterbi_decode(logits, trans_params, sentence_lengths)
+                    tag_preds = test_data.logits_indices_to_tags_seq(viterbi_sequences, sentence_lengths)
                 else:
-                    tag_preds = test_data.logits_indices_to_tags_seq(logits_indices, length)
-                tag_corrects = test_data.logits_indices_to_tags_seq(output_data_indices, length)
+                    tag_preds = test_data.logits_indices_to_tags_seq(logits_indices, sentence_lengths)
+                tag_corrects = test_data.logits_indices_to_tags_seq(output_data_indices, sentence_lengths)
                 test_prec, test_rec, test_f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
                 print('test precision, recall, f1(chunk): ', test_prec, test_rec, test_f1)
             # learning rate change

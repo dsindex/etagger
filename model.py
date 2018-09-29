@@ -63,12 +63,12 @@ class Model:
         """
         RNN layer
         """
-        self.length = self.__compute_length(self.input_data_etc)
+        self.sentence_lengths = self.__compute_sentence_lengths(self.input_data_etc)
         rnn_output = tf.identity(self.input_data)
         for i in range(self.__num_layers):
             keep_prob = self.__rnn_keep_prob if self.is_train else 1.0
             scope = 'bi-lstm-%s' % i
-            rnn_output = self.__bi_lstm(rnn_output, self.length, rnn_size=self.__rnn_size, keep_prob=keep_prob, scope=scope)
+            rnn_output = self.__bi_lstm(rnn_output, self.sentence_lengths, rnn_size=self.__rnn_size, keep_prob=keep_prob, scope=scope)
         self.rnn_output = rnn_output
 
         """
@@ -213,7 +213,7 @@ class Model:
         """Compute loss(self.output_data, self.logits)
         """
         if self.use_crf:
-            log_likelihood, trans_params = tf.contrib.crf.crf_log_likelihood(self.logits, self.output_data_indices, self.length)
+            log_likelihood, trans_params = tf.contrib.crf.crf_log_likelihood(self.logits, self.output_data_indices, self.sentence_lengths)
             self.trans_params = trans_params # need to evaludate it for decoding
             return tf.reduce_mean(-log_likelihood)
         else:
@@ -223,7 +223,7 @@ class Model:
             mask = tf.sign(tf.reduce_max(tf.abs(self.output_data), reduction_indices=2)) # (batch_size, sentence_length)
             cross_entropy *= mask
             cross_entropy = tf.reduce_sum(cross_entropy, reduction_indices=1)            # (batch_size)
-            cross_entropy /= tf.cast(self.length, tf.float32)                            # (batch_size)
+            cross_entropy /= tf.cast(self.sentence_lengths, tf.float32)                  # (batch_size)
             self.trans_params = tf.constant(0.0, shape=[self.class_size, self.class_size])
             return tf.reduce_mean(cross_entropy)
 
@@ -235,11 +235,11 @@ class Model:
         mask = tf.sign(tf.reduce_max(tf.abs(self.output_data), reduction_indices=2))                       # (batch_size, sentence_length)
         correct_prediction *= mask
         correct_prediction = tf.reduce_sum(correct_prediction, reduction_indices=1)                        # (batch_size)
-        correct_prediction /= tf.cast(self.length, tf.float32)                                             # (batch_size)
+        correct_prediction /= tf.cast(self.sentence_lengths, tf.float32)                                   # (batch_size)
         return tf.reduce_mean(correct_prediction)
 
-    def __compute_length(self, output_data):
-        """Compute each sentence length
+    def __compute_sentence_lengths(self, output_data):
+        """Compute each sentence lengths
         """
         words_used_in_sent = tf.sign(tf.reduce_max(tf.abs(output_data), reduction_indices=2)) # (batch_size, sentence_length)
         return tf.cast(tf.reduce_sum(words_used_in_sent, reduction_indices=1), tf.int32)      # (batch_size)
