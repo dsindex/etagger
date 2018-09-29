@@ -35,7 +35,7 @@ def inference_bulk(config):
         feed_dict = {model.input_data_word_ids: test_data.sentence_word_ids,
                      model.input_data_wordchr_ids: test_data.sentence_wordchr_ids,
                      model.input_data_pos_ids: test_data.sentence_pos_ids,
-                     model.input_data_etc: test_data.sentence_etcs,
+                     model.input_data_etcs: test_data.sentence_etcs,
                      model.output_data: test_data.sentence_tags}
         logits, logits_indices, trans_params, output_data_indices, sentence_lengths, test_loss = \
                      sess.run([model.logits, model.logits_indices, model.trans_params, \
@@ -80,7 +80,7 @@ def inference_bucket(config):
             feed_dict = {model.input_data_word_ids: inp.sentence_word_ids,
                          model.input_data_wordchr_ids: inp.sentence_wordchr_ids,
                          model.input_data_pos_ids: inp.sentence_pos_ids,
-                         model.input_data_etc: inp.sentence_etcs,
+                         model.input_data_etcs: inp.sentence_etcs,
                          model.output_data: inp.sentence_tags}
             logits, trans_params, sentence_lengths, loss = \
                          sess.run([model.logits, model.trans_params, \
@@ -109,7 +109,7 @@ def inference_bucket(config):
         feed_dict = {model.input_data_word_ids: inp.sentence_word_ids,
                      model.input_data_wordchr_ids: inp.sentence_wordchr_ids,
                      model.input_data_pos_ids: inp.sentence_pos_ids,
-                     model.input_data_etc: inp.sentence_etcs,
+                     model.input_data_etcs: inp.sentence_etcs,
                      model.output_data: inp.sentence_tags}
         logits, trans_params, sentence_lengths, loss = \
                      sess.run([model.logits, model.trans_params, \
@@ -194,7 +194,7 @@ def inference_line(config):
         feed_dict = {model.input_data_word_ids: inp.sentence_word_ids,
                      model.input_data_wordchr_ids: inp.sentence_wordchr_ids,
                      model.input_data_pos_ids: inp.sentence_pos_ids,
-                     model.input_data_etc: inp.sentence_etcs,
+                     model.input_data_etcs: inp.sentence_etcs,
                      model.output_data: inp.sentence_tags}
         logits, trans_params, sentence_lengths, loss = \
                      sess.run([model.logits, model.trans_params, \

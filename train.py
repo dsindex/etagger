@@ -46,7 +46,7 @@ def do_train(model, config, train_data, dev_data, test_data):
                 feed_dict={model.input_data_word_ids: train_data.sentence_word_ids[ptr:ptr + config.batch_size],
                            model.input_data_wordchr_ids: train_data.sentence_wordchr_ids[ptr:ptr + config.batch_size],
                            model.input_data_pos_ids: train_data.sentence_pos_ids[ptr:ptr + config.batch_size],
-                           model.input_data_etc: train_data.sentence_etcs[ptr:ptr + config.batch_size],
+                           model.input_data_etcs: train_data.sentence_etcs[ptr:ptr + config.batch_size],
                            model.output_data: train_data.sentence_tags[ptr:ptr + config.batch_size],
                            model.learning_rate:learning_rate}
                 step, train_summaries, _, train_loss, train_accuracy = \
@@ -58,7 +58,7 @@ def do_train(model, config, train_data, dev_data, test_data):
             feed_dict={model.input_data_word_ids: dev_data.sentence_word_ids,
                        model.input_data_wordchr_ids: dev_data.sentence_wordchr_ids,
                        model.input_data_pos_ids: dev_data.sentence_pos_ids,
-                       model.input_data_etc: dev_data.sentence_etcs,
+                       model.input_data_etcs: dev_data.sentence_etcs,
                        model.output_data: dev_data.sentence_tags}
             step, dev_summaries, logits, logits_indices, trans_params, output_data_indices, sentence_lengths, dev_loss, dev_accuracy = \
                        sess.run([model.global_step, dev_summary_op, model.logits, model.logits_indices, \
@@ -90,7 +90,7 @@ def do_train(model, config, train_data, dev_data, test_data):
                 feed_dict={model.input_data_word_ids: test_data.sentence_word_ids,
                            model.input_data_wordchr_ids: test_data.sentence_wordchr_ids,
                            model.input_data_pos_ids: test_data.sentence_pos_ids,
-                           model.input_data_etc: test_data.sentence_etcs,
+                           model.input_data_etcs: test_data.sentence_etcs,
                            model.output_data: test_data.sentence_tags}
                 step, logits, logits_indices, trans_params, output_data_indices, sentence_lengths, test_loss, test_accuracy = \
                            sess.run([model.global_step, model.logits, model.logits_indices, \

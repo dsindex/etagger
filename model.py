@@ -56,14 +56,14 @@ class Model:
         self.pos_embeddings = self.__pos_embedding(self.input_data_pos_ids, keep_prob=keep_prob, scope='pos-embedding')
 
         # etc features 
-        self.input_data_etc = tf.placeholder(tf.float32, shape=[None, self.sentence_length, self.etc_dim], name='input_data_etc')
+        self.input_data_etcs = tf.placeholder(tf.float32, shape=[None, self.sentence_length, self.etc_dim], name='input_data_etcs')
 
-        self.input_data = tf.concat([self.word_embeddings, self.wordchr_embeddings, self.pos_embeddings, self.input_data_etc], axis=-1, name='input_data') # (batch_size, sentence_length, unit_dim)
+        self.input_data = tf.concat([self.word_embeddings, self.wordchr_embeddings, self.pos_embeddings, self.input_data_etcs], axis=-1, name='input_data') # (batch_size, sentence_length, unit_dim)
 
         """
         RNN layer
         """
-        self.sentence_lengths = self.__compute_sentence_lengths(self.input_data_etc)
+        self.sentence_lengths = self.__compute_sentence_lengths(self.input_data_etcs)
         rnn_output = tf.identity(self.input_data)
         for i in range(self.__num_layers):
             keep_prob = self.__rnn_keep_prob if self.is_train else 1.0
