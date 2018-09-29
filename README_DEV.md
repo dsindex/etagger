@@ -87,6 +87,7 @@ CRF
 -> File "~/lib64/python3.6/site-packages/tensorflow/python/framework/tensor_util.py", line 447, in make_tensor_proto
     "Cannot create a tensor proto whose content is larger than 2GB.")
    ValueError: Cannot create a tensor proto whose content is larger than 2GB.
+-> fixed
 
 ```
 
