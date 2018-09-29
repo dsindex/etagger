@@ -14,10 +14,10 @@ import sys
 import argparse
 
 def do_train(model, config, train_data, dev_data, test_data):
-    learning_rate_init=0.001  # initial
+    learning_rate_init=0.001   # initial
     learning_rate_final=0.0001 # final
     learning_rate=learning_rate_init
-    intermid_epoch = 20       # after this epoch, change learning rate
+    intermid_epoch = 20        # after this epoch, change learning rate
     maximum = 0
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     sess = tf.Session(config=session_conf)
