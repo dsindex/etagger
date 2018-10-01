@@ -13,9 +13,9 @@ class Model:
     __pos_keep_prob = 0.5          # keep probability for dropout(pos embedding)
     __chr_conv_type = 'conv1d'     # conv1d | conv2d
     __filter_sizes = [3]           # filter sizes
-    __num_filters = 50             # number of filters
-    __rnn_size = 100               # size of RNN hidden unit
-    __num_layers = 1               # number of RNN layers
+    __num_filters = 30             # number of filters
+    __rnn_size = 200               # size of RNN hidden unit
+    __num_layers = 2               # number of RNN layers
     __mh_num_heads = 4             # number of head for multi head attention
     __mh_num_units = 32            # Q,K,V dimension for multi head attention
     __mh_dropout = 0.5             # dropout probability for multi head attention

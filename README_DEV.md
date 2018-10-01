@@ -6,10 +6,10 @@
 word embedding size : 100
 wrd_keep_prob : 0.5
 conv1d
-chracter embedding size : 30 -> 100
+chracter embedding size : 30
 chracter embedding random init : -1.0 ~ 1.0
 filter_sizes : [3]
-num_filters : 30 -> 50
+num_filters : 30
 chr_keep_prob : 0.5
 #pos embedding size : 5
 #pos embedding random init : -0.5 ~ 0.5
@@ -17,8 +17,8 @@ chr_keep_prob : 0.5
 #pos one-hot : 5
 #chunk one-hot : 5
 #shape vec : 9
-rnn_size : 200 -> 100
-num_layers : 2 -> 1
+rnn_size : 200
+num_layers : 2
 learning_rate : 0.001, exponential decay(15000, 0.6)
 rnn_keep_prob : 0.5
 epoch : 70
