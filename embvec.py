@@ -10,8 +10,6 @@ class EmbVec:
         self.pad = '#PAD#'
         self.unk = '#UNK#'
         self.wrd_vocab = {}      # word vocab
-        self.wrd_embeddings = []
-        self.wrd_dim = args.wrd_dim
         self.pad_wid = 0         # for padding word embedding
         self.unk_wid = 1         # for unknown word
         self.wrd_vocab[self.pad] = self.pad_wid
@@ -19,6 +17,8 @@ class EmbVec:
         self.chr_vocab = {}      # character vocab
         self.pad_cid = 0         # for padding char embedding
         self.unk_cid = 1         # for unknown char
+        self.beg_cid = 2         # begin of word marker
+        self.end_cid = 3         # end of word marker
         self.chr_vocab[self.pad] = self.pad_cid
         self.chr_vocab[self.unk] = self.unk_cid
         self.pos_vocab = {}      # pos vocab
@@ -36,37 +36,8 @@ class EmbVec:
         self.tag_prefix_i = 'I-'
         self.gaz_vocab = {}      # gazetteer vocab
 
-        invalid = 0
-        # 0 id for padding
-        vector = np.array([float(0) for i in range(self.wrd_dim)])
-        assert(len(vector) == self.wrd_dim)
-        self.wrd_embeddings.append(vector)
-        # 1 wid for unknown
-        vector = np.array([random() for i in range(self.wrd_dim)])
-        assert(len(vector) == self.wrd_dim)
-        self.wrd_embeddings.append(vector)
-        # build word vocab
+        # build word/character/pos/tag vocab
         wid = self.unk_wid + 1
-        for line in open(args.emb_path):
-            line = line.strip()
-            tokens = line.split()
-            word = tokens[0].lower()
-            try:
-                vector = np.array([float(val) for val in tokens[1:]])
-            except:
-                '''
-                sys.stderr.write(line + '\n')
-                '''
-                invalid += 1
-                continue
-            if len(vector) != self.wrd_dim:
-                invalid += 1
-                continue
-            self.wrd_vocab[word] = wid
-            self.wrd_embeddings.append(vector)
-            wid += 1
-        sys.stderr.write('invalid entries %d' % (invalid) + '\n')
-        # build character/pos/tag vocab
         cid = self.unk_cid + 1
         pid = self.unk_pid + 1
         tid = self.oot_tid + 1
@@ -76,8 +47,13 @@ class EmbVec:
             tokens = line.split()
             assert(len(tokens) == 4)
             word = tokens[0]
+            lword = word.lower()
             pos  = tokens[1]
             tag  = tokens[3]
+            # word vocab
+            if lword not in self.wrd_vocab:
+                self.wrd_vocab[lword] = wid
+                wid += 1
             # character vocab
             for ch in word:
                 if ch not in self.chr_vocab:
@@ -92,6 +68,28 @@ class EmbVec:
                 self.tag_vocab[tag] = tid
                 self.itag_vocab[tid] = tag
                 tid += 1
+
+        # build word embeddings
+        wrd_vocab_size = len(self.wrd_vocab)
+        self.wrd_dim = args.wrd_dim
+        self.wrd_embeddings = np.zeros((wrd_vocab_size, self.wrd_dim))
+        # 0 id for padding
+        vector = np.array([float(0) for i in range(self.wrd_dim)])
+        self.wrd_embeddings[self.pad_wid] = vector
+        # 1 wid for unknown
+        vector = np.array([random() for i in range(self.wrd_dim)])
+        self.wrd_embeddings[self.unk_wid] = vector
+        for line in open(args.emb_path):
+            line = line.strip()
+            tokens = line.split()
+            lword = tokens[0].lower()
+            try: vector = np.array([float(val) for val in tokens[1:]])
+            except: continue
+            if len(vector) != self.wrd_dim: continue
+            if lword not in self.wrd_vocab: continue
+            wid = self.wrd_vocab[lword]
+            self.wrd_embeddings[wid] = vector
+
         # build gazetteer vocab
         bucket = []
         for line in open(args.train_path):
@@ -106,7 +104,7 @@ class EmbVec:
                     if not segment: continue
                     tag_suffix = tag.split('-')[1]
                     # noise filtering
-                    if len(segment) <= 10: continue
+                    if len(segment) <= 3: continue
                     if segment not in self.gaz_vocab:
                         self.gaz_vocab[segment] = {}
                         self.gaz_vocab[segment][tag_suffix] = 1
@@ -189,13 +187,6 @@ class EmbVec:
                 return j
         return 0
                 
-    def __getitem__(self, wid):
-        try:
-            return self.wrd_embeddings[wid]
-        except KeyError:
-            vec = np.array([random() for i in range(self.wrd_dim)])
-            return vec
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--emb_path', type=str, help='path to a file of word embedding vector(.txt)', required=True)

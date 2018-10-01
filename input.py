@@ -60,7 +60,7 @@ class Input:
             tokens = line.split()
             assert (len(tokens) == 4)
             sentence_length += 1
-            word = self.replace_digits(tokens[0])
+            word = tokens[0]
             wid = self.config.embvec.get_wid(word)
             word_ids.append(wid)
             if sentence_length == self.max_sentence_length: break
@@ -81,8 +81,8 @@ class Input:
             sentence_length += 1
             chr_ids = []
             word_length = 0
-            word = self.replace_digits(tokens[0])
-            for ch in word:
+            word = tokens[0]
+            for ch in list(word):
                 word_length += 1 
                 cid = self.config.embvec.get_cid(ch)
                 chr_ids.append(cid)
@@ -144,7 +144,7 @@ class Input:
         sentence_length = 0
         for tokens in nbucket:
             sentence_length += 1
-            word = self.replace_digits(tokens[0]).lower()
+            word = tokens[0].lower()
             temp = self.__shape_vec(tokens[0])                              # adding shape vec(5)
             temp = np.append(temp, self.__pos_vec(tokens[1]))               # adding pos one-hot(5)
             '''
@@ -317,11 +317,3 @@ class Input:
             else:
                 temp_len += 1
         return max_length
-
-    @staticmethod
-    def replace_digits(string):
-        return string
-        '''
-        return re.sub('[0-9]', '0', string)
-        '''
-

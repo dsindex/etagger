@@ -2,23 +2,10 @@
 - experiments 6
 ```
 
-* additional test
-  1. only use word and character embedding + lstm + crf
-    - word : 300
-    - character : 100, 50
-    - lstm : 100, 1 bidirectional
-    - crf
-  2. learning_rate decay
-  3. early stopping
-  4. use special begin, end marker for character embedding
-  5. small batch size
-  6. shuffling at every epoch
-  7. do i need to mask for character convolution?
-
 * test 2
-word embedding size : 100 -> 300 (Glove840B)
+word embedding size : 100
 wrd_keep_prob : 0.5
-character begin, end marker : <b>, </b>
+conv1d
 chracter embedding size : 30 -> 100
 chracter embedding random init : -1.0 ~ 1.0
 filter_sizes : [3]
@@ -32,12 +19,10 @@ chr_keep_prob : 0.5
 #shape vec : 9
 rnn_size : 200 -> 100
 num_layers : 2 -> 1
-learning_rate : 0.015
-decay_rate : 0.05 (0.95), using tf.train.exponential_decay()
-early stopping : 10
+learning_rate : 0.001, exponential decay(15000, 0.6)
 rnn_keep_prob : 0.5
 epoch : 70
-batch_size : 20 -> 10
+batch_size : 20
 +
 #multi head attention(softmax with masking)
 #mh_num_heads : 4
@@ -48,7 +33,11 @@ batch_size : 20 -> 10
 save model by f1(token)
 +
 CRF
++ 
+early stopping : 10
 
+* check
+glove840B -> something weird
 
 * test 1
 word embedding size : 100 -> 300 (Glove840B)
@@ -81,11 +70,8 @@ save model by f1(token)
 +
 CRF
 
--> wrd_embeddings = tf.get_variable(name='wrd_embeddings', initializer=embed_init, shape=embed_arr.shape, trainable=False)
--> File "~/lib64/python3.6/site-packages/tensorflow/python/framework/tensor_util.py", line 447, in make_tensor_proto
-    "Cannot create a tensor proto whose content is larger than 2GB.")
-   ValueError: Cannot create a tensor proto whose content is larger than 2GB.
--> fixed
+token : 0.9063109161793372
+chunk : 0.900184680327148
 
 ```
 

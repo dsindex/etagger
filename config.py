@@ -1,17 +1,6 @@
 from __future__ import print_function
-import tensorflow as tf
 import numpy as np
 import pickle as pkl
-
-"""
-character dimension
-"""
-CHR_DIM = 30
-
-"""
-pos dimension
-"""
-POS_DIM = 5
 
 """
 etc dimension
@@ -25,8 +14,8 @@ class Config:
         self.emb_path = args.emb_path
         self.embvec = pkl.load(open(self.emb_path, 'rb'))
         self.wrd_dim = args.wrd_dim
-        self.chr_dim = CHR_DIM
-        self.pos_dim = POS_DIM
+        self.chr_dim = 100
+        self.pos_dim = 5
         # basic features + gazetteer feature
         '''
         self.etc_dim = ETC_DIM + len(self.embvec.tag_vocab)
@@ -37,9 +26,12 @@ class Config:
         self.word_length = args.word_length
         self.restore = args.restore
         self.use_crf = use_crf
-        if is_train:
+        self.starter_learning_rate = 0.001
+        self.decay_steps = 15000 # batch_size(20), epoch(20)
+        self.decay_rate = 0.6
+        self.is_train = is_train
+        if self.is_train:
             self.epoch = args.epoch
             self.batch_size = args.batch_size
             self.checkpoint_dir = args.checkpoint_dir
             self.summary_dir = args.summary_dir
-        self.is_train = is_train

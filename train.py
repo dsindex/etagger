@@ -9,15 +9,14 @@ from token_eval  import TokenEval
 from chunk_eval  import ChunkEval
 from viterbi import viterbi_decode
 from general_utils import Progbar
+from early_stopping import EarlyStopping
 import os
 import sys
+import random
 import argparse
 
 def do_train(model, config, train_data, dev_data, test_data):
-    learning_rate_init=0.001   # initial
-    learning_rate_final=0.0001 # final
-    learning_rate=learning_rate_init
-    intermid_epoch = 20        # after this epoch, change learning rate
+    early_stopping = EarlyStopping(patience=10, verbose=1)
     maximum = 0
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     sess = tf.Session(config=session_conf)
@@ -47,12 +46,12 @@ def do_train(model, config, train_data, dev_data, test_data):
                            model.input_data_wordchr_ids: train_data.sentence_wordchr_ids[ptr:ptr + config.batch_size],
                            model.input_data_pos_ids: train_data.sentence_pos_ids[ptr:ptr + config.batch_size],
                            model.input_data_etcs: train_data.sentence_etcs[ptr:ptr + config.batch_size],
-                           model.output_data: train_data.sentence_tags[ptr:ptr + config.batch_size],
-                           model.learning_rate:learning_rate}
-                step, train_summaries, _, train_loss, train_accuracy = \
-                           sess.run([model.global_step, train_summary_op, model.train_op, model.loss, model.accuracy], feed_dict=feed_dict)
-                prog.update(idx + 1, [('train loss', train_loss), ('train accuracy', train_accuracy)])
+                           model.output_data: train_data.sentence_tags[ptr:ptr + config.batch_size]}
+                step, train_summaries, _, train_loss, train_accuracy, learning_rate = \
+                           sess.run([model.global_step, train_summary_op, model.train_op, \
+                                     model.loss, model.accuracy, model.learning_rate], feed_dict=feed_dict)
                 train_summary_writer.add_summary(train_summaries, step)
+                prog.update(idx + 1, [('step', step), ('train loss', train_loss), ('train accuracy', train_accuracy), ('lr', learning_rate)])
                 idx += 1
             # evaluate on dev data
             feed_dict={model.input_data_word_ids: dev_data.sentence_word_ids,
@@ -68,6 +67,9 @@ def do_train(model, config, train_data, dev_data, test_data):
             dev_summary_writer.add_summary(dev_summaries, step)
             print('dev precision, recall, f1(token): ')
             token_f1 = TokenEval.compute_f1(config.class_size, logits, dev_data.sentence_tags, sentence_lengths)
+            # early stopping
+            if early_stopping.validate(token_f1): break
+            '''
             if config.use_crf:
                 viterbi_sequences = viterbi_decode(logits, trans_params, sentence_lengths)
                 tag_preds = dev_data.logits_indices_to_tags_seq(viterbi_sequences, sentence_lengths)
@@ -77,6 +79,7 @@ def do_train(model, config, train_data, dev_data, test_data):
             dev_prec, dev_rec, dev_f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
             print('dev precision, recall, f1(chunk): ', dev_prec, dev_rec, dev_f1)
             chunk_f1 = dev_f1
+            '''
             # save best model
             '''
             m = chunk_f1 # slightly lower than token-based f1 for test
@@ -107,8 +110,6 @@ def do_train(model, config, train_data, dev_data, test_data):
                 tag_corrects = test_data.logits_indices_to_tags_seq(output_data_indices, sentence_lengths)
                 test_prec, test_rec, test_f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
                 print('test precision, recall, f1(chunk): ', test_prec, test_rec, test_f1)
-            # learning rate change
-            if e > intermid_epoch: learning_rate=learning_rate_final
 
 def train(config):
     # Build input data

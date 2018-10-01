@@ -18,6 +18,7 @@ etagger
   - [cnn-text-classification-tf](https://github.com/dennybritz/cnn-text-classification-tf/blob/master/text_cnn.py)
   - [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py)
   - [sequence_tagging/ner_model.py](https://github.com/guillaumegenthial/sequence_tagging/blob/master/model/ner_model.py)
+  - [tf_ner/masked_conv.py](https://github.com/guillaumegenthial/tf_ner/blob/master/models/chars_conv_lstm_crf/masked_conv.py)
   - [bilm](https://github.com/allenai/bilm-tf)
 
 - modification
@@ -29,31 +30,29 @@ etagger
       - inference line using spacy
     - [x] extend 5 tag(class) to 9 (automatically)
       - out of tag(class) 'O' and its id '0' are fixed
-    - [x] apply dropout for train() only
-    - [x] apply embedding_lookup()
-      - word embedding(glove)
-    - [x] apply character-level embedding
-      - using convolution
-      - using reduce_max only
-    - [x] apply gazetteer features
+    - [x] dropout for train() only
+    - [x] word embedding(glove)
+      - Glove6B, Glove840B
+    - [x] character embedding
+      - conv2d, conv1d(masked)
+    - [x] gazetteer features
       - if we construct the gazetteer vocab from the training data, the performance is decreasing.
       - recommend constructing the gazetteer vocab from other sources.
-    - [x] apply learning-rate decay
+    - [x] learning-rate decay
       - simply, 0.001 -> 0.0001 at 20 epoch
       - using tf.train.exponential_decay()
-    - [x] apply pos embedding
+    - [x] pos embedding
       - pos one-hot vector + pos embedding
     - [x] extend language specific features
-      - initialCaps, allCaps, lowercase, mixedCaps, non-info
-    - [x] apply multi-head self-attention
+      - initialCaps, allCaps, lowercase, mixedCaps, no-info, etc
+    - [x] multi-head self-attention
       - softmax with query, key masking
-    - [x] apply CRF
+    - [x] CRF
       - train by crf_log_likelihood()
       - inference by viterbi_decode()
-    - [x] apply Glove840B vectors
-    - [ ] apply IOBES tagging schemes
-    - [ ] apply ELMO embedding
-    - [ ] apply curriculum learning
+    - [ ] IOBES tagging schemes
+    - [ ] ELMO embedding
+    - [ ] curriculum learning
       - sort the training data ascending order by average entropy(calculated at the end of layers) 
     - [ ] serve api
       - freeze model and serve
@@ -88,43 +87,6 @@ etagger
         - F1 : 0.9222
       - [Semi-supervised sequence tagging with bidirectional language models](https://arxiv.org/pdf/1705.00108.pdf)
         - F1 : 0.9193
-
-- references
-  - general
-    - articles
-      - [Named Entity Recognition with Bidirectional LSTM-CNNs](https://www.aclweb.org/anthology/Q16-1026)
-      - [Towards Deep Learning in Hindi NER: An approach to tackle the Labelled Data Scarcity](https://arxiv.org/pdf/1610.09756.pdf)
-      - [Exploring neural architectures for NER](https://web.stanford.edu/class/cs224n/reports/6896582.pdf)
-      - [Early Stopping(in Korean)](http://forensics.tistory.com/29)
-      - [Learning Rate Decay(in Korean)](http://twinw.tistory.com/243)
-    - tensorflow impl
-      - [ner-lstm](https://github.com/monikkinom/ner-lstm)
-    - keras impl
-      - [keras implementation](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
-  - character convolution
-    - articles
-      - [Implementing a CNN for Text Classification in TensorFlow](http://www.wildml.com/2015/12/implementing-a-cnn-for-text-classification-in-tensorflow/)
-      - [Implementing a sentence classification using Char level CNN & RNN](https://github.com/cuteboydot/Sentence-Classification-using-Char-CNN-and-RNN)
-    - tensorflow impl
-      - [cnn-text-classification-tf](https://github.com/dennybritz/cnn-text-classification-tf/blob/master/text_cnn.py)
-      - [lstm-char-cnn-tensorflow/models/LSTMTDNN.py](https://github.com/carpedm20/lstm-char-cnn-tensorflow/blob/master/models/LSTMTDNN.py)
-  - multi-head attention
-    - tensorflow impl
-      - [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py)
-      - [transformer-tensorflow/transformer/attention.py](https://github.com/DongjunLee/transformer-tensorflow/blob/master/transformer/attention.py)
-  - CRF
-    - articles
-      - [Sequence Tagging with Tensorflow](https://guillaumegenthial.github.io/sequence-tagging-with-tensorflow.html)
-      - [ADVANCED: MAKING DYNAMIC DECISIONS AND THE BI-LSTM CRF](https://pytorch.org/tutorials/beginner/nlp/advanced_tutorial.html)
-    - tensorflow impl
-      - [sequence_tagging](https://github.com/guillaumegenthial/sequence_tagging/blob/master/model/ner_model.py)
-      - [tf_ner](https://github.com/guillaumegenthial/tf_ner)
-      - [tensorflow/contrib/python/opps/crf.py](https://github.com/tensorflow/tensorflow/blob/r1.10/tensorflow/contrib/crf/python/ops/crf.py)
-  - ELMO
-    - articles
-      - [Deep contextualized word representations](https://arxiv.org/pdf/1802.05365.pdf)
-    - tensorflow impl
-      - [bilm](https://github.com/allenai/bilm-tf)
 
 ### pre-requisites
 
@@ -260,3 +222,44 @@ in IN O O O
 . . O I-DATE O
 ```
 
+### references
+
+- general
+  - articles
+    - [Named Entity Recognition with Bidirectional LSTM-CNNs](https://www.aclweb.org/anthology/Q16-1026)
+    - [Towards Deep Learning in Hindi NER: An approach to tackle the Labelled Data Scarcity](https://arxiv.org/pdf/1610.09756.pdf)
+    - [Exploring neural architectures for NER](https://web.stanford.edu/class/cs224n/reports/6896582.pdf)
+    - [Early Stopping(in Korean)](http://forensics.tistory.com/29)
+    - [Learning Rate Decay](https://www.tensorflow.org/api_docs/python/tf/train/exponential_decay)
+  - tensorflow impl
+    - [ner-lstm](https://github.com/monikkinom/ner-lstm)
+  - keras impl
+    - [keras implementation](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
+
+- character convolution
+  - articles
+    - [Implementing a CNN for Text Classification in TensorFlow](http://www.wildml.com/2015/12/implementing-a-cnn-for-text-classification-in-tensorflow/)
+    - [Implementing a sentence classification using Char level CNN & RNN](https://github.com/cuteboydot/Sentence-Classification-using-Char-CNN-and-RNN)
+  - tensorflow impl
+    - [cnn-text-classification-tf](https://github.com/dennybritz/cnn-text-classification-tf/blob/master/text_cnn.py)
+    - [lstm-char-cnn-tensorflow/models/LSTMTDNN.py](https://github.com/carpedm20/lstm-char-cnn-tensorflow/blob/master/models/LSTMTDNN.py)
+
+- multi-head attention
+  - tensorflow impl
+    - [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py)
+    - [transformer-tensorflow/transformer/attention.py](https://github.com/DongjunLee/transformer-tensorflow/blob/master/transformer/attention.py)
+
+- CRF
+  - articles
+    - [Sequence Tagging with Tensorflow](https://guillaumegenthial.github.io/sequence-tagging-with-tensorflow.html)
+    - [ADVANCED: MAKING DYNAMIC DECISIONS AND THE BI-LSTM CRF](https://pytorch.org/tutorials/beginner/nlp/advanced_tutorial.html)
+  - tensorflow impl
+    - [sequence_tagging](https://github.com/guillaumegenthial/sequence_tagging/blob/master/model/ner_model.py)
+    - [tf_ner](https://github.com/guillaumegenthial/tf_ner)
+    - [tensorflow/contrib/python/opps/crf.py](https://github.com/tensorflow/tensorflow/blob/r1.10/tensorflow/contrib/crf/python/ops/crf.py)
+
+- ELMO
+  - articles
+    - [Deep contextualized word representations](https://arxiv.org/pdf/1802.05365.pdf)
+  - tensorflow impl
+    - [bilm](https://github.com/allenai/bilm-tf)
