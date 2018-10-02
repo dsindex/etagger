@@ -35,7 +35,7 @@ class Model:
         self.class_size = config.class_size
         self.use_crf = config.use_crf
         self.is_train = tf.placeholder(tf.bool, name='is_train')
-        _ = tf.cond(self.is_train, lambda: self.set_cuda_visible_devices(True), lambda: self.set_cuda_visible_devices(False)) 
+        self.set_cuda_visible_devices(config.is_train)
 
         """
         Input layer
