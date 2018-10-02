@@ -96,7 +96,14 @@ etagger
 
 - python >= 3.6
 
-- tensorflow >= 1.11
+- tensorflow >= 1.10
+```
+tensorflow 1.10, CUDA 9.0, cuDNN 7.12
+(cuda-9.0-pkg/cuda-9.0/lib64, cudnn-9.0/lib64)
+
+tensorflow 1.11, CUDA 9.0, cuDNN 7.31
+(cuda-9.0-pkg/cuda-9.0/lib64, cudnn-9.0-v73/lib64)
+```
 
 - numpy
 
