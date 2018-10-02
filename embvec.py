@@ -17,8 +17,6 @@ class EmbVec:
         self.chr_vocab = {}      # character vocab
         self.pad_cid = 0         # for padding char embedding
         self.unk_cid = 1         # for unknown char
-        self.beg_cid = 2         # begin of word marker
-        self.end_cid = 3         # end of word marker
         self.chr_vocab[self.pad] = self.pad_cid
         self.chr_vocab[self.unk] = self.unk_cid
         self.pos_vocab = {}      # pos vocab
@@ -41,18 +39,17 @@ class EmbVec:
         cid = self.unk_cid + 1
         pid = self.unk_pid + 1
         tid = self.oot_tid + 1
-        for line in open(args.train_path):
+        for line in open(args.total_path):
             line = line.strip()
             if not line: continue
             tokens = line.split()
             assert(len(tokens) == 4)
             word = tokens[0]
-            lword = word.lower()
             pos  = tokens[1]
             tag  = tokens[3]
             # word vocab
-            if lword not in self.wrd_vocab:
-                self.wrd_vocab[lword] = wid
+            if word not in self.wrd_vocab:
+                self.wrd_vocab[word] = wid
                 wid += 1
             # character vocab
             for ch in word:
@@ -82,12 +79,13 @@ class EmbVec:
         for line in open(args.emb_path):
             line = line.strip()
             tokens = line.split()
-            lword = tokens[0].lower()
+            word = tokens[0]
             try: vector = np.array([float(val) for val in tokens[1:]])
             except: continue
             if len(vector) != self.wrd_dim: continue
-            if lword not in self.wrd_vocab: continue
-            wid = self.wrd_vocab[lword]
+            # FIXME for fast training. when it comes to service, comment out
+            if word not in self.wrd_vocab: continue
+            wid = self.wrd_vocab[word]
             self.wrd_embeddings[wid] = vector
 
         # build gazetteer vocab
@@ -97,7 +95,7 @@ class EmbVec:
                 bucket_size = len(bucket)
                 for i in range(bucket_size):
                     tokens = bucket[i]
-                    word = tokens[0].lower()
+                    word = tokens[0]
                     tag  = tokens[3]
                     if self.tag_prefix_b not in tag: continue
                     segment = self.__get_segment(bucket, bucket_size, i)
@@ -118,13 +116,11 @@ class EmbVec:
                 bucket.append(tokens)
         
     def get_wid(self, word):
-        word = word.lower()
         if word in self.wrd_vocab:
             return self.wrd_vocab[word]
         return self.unk_wid
 
     def get_cid(self, ch):
-        ch = ch.lower()
         if ch in self.chr_vocab:
             return self.chr_vocab[ch]
         return self.unk_cid
@@ -156,10 +152,9 @@ class EmbVec:
             if valid:
                 segment.append(word)
             else: break
-        return ''.join(segment).lower()
+        return ''.join(segment)
 
     def get_gaz(self, word):
-        word = word.lower()
         if word in self.gaz_vocab:
             return self.gaz_vocab[word]
         return None
@@ -171,7 +166,7 @@ class EmbVec:
             segment = []
             # bucket[i+0][0] ~ bucket[i+k][0]
             for k in range(j): segment.append(bucket[i+k][0])
-            key = ''.join(segment).lower()
+            key = ''.join(segment)
             if key in self.gaz_vocab:
                 for k in range(j):
                     gvec = bucket[i+k][4]
@@ -191,7 +186,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--emb_path', type=str, help='path to a file of word embedding vector(.txt)', required=True)
     parser.add_argument('--wrd_dim', type=int, help='embedding vector dimension', required=True)
-    parser.add_argument('--train_path', type=str, help='path to a training file', required=True)
+    parser.add_argument('--train_path', type=str, help='path to a train file', required=True)
+    parser.add_argument('--total_path', type=str, help='path to a train+dev+test file', required=True)
     args = parser.parse_args()
     embvec = EmbVec(args)
     pkl.dump(embvec, open(args.emb_path + '.pkl', 'wb'))

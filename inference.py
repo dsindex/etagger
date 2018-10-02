@@ -36,7 +36,8 @@ def inference_bulk(config):
                      model.input_data_wordchr_ids: test_data.sentence_wordchr_ids,
                      model.input_data_pos_ids: test_data.sentence_pos_ids,
                      model.input_data_etcs: test_data.sentence_etcs,
-                     model.output_data: test_data.sentence_tags}
+                     model.output_data: test_data.sentence_tags,
+                     model.is_train: False}
         logits, logits_indices, trans_params, output_data_indices, sentence_lengths, test_loss = \
                      sess.run([model.logits, model.logits_indices, model.trans_params, \
                                model.output_data_indices, model.sentence_lengths, model.loss], \
@@ -81,7 +82,8 @@ def inference_bucket(config):
                          model.input_data_wordchr_ids: inp.sentence_wordchr_ids,
                          model.input_data_pos_ids: inp.sentence_pos_ids,
                          model.input_data_etcs: inp.sentence_etcs,
-                         model.output_data: inp.sentence_tags}
+                         model.output_data: inp.sentence_tags,
+                         model.is_train: False}
             logits, trans_params, sentence_lengths, loss = \
                          sess.run([model.logits, model.trans_params, \
                                    model.sentence_lengths, model.loss], \
@@ -110,7 +112,8 @@ def inference_bucket(config):
                      model.input_data_wordchr_ids: inp.sentence_wordchr_ids,
                      model.input_data_pos_ids: inp.sentence_pos_ids,
                      model.input_data_etcs: inp.sentence_etcs,
-                     model.output_data: inp.sentence_tags}
+                     model.output_data: inp.sentence_tags,
+                     model.is_train: False}
         logits, trans_params, sentence_lengths, loss = \
                      sess.run([model.logits, model.trans_params, \
                                model.sentence_lengths, model.loss], \
@@ -195,7 +198,8 @@ def inference_line(config):
                      model.input_data_wordchr_ids: inp.sentence_wordchr_ids,
                      model.input_data_pos_ids: inp.sentence_pos_ids,
                      model.input_data_etcs: inp.sentence_etcs,
-                     model.output_data: inp.sentence_tags}
+                     model.output_data: inp.sentence_tags,
+                     model.is_train: False}
         logits, trans_params, sentence_lengths, loss = \
                      sess.run([model.logits, model.trans_params, \
                                model.sentence_lengths, model.loss], \

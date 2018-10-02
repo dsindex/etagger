@@ -23,14 +23,13 @@ etagger
 
 - modification
   - refactoring
-    - [x] implement input.py, config.py
-    - [x] split model.py to model.py, train.py, inference.py
+    - [x] config.py, input.py
+    - [x] inference.py
       - inference bulk
       - inference bucket
       - inference line using spacy
     - [x] extend 5 tag(class) to 9 (automatically)
       - out of tag(class) 'O' and its id '0' are fixed
-    - [x] dropout for train() only
     - [x] word embedding(glove)
       - Glove6B, Glove840B
     - [x] character embedding
@@ -44,12 +43,16 @@ etagger
     - [x] pos embedding
       - pos one-hot vector + pos embedding
     - [x] extend language specific features
-      - initialCaps, allCaps, lowercase, mixedCaps, no-info, etc
+      - initialCaps, allCaps, lowercase, mixedCaps, no-info, ...
+    - [x] bidirectional lstm
+      - tf.nn.bidirectional_dynamic_rnn()
+      - tf.contrib.rnn.LSTMBlockFusedCell()
     - [x] multi-head self-attention
       - softmax with query, key masking
     - [x] CRF
       - train by crf_log_likelihood()
       - inference by viterbi_decode()
+    - [x] early stopping
     - [ ] IOBES tagging schemes
     - [ ] ELMO embedding
     - [ ] curriculum learning
@@ -77,29 +80,30 @@ etagger
         - 15 epoch, per-chunk(exact) miscro F1: 0.8998
           - early stopping 3 epochs without improvement
       - [tf_ner](https://github.com/guillaumegenthial/tf_ner)
-        - not yet tested
+        - tested
         - Glove840B.300
-        - F1 : 0.9121
+        - F1 : 0.905 ~ 0.907 (chars_conv_lstm_crf)
+          - reported F1 : 0.9121
     - SOTA
       - [Semi-Supervised Sequence Modeling with Cross-View Training](https://arxiv.org/pdf/1809.08370.pdf)
-        - F1 : 0.926
+        - reported F1 : 0.926
       - [Deep contextualized word representations](https://arxiv.org/pdf/1802.05365.pdf)
-        - F1 : 0.9222
+        - reported F1 : 0.9222
       - [Semi-supervised sequence tagging with bidirectional language models](https://arxiv.org/pdf/1705.00108.pdf)
-        - F1 : 0.9193
+        - reported F1 : 0.9193
 
 ### pre-requisites
 
 - python >= 3.6
-  - this is due to bilm.
 
-- tensorflow >= 1.4
+- tensorflow >= 1.11
 
 - numpy
 
 - data
   - [download data of CoNLL 2003 shared task](https://github.com/mxhofer/Named-Entity-Recognition-BidirectionalLSTM-CNN-CoNLL/tree/master/data) 
   - place train.txt, dev.txt, test.txt in data dir
+  - merge to total.txt in data dir
 
 - glove embedding
   - [download Glove6B](http://nlp.stanford.edu/data/glove.6B.zip)
@@ -125,11 +129,11 @@ etagger
 
 - convert word embedding to pickle
 ```
-$ python embvec.py --emb_path embeddings/glove.6B.50d.txt --wrd_dim 50 --train_path data/train.txt
-$ python embvec.py --emb_path embeddings/glove.6B.100d.txt --wrd_dim 100 --train_path data/train.txt
-$ python embvec.py --emb_path embeddings/glove.6B.200d.txt --wrd_dim 200 --train_path data/train.txt
-$ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train_path data/train.txt
-$ python embvec.py --emb_path embeddings/glove.840B.300d.txt --wrd_dim 300 --train_path data/train.txt
+$ python embvec.py --emb_path embeddings/glove.6B.50d.txt --wrd_dim 50 --train_path data/train.txt --total_path data/total.txt
+$ python embvec.py --emb_path embeddings/glove.6B.100d.txt --wrd_dim 100 --train_path data/train.txt --total_path data/total.txt
+$ python embvec.py --emb_path embeddings/glove.6B.200d.txt --wrd_dim 200 --train_path data/train.txt --total_path data/total.txt
+$ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt
+$ python embvec.py --emb_path embeddings/glove.840B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt
 ```
 
 - check max sentence length
@@ -146,7 +150,7 @@ test, max_sentence_length = 124
   - command
   ```
   $ python train.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --sentence_length 125 --batch_size 20 --epoch 70
-  $ rm -rf runs; tensorboard --logdir runs/summaries/
+  $ rm -rf runs; tensorboard --logdir runs/summaries/ --port 6007
   ```
   - accuracy and loss
   ![graph-2](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-2.png)

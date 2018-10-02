@@ -2,25 +2,64 @@
 - experiments 6
 ```
 
-* test 2
+* test 3
+no lower case conversion
 word embedding size : 100
 wrd_keep_prob : 0.5
-conv1d
+chr_conv_type : conv2d
 chracter embedding size : 30
 chracter embedding random init : -1.0 ~ 1.0
 filter_sizes : [3]
 num_filters : 30
 chr_keep_prob : 0.5
-#pos embedding size : 5
+pos embedding size : 5 -> 6
+pos embedding random init : -0.5 ~ 0.5
+pos_keep_prob : 0.5
+pos one-hot : 5
+chunk one-hot : 5
+shape vec : 9
+rnn_type : fused (LSTMBlockFusedCell)
+rnn_size : 200
+num_layers : 2
+rnn_keep_prob : 0.5
+learning_rate : 0.001 / 15000 / 0.6, exponential_decay()
+gradient clipping : 1
+epoch : 70
+batch_size : 20
++
+multi head attention(softmax with masking)
+mh_num_heads : 4
+mh_num_units : 32
+mh_dropout : 0.5
+normalize() instead of layer_norm()
++
+save model by f1(token)
++
+CRF
+
+
+* test 2
+no lower case conversion
+word embedding size : 100 -> 300 (Glove840B)
+wrd_keep_prob : 0.5
+chr_conv_type : conv1d
+chracter embedding size : 30 -> 100
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 30 -> 50
+chr_keep_prob : 0.5
+#pos embedding size : 5 -> 6
 #pos embedding random init : -0.5 ~ 0.5
 #pos_keep_prob : 0.5
 #pos one-hot : 5
 #chunk one-hot : 5
 #shape vec : 9
-rnn_size : 200
-num_layers : 2
-learning_rate : 0.001, exponential decay(15000, 0.6)
+rnn_type : fused (LSTMBlockFusedCell)
+rnn_size : 200 -> 100
+num_layers : 2 -> 1
 rnn_keep_prob : 0.5
+learning_rate : 0.001 / 15000 / 0.6, exponential_decay()
+no gradient clipping
 epoch : 70
 batch_size : 20
 +
@@ -33,11 +72,7 @@ batch_size : 20
 save model by f1(token)
 +
 CRF
-+ 
-early stopping : 10
 
-* check
-glove840B -> something weird
 
 * test 1
 word embedding size : 100 -> 300 (Glove840B)

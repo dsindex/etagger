@@ -16,7 +16,7 @@ import random
 import argparse
 
 def do_train(model, config, train_data, dev_data, test_data):
-    early_stopping = EarlyStopping(patience=10, verbose=1)
+    early_stopping = EarlyStopping(patience=10, measure='f1', verbose=1)
     maximum = 0
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     sess = tf.Session(config=session_conf)
@@ -46,7 +46,8 @@ def do_train(model, config, train_data, dev_data, test_data):
                            model.input_data_wordchr_ids: train_data.sentence_wordchr_ids[ptr:ptr + config.batch_size],
                            model.input_data_pos_ids: train_data.sentence_pos_ids[ptr:ptr + config.batch_size],
                            model.input_data_etcs: train_data.sentence_etcs[ptr:ptr + config.batch_size],
-                           model.output_data: train_data.sentence_tags[ptr:ptr + config.batch_size]}
+                           model.output_data: train_data.sentence_tags[ptr:ptr + config.batch_size],
+                           model.is_train: True}
                 step, train_summaries, _, train_loss, train_accuracy, learning_rate = \
                            sess.run([model.global_step, train_summary_op, model.train_op, \
                                      model.loss, model.accuracy, model.learning_rate], feed_dict=feed_dict)
@@ -58,7 +59,8 @@ def do_train(model, config, train_data, dev_data, test_data):
                        model.input_data_wordchr_ids: dev_data.sentence_wordchr_ids,
                        model.input_data_pos_ids: dev_data.sentence_pos_ids,
                        model.input_data_etcs: dev_data.sentence_etcs,
-                       model.output_data: dev_data.sentence_tags}
+                       model.output_data: dev_data.sentence_tags,
+                       model.is_train: False}
             step, dev_summaries, logits, logits_indices, trans_params, output_data_indices, sentence_lengths, dev_loss, dev_accuracy = \
                        sess.run([model.global_step, dev_summary_op, model.logits, model.logits_indices, \
                                  model.trans_params, model.output_data_indices, model.sentence_lengths, model.loss, model.accuracy], \
@@ -67,8 +69,10 @@ def do_train(model, config, train_data, dev_data, test_data):
             dev_summary_writer.add_summary(dev_summaries, step)
             print('dev precision, recall, f1(token): ')
             token_f1 = TokenEval.compute_f1(config.class_size, logits, dev_data.sentence_tags, sentence_lengths)
+            '''
             # early stopping
-            if early_stopping.validate(token_f1): break
+            if early_stopping.validate(token_f1, measure='f1'): break
+            '''
             '''
             if config.use_crf:
                 viterbi_sequences = viterbi_decode(logits, trans_params, sentence_lengths)
@@ -94,7 +98,8 @@ def do_train(model, config, train_data, dev_data, test_data):
                            model.input_data_wordchr_ids: test_data.sentence_wordchr_ids,
                            model.input_data_pos_ids: test_data.sentence_pos_ids,
                            model.input_data_etcs: test_data.sentence_etcs,
-                           model.output_data: test_data.sentence_tags}
+                           model.output_data: test_data.sentence_tags,
+                           model.is_train: False}
                 step, logits, logits_indices, trans_params, output_data_indices, sentence_lengths, test_loss, test_accuracy = \
                            sess.run([model.global_step, model.logits, model.logits_indices, \
                                      model.trans_params, model.output_data_indices, model.sentence_lengths, model.loss, model.accuracy], \

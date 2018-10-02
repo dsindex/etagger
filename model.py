@@ -11,9 +11,10 @@ class Model:
     __chr_keep_prob = 0.5          # keep probability for dropout(character embedding)
     __rnn_keep_prob = 0.5          # keep probability for dropout(rnn cell)
     __pos_keep_prob = 0.5          # keep probability for dropout(pos embedding)
-    __chr_conv_type = 'conv1d'     # conv1d | conv2d
+    __chr_conv_type = 'conv2d'     # conv1d | conv2d
     __filter_sizes = [3]           # filter sizes
     __num_filters = 30             # number of filters
+    __rnn_type = 'fused'           # normal | fused
     __rnn_size = 200               # size of RNN hidden unit
     __num_layers = 2               # number of RNN layers
     __mh_num_heads = 4             # number of head for multi head attention
@@ -32,9 +33,9 @@ class Model:
         self.pos_dim = config.pos_dim
         self.etc_dim = config.etc_dim
         self.class_size = config.class_size
-        self.is_train = config.is_train
         self.use_crf = config.use_crf
-        self.set_cuda_visible_devices(self.is_train)
+        self.is_train = tf.placeholder(tf.bool, name='is_train')
+        _ = tf.cond(self.is_train, lambda: self.set_cuda_visible_devices(True), lambda: self.set_cuda_visible_devices(False)) 
 
         """
         Input layer
@@ -45,27 +46,27 @@ class Model:
 
         # word embedding features
         self.input_data_word_ids = tf.placeholder(tf.int32, shape=[None, self.sentence_length], name='input_data_word_ids')
-        keep_prob = self.__wrd_keep_prob if self.is_train else 1.0
+        keep_prob = tf.cond(self.is_train, lambda: self.__wrd_keep_prob, lambda: 1.0)
         self.word_embeddings = self.__word_embedding(self.input_data_word_ids, keep_prob=keep_prob, scope='word-embedding')
 
         # character embedding features
         self.input_data_wordchr_ids = tf.placeholder(tf.int32, shape=[None, self.sentence_length, self.word_length], name='input_data_wordchr_ids')
-        keep_prob = self.__chr_keep_prob if self.is_train else 1.0
+        keep_prob = tf.cond(self.is_train, lambda: self.__chr_keep_prob, lambda: 1.0)
         if self.__chr_conv_type == 'conv1d':
-            self.wordchr_embeddings = self.__wordchr_embedding_conv1d(self.input_data_wordchr_ids, keep_prob=keep_prob, scope='wordchr-embedding')
+            self.wordchr_embeddings = self.__wordchr_embedding_conv1d(self.input_data_wordchr_ids, keep_prob=keep_prob, scope='wordchr-embedding-conv1d')
         else:
-            self.wordchr_embeddings = self.__wordchr_embedding_conv2d(self.input_data_wordchr_ids, keep_prob=keep_prob, scope='wordchr-embedding')
+            self.wordchr_embeddings = self.__wordchr_embedding_conv2d(self.input_data_wordchr_ids, keep_prob=keep_prob, scope='wordchr-embedding-conv2d')
 
         # pos embedding features
         self.input_data_pos_ids = tf.placeholder(tf.int32, shape=[None, self.sentence_length], name='input_data_pos_ids')
-        keep_prob = self.__pos_keep_prob if self.is_train else 1.0
+        keep_prob = tf.cond(self.is_train, lambda: self.__pos_keep_prob, lambda: 1.0)
         self.pos_embeddings = self.__pos_embedding(self.input_data_pos_ids, keep_prob=keep_prob, scope='pos-embedding')
 
         # etc features 
         self.input_data_etcs = tf.placeholder(tf.float32, shape=[None, self.sentence_length, self.etc_dim], name='input_data_etcs')
 
-        #self.input_data = tf.concat([self.word_embeddings, self.wordchr_embeddings, self.pos_embeddings, self.input_data_etcs], axis=-1, name='input_data') # (batch_size, sentence_length, unit_dim)
-        self.input_data = tf.concat([self.word_embeddings, self.wordchr_embeddings], axis=-1, name='input_data') # (batch_size, sentence_length, unit_dim)
+        self.input_data = tf.concat([self.word_embeddings, self.wordchr_embeddings, self.pos_embeddings, self.input_data_etcs], axis=-1, name='input_data') # (batch_size, sentence_length, unit_dim)
+        #self.input_data = tf.concat([self.word_embeddings, self.wordchr_embeddings], axis=-1, name='input_data') # (batch_size, sentence_length, unit_dim)
 
         """
         RNN layer
@@ -73,16 +74,20 @@ class Model:
         self.sentence_lengths = self.__compute_sentence_lengths(self.input_data_etcs)
         rnn_output = tf.identity(self.input_data)
         for i in range(self.__num_layers):
-            keep_prob = self.__rnn_keep_prob if self.is_train else 1.0
-            scope = 'bi-lstm-%s' % i
-            rnn_output = self.__bi_lstm(rnn_output, self.sentence_lengths, rnn_size=self.__rnn_size, keep_prob=keep_prob, scope=scope)
+            keep_prob = tf.cond(self.is_train, lambda: self.__rnn_keep_prob, lambda: 1.0)
+            if self.__rnn_type == 'fused':
+                scope = 'bi-lstm-fused-%s' % i
+                rnn_output = self.__bi_lstm_fused(rnn_output, self.sentence_lengths, rnn_size=self.__rnn_size, keep_prob=keep_prob, scope=scope)
+            else:
+                scope = 'bi-lstm-%s' % i
+                rnn_output = self.__bi_lstm(rnn_output, self.sentence_lengths, rnn_size=self.__rnn_size, keep_prob=keep_prob, scope=scope)
         self.rnn_output = rnn_output
 
         """
         Attention layer
         """
-        #self.attended_output = self.__self_attention(self.rnn_output, 2*self.__rnn_size, scope='self-attention')
-        self.attended_output = self.rnn_output
+        self.attended_output = self.__self_attention(self.rnn_output, 2*self.__rnn_size, scope='self-attention')
+        #self.attended_output = self.rnn_output
 
         """
         Projection layer
@@ -119,8 +124,11 @@ class Model:
                                                             staircase=True)
             optimizer = tf.train.AdamOptimizer(self.learning_rate)
             tvars = tf.trainable_variables()
-            grads, _ = tf.clip_by_global_norm(tf.gradients(self.loss, tvars), 10)
+            grads, _ = tf.clip_by_global_norm(tf.gradients(self.loss, tvars), 1)
             self.train_op = optimizer.apply_gradients(zip(grads, tvars), global_step=self.global_step)
+            '''
+            self.train_op = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss, global_step=self.global_step)
+            '''
 
     def __word_embedding(self, inputs, keep_prob=0.5, scope='word-embedding'):
         """Look up word embeddings
@@ -130,7 +138,7 @@ class Model:
                 word_embeddings = tf.nn.embedding_lookup(self.wrd_embeddings, inputs)   # (batch_size, sentence_length, wrd_dim)
             return tf.nn.dropout(word_embeddings, keep_prob)
 
-    def __wordchr_embedding_conv1d(self, inputs, keep_prob=0.5, scope='wordchr-embedding'):
+    def __wordchr_embedding_conv1d(self, inputs, keep_prob=0.5, scope='wordchr-embedding-conv1d'):
         """Compute character embeddings by masked conv1d and max-pooling
         """
         with tf.variable_scope(scope):
@@ -148,7 +156,7 @@ class Model:
             wordchr_embeddings = tf.reshape(wordchr_embeddings, [-1, self.sentence_length, filters])
             return tf.nn.dropout(wordchr_embeddings, keep_prob)
 
-    def __wordchr_embedding_conv2d(self, inputs, keep_prob=0.5, scope='wordchr-embedding'):
+    def __wordchr_embedding_conv2d(self, inputs, keep_prob=0.5, scope='wordchr-embedding-conv2d'):
         """Compute character embeddings by conv2d and max-pooling
         """
         with tf.variable_scope(scope):
@@ -180,7 +188,7 @@ class Model:
                     # max-pooling over the outputs
                     pooled = tf.nn.max_pool(
                         h,
-                        ksize=[1, self.word_length - self.__num_filters + 1, 1, 1],
+                        ksize=[1, self.word_length - filter_size + 1, 1, 1],
                         strides=[1, 1, 1, 1],
                         padding='VALID',
                         name='pool')
@@ -218,12 +226,27 @@ class Model:
             outputs = tf.concat([output_fw, output_bw], axis=-1)
             return tf.nn.dropout(outputs, keep_prob)
 
+    def __bi_lstm_fused(self, inputs, lengths, rnn_size, keep_prob=0.5, scope='bi-lstm-fused'):
+        """Apply bi-directional LSTM fused
+        """
+        with tf.variable_scope(scope):
+            t = tf.transpose(inputs, perm=[1, 0, 2])  # Need time-major
+            lstm_cell_fw = tf.contrib.rnn.LSTMBlockFusedCell(rnn_size)
+            lstm_cell_bw = tf.contrib.rnn.LSTMBlockFusedCell(rnn_size)
+            lstm_cell_bw = tf.contrib.rnn.TimeReversedFusedRNN(lstm_cell_bw)
+            output_fw, _ = lstm_cell_fw(t, dtype=tf.float32, sequence_length=lengths)
+            output_bw, _ = lstm_cell_bw(t, dtype=tf.float32, sequence_length=lengths)
+            outputs = tf.concat([output_fw, output_bw], axis=-1)
+            outputs = tf.transpose(outputs, perm=[1, 0, 2])
+            return tf.nn.dropout(outputs, keep_prob)
+
     def __self_attention(self, inputs, model_dim, scope='self-attention'):
         """Apply self attention
         """
         with tf.variable_scope(scope):
             queries = inputs
             keys = inputs
+            is_training = tf.cond(self.is_train, lambda: True, lambda: False)
             attended_queries = multihead_attention(queries,
                                                    keys,
                                                    num_units=self.__mh_num_units,
@@ -270,24 +293,24 @@ class Model:
         """Compute each sentence lengths
         """
         sentence_masks = self.__compute_sentence_masks(input_data_etcs)
-        return tf.cast(tf.reduce_sum(sentence_masks, reduction_indices=1), tf.int32)                       # (batch_size)
+        return tf.cast(tf.reduce_sum(sentence_masks, reduction_indices=1), tf.int32)           # (batch_size)
 
     def __compute_sentence_masks(self, input_data_etcs):
         """Compute each sentence masks
         """
-        sentence_masks = tf.sign(tf.reduce_max(tf.abs(input_data_etcs), reduction_indices=2))              # (batch_size, sentence_length, etc_dim) -> (batch_size, sentence_length)
+        sentence_masks = tf.sign(tf.reduce_max(tf.abs(input_data_etcs), reduction_indices=2))  # (batch_size, sentence_length, etc_dim) -> (batch_size, sentence_length)
         return sentence_masks
 
     def __compute_word_lengths(self, wordchr_embeddings_t):
         """Compute each word lengths
         """
         word_masks = self.__compute_word_masks(wordchr_embeddings_t)
-        return tf.cast(tf.reduce_sum(word_masks, reduction_indices=1), tf.int32)                           # (batch_size*sentence_length)
+        return tf.cast(tf.reduce_sum(word_masks, reduction_indices=1), tf.int32)               # (batch_size*sentence_length)
 
     def __compute_word_masks(self, wordchr_embeddings_t):
         """Compute each word masks 
         """
-        word_masks = tf.sign(tf.reduce_max(tf.abs(wordchr_embeddings_t), reduction_indices=2))             # (batch_size*sentence_length, word_length, chr_dim) -> (batch_size*sentence_length, word_length)
+        word_masks = tf.sign(tf.reduce_max(tf.abs(wordchr_embeddings_t), reduction_indices=2)) # (batch_size*sentence_length, word_length, chr_dim) -> (batch_size*sentence_length, word_length)
         return word_masks
 
     @staticmethod
@@ -297,3 +320,4 @@ class Model:
         if is_train:
             from tensorflow.python.client import device_lib
             print(device_lib.list_local_devices())
+        return True

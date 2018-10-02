@@ -15,7 +15,7 @@ class Config:
         self.embvec = pkl.load(open(self.emb_path, 'rb'))
         self.wrd_dim = args.wrd_dim
         self.chr_dim = 30
-        self.pos_dim = 5
+        self.pos_dim = 6
         # basic features + gazetteer feature
         '''
         self.etc_dim = ETC_DIM + len(self.embvec.tag_vocab)
