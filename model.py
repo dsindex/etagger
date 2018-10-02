@@ -14,7 +14,7 @@ class Model:
     __chr_conv_type = 'conv2d'     # conv1d | conv2d
     __filter_sizes = [3]           # filter sizes
     __num_filters = 30             # number of filters
-    __rnn_type = 'fused'           # normal | fused
+    __rnn_type = 'normal'          # normal | fused
     __rnn_size = 200               # size of RNN hidden unit
     __num_layers = 2               # number of RNN layers
     __mh_num_heads = 4             # number of head for multi head attention
@@ -66,7 +66,6 @@ class Model:
         self.input_data_etcs = tf.placeholder(tf.float32, shape=[None, self.sentence_length, self.etc_dim], name='input_data_etcs')
 
         self.input_data = tf.concat([self.word_embeddings, self.wordchr_embeddings, self.pos_embeddings, self.input_data_etcs], axis=-1, name='input_data') # (batch_size, sentence_length, unit_dim)
-        #self.input_data = tf.concat([self.word_embeddings, self.wordchr_embeddings], axis=-1, name='input_data') # (batch_size, sentence_length, unit_dim)
 
         """
         RNN layer
@@ -87,7 +86,6 @@ class Model:
         Attention layer
         """
         self.attended_output = self.__self_attention(self.rnn_output, 2*self.__rnn_size, scope='self-attention')
-        #self.attended_output = self.rnn_output
 
         """
         Projection layer
@@ -124,7 +122,7 @@ class Model:
                                                             staircase=True)
             optimizer = tf.train.AdamOptimizer(self.learning_rate)
             tvars = tf.trainable_variables()
-            grads, _ = tf.clip_by_global_norm(tf.gradients(self.loss, tvars), 1)
+            grads, _ = tf.clip_by_global_norm(tf.gradients(self.loss, tvars), 10)
             self.train_op = optimizer.apply_gradients(zip(grads, tvars), global_step=self.global_step)
             '''
             self.train_op = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss, global_step=self.global_step)
