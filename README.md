@@ -83,7 +83,7 @@ etagger
         - tested
         - Glove840B.300
         - F1 : 0.905 ~ 0.907 (chars_conv_lstm_crf)
-          - reported F1 : 0.9121
+          - reported F1 : 0.9118
     - SOTA
       - [Semi-Supervised Sequence Modeling with Cross-View Training](https://arxiv.org/pdf/1809.08370.pdf)
         - reported F1 : 0.926
