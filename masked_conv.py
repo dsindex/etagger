@@ -52,7 +52,7 @@ def masked_conv1d_and_max(t, weights, filters, kernel_size, activation=tf.nn.rel
     t_conv *= weights
 
     # Reduce max -- set to zero if all padded
-    t_conv += (1. - weights) * tf.reduce_min(t_conv, axis=-2, keep_dims=True)  # (dim1, dim2, filters) + (dim1, 1, filters)
+    t_conv += (1. - weights) * tf.reduce_min(t_conv, axis=-2, keepdims=True)  # (dim1, dim2, filters) + (dim1, 1, filters)
     t_max = tf.reduce_max(t_conv, axis=-2)  # (dim1, 1, filters)
 
     # Reshape the output

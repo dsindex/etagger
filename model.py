@@ -11,7 +11,7 @@ class Model:
     __chr_keep_prob = 0.5          # keep probability for dropout(character embedding)
     __rnn_keep_prob = 0.5          # keep probability for dropout(rnn cell)
     __pos_keep_prob = 0.5          # keep probability for dropout(pos embedding)
-    __chr_conv_type = 'conv2d'     # conv1d | conv2d
+    __chr_conv_type = 'conv1d'     # conv1d | conv2d
     __filter_sizes = [3]           # filter sizes
     __num_filters = 30             # number of filters
     __rnn_type = 'fused'           # normal | fused

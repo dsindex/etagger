@@ -177,6 +177,8 @@ test, max_sentence_length = 124
   ```
   - after replacing layer_norm() to normalize() and applying the dropout of word embeddings
   ![graph-4](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-4.png)
+  - train, dev accuracy after applying LSTMBlockFusedCell
+  ![graph-5](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-5.png)
 
 - inference(bulk)
 ```
