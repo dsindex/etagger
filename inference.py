@@ -99,10 +99,8 @@ def inference_bucket(config):
             sys.stdout.write('\n')
             bucket = []
             duration_time = time.time() - start_time
-            
             out = 'duration_time : ' + str(duration_time) + ' sec'
             sys.stderr.write(out + '\n')
-            
         if line : bucket.append(line)
     if len(bucket) != 0:
         start_time = time.time()
@@ -128,10 +126,8 @@ def inference_bucket(config):
             sys.stdout.write(out + '\n')
         sys.stdout.write('\n')
         duration_time = time.time() - start_time
-        '''
         out = 'duration_time : ' + str(duration_time) + ' sec'
         sys.stderr.write(out + '\n')
-        '''
 
     sess.close()
 

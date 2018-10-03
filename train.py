@@ -69,10 +69,8 @@ def do_train(model, config, train_data, dev_data, test_data):
             dev_summary_writer.add_summary(dev_summaries, step)
             print('dev precision, recall, f1(token): ')
             token_f1 = TokenEval.compute_f1(config.class_size, logits, dev_data.sentence_tags, sentence_lengths)
-            '''
             # early stopping
             if early_stopping.validate(token_f1, measure='f1'): break
-            '''
             '''
             if config.use_crf:
                 viterbi_sequences = viterbi_decode(logits, trans_params, sentence_lengths)

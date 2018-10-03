@@ -37,6 +37,7 @@ CRF
 
 token : 0.9128493670111919
 chunk : 0.9066360748323333
+training time : 1 hour
 
 * test 5
 word embedding size : 100
@@ -142,6 +143,9 @@ save model by f1(token)
 +
 CRF
 
+token : 0.9098120576031243
+chunk : 0.905320744727786
+training time : 3.5 hours
 
 * test 2
 word embedding size : 100
