@@ -2,6 +2,42 @@
 - experiments 6
 ```
 
+* test 7
+word embedding size : 100 -> 300(glove840B)
+wrd_keep_prob : 0.5
+chr_conv_type : conv1d
+chracter embedding size : 30
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 30
+chr_keep_prob : 0.5
+pos embedding size : 6
+pos embedding random init : -0.5 ~ 0.5
+pos_keep_prob : 0.5
+pos one-hot : 5
+shape vec : 9
+rnn_type : fused
+rnn_size : 200
+num_layers : 2
+rnn_keep_prob : 0.5
+learning_rate : 0.001 / 15000 / 1.0, exponential_decay() => fixed 0.001
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+multi head attention(softmax with masking)
+mh_num_heads : 4
+mh_num_units : 32
+mh_dropout : 0.5
+normalize() instead of layer_norm()
++
+save model by f1(token)
++
+CRF
+
+token : 0.9157317073170732 -> best
+chunk : 0.9102156238953694 -> best
+
 * test 6
 word embedding size : 100
 wrd_keep_prob : 0.5
@@ -11,12 +47,12 @@ chracter embedding random init : -1.0 ~ 1.0
 filter_sizes : [3]
 num_filters : 30
 chr_keep_prob : 0.5
-pos embedding size : 5 -> 6
+pos embedding size : 6
 pos embedding random init : -0.5 ~ 0.5
 pos_keep_prob : 0.5
 pos one-hot : 5
 shape vec : 9
-rnn_type : normal -> fused
+rnn_type : fused
 rnn_size : 200
 num_layers : 2
 rnn_keep_prob : 0.5
@@ -37,7 +73,6 @@ CRF
 
 token : 0.9128493670111919
 chunk : 0.9066360748323333
-training time : 1 hour
 
 * test 5
 word embedding size : 100
@@ -53,7 +88,7 @@ pos embedding random init : -0.5 ~ 0.5
 pos_keep_prob : 0.5
 pos one-hot : 5
 shape vec : 9
-rnn_type : normal -> fused
+rnn_type : fused
 rnn_size : 200
 num_layers : 2
 rnn_keep_prob : 0.5
@@ -74,7 +109,6 @@ CRF
 
 token : 0.9087149546919662
 chunk : 0.9053483462350458
-training time : 1 hour
 
 * test 4
 word embedding size : 100
@@ -109,6 +143,8 @@ save model by f1(token)
 +
 CRF
 
+token : 0.9075067024128687
+chunk : 0.9050426823902139
 
 * test 3
 word embedding size : 100
@@ -145,7 +181,6 @@ CRF
 
 token : 0.9098120576031243
 chunk : 0.905320744727786
-training time : 3.5 hours
 
 * test 2
 word embedding size : 100
@@ -180,9 +215,8 @@ save model by f1(token)
 +
 CRF
 
-token : 0.9138489758483644 -> best
-chunk : 0.9082082965578112 -> best
-training time : 3.5 hours
+token : 0.9138489758483644
+chunk : 0.9082082965578112
 
 * test 1
 word embedding size : 100 -> 300 (Glove840B)

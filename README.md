@@ -44,8 +44,8 @@ etagger
     - [x] extend language specific features
       - initialCaps, allCaps, lowercase, mixedCaps, no-info, ...
     - [x] bidirectional lstm
-      - tf.nn.bidirectional_dynamic_rnn()
-      - tf.contrib.rnn.LSTMBlockFusedCell()
+      - tf.contrib.rnn.LSTMCell() with tf.nn.bidirectional_dynamic_rnn()
+      - tf.contrib.rnn.LSTMBlockFusedCell() with tf.contrib.rnn.TimeReversedFusedRNN()
     - [x] multi-head self-attention
       - softmax with query, key masking
     - [x] CRF
@@ -65,9 +65,9 @@ etagger
 - evaluation
   - [experiments](https://github.com/dsindex/etagger/blob/master/README_DEV.md)
   - fscore
-    - experiments 6, test 2
-      - 70 epoch, per-token(partial) micro f1 : 0.9138489758483644
-      - 70 epoch, per-chunk(exact)   micro f1 : **0.9082082965578112**
+    - experiments 6, test 7
+      - 70 epoch, per-token(partial) micro f1 : 0.9157317073170732
+      - 70 epoch, per-chunk(exact)   micro f1 : **0.9102156238953694**
   - comparision to previous research
     - implementations
       - [Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
@@ -157,6 +157,8 @@ test, max_sentence_length = 124
   - command
   ```
   $ python train.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --sentence_length 125 --batch_size 20 --epoch 70
+  or
+  $ python train.py --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --batch_size 20 --epoch 70
   $ rm -rf runs; tensorboard --logdir runs/summaries/ --port 6007
   ```
   - accuracy and loss
@@ -177,9 +179,16 @@ test, max_sentence_length = 124
   ```
   - after replacing layer_norm() to normalize() and applying the dropout of word embeddings
   ![graph-4](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-4.png)
-  - train, dev accuracy after applying LSTMBlockFusedCell
+  - train, dev accuracy after applying LSTMBlockFusedCell which is 2~3 times faster than LSTMCell
   ![graph-5](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-5.png)
-
+  - tips for training speed up
+    - filter out words(which are not in train/dev/test data) from word embeddings. but not for service.
+    - use LSTMBlockFusedCell for bidirectional LSTM. this is 2~3 times faster than LSTMCell.
+    - use early stopping
+  - etc tips
+    - save best model by using token-based f1. token-based f1 is slightly better than chunk-based f1
+    - be careful for word lowercase when you are using glove6B embeddings. those are all lowercased.
+    
 - inference(bulk)
 ```
 $ python inference.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --sentence_length 125 --restore checkpoint/model_max.ckpt
@@ -188,6 +197,8 @@ $ python inference.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 
 - inference(bucket)
 ```
 $ python inference.py --mode bucket --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --sentence_length 125 --restore checkpoint/model_max.ckpt < data/test.txt > pred.txt
+or
+$ python inference.py --mode bucket --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --restore checkpoint/model_max.ckpt < data/test.txt > pred.txt
 $ python token_eval.py < pred.txt
 $ python chunk_eval.py < pred.txt
 ```
