@@ -31,7 +31,7 @@ etagger
     - [x] extend 5 tag(class) to 9 (automatically)
       - out of tag(class) 'O' and its id '0' are fixed
     - [x] word embedding(glove)
-      - Glove6B, Glove840B
+      - Glove6B(lowercase), Glove840B(no lowercase)
     - [x] character embedding
       - conv2d, conv1d(masked)
     - [x] gazetteer features
@@ -140,7 +140,7 @@ $ python embvec.py --emb_path embeddings/glove.6B.50d.txt --wrd_dim 50 --train_p
 $ python embvec.py --emb_path embeddings/glove.6B.100d.txt --wrd_dim 100 --train_path data/train.txt --total_path data/total.txt
 $ python embvec.py --emb_path embeddings/glove.6B.200d.txt --wrd_dim 200 --train_path data/train.txt --total_path data/total.txt
 $ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt
-$ python embvec.py --emb_path embeddings/glove.840B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt
+$ python embvec.py --emb_path embeddings/glove.840B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --lowercase 0
 ```
 
 - check max sentence length

@@ -162,10 +162,12 @@ class Model:
                 chr_embeddings = tf.Variable(tf.random_uniform([self.chr_vocab_size, self.chr_dim], -1.0, 1.0), name='chr_embeddings')
                 wordchr_embeddings_t = tf.nn.embedding_lookup(chr_embeddings, inputs)                           # (batch_size, sentence_length, word_length, chr_dim)
             wordchr_embeddings_t = tf.reshape(wordchr_embeddings_t, [-1, self.word_length, self.chr_dim])       # (batch_size*sentence_length, word_length, chr_dim)
+            '''
             # masking
             word_masks = self.__compute_word_masks(wordchr_embeddings_t)
             word_masks = tf.expand_dims(word_masks, -1)                     # (batch_size*sentence_length, word_length, 1)
             wordchr_embeddings_t *= word_masks # broadcasting
+            '''
             # conv and max-pooling
             wordchr_embeddings = tf.expand_dims(wordchr_embeddings_t, -1)   # (batch_size*sentence_length, word_length, chr_dim, 1)
             pooled_outputs = []
@@ -251,7 +253,7 @@ class Model:
                                                    num_heads=self.__mh_num_heads,
                                                    model_dim=model_dim,
                                                    dropout_rate=self.__mh_dropout,
-                                                   is_training=self.is_train,
+                                                   is_training=is_training,
                                                    causality=False, # no future masking
                                                    scope='multihead-attention',
                                                    reuse=None)

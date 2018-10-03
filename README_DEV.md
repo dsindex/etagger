@@ -2,11 +2,7 @@
 - experiments 6
 ```
 
-* less dropout
-  code refactoring
-
 * test 2
-no lower case conversion
 word embedding size : 100
 wrd_keep_prob : 0.5
 chr_conv_type : conv2d
@@ -24,7 +20,7 @@ rnn_type : normal
 rnn_size : 200
 num_layers : 2
 rnn_keep_prob : 0.5
-learning_rate : 0.001 / 15000 / 0.1, exponential_decay()
+learning_rate : 0.001 / 15000 / 1.0, exponential_decay() => fixed 0.001
 gradient clipping : 10
 epoch : 70
 batch_size : 20
@@ -88,7 +84,6 @@ pos embedding size : 5
 pos embedding random init : -0.5 ~ 0.5
 pos_keep_prob : 0.5
 pos one-hot : 5
-#chunk one-hot : 5
 shape vec : 9
 rnn_size : 200
 num_layers : 2 -> 1
@@ -122,7 +117,6 @@ pos embedding size : 5
 pos embedding random init : -0.5 ~ 0.5
 pos_keep_prob : 0.5
 pos one-hot : 5
-#chunk one-hot : 5
 shape vec : 9
 rnn_size : 200
 num_layers : 2 -> use multiple bidirectional_dynamic_rnn() -> 2 times slower than tf.contrib.rnn.MultiRNNCell() with tf.contrib.rnn.static_bidirectional_rnn()

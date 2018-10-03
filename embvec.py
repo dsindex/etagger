@@ -9,6 +9,7 @@ class EmbVec:
     def __init__(self, args):
         self.pad = '#PAD#'
         self.unk = '#UNK#'
+        self.lowercase = args.lowercase
         self.wrd_vocab = {}      # word vocab
         self.pad_wid = 0         # for padding word embedding
         self.unk_wid = 1         # for unknown word
@@ -47,15 +48,16 @@ class EmbVec:
             word = tokens[0]
             pos  = tokens[1]
             tag  = tokens[3]
-            # word vocab
-            if word not in self.wrd_vocab:
-                self.wrd_vocab[word] = wid
-                wid += 1
             # character vocab
             for ch in word:
                 if ch not in self.chr_vocab:
                     self.chr_vocab[ch] = cid
                     cid += 1
+            # word vocab
+            if self.lowercase: word = word.lower()
+            if word not in self.wrd_vocab:
+                self.wrd_vocab[word] = wid
+                wid += 1
             # pos vocab
             if pos not in self.pos_vocab:
                 self.pos_vocab[pos] = pid
@@ -83,6 +85,7 @@ class EmbVec:
             try: vector = np.array([float(val) for val in tokens[1:]])
             except: continue
             if len(vector) != self.wrd_dim: continue
+            if self.lowercase: word = word.lower()
             # FIXME for fast training. when it comes to service, comment out
             if word not in self.wrd_vocab: continue
             wid = self.wrd_vocab[word]
@@ -90,7 +93,7 @@ class EmbVec:
 
         # build gazetteer vocab
         bucket = []
-        for line in open(args.train_path):
+        for line in open(args.train_path): # train data only
             if line in ['\n', '\r\n']:
                 bucket_size = len(bucket)
                 for i in range(bucket_size):
@@ -116,6 +119,7 @@ class EmbVec:
                 bucket.append(tokens)
         
     def get_wid(self, word):
+        if self.lowercase: word = word.lower()
         if word in self.wrd_vocab:
             return self.wrd_vocab[word]
         return self.unk_wid
@@ -188,6 +192,7 @@ if __name__ == '__main__':
     parser.add_argument('--wrd_dim', type=int, help='embedding vector dimension', required=True)
     parser.add_argument('--train_path', type=str, help='path to a train file', required=True)
     parser.add_argument('--total_path', type=str, help='path to a train+dev+test file', required=True)
+    parser.add_argument('--lowercase', type=int, help='apply lower case for word embedding', default=1)
     args = parser.parse_args()
     embvec = EmbVec(args)
     pkl.dump(embvec, open(args.emb_path + '.pkl', 'wb'))
