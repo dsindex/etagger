@@ -14,7 +14,7 @@ class Model:
     __chr_conv_type = 'conv2d'     # conv1d | conv2d
     __filter_sizes = [3]           # filter sizes
     __num_filters = 30             # number of filters
-    __rnn_type = 'normal'          # normal | fused
+    __rnn_type = 'fused'           # normal | fused
     __rnn_size = 200               # size of RNN hidden unit
     __num_layers = 2               # number of RNN layers
     __mh_num_heads = 4             # number of head for multi head attention

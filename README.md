@@ -38,7 +38,6 @@ etagger
       - if we construct the gazetteer vocab from the training data, the performance is decreasing.
       - recommend constructing the gazetteer vocab from other sources.
     - [x] learning-rate decay
-      - simply, 0.001 -> 0.0001 at 20 epoch
       - using tf.train.exponential_decay()
     - [x] pos embedding
       - pos one-hot vector + pos embedding
@@ -66,8 +65,9 @@ etagger
 - evaluation
   - [experiments](https://github.com/dsindex/etagger/blob/master/README_DEV.md)
   - fscore
-    - 70 epoch, per-token(partial) micro f1 : 0.91112196313
-    - 70 epoch, per-chunk(exact)   micro f1 : **0.90743845407**
+    - experiments 6, test 2
+      - 70 epoch, per-token(partial) micro f1 : 0.9138489758483644
+      - 70 epoch, per-chunk(exact)   micro f1 : **0.9082082965578112**
   - comparision to previous research
     - implementations
       - [Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
