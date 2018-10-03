@@ -66,8 +66,8 @@ etagger
   - [experiments](https://github.com/dsindex/etagger/blob/master/README_DEV.md)
   - fscore
     - experiments 6, test 7
-      - 70 epoch, per-token(partial) micro f1 : 0.9157317073170732
-      - 70 epoch, per-chunk(exact)   micro f1 : **0.9102156238953694**
+      - per-token(partial) micro f1 : 0.9157317073170732
+      - per-chunk(exact)   micro f1 : **0.9102156238953694**
   - comparision to previous research
     - implementations
       - [Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
@@ -77,8 +77,7 @@ etagger
       - [sequence_tagging](https://github.com/guillaumegenthial/sequence_tagging)
         - tested
         - Glove6B.100
-        - 15 epoch, per-chunk(exact) miscro F1: 0.8998
-          - early stopping 3 epochs without improvement
+        - per-chunk(exact) miscro F1: 0.8998
       - [tf_ner](https://github.com/guillaumegenthial/tf_ner)
         - tested
         - Glove840B.300
