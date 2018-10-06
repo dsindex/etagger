@@ -1,4 +1,42 @@
 
+- experiments 7
+```
+* test 1
+word embedding size : 300(glove840B)
+keep_prob : 0.5
+chr_conv_type : conv1d
+chracter embedding size : 100
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 50
+pos embedding size : 6
+pos embedding random init : -0.5 ~ 0.5
+pos one-hot : 5
+shape vec : 9
+apply etc features dropout
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.7
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+mh_used : True
+mh_num_layers : 1
+mh_num_heads : 4
+mh_num_units : 32
+mh_keep_prob : 0.5
+apply feedforward net
++
+save model by f1(token)
++
+CRF
+
+
+```
+
 - experiments 6
 ```
 * test 13 ( == test 7)
@@ -549,7 +587,6 @@ pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 30
 chracter embedding random init : -1.0 ~ 1.0
 pos one-hot : 5
-#chunk one-hot : 5
 shape vec : 9
 filter_size : 3
 num_filters : 30
@@ -583,7 +620,6 @@ pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 30
 chracter embedding random init : -1.0 ~ 1.0
 pos one-hot : 5
-#chunk one-hot : 5
 shape vec : 9
 filter_size : 3
 num_filters : 30
@@ -611,7 +647,6 @@ pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 30
 chracter embedding random init : -1.0 ~ 1.0
 pos one-hot : 5
-#chunk one-hot : 5
 shape vec : 9
 filter_size : 3
 num_filters : 30
@@ -645,7 +680,6 @@ pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 30
 chracter embedding random init : -1.0 ~ 1.0
 pos one-hot : 5
-#chunk one-hot : 5
 shape vec : 9
 filter_size : 3
 num_filters : 30
@@ -679,7 +713,6 @@ pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 30
 chracter embedding random init : -1.0 ~ 1.0
 pos one-hot : 5
-#chunk one-hot : 5
 shape vec : 9
 filter_size : 3
 num_filters : 30
@@ -713,7 +746,6 @@ pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 30
 chracter embedding random init : -1.0 ~ 1.0
 pos one-hot : 5
-#chunk one-hot : 5
 shape vec : 9
 filter_size : 3
 num_filters : 30
@@ -749,7 +781,6 @@ pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 30
 chracter embedding random init : -1.0 ~ 1.0
 pos one-hot : 5
-#chunk one-hot : 5
 shape vec : 9
 filter_size : 3
 num_filters : 30
@@ -781,7 +812,6 @@ pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 30
 chracter embedding random init : -1.0 ~ 1.0
 pos one-hot : 5
-#chunk one-hot : 5
 shape vec : 9  -> 9 (disjoint upperInitial and mixedCaps), fixed after this setting
 filter_size : 3
 num_filters : 30
@@ -811,7 +841,6 @@ pos embedding random init : -0.5 ~ 0.5
 chracter embedding size : 30
 chracter embedding random init : -1.0 ~ 1.0
 pos one-hot : 5
-#chunk one-hot : 5
 shape vec : 9
 filter_size : 3
 num_filters : 30
@@ -841,7 +870,6 @@ word embedding size : 100
 chracter embedding size : 30
 chracter embedding random init : -1.0 ~ 1.0
 pos one-hot : 5
-#chunk one-hot : 5
 shape vec : 9
 filter_size : 3
 num_filters : 30
@@ -871,7 +899,6 @@ word embedding size : 100
 #chracter embedding size : 30
 #chracter embedding random init : -1.0 ~ 1.0
 pos one-hot : 5
-#chunk one-hot : 5
 shape vec : 9
 #filter_size : 3
 #num_filters : 30
@@ -901,7 +928,6 @@ word embedding size : 100
 chracter embedding size : 30
 chracter embedding random init : -1.0 ~ 1.0
 #pos one-hot : 5
-#chunk one-hot : 5
 shape vec : 5 -> 9
 filter_size : 3
 num_filters : 30

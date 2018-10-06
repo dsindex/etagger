@@ -4,40 +4,11 @@
 from __future__ import print_function
 import tensorflow as tf
 
-def normalize(inputs, 
-              epsilon = 1e-8,
-              scope="ln",
-              reuse=None):
-    """Applies layer normalization.
-    
-    Args:
-      inputs: A tensor with 2 or more dimensions, where the first dimension has
-        `batch_size`.
-      epsilon: A floating number. A very small number for preventing ZeroDivision Error.
-      scope: Optional scope for `variable_scope`.
-      reuse: Boolean, whether to reuse the weights of a previous layer
-        by the same name.
-      
-    Returns:
-      A tensor with the same shape and data dtype as `inputs`.
-    """
-    with tf.variable_scope(scope, reuse=reuse):
-        inputs_shape = inputs.get_shape()
-        params_shape = inputs_shape[-1:]
-    
-        mean, variance = tf.nn.moments(inputs, [-1], keep_dims=True)
-        beta= tf.Variable(tf.zeros(params_shape))
-        gamma = tf.Variable(tf.ones(params_shape))
-        normalized = (inputs - mean) / ( (variance + epsilon) ** (.5) )
-        outputs = gamma * normalized + beta
-        
-    return outputs
-
 def multihead_attention(queries, 
                         keys, 
                         num_units=32, 
-                        num_heads=8,
-                        model_dim=512,
+                        num_heads=4,
+                        model_dim=400,
                         dropout_rate=0,
                         is_training=True,
                         causality=False,
@@ -64,7 +35,7 @@ def multihead_attention(queries,
     with tf.variable_scope(scope, reuse=reuse):
         # Set the fall back option for num_units
         if num_units is None:
-            num_units = queries.get_shape().as_list[-1]
+            num_units = queries.get_shape().as_list()[-1]
         
         # Linear projections
         Q = tf.layers.dense(queries, num_units, activation=tf.nn.relu) # (N, T_q, C)
@@ -120,6 +91,111 @@ def multihead_attention(queries,
         # Linear projection
         outputs = tf.layers.dense(outputs, model_dim, activation=tf.nn.relu) # (N, T_q, M)
               
+    return outputs
+
+def feedforward(inputs, 
+                num_units=[1600, 400],
+                scope="feed-forward", 
+                reuse=None):
+    '''Point-wise feed forward net.
+    
+    Args:
+      inputs: A 3d tensor with shape of [N, T, C].
+      num_units: A list of two integers.
+      scope: Optional scope for `variable_scope`.
+      reuse: Boolean, whether to reuse the weights of a previous layer
+        by the same name.
+        
+    Returns:
+      A 3d tensor with the same shape and dtype as inputs
+    '''
+    with tf.variable_scope(scope, reuse=reuse):
+        # Inner layer
+        params = {"inputs": inputs, "filters": num_units[0], "kernel_size": 1,
+                  "activation": tf.nn.relu, "use_bias": True}
+        outputs = tf.layers.conv1d(**params)
+        
+        # Readout layer
+        params = {"inputs": outputs, "filters": num_units[1], "kernel_size": 1,
+                  "activation": None, "use_bias": True}
+        outputs = tf.layers.conv1d(**params)
+    
+    return outputs
+
+def positional_encoding(inputs,
+                        num_units,
+                        zero_pad=True,
+                        scale=True,
+                        scope="positional_encoding",
+                        reuse=None):
+    '''Sinusoidal Positional_Encoding.
+
+    Args:
+      inputs: A 2d Tensor with shape of (N, T).
+      num_units: Output dimensionality
+      zero_pad: Boolean. If True, all the values of the first row (id = 0) should be constant zero
+      scale: Boolean. If True, the output will be multiplied by sqrt num_units(check details from paper)
+      scope: Optional scope for `variable_scope`.
+      reuse: Boolean, whether to reuse the weights of a previous layer
+        by the same name.
+
+    Returns:
+        A 'Tensor' with one more rank than inputs's, with the dimensionality should be 'num_units'
+    '''
+
+    N, T = inputs.get_shape().as_list()
+    with tf.variable_scope(scope, reuse=reuse):
+        position_ind = tf.tile(tf.expand_dims(tf.range(T), 0), [N, 1])
+
+        # First part of the PE function: sin and cos argument
+        position_enc = np.array([
+            [pos / np.power(10000, 2.*i/num_units) for i in range(num_units)]
+            for pos in range(T)])
+
+        # Second part, apply the cosine to even columns and sin to odds.
+        position_enc[:, 0::2] = np.sin(position_enc[:, 0::2])  # dim 2i
+        position_enc[:, 1::2] = np.cos(position_enc[:, 1::2])  # dim 2i+1
+
+        # Convert to a tensor
+        lookup_table = tf.convert_to_tensor(position_enc)
+
+        if zero_pad:
+            lookup_table = tf.concat((tf.zeros(shape=[1, num_units]),
+                                      lookup_table[1:, :]), 0)
+        outputs = tf.nn.embedding_lookup(lookup_table, position_ind)
+
+        if scale:
+            outputs = outputs * num_units**0.5
+
+        return outputs
+
+def normalize(inputs, 
+              epsilon = 1e-8,
+              scope="layer-norm",
+              reuse=None):
+    """Applies layer normalization.
+    
+    Args:
+      inputs: A tensor with 2 or more dimensions, where the first dimension has
+        `batch_size`.
+      epsilon: A floating number. A very small number for preventing ZeroDivision Error.
+      scope: Optional scope for `variable_scope`.
+      reuse: Boolean, whether to reuse the weights of a previous layer
+        by the same name.
+      
+    Returns:
+      A tensor with the same shape and data dtype as `inputs`.
+    """
+    with tf.variable_scope(scope, reuse=reuse):
+        inputs_shape = inputs.get_shape()
+        params_shape = inputs_shape[-1:]
+    
+        mean, variance = tf.nn.moments(inputs, [-1], keep_dims=True)
+        beta= tf.Variable(tf.zeros(params_shape))
+        gamma = tf.Variable(tf.ones(params_shape))
+        normalized = (inputs - mean) / ( (variance + epsilon) ** (.5) )
+        outputs = gamma * normalized + beta
+        
     return outputs
 
 

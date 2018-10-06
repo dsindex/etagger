@@ -2,24 +2,24 @@ from __future__ import print_function
 import tensorflow as tf
 import numpy as np
 from embvec import EmbVec
-from attention import multihead_attention, normalize
+from attention import multihead_attention, feedforward, positional_encoding, normalize
 from masked_conv import masked_conv1d_and_max
 
 class Model:
 
-    __wrd_keep_prob = 0.5          # keep probability for dropout(word embedding)
-    __chr_keep_prob = 0.5          # keep probability for dropout(character embedding)
-    __rnn_keep_prob = 0.5          # keep probability for dropout(rnn cell)
-    __pos_keep_prob = 0.5          # keep probability for dropout(pos embedding)
+    __keep_prob = 0.5              # keep probability for dropout
     __chr_conv_type = 'conv1d'     # conv1d | conv2d
     __filter_sizes = [3]           # filter sizes
     __num_filters = 50             # number of filters
+    __rnn_used = True              # use rnn layer or not
     __rnn_type = 'fused'           # normal | fused
     __rnn_size = 200               # size of RNN hidden unit
-    __num_layers = 2               # number of RNN layers
+    __rnn_num_layers = 2           # number of RNN layers
+    __mh_used = True               # use multi head attention layer or not
+    __mh_num_layers = 1            # number of layers for multi head attention
     __mh_num_heads = 4             # number of head for multi head attention
     __mh_num_units = 32            # Q,K,V dimension for multi head attention
-    __mh_dropout = 0.5             # dropout probability for multi head attention
+    __mh_keep_prob = 0.5           # keep probability for multi head attention
 
     def __init__(self, config):
         self.embvec = config.embvec
@@ -44,14 +44,14 @@ class Model:
         self.wrd_embeddings_init = tf.placeholder(tf.float32, shape=[self.wrd_vocab_size, self.wrd_dim])
         self.wrd_embeddings = tf.Variable(self.wrd_embeddings_init, name='wrd_embeddings', trainable=False)
 
+        keep_prob = tf.cond(self.is_train, lambda: self.__keep_prob, lambda: 1.0)
+
         # word embedding features
         self.input_data_word_ids = tf.placeholder(tf.int32, shape=[None, self.sentence_length], name='input_data_word_ids')
-        keep_prob = tf.cond(self.is_train, lambda: self.__wrd_keep_prob, lambda: 1.0)
         self.word_embeddings = self.__word_embedding(self.input_data_word_ids, keep_prob=keep_prob, scope='word-embedding')
 
         # character embedding features
         self.input_data_wordchr_ids = tf.placeholder(tf.int32, shape=[None, self.sentence_length, self.word_length], name='input_data_wordchr_ids')
-        keep_prob = tf.cond(self.is_train, lambda: self.__chr_keep_prob, lambda: 1.0)
         if self.__chr_conv_type == 'conv1d':
             self.wordchr_embeddings = self.__wordchr_embedding_conv1d(self.input_data_wordchr_ids, keep_prob=keep_prob, scope='wordchr-embedding-conv1d')
         else:
@@ -59,50 +59,58 @@ class Model:
 
         # pos embedding features
         self.input_data_pos_ids = tf.placeholder(tf.int32, shape=[None, self.sentence_length], name='input_data_pos_ids')
-        keep_prob = tf.cond(self.is_train, lambda: self.__pos_keep_prob, lambda: 1.0)
         self.pos_embeddings = self.__pos_embedding(self.input_data_pos_ids, keep_prob=keep_prob, scope='pos-embedding')
 
         # etc features 
         self.input_data_etcs = tf.placeholder(tf.float32, shape=[None, self.sentence_length, self.etc_dim], name='input_data_etcs')
+        self.input_data_etcs = tf.nn.dropout(self.input_data_etcs, keep_prob)
 
-        self.input_data = tf.concat([self.word_embeddings, self.wordchr_embeddings, self.pos_embeddings, self.input_data_etcs], axis=-1, name='input_data') # (batch_size, sentence_length, unit_dim)
+        self.input_data = tf.concat([self.word_embeddings, self.wordchr_embeddings, self.pos_embeddings, self.input_data_etcs], axis=-1, name='input_data') # (batch_size, sentence_length, input_dim)
+        self.sentence_lengths = self.__compute_sentence_lengths(self.input_data_etcs)
 
         """
         RNN layer
         """
-        self.sentence_lengths = self.__compute_sentence_lengths(self.input_data_etcs)
         rnn_output = tf.identity(self.input_data)
-        for i in range(self.__num_layers):
-            keep_prob = tf.cond(self.is_train, lambda: self.__rnn_keep_prob, lambda: 1.0)
-            if self.__rnn_type == 'fused':
-                scope = 'bi-lstm-fused-%s' % i
-                rnn_output = self.__bi_lstm_fused(rnn_output, self.sentence_lengths, rnn_size=self.__rnn_size, keep_prob=keep_prob, scope=scope)
-            else:
-                scope = 'bi-lstm-%s' % i
-                rnn_output = self.__bi_lstm(rnn_output, self.sentence_lengths, rnn_size=self.__rnn_size, keep_prob=keep_prob, scope=scope)
+        if self.__rnn_used:
+            for i in range(self.__rnn_num_layers):
+                if self.__rnn_type == 'fused':
+                    scope = 'bi-lstm-fused-%s' % i
+                    rnn_output = self.__bi_lstm_fused(rnn_output, self.sentence_lengths, rnn_size=self.__rnn_size, keep_prob=keep_prob, scope=scope) # (batch_size, sentence_length, 2*rnn_size)
+                else:
+                    scope = 'bi-lstm-%s' % i
+                    rnn_output = self.__bi_lstm(rnn_output, self.sentence_lengths, rnn_size=self.__rnn_size, keep_prob=keep_prob, scope=scope)       # (batch_size, sentence_length, 2*rnn_size)
         self.rnn_output = rnn_output
 
         """
         Attention layer
         """
-        self.attended_output = self.__self_attention(self.rnn_output, 2*self.__rnn_size, scope='self-attention')
+        attended_output = tf.identity(self.rnn_output)
+        if self.__mh_used:
+            if not self.__rnn_used:
+                attended_output += positional_encoding(self.sentence_lengths,
+                                                       num_units=attended_output.get_shape().as_list()[-1],
+                                                       zero_pad=False,
+                                                       scale=False,
+                                                       scope='positional-encoding')
+            mh_keep_prob = tf.cond(self.is_train, lambda: self.__mh_keep_prob, lambda: 1.0)
+            # block
+            for i in range(self.__mh_num_layers):
+                attended_output = self.__self_attention(attended_output, keep_prob=mh_keep_prob, scope='self-attention-%s'%i)
+                attended_output = self.__feedforward(attended_output, scope='feed-forward-%s'%i)
+        self.attended_output = attended_output
 
         """
         Projection layer
         """
-        with tf.variable_scope('projection'):
-            weight = tf.Variable(tf.truncated_normal([2*self.__rnn_size, self.class_size], stddev=0.01), name='W')
-            bias = tf.Variable(tf.constant(0.1, shape=[self.class_size]), name='b')
-            t_attended_output = tf.reshape(self.attended_output, [-1, 2*self.__rnn_size])      # (batch_size*sentence_length, 2*self.__rnn_size)
-            self.logits = tf.matmul(t_attended_output, weight) + bias                          # (batch_size*sentence_length, class_size)
-            self.logits = tf.reshape(self.logits, [-1, self.sentence_length, self.class_size]) # (batch_size, sentence_length, class_size)
-            self.logits_indices = tf.cast(tf.argmax(self.logits, 2), tf.int32)                 # (batch_size, sentence_length)
+        self.logits = self.__projection(self.attended_output, self.class_size, scope='projection')     # (batch_size, sentence_length, class_size)
+        self.logits_indices = tf.cast(tf.argmax(self.logits, 2), tf.int32)                             # (batch_size, sentence_length)
 
         """
         Output answer
         """
         self.output_data = tf.placeholder(tf.float32, shape=[None, self.sentence_length, self.class_size], name='output_data')
-        self.output_data_indices = tf.cast(tf.argmax(self.output_data, 2), tf.int32)           # (batch_size, sentence_length)
+        self.output_data_indices = tf.cast(tf.argmax(self.output_data, 2), tf.int32)  # (batch_size, sentence_length)
 
         """
         Loss, Accuracy, Optimization
@@ -208,6 +216,8 @@ class Model:
             return tf.nn.dropout(wordchr_embeddings, keep_prob)
 
     def __pos_embedding(self, inputs, keep_prob=0.5, scope='pos-embedding'):
+        """Computing pos embeddings
+        """
         with tf.variable_scope(scope):
             with tf.device('/cpu:0'):
                 p_embeddings = tf.Variable(tf.random_uniform([self.pos_vocab_size, self.pos_dim], -0.5, 0.5), name='p_embeddings')
@@ -238,10 +248,12 @@ class Model:
             outputs = tf.transpose(outputs, perm=[1, 0, 2])
             return tf.nn.dropout(outputs, keep_prob)
 
-    def __self_attention(self, inputs, model_dim, scope='self-attention'):
-        """Apply self attention
+    def __self_attention(self, inputs, keep_prob=0.5, scope='self-attention'):
+        """Apply self attention 
         """
         with tf.variable_scope(scope):
+            # inputs last dimension must be equal to model_dim because we use a residual connection. 
+            model_dim = inputs.get_shape().as_list()[-1]
             queries = inputs
             keys = inputs
             is_training = tf.cond(self.is_train, lambda: True, lambda: False)
@@ -250,13 +262,37 @@ class Model:
                                                    num_units=self.__mh_num_units,
                                                    num_heads=self.__mh_num_heads,
                                                    model_dim=model_dim,
-                                                   dropout_rate=self.__mh_dropout,
+                                                   dropout_rate=1.0 - keep_prob,
                                                    is_training=is_training,
                                                    causality=False, # no future masking
                                                    scope='multihead-attention',
                                                    reuse=None)
             # residual connection and layer normalization
-            return normalize(tf.add(inputs, attended_queries), scope='layer-norm')
+            return normalize(tf.add(inputs, attended_queries), scope='layer-norm', reuse=None)
+
+    def __feedforward(self, inputs, scope='feed-forward'):
+        """Apply Point-wise feed forward layer
+        """
+        with tf.variable_scope(scope):
+            # inputs last dimension must be equal to model_dim because we use a residual connection.
+            model_dim = inputs.get_shape().as_list()[-1]
+            num_units = [4*model_dim, model_dim]
+            outputs = feedforward(inputs, num_units=num_units, scope=scope, reuse=None)
+            # residual connection and layer normalization
+            return normalize(tf.add(inputs, outputs), scope='layer-norm', reuse=None)
+
+    def __projection(self, inputs, out_dim, scope='projection'):
+        """Apply fully-connected projection layer
+        """
+        with tf.variable_scope('projection'):
+            sentence_length = inputs.get_shape().as_list()[-2]
+            in_dim = inputs.get_shape().as_list()[-1]
+            weight = tf.Variable(tf.truncated_normal([in_dim, out_dim], stddev=0.01), name='W')
+            bias = tf.Variable(tf.constant(0.1, shape=[out_dim]), name='b')
+            t_output = tf.reshape(inputs, [-1, in_dim])                 # (batch_size*sentence_length, in_dim)
+            output = tf.matmul(t_output, weight) + bias                 # (batch_size*sentence_length, out_dim)
+            output = tf.reshape(output, [-1, sentence_length, out_dim]) # (batch_size, sentence_length, out_dim)
+            return output
 
     def __compute_loss(self):
         """Compute loss(self.output_data, self.logits)

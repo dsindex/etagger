@@ -5,10 +5,11 @@ etagger
 
 - named entity tagger using
   - embedding
-    - word embedding(glove) and character convolutional embedding
-    - ELMO embedding
-  - pos embedding
-  - gazetteer features
+    - basic embedding
+      - word embedding(glove) and character convolutional embedding
+      - ELMO embedding
+    - etc embedding
+      - pos embedding, etc features(gazetteer features)
   - multi-layer Bidirectional LSTM
   - multi-head attention
   - CRF decoder
@@ -25,11 +26,7 @@ etagger
   - refactoring
     - [x] config.py, input.py
     - [x] inference.py
-      - inference bulk
-      - inference bucket
-      - inference line using spacy
     - [x] extend 5 tag(class) to 9 (automatically)
-      - out of tag(class) 'O' and its id '0' are fixed
     - [x] word embedding(glove)
       - Glove6B(lowercase), Glove840B(no lowercase)
     - [x] character embedding
@@ -38,19 +35,13 @@ etagger
       - if we construct the gazetteer vocab from the training data, the performance is decreasing.
       - recommend constructing the gazetteer vocab from other sources.
     - [x] learning-rate decay
-      - using tf.train.exponential_decay()
     - [x] pos embedding
-      - pos one-hot vector + pos embedding
     - [x] extend language specific features
-      - initialCaps, allCaps, lowercase, mixedCaps, no-info, ...
     - [x] bidirectional lstm
       - tf.contrib.rnn.LSTMCell() with tf.nn.bidirectional_dynamic_rnn()
       - tf.contrib.rnn.LSTMBlockFusedCell() with tf.contrib.rnn.TimeReversedFusedRNN()
     - [x] multi-head self-attention
-      - softmax with query, key masking
     - [x] CRF
-      - train by crf_log_likelihood()
-      - inference by viterbi_decode()
     - [x] early stopping
     - [ ] IOBES tagging schemes
     - [ ] ELMO embedding
