@@ -51,21 +51,30 @@ class Model:
         self.word_embeddings = self.__word_embedding(self.input_data_word_ids, keep_prob=keep_prob, scope='word-embedding')
 
         # character embedding features
-        self.input_data_wordchr_ids = tf.placeholder(tf.int32, shape=[None, self.sentence_length, self.word_length], name='input_data_wordchr_ids')
+        self.input_data_wordchr_ids = tf.placeholder(tf.int32,
+                                                     shape=[None, self.sentence_length, self.word_length],
+                                                     name='input_data_wordchr_ids')
         if self.__chr_conv_type == 'conv1d':
-            self.wordchr_embeddings = self.__wordchr_embedding_conv1d(self.input_data_wordchr_ids, keep_prob=keep_prob, scope='wordchr-embedding-conv1d')
+            self.wordchr_embeddings = self.__wordchr_embedding_conv1d(self.input_data_wordchr_ids,
+                                                                      keep_prob=keep_prob,
+                                                                      scope='wordchr-embedding-conv1d')
         else:
-            self.wordchr_embeddings = self.__wordchr_embedding_conv2d(self.input_data_wordchr_ids, keep_prob=keep_prob, scope='wordchr-embedding-conv2d')
+            self.wordchr_embeddings = self.__wordchr_embedding_conv2d(self.input_data_wordchr_ids,
+                                                                      keep_prob=keep_prob,
+                                                                      scope='wordchr-embedding-conv2d')
 
         # pos embedding features
         self.input_data_pos_ids = tf.placeholder(tf.int32, shape=[None, self.sentence_length], name='input_data_pos_ids')
         self.pos_embeddings = self.__pos_embedding(self.input_data_pos_ids, keep_prob=keep_prob, scope='pos-embedding')
 
         # etc features 
-        self.input_data_etcs = tf.placeholder(tf.float32, shape=[None, self.sentence_length, self.etc_dim], name='input_data_etcs')
-        self.input_data_etcs = tf.nn.dropout(self.input_data_etcs, keep_prob)
+        self.input_data_etcs = tf.placeholder(tf.float32,
+                                              shape=[None, self.sentence_length, self.etc_dim],
+                                              name='input_data_etcs')
 
-        self.input_data = tf.concat([self.word_embeddings, self.wordchr_embeddings, self.pos_embeddings, self.input_data_etcs], axis=-1, name='input_data') # (batch_size, sentence_length, input_dim)
+        self.input_data = tf.concat([self.word_embeddings, self.wordchr_embeddings, self.pos_embeddings, self.input_data_etcs],
+                                    axis=-1,
+                                    name='input_data') # (batch_size, sentence_length, input_dim)
         self.sentence_lengths = self.__compute_sentence_lengths(self.input_data_etcs)
 
         """
@@ -76,10 +85,17 @@ class Model:
             for i in range(self.__rnn_num_layers):
                 if self.__rnn_type == 'fused':
                     scope = 'bi-lstm-fused-%s' % i
-                    rnn_output = self.__bi_lstm_fused(rnn_output, self.sentence_lengths, rnn_size=self.__rnn_size, keep_prob=keep_prob, scope=scope) # (batch_size, sentence_length, 2*rnn_size)
+                    rnn_output = self.__bi_lstm_fused(rnn_output,
+                                                      self.sentence_lengths,
+                                                      rnn_size=self.__rnn_size,
+                                                      keep_prob=keep_prob,
+                                                      scope=scope)                # (batch_size, sentence_length, 2*rnn_size)
                 else:
                     scope = 'bi-lstm-%s' % i
-                    rnn_output = self.__bi_lstm(rnn_output, self.sentence_lengths, rnn_size=self.__rnn_size, keep_prob=keep_prob, scope=scope)       # (batch_size, sentence_length, 2*rnn_size)
+                    rnn_output = self.__bi_lstm(rnn_output,
+                                                self.sentence_lengths,
+                                                rnn_size=self.__rnn_size,
+                                                keep_prob=keep_prob, scope=scope) # (batch_size, sentence_length, 2*rnn_size)
         self.rnn_output = rnn_output
 
         """
@@ -96,20 +112,27 @@ class Model:
             mh_keep_prob = tf.cond(self.is_train, lambda: self.__mh_keep_prob, lambda: 1.0)
             # block
             for i in range(self.__mh_num_layers):
-                attended_output = self.__self_attention(attended_output, keep_prob=mh_keep_prob, scope='self-attention-%s'%i)
-                attended_output = self.__feedforward(attended_output, scope='feed-forward-%s'%i)
+                attended_output = self.__self_attention(attended_output,
+                                                        keep_prob=mh_keep_prob,
+                                                        scope='self-attention-%s'%i)
+                attended_output = self.__feedforward(attended_output,
+                                                     scope='feed-forward-%s'%i)
         self.attended_output = attended_output
 
         """
         Projection layer
         """
-        self.logits = self.__projection(self.attended_output, self.class_size, scope='projection')     # (batch_size, sentence_length, class_size)
-        self.logits_indices = tf.cast(tf.argmax(self.logits, 2), tf.int32)                             # (batch_size, sentence_length)
+        self.logits = self.__projection(self.attended_output,
+                                        self.class_size,
+                                        scope='projection')                # (batch_size, sentence_length, class_size)
+        self.logits_indices = tf.cast(tf.argmax(self.logits, 2), tf.int32) # (batch_size, sentence_length)
 
         """
         Output answer
         """
-        self.output_data = tf.placeholder(tf.float32, shape=[None, self.sentence_length, self.class_size], name='output_data')
+        self.output_data = tf.placeholder(tf.float32,
+                                          shape=[None, self.sentence_length, self.class_size],
+                                          name='output_data')
         self.output_data_indices = tf.cast(tf.argmax(self.output_data, 2), tf.int32)  # (batch_size, sentence_length)
 
         """
@@ -141,7 +164,7 @@ class Model:
         """
         with tf.variable_scope(scope):
             with tf.device('/cpu:0'):
-                word_embeddings = tf.nn.embedding_lookup(self.wrd_embeddings, inputs)   # (batch_size, sentence_length, wrd_dim)
+                word_embeddings = tf.nn.embedding_lookup(self.wrd_embeddings, inputs) # (batch_size, sentence_length, wrd_dim)
             return tf.nn.dropout(word_embeddings, keep_prob)
 
     def __wordchr_embedding_conv1d(self, inputs, keep_prob=0.5, scope='wordchr-embedding-conv1d'):
@@ -149,10 +172,12 @@ class Model:
         """
         with tf.variable_scope(scope):
             with tf.device('/cpu:0'):
-                chr_embeddings = tf.Variable(tf.random_uniform([self.chr_vocab_size, self.chr_dim], -1.0, 1.0), name='chr_embeddings')
-                wordchr_embeddings_t = tf.nn.embedding_lookup(chr_embeddings, inputs)                           # (batch_size, sentence_length, word_length, chr_dim)
+                chr_embeddings = tf.Variable(tf.random_uniform([self.chr_vocab_size, self.chr_dim], -1.0, 1.0),
+                                             name='chr_embeddings')
+                wordchr_embeddings_t = tf.nn.embedding_lookup(chr_embeddings, inputs) # (batch_size, sentence_length, word_length, chr_dim)
                 wordchr_embeddings_t = tf.nn.dropout(wordchr_embeddings_t, keep_prob)
-            wordchr_embeddings_t = tf.reshape(wordchr_embeddings_t, [-1, self.word_length, self.chr_dim])       # (batch_size*sentence_length, word_length, chr_dim)
+            wordchr_embeddings_t = tf.reshape(wordchr_embeddings_t,
+                                              [-1, self.word_length, self.chr_dim])   # (batch_size*sentence_length, word_length, chr_dim)
             # masking
             word_masks = self.__compute_word_masks(wordchr_embeddings_t)
             filters = self.__num_filters
@@ -167,9 +192,11 @@ class Model:
         """
         with tf.variable_scope(scope):
             with tf.device('/cpu:0'):
-                chr_embeddings = tf.Variable(tf.random_uniform([self.chr_vocab_size, self.chr_dim], -1.0, 1.0), name='chr_embeddings')
-                wordchr_embeddings_t = tf.nn.embedding_lookup(chr_embeddings, inputs)                           # (batch_size, sentence_length, word_length, chr_dim)
-            wordchr_embeddings_t = tf.reshape(wordchr_embeddings_t, [-1, self.word_length, self.chr_dim])       # (batch_size*sentence_length, word_length, chr_dim)
+                chr_embeddings = tf.Variable(tf.random_uniform([self.chr_vocab_size, self.chr_dim], -1.0, 1.0),
+                                              name='chr_embeddings')
+                wordchr_embeddings_t = tf.nn.embedding_lookup(chr_embeddings, inputs) # (batch_size, sentence_length, word_length, chr_dim)
+            wordchr_embeddings_t = tf.reshape(wordchr_embeddings_t,
+                                              [-1, self.word_length, self.chr_dim])   # (batch_size*sentence_length, word_length, chr_dim)
             # masking
             word_masks = self.__compute_word_masks(wordchr_embeddings_t)
             word_masks = tf.expand_dims(word_masks, -1)                     # (batch_size*sentence_length, word_length, 1)
@@ -199,7 +226,7 @@ class Model:
                         padding='VALID',
                         name='pool')
                     pooled_outputs.append(pooled)
-                    """ex) for filter size 3 
+                    """ex) for filter size 3
                     conv Tensor("conv-maxpool-3/conv:0", shape=(?, 13, 1, num_filters), dtype=float32)
                     pooled Tensor("conv-maxpool-3/pool:0", shape=(?, 1, 1, num_filters), dtype=float32)
                     """
@@ -220,8 +247,9 @@ class Model:
         """
         with tf.variable_scope(scope):
             with tf.device('/cpu:0'):
-                p_embeddings = tf.Variable(tf.random_uniform([self.pos_vocab_size, self.pos_dim], -0.5, 0.5), name='p_embeddings')
-                pos_embeddings = tf.nn.embedding_lookup(p_embeddings, inputs)    # (batch_size, sentence_length, pos_dim)
+                p_embeddings = tf.Variable(tf.random_uniform([self.pos_vocab_size, self.pos_dim], -0.5, 0.5),
+                                           name='p_embeddings')
+                pos_embeddings = tf.nn.embedding_lookup(p_embeddings, inputs) # (batch_size, sentence_length, pos_dim)
             return tf.nn.dropout(pos_embeddings, keep_prob)
 
     def __bi_lstm(self, inputs, lengths, rnn_size, keep_prob=0.5, scope='bi-lstm'):
@@ -230,7 +258,11 @@ class Model:
         with tf.variable_scope(scope):
             cell_fw = tf.contrib.rnn.LSTMCell(rnn_size)
             cell_bw = tf.contrib.rnn.LSTMCell(rnn_size)
-            (output_fw, output_bw), _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, sequence_length=lengths, dtype=tf.float32)
+            (output_fw, output_bw), _ = tf.nn.bidirectional_dynamic_rnn(cell_fw,
+                                                                        cell_bw,
+                                                                        inputs,
+                                                                        sequence_length=lengths,
+                                                                        dtype=tf.float32)
             outputs = tf.concat([output_fw, output_bw], axis=-1)
             return tf.nn.dropout(outputs, keep_prob)
 
@@ -298,53 +330,59 @@ class Model:
         """Compute loss(self.output_data, self.logits)
         """
         if self.use_crf:
-            log_likelihood, trans_params = tf.contrib.crf.crf_log_likelihood(self.logits, self.output_data_indices, self.sentence_lengths)
+            log_likelihood, trans_params = tf.contrib.crf.crf_log_likelihood(self.logits,
+                                                                             self.output_data_indices,
+                                                                             self.sentence_lengths)
             self.trans_params = trans_params # need to evaludate it for decoding
             return tf.reduce_mean(-log_likelihood)
         else:
-            cross_entropy = self.output_data * tf.log(tf.nn.softmax(self.logits))        # (batch_size, sentence_length, class_size)
-            cross_entropy = -tf.reduce_sum(cross_entropy, reduction_indices=2)           # (batch_size, sentence_length)
+            cross_entropy = self.output_data * tf.log(tf.nn.softmax(self.logits)) # (batch_size, sentence_length, class_size)
+            cross_entropy = -tf.reduce_sum(cross_entropy, reduction_indices=2)    # (batch_size, sentence_length)
             # masking
-            mask = tf.sign(tf.reduce_max(tf.abs(self.output_data), reduction_indices=2)) # (batch_size, sentence_length)
+            mask = tf.sign(tf.reduce_max(tf.abs(self.output_data),
+                                         reduction_indices=2))                    # (batch_size, sentence_length)
             cross_entropy *= mask
-            cross_entropy = tf.reduce_sum(cross_entropy, reduction_indices=1)            # (batch_size)
-            cross_entropy /= tf.cast(self.sentence_lengths, tf.float32)                  # (batch_size)
+            cross_entropy = tf.reduce_sum(cross_entropy, reduction_indices=1)     # (batch_size)
+            cross_entropy /= tf.cast(self.sentence_lengths, tf.float32)           # (batch_size)
             self.trans_params = tf.constant(0.0, shape=[self.class_size, self.class_size])
             return tf.reduce_mean(cross_entropy)
 
     def __compute_accuracy(self):
         """Compute accuracy(self.output_data, self.logits)
         """
-        correct_prediction = tf.cast(tf.equal(self.logits_indices, self.output_data_indices), tf.float32)  # (batch_size, sentence_length)
+        correct_prediction = tf.cast(tf.equal(self.logits_indices, self.output_data_indices),
+                                     tf.float32)                                     # (batch_size, sentence_length)
         # masking
-        mask = tf.sign(tf.reduce_max(tf.abs(self.output_data), reduction_indices=2))                       # (batch_size, sentence_length)
+        mask = tf.sign(tf.reduce_max(tf.abs(self.output_data), reduction_indices=2)) # (batch_size, sentence_length)
         correct_prediction *= mask
-        correct_prediction = tf.reduce_sum(correct_prediction, reduction_indices=1)                        # (batch_size)
-        correct_prediction /= tf.cast(self.sentence_lengths, tf.float32)                                   # (batch_size)
+        correct_prediction = tf.reduce_sum(correct_prediction, reduction_indices=1)  # (batch_size)
+        correct_prediction /= tf.cast(self.sentence_lengths, tf.float32)             # (batch_size)
         return tf.reduce_mean(correct_prediction)
 
     def __compute_sentence_lengths(self, input_data_etcs):
         """Compute each sentence lengths
         """
         sentence_masks = self.__compute_sentence_masks(input_data_etcs)
-        return tf.cast(tf.reduce_sum(sentence_masks, reduction_indices=1), tf.int32)           # (batch_size)
+        return tf.cast(tf.reduce_sum(sentence_masks, reduction_indices=1), tf.int32) # (batch_size)
 
     def __compute_sentence_masks(self, input_data_etcs):
         """Compute each sentence masks
         """
-        sentence_masks = tf.sign(tf.reduce_max(tf.abs(input_data_etcs), reduction_indices=2))  # (batch_size, sentence_length, etc_dim) -> (batch_size, sentence_length)
+        sentence_masks = tf.sign(tf.reduce_max(tf.abs(input_data_etcs),
+                                               reduction_indices=2)) # (batch_size, sentence_length)
         return sentence_masks
 
     def __compute_word_lengths(self, wordchr_embeddings_t):
         """Compute each word lengths
         """
         word_masks = self.__compute_word_masks(wordchr_embeddings_t)
-        return tf.cast(tf.reduce_sum(word_masks, reduction_indices=1), tf.int32)               # (batch_size*sentence_length)
+        return tf.cast(tf.reduce_sum(word_masks, reduction_indices=1), tf.int32)     # (batch_size*sentence_length)
 
     def __compute_word_masks(self, wordchr_embeddings_t):
         """Compute each word masks 
         """
-        word_masks = tf.sign(tf.reduce_max(tf.abs(wordchr_embeddings_t), reduction_indices=2)) # (batch_size*sentence_length, word_length, chr_dim) -> (batch_size*sentence_length, word_length)
+        word_masks = tf.sign(tf.reduce_max(tf.abs(wordchr_embeddings_t),
+                                           reduction_indices=2))     # (batch_size*sentence_length, word_length)
         return word_masks
 
     @staticmethod

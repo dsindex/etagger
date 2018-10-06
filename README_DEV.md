@@ -13,7 +13,6 @@ pos embedding size : 6
 pos embedding random init : -0.5 ~ 0.5
 pos one-hot : 5
 shape vec : 9
-apply etc features dropout
 rnn_used : True
 rnn_type : fused
 rnn_size : 200

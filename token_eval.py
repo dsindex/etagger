@@ -71,12 +71,18 @@ class TokenEval:
         print(self.fn)
 
         for c, _ in self.cls.items():
-            if self.tp[c] + self.fp[c] != 0: self.precision[c] = self.tp[c]*1.0 / (self.tp[c] + self.fp[c])
-            else: self.precision[c] = 0
-            if self.tp[c] + self.fn[c] != 0: self.recall[c] = self.tp[c]*1.0 / (self.tp[c] + self.fn[c])
-            else: self.recall[c] = 0
-            if self.precision[c] + self.recall[c] != 0: self.fscore[c] = 2.0*self.precision[c]*self.recall[c] / (self.precision[c] + self.recall[c])
-            else: self.fscore[c] = 0
+            if self.tp[c] + self.fp[c] != 0:
+                self.precision[c] = self.tp[c]*1.0 / (self.tp[c] + self.fp[c])
+            else:
+                self.precision[c] = 0
+            if self.tp[c] + self.fn[c] != 0:
+                self.recall[c] = self.tp[c]*1.0 / (self.tp[c] + self.fn[c])
+            else:
+                self.recall[c] = 0
+            if self.precision[c] + self.recall[c] != 0:
+                self.fscore[c] = 2.0*self.precision[c]*self.recall[c] / (self.precision[c] + self.recall[c])
+            else:
+                self.fscore[c] = 0
 
         print('')
         print('precision:')

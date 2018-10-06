@@ -21,7 +21,8 @@ def do_train(model, config, train_data, dev_data, test_data):
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     sess = tf.Session(config=session_conf)
     with sess.as_default():
-        sess.run(tf.global_variables_initializer(), feed_dict={model.wrd_embeddings_init: config.embvec.wrd_embeddings}) # feed large embedding data
+        sess.run(tf.global_variables_initializer(),
+                 feed_dict={model.wrd_embeddings_init: config.embvec.wrd_embeddings}) # feed large embedding data
         saver = tf.train.Saver()
         if config.restore is not None:
             saver.restore(sess, config.restore)
@@ -52,7 +53,11 @@ def do_train(model, config, train_data, dev_data, test_data):
                            sess.run([model.global_step, train_summary_op, model.train_op, \
                                      model.loss, model.accuracy, model.learning_rate], feed_dict=feed_dict)
                 train_summary_writer.add_summary(train_summaries, step)
-                prog.update(idx + 1, [('step', step), ('train loss', train_loss), ('train accuracy', train_accuracy), ('lr', learning_rate)])
+                prog.update(idx + 1,
+                            [('step', step),
+                             ('train loss', train_loss),
+                             ('train accuracy', train_accuracy),
+                             ('lr', learning_rate)])
                 idx += 1
             # evaluate on dev data
             feed_dict={model.input_data_word_ids: dev_data.sentence_word_ids,
@@ -61,10 +66,11 @@ def do_train(model, config, train_data, dev_data, test_data):
                        model.input_data_etcs: dev_data.sentence_etcs,
                        model.output_data: dev_data.sentence_tags,
                        model.is_train: False}
-            step, dev_summaries, logits, logits_indices, trans_params, output_data_indices, sentence_lengths, dev_loss, dev_accuracy = \
+            step, dev_summaries, logits, logits_indices, trans_params, \
+                output_data_indices, sentence_lengths, dev_loss, dev_accuracy = \
                        sess.run([model.global_step, dev_summary_op, model.logits, model.logits_indices, \
-                                 model.trans_params, model.output_data_indices, model.sentence_lengths, model.loss, model.accuracy], \
-                                 feed_dict=feed_dict)
+                                 model.trans_params, model.output_data_indices, model.sentence_lengths, \
+                                 model.loss, model.accuracy], feed_dict=feed_dict)
             print('epoch: %d / %d, step: %d, dev loss: %s, dev accuracy: %s' % (e, config.epoch, step, dev_loss, dev_accuracy))
             dev_summary_writer.add_summary(dev_summaries, step)
             print('dev precision, recall, f1(token): ')
@@ -96,10 +102,11 @@ def do_train(model, config, train_data, dev_data, test_data):
                            model.input_data_etcs: test_data.sentence_etcs,
                            model.output_data: test_data.sentence_tags,
                            model.is_train: False}
-                step, logits, logits_indices, trans_params, output_data_indices, sentence_lengths, test_loss, test_accuracy = \
-                           sess.run([model.global_step, model.logits, model.logits_indices, \
-                                     model.trans_params, model.output_data_indices, model.sentence_lengths, model.loss, model.accuracy], \
-                                     feed_dict=feed_dict)
+                step, logits, logits_indices, trans_params, output_data_indices, \
+                    sentence_lengths, test_loss, test_accuracy = \
+                        sess.run([model.global_step, model.logits, model.logits_indices, \
+                                  model.trans_params, model.output_data_indices, model.sentence_lengths, \
+                                  model.loss, model.accuracy], feed_dict=feed_dict)
                 print('epoch: %d / %d, step: %d, test loss: %s, test accuracy: %s' % (e, config.epoch, step, test_loss, test_accuracy))
                 print('test precision, recall, f1(token): ')
                 TokenEval.compute_f1(config.class_size, logits, test_data.sentence_tags, sentence_lengths)
