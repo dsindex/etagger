@@ -69,8 +69,6 @@ def do_train(model, config, train_data, dev_data, test_data):
             dev_summary_writer.add_summary(dev_summaries, step)
             print('dev precision, recall, f1(token): ')
             token_f1 = TokenEval.compute_f1(config.class_size, logits, dev_data.sentence_tags, sentence_lengths)
-            # early stopping
-            if early_stopping.validate(token_f1, measure='f1'): break
             '''
             if config.use_crf:
                 viterbi_sequences = viterbi_decode(logits, trans_params, sentence_lengths)
@@ -81,15 +79,15 @@ def do_train(model, config, train_data, dev_data, test_data):
             dev_prec, dev_rec, dev_f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
             print('dev precision, recall, f1(chunk): ', dev_prec, dev_rec, dev_f1)
             chunk_f1 = dev_f1
-            '''
-            # save best model
-            '''
             m = chunk_f1 # slightly lower than token-based f1 for test
             '''
             m = token_f1
+            # early stopping
+            if early_stopping.validate(m, measure='f1'): break
             if m > maximum:
                 print('new best f1 score!')
                 maximum = m
+                # save best model
                 save_path = saver.save(sess, config.checkpoint_dir + '/' + 'model_max.ckpt')
                 print('max model saved in file: %s' % save_path)
                 feed_dict={model.input_data_word_ids: test_data.sentence_word_ids,

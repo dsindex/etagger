@@ -73,7 +73,7 @@ etagger
       - [Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
         - tested
         - Glove6B.100
-        - 70 epoch, per-chunk(exact) micro Prec: 0.887, Rec: 0.902, F1: 0.894
+        - per-chunk(exact) micro Prec: 0.887, Rec: 0.902, F1: 0.894
       - [sequence_tagging](https://github.com/guillaumegenthial/sequence_tagging)
         - tested
         - Glove6B.100
@@ -158,7 +158,7 @@ test, max_sentence_length = 124
   $ python train.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --sentence_length 125 --batch_size 20 --epoch 70
   or
   $ python train.py --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --batch_size 20 --epoch 70
-  $ rm -rf runs; tensorboard --logdir runs/summaries/ --port 6007
+  $ rm -rf runs; tensorboard --logdir runs/summaries/ --port 6008
   ```
   - accuracy and loss
   ![graph-2](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-2.png)
@@ -280,6 +280,8 @@ in IN O O O
     - [sequence_tagging](https://github.com/guillaumegenthial/sequence_tagging/blob/master/model/ner_model.py)
     - [tf_ner](https://github.com/guillaumegenthial/tf_ner)
     - [tensorflow/contrib/python/opps/crf.py](https://github.com/tensorflow/tensorflow/blob/r1.10/tensorflow/contrib/crf/python/ops/crf.py)
+  - pytorch impl
+    - [allennlp/conditional_random_field.py](https://github.com/allenai/allennlp/blob/master/allennlp/modules/conditional_random_field.py)
 
 - ELMO
   - articles

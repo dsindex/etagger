@@ -14,7 +14,7 @@ class Config:
         self.emb_path = args.emb_path
         self.embvec = pkl.load(open(self.emb_path, 'rb'))
         self.wrd_dim = args.wrd_dim
-        self.chr_dim = 30
+        self.chr_dim = 100
         self.pos_dim = 6
         # basic features + gazetteer feature
         '''
@@ -27,8 +27,8 @@ class Config:
         self.restore = args.restore
         self.use_crf = use_crf
         self.starter_learning_rate = 0.001
-        self.decay_steps = 15000 # batch_size(20), epoch(20)
-        self.decay_rate = 1.0
+        self.decay_steps = 12000
+        self.decay_rate = 0.7
         self.is_train = is_train
         if self.is_train:
             self.epoch = args.epoch

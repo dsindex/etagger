@@ -1,9 +1,224 @@
 
 - experiments 6
 ```
+* test 13 ( == test 7)
+word embedding size : 300(glove840B)
+wrd_keep_prob : 0.5
+chr_conv_type : conv1d
+chracter embedding size : 30
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 30
+chr_keep_prob : 0.5
+pos embedding size : 6
+pos embedding random init : -0.5 ~ 0.5
+pos_keep_prob : 0.5
+pos one-hot : 5
+shape vec : 9
+rnn_type : fused
+rnn_size : 200
+num_layers : 2
+rnn_keep_prob : 0.5
+learning_rate : 0.001 / 15000 / 1.0, exponential_decay() => fixed 0.001
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+multi head attention(softmax with masking)
+mh_num_heads : 4
+mh_num_units : 32
+mh_dropout : 0.5
+normalize() instead of layer_norm()
++
+save model by f1(token)
++
+CRF
+
+token : 0.913468589586898
+chunk : 0.9075200564224631
+
+* test 12
+word embedding size : 300(glove840B)
+wrd_keep_prob : 0.5
+chr_conv_type : conv1d
+chracter embedding size : 30
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 30
+chr_keep_prob : 0.5
+pos embedding size : 6
+pos embedding random init : -0.5 ~ 0.5
+pos_keep_prob : 0.5
+pos one-hot : 5
+shape vec : 9
+rnn_type : fused
+rnn_size : 200
+num_layers : 2
+rnn_keep_prob : 0.5
+learning_rate : 0.001 / 15000 / 1.0, exponential_decay() => fixed 0.001 -> 0.001 / 12000 / 0.7
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+multi head attention(softmax with masking)
+mh_num_heads : 4
+mh_num_units : 32
+mh_dropout : 0.5
+normalize() instead of layer_norm()
++
+save model by f1(token)
++
+CRF
+
+token : 0.9155697055041939
+chunk : 0.9095246509984096
+
+* test 11
+word embedding size : 300(glove840B)
+wrd_keep_prob : 0.5
+chr_conv_type : conv1d
+chracter embedding size : 30 -> 100
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 50
+chr_keep_prob : 0.5
+pos embedding size : 6
+pos embedding random init : -0.5 ~ 0.5
+pos_keep_prob : 0.5
+pos one-hot : 5
+shape vec : 9
+rnn_type : fused
+rnn_size : 200
+num_layers : 2
+rnn_keep_prob : 0.5
+learning_rate : 0.001 / 15000 / 1.0, exponential_decay() => fixed 0.001 -> 0.001 / 12000 / 0.7
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+multi head attention(softmax with masking)
+mh_num_heads : 4
+mh_num_units : 32
+mh_dropout : 0.5
+normalize() instead of layer_norm()
++
+save model by f1(token)
++
+CRF
+
+token : 0.9136721371484351
+chunk : 0.9099091149739699
+
+* test 10
+word embedding size : 300(glove840B)
+wrd_keep_prob : 0.5
+chr_conv_type : conv1d
+chracter embedding size : 30 -> 100
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 30 -> 50
+chr_keep_prob : 0.5
+pos embedding size : 6
+pos embedding random init : -0.5 ~ 0.5
+pos_keep_prob : 0.5
+pos one-hot : 5
+shape vec : 9
+rnn_type : fused
+rnn_size : 200 -> 100
+num_layers : 2
+rnn_keep_prob : 0.5
+learning_rate : 0.001 / 15000 / 1.0, exponential_decay() => fixed 0.001
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+multi head attention(softmax with masking)
+mh_num_heads : 4
+mh_num_units : 32
+mh_dropout : 0.5
+normalize() instead of layer_norm()
++
+save model by f1(token)
++
+CRF
+
+token : 0.9117467302285784
+chunk : 0.9078377661924539
+
+* test 9
+word embedding size : 300(glove840B)
+wrd_keep_prob : 0.5
+chr_conv_type : conv1d
+chracter embedding size : 30 -> 100
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 30 -> 50
+chr_keep_prob : 0.5
+pos embedding size : 6
+pos embedding random init : -0.5 ~ 0.5
+pos_keep_prob : 0.5
+pos one-hot : 5
+shape vec : 9
+rnn_type : fused
+rnn_size : 200 -> 100
+num_layers : 2 -> 1
+rnn_keep_prob : 0.5
+learning_rate : 0.001 / 15000 / 1.0, exponential_decay() => fixed 0.001
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+multi head attention(softmax with masking)
+mh_num_heads : 4
+mh_num_units : 32
+mh_dropout : 0.5
+normalize() instead of layer_norm()
++
+save model by f1(token)
++
+CRF
+
+token : 0.9119120342089188
+chunk : 0.9059798906332687
+
+* test 8
+word embedding size : 300(glove840B)
+wrd_keep_prob : 0.5
+chr_conv_type : conv1d
+chracter embedding size : 30
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 30
+chr_keep_prob : 0.5
+pos embedding size : 6
+pos embedding random init : -0.5 ~ 0.5
+pos_keep_prob : 0.5
+pos one-hot : 5
+shape vec : 9
+rnn_type : fused
+rnn_size : 200
+num_layers : 2
+rnn_keep_prob : 0.5
+learning_rate : 0.001 / 15000 / 1.0, exponential_decay() => fixed 0.001
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+multi head attention(softmax with masking)
+mh_num_heads : 4
+mh_num_units : 32
+mh_dropout : 0.5
+normalize() instead of layer_norm()
++
+save model by : f1(token) -> f1(chunk)
++
+CRF
+
+token : 0.9131098491787263
+chunk : 0.9068618804021874
 
 * test 7
-word embedding size : 100 -> 300(glove840B)
+word embedding size : 300(glove840B)
 wrd_keep_prob : 0.5
 chr_conv_type : conv1d
 chracter embedding size : 30
@@ -38,10 +253,14 @@ CRF
 token : 0.9157317073170732 -> best
 chunk : 0.9102156238953694 -> best
 
+# rerun #
+token : 0.9121906507791018
+chunk : 0.9068618804021874
+
 * test 6
 word embedding size : 100
 wrd_keep_prob : 0.5
-chr_conv_type : conv2d -> conv1d
+chr_conv_type : conv1d
 chracter embedding size : 30
 chracter embedding random init : -1.0 ~ 1.0
 filter_sizes : [3]
