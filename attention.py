@@ -1,8 +1,10 @@
-# source from 
-# : https://github.com/Kyubyong/transformer/blob/master/modules.py
-
 from __future__ import print_function
 import tensorflow as tf
+import numpy as np
+
+'''
+source from https://github.com/Kyubyong/transformer/blob/master/modules.py
+'''
 
 def multihead_attention(queries, 
                         keys, 
@@ -122,53 +124,6 @@ def feedforward(inputs,
     
     return outputs
 
-def positional_encoding(inputs,
-                        num_units,
-                        zero_pad=True,
-                        scale=True,
-                        scope="positional_encoding",
-                        reuse=None):
-    '''Sinusoidal Positional_Encoding.
-
-    Args:
-      inputs: A 2d Tensor with shape of (N, T).
-      num_units: Output dimensionality
-      zero_pad: Boolean. If True, all the values of the first row (id = 0) should be constant zero
-      scale: Boolean. If True, the output will be multiplied by sqrt num_units(check details from paper)
-      scope: Optional scope for `variable_scope`.
-      reuse: Boolean, whether to reuse the weights of a previous layer
-        by the same name.
-
-    Returns:
-        A 'Tensor' with one more rank than inputs's, with the dimensionality should be 'num_units'
-    '''
-
-    N, T = inputs.get_shape().as_list()
-    with tf.variable_scope(scope, reuse=reuse):
-        position_ind = tf.tile(tf.expand_dims(tf.range(T), 0), [N, 1])
-
-        # First part of the PE function: sin and cos argument
-        position_enc = np.array([
-            [pos / np.power(10000, 2.*i/num_units) for i in range(num_units)]
-            for pos in range(T)])
-
-        # Second part, apply the cosine to even columns and sin to odds.
-        position_enc[:, 0::2] = np.sin(position_enc[:, 0::2])  # dim 2i
-        position_enc[:, 1::2] = np.cos(position_enc[:, 1::2])  # dim 2i+1
-
-        # Convert to a tensor
-        lookup_table = tf.convert_to_tensor(position_enc)
-
-        if zero_pad:
-            lookup_table = tf.concat((tf.zeros(shape=[1, num_units]),
-                                      lookup_table[1:, :]), 0)
-        outputs = tf.nn.embedding_lookup(lookup_table, position_ind)
-
-        if scale:
-            outputs = outputs * num_units**0.5
-
-        return outputs
-
 def normalize(inputs, 
               epsilon = 1e-8,
               scope="layer-norm",
@@ -197,5 +152,122 @@ def normalize(inputs,
         outputs = gamma * normalized + beta
         
     return outputs
+
+def positional_encoding(lengths,
+                        maxlen,
+                        num_units,
+                        zero_pad=True,
+                        scale=True,
+                        scope="positional_encoding",
+                        reuse=None):
+    '''Sinusoidal Positional_Encoding.
+
+    Args:
+      lengths: The lengths of the inputs to create position embeddings for.
+        An int32 tensor of shape `[batch_size]`.
+      maxlen: The maximum length of the input sequence to create position
+        embeddings for. An int32 tensor.
+      num_units: Output dimensionality
+      zero_pad: Boolean. If True, all the values of the first row (id = 0) should be constant zero
+      scale: Boolean. If True, the output will be multiplied by sqrt num_units(check details from paper)
+      scope: Optional scope for `variable_scope`.
+      reuse: Boolean, whether to reuse the weights of a previous layer
+        by the same name.
+
+    Returns:
+      A tensor of shape `[batch_size, maxlen, num_units]` that contains
+      embeddings for each position. All elements past `lengths` are zero.
+    '''
+
+    N = tf.shape(lengths)[0]
+    T = maxlen
+    with tf.variable_scope(scope, reuse=reuse):
+        position_ind = tf.tile(tf.expand_dims(tf.range(T), 0), [N, 1]) # (batch_size, maxlen)
+
+        # First part of the PE function: sin and cos argument
+        position_enc = np.array([
+            [pos / np.power(10000, 2.*i/num_units) for i in range(num_units)]
+            for pos in range(T)])
+
+        # Second part, apply the cosine to even columns and sin to odds.
+        position_enc[:, 0::2] = np.sin(position_enc[:, 0::2])  # dim 2i
+        position_enc[:, 1::2] = np.cos(position_enc[:, 1::2])  # dim 2i+1
+
+        # Convert to a tensor
+        lookup_table = tf.convert_to_tensor(position_enc, dtype=tf.float32)
+
+        if zero_pad:
+            lookup_table = tf.concat((tf.zeros(shape=[1, num_units]),
+                                      lookup_table[1:, :]), 0)
+        outputs = tf.nn.embedding_lookup(lookup_table, position_ind)
+
+        if scale:
+            outputs = outputs * num_units**0.5
+
+        # Mask out positions that are padded
+        mask = tf.sequence_mask(lengths=lengths, maxlen=maxlen, dtype=tf.float32)
+        outputs = outputs * tf.expand_dims(mask, 2) # broadcasting
+
+        return outputs
+
+'''
+2) source from https://github.com/google/seq2seq/blob/master/seq2seq/encoders/pooling_encoder.py
+'''
+
+def position_encoding(sentence_size, embedding_size):
+    """
+    Position Encoding described in section 4.1 of
+    End-To-End Memory Networks (https://arxiv.org/abs/1503.08895).
+
+    Args:
+      sentence_size: length of the sentence
+      embedding_size: dimensionality of the embeddings
+
+    Returns:
+      A numpy array of shape [sentence_size, embedding_size] containing
+      the fixed position encodings for each sentence position.
+    """
+    encoding = np.ones((sentence_size, embedding_size), dtype=np.float32)
+    ls = sentence_size + 1
+    le = embedding_size + 1
+    for k in range(1, le):
+        for j in range(1, ls):
+          encoding[j-1, k-1] = (1.0 - j/float(ls)) - (
+              k / float(le)) * (1. - 2. * j/float(ls))
+    return encoding
+
+def create_position_embedding(embedding_dim, num_positions, lengths, maxlen):
+    """Creates position embeddings.
+
+    Args:
+      embedding_dim: Dimensionality of the embeddings. An integer.
+      num_positions: The number of positions to be embedded. For example,
+        if you have inputs of length up to 100, this should be 100. An integer.
+      lengths: The lengths of the inputs to create position embeddings for.
+        An int32 tensor of shape `[batch_size]`.
+      maxlen: The maximum length of the input sequence to create position
+        embeddings for. An int32 tensor.
+
+    Returns:
+      A tensor of shape `[batch_size, maxlen, embedding_dim]` that contains
+      embeddings for each position. All elements past `lengths` are zero.
+    """
+    # Create constant position encodings
+    position_encodings = tf.constant(
+        position_encoding(num_positions, embedding_dim),
+        name="position_encoding")
+
+    # Slice to size of current sequence
+    pe_slice = position_encodings[:maxlen, :]
+    # Replicate encodings for each element in the batch
+    batch_size = tf.shape(lengths)[0]
+    pe_batch = tf.tile([pe_slice], [batch_size, 1, 1])
+
+    # Mask out positions that are padded
+    positions_mask = tf.sequence_mask(
+        lengths=lengths, maxlen=maxlen, dtype=tf.float32)
+    positions_embed = pe_batch * tf.expand_dims(positions_mask, 2)
+
+    return positions_embed
 
 

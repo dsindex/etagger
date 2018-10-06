@@ -1,11 +1,11 @@
-# source from
-# : https://github.com/guillaumegenthial/sequence_tagging/blob/master/model/general_utils.py
-
 import time
 import sys
 import logging
 import numpy as np
 
+'''
+source from https://github.com/guillaumegenthial/sequence_tagging/blob/master/model/general_utils.py
+'''
 
 def get_logger(filename):
     """Return a logger instance that writes in filename
@@ -27,7 +27,6 @@ def get_logger(filename):
     logging.getLogger().addHandler(handler)
 
     return logger
-
 
 class Progbar(object):
     """Progbar class copied from keras (https://github.com/fchollet/keras/)

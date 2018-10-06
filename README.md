@@ -4,20 +4,23 @@ etagger
 ### description
 
 - named entity tagger using
-  - embedding
+  - encoding
     - basic embedding
       - word embedding(glove) and character convolutional embedding
       - ELMO embedding
     - etc embedding
       - pos embedding, etc features(gazetteer features)
-  - multi-layer Bidirectional LSTM
-  - multi-head attention
-  - CRF decoder
+  - contextual encoding
+    - multi-layer Bidirectional LSTM + multi-head attention
+    - positional encoding + multi-layer of block(multi-head attention + feed forward net)
+  - decoding
+    - CRF decoder
 
 - base repository
   - [ner-lstm](https://github.com/monikkinom/ner-lstm)
   - [cnn-text-classification-tf](https://github.com/dennybritz/cnn-text-classification-tf/blob/master/text_cnn.py)
   - [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py)
+  - [seq2seq/pooling_encoder.py](https://github.com/google/seq2seq/blob/master/seq2seq/encoders/pooling_encoder.py)
   - [sequence_tagging/ner_model.py](https://github.com/guillaumegenthial/sequence_tagging/blob/master/model/ner_model.py)
   - [tf_ner/masked_conv.py](https://github.com/guillaumegenthial/tf_ner/blob/master/models/chars_conv_lstm_crf/masked_conv.py)
   - [bilm](https://github.com/allenai/bilm-tf)
@@ -247,6 +250,8 @@ in IN O O O
     - [Learning Rate Decay](https://www.tensorflow.org/api_docs/python/tf/train/exponential_decay)
   - tensorflow impl
     - [ner-lstm](https://github.com/monikkinom/ner-lstm)
+    - [sequence_tagging](https://github.com/guillaumegenthial/sequence_tagging/blob/master/model/ner_model.py)
+    - [tf_ner](https://github.com/guillaumegenthial/tf_ner)
   - keras impl
     - [keras implementation](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
 
@@ -262,6 +267,7 @@ in IN O O O
   - tensorflow impl
     - [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py)
     - [transformer-tensorflow/transformer/attention.py](https://github.com/DongjunLee/transformer-tensorflow/blob/master/transformer/attention.py)
+    - [seq2seq/pooling_encoder.py](https://github.com/google/seq2seq/blob/master/seq2seq/encoders/pooling_encoder.py)
 
 - CRF
   - articles

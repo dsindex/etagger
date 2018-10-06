@@ -13,7 +13,7 @@ pos embedding size : 6
 pos embedding random init : -0.5 ~ 0.5
 pos one-hot : 5
 shape vec : 9
-rnn_used : True
+rnn_used : True -> False
 rnn_type : fused
 rnn_size : 200
 rnn_num_layers : 2
@@ -23,11 +23,11 @@ epoch : 70
 batch_size : 20
 +
 mh_used : True
-mh_num_layers : 1
+mh_num_layers : 1 -> 2
 mh_num_heads : 4
-mh_num_units : 32
+mh_num_units : 32 -> 64
 mh_keep_prob : 0.5
-apply feedforward net
+positional encoding + multi head attention + feed forward net
 +
 save model by f1(token)
 +

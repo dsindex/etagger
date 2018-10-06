@@ -1,7 +1,8 @@
-# source from 
-# : http://forensics.tistory.com/29
-
 from __future__ import print_function
+
+'''
+source from http://forensics.tistory.com/29
+'''
 
 class EarlyStopping():
     def __init__(self, patience=0, measure='loss', verbose=0):

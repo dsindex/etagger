@@ -2,7 +2,7 @@ from __future__ import print_function
 import tensorflow as tf
 import numpy as np
 from embvec import EmbVec
-from attention import multihead_attention, feedforward, positional_encoding, normalize
+from attention import multihead_attention, feedforward, normalize, positional_encoding, create_position_embedding
 from masked_conv import masked_conv1d_and_max
 
 class Model:
@@ -11,14 +11,14 @@ class Model:
     __chr_conv_type = 'conv1d'     # conv1d | conv2d
     __filter_sizes = [3]           # filter sizes
     __num_filters = 50             # number of filters
-    __rnn_used = True              # use rnn layer or not
+    __rnn_used = False             # use rnn layer or not
     __rnn_type = 'fused'           # normal | fused
     __rnn_size = 200               # size of RNN hidden unit
     __rnn_num_layers = 2           # number of RNN layers
     __mh_used = True               # use multi head attention layer or not
-    __mh_num_layers = 1            # number of layers for multi head attention
+    __mh_num_layers = 2            # number of layers for multi head attention
     __mh_num_heads = 4             # number of head for multi head attention
-    __mh_num_units = 32            # Q,K,V dimension for multi head attention
+    __mh_num_units = 64            # Q,K,V dimension for multi head attention
     __mh_keep_prob = 0.5           # keep probability for multi head attention
 
     def __init__(self, config):
@@ -104,13 +104,23 @@ class Model:
         attended_output = tf.identity(self.rnn_output)
         if self.__mh_used:
             if not self.__rnn_used:
+                '''
+                # positional encoding
+                attended_output += create_position_embedding(attended_output.get_shape().as_list()[-1],
+                                                             self.sentence_length,
+                                                             self.sentence_lengths,
+                                                             self.sentence_length) 
+                '''
+                # sinusoidal positional encoding
                 attended_output += positional_encoding(self.sentence_lengths,
-                                                       num_units=attended_output.get_shape().as_list()[-1],
+                                                       self.sentence_length,
+                                                       attended_output.get_shape().as_list()[-1],
                                                        zero_pad=False,
                                                        scale=False,
-                                                       scope='positional-encoding')
+                                                       scope='positional-encoding',
+                                                       reuse=None)
             mh_keep_prob = tf.cond(self.is_train, lambda: self.__mh_keep_prob, lambda: 1.0)
-            # block
+            # block (self attention + feed forward)
             for i in range(self.__mh_num_layers):
                 attended_output = self.__self_attention(attended_output,
                                                         keep_prob=mh_keep_prob,

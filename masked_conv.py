@@ -1,13 +1,10 @@
-# source from
-# : https://github.com/guillaumegenthial/tf_ner/blob/master/models/chars_conv_lstm_crf/masked_conv.py
-
-"""Implement masked 1d convolution with max-pooling"""
-
-__author__ = "Guillaume Genthial"
-
+from __future__ import print_function
 from six.moves import reduce
 import tensorflow as tf
 
+'''
+source from https://github.com/guillaumegenthial/tf_ner/blob/master/models/chars_conv_lstm_crf/masked_conv.py
+'''
 
 def masked_conv1d_and_max(t, weights, filters, kernel_size, activation=tf.nn.relu):
     """Applies 1d convolution and a masked max-pooling
