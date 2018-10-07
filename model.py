@@ -2,7 +2,7 @@ from __future__ import print_function
 import tensorflow as tf
 import numpy as np
 from embvec import EmbVec
-from attention import multihead_attention, feedforward, normalize, positional_encoding, create_position_embedding
+from transformer import multihead_attention, feedforward, normalize, positional_encoding
 from masked_conv import masked_conv1d_and_max
 
 class Model:
@@ -11,15 +11,15 @@ class Model:
     __chr_conv_type = 'conv1d'     # conv1d | conv2d
     __filter_sizes = [3]           # filter sizes
     __num_filters = 50             # number of filters
-    __rnn_used = False             # use rnn layer or not
+    __rnn_used = True              # use rnn layer or not
     __rnn_type = 'fused'           # normal | fused
     __rnn_size = 200               # size of RNN hidden unit
     __rnn_num_layers = 2           # number of RNN layers
-    __mh_used = True               # use multi head attention layer or not
-    __mh_num_layers = 2            # number of layers for multi head attention
-    __mh_num_heads = 4             # number of head for multi head attention
-    __mh_num_units = 64            # Q,K,V dimension for multi head attention
-    __mh_keep_prob = 0.5           # keep probability for multi head attention
+    __tf_used = True               # use transformer encoder layer or not
+    __tf_num_layers = 1            # number of layers for transformer encoder
+    __tf_mh_num_heads = 4          # number of head for multi head attention
+    __tf_mh_num_units = 64         # Q,K,V dimension for multi head attention
+    __tf_keep_prob = 0.5           # keep probability for transformer encoder
 
     def __init__(self, config):
         self.embvec = config.embvec
@@ -99,40 +99,45 @@ class Model:
         self.rnn_output = rnn_output
 
         """
-        Attention layer
+        Transformer layer
         """
-        attended_output = tf.identity(self.rnn_output)
-        if self.__mh_used:
-            if not self.__rnn_used:
-                '''
-                # positional encoding
-                attended_output += create_position_embedding(attended_output.get_shape().as_list()[-1],
-                                                             self.sentence_length,
-                                                             self.sentence_lengths,
-                                                             self.sentence_length) 
-                '''
-                # sinusoidal positional encoding
-                attended_output += positional_encoding(self.sentence_lengths,
-                                                       self.sentence_length,
-                                                       attended_output.get_shape().as_list()[-1],
-                                                       zero_pad=False,
-                                                       scale=False,
-                                                       scope='positional-encoding',
-                                                       reuse=None)
-            mh_keep_prob = tf.cond(self.is_train, lambda: self.__mh_keep_prob, lambda: 1.0)
-            # block (self attention + feed forward)
-            for i in range(self.__mh_num_layers):
-                attended_output = self.__self_attention(attended_output,
-                                                        keep_prob=mh_keep_prob,
-                                                        scope='self-attention-%s'%i)
-                attended_output = self.__feedforward(attended_output,
-                                                     scope='feed-forward-%s'%i)
-        self.attended_output = attended_output
+        transformed_output = tf.identity(self.rnn_output)
+        if self.__tf_used:
+            # add sinusoidal positional encoding
+            transformed_output += positional_encoding(self.sentence_lengths,
+                                                      self.sentence_length,
+                                                      transformed_output.get_shape().as_list()[-1],
+                                                      zero_pad=False,
+                                                      scale=False,
+                                                      scope='positional-encoding',
+                                                     reuse=None)
+            tf_keep_prob = tf.cond(self.is_train, lambda: self.__tf_keep_prob, lambda: 1.0)
+            # inputs last dimension must be equal to model_dim because we use a residual connection. 
+            model_dim = transformed_output.get_shape().as_list()[-1]
+            # block
+            for i in range(self.__tf_num_layers):
+                x = transformed_output
+                # layer norm
+                x_norm = normalize(x, scope='layer-norm-sa-%s'%i, reuse=None)
+                # multi-head attention
+                y = self.__self_attention(x_norm, model_dim=model_dim, scope='self-attention-%s'%i)
+                # residual and dropout
+                x = tf.nn.dropout(x + y, keep_prob=tf_keep_prob)
+                # layer norm
+                x_norm = normalize(x, scope='layer-norm-ffn-%s'%i, reuse=None)
+                # position-wise feed forward net
+                y = self.__feedforward(x_norm, model_dim=model_dim, scope='feed-forward-%s'%i)
+                # residual and dropout
+                y = tf.nn.dropout(x + y, keep_prob=tf_keep_prob)
+                transformed_output = y
+            # final layer norm
+            transformed_output = normalize(transformed_output, scope='layer-norm', reuse=None)
+        self.transformed_output = transformed_output
 
         """
         Projection layer
         """
-        self.logits = self.__projection(self.attended_output,
+        self.logits = self.__projection(self.transformed_output,
                                         self.class_size,
                                         scope='projection')                # (batch_size, sentence_length, class_size)
         self.logits_indices = tf.cast(tf.argmax(self.logits, 2), tf.int32) # (batch_size, sentence_length)
@@ -290,38 +295,34 @@ class Model:
             outputs = tf.transpose(outputs, perm=[1, 0, 2])
             return tf.nn.dropout(outputs, keep_prob)
 
-    def __self_attention(self, inputs, keep_prob=0.5, scope='self-attention'):
+    def __self_attention(self, inputs, model_dim=None, scope='self-attention'):
         """Apply self attention 
         """
         with tf.variable_scope(scope):
-            # inputs last dimension must be equal to model_dim because we use a residual connection. 
-            model_dim = inputs.get_shape().as_list()[-1]
+            if not model_dim: model_dim = inputs.get_shape().as_list()[-1]
             queries = inputs
             keys = inputs
             is_training = tf.cond(self.is_train, lambda: True, lambda: False)
             attended_queries = multihead_attention(queries,
                                                    keys,
-                                                   num_units=self.__mh_num_units,
-                                                   num_heads=self.__mh_num_heads,
+                                                   num_units=self.__tf_mh_num_units,
+                                                   num_heads=self.__tf_mh_num_heads,
                                                    model_dim=model_dim,
-                                                   dropout_rate=1.0 - keep_prob,
+                                                   dropout_rate=0.0, # no dropout here
                                                    is_training=is_training,
                                                    causality=False, # no future masking
                                                    scope='multihead-attention',
                                                    reuse=None)
-            # residual connection and layer normalization
-            return normalize(tf.add(inputs, attended_queries), scope='layer-norm', reuse=None)
+            return attended_queries
 
-    def __feedforward(self, inputs, scope='feed-forward'):
+    def __feedforward(self, inputs, model_dim=None, scope='feed-forward'):
         """Apply Point-wise feed forward layer
         """
         with tf.variable_scope(scope):
-            # inputs last dimension must be equal to model_dim because we use a residual connection.
-            model_dim = inputs.get_shape().as_list()[-1]
+            if not model_dim: model_dim = inputs.get_shape().as_list()[-1]
             num_units = [4*model_dim, model_dim]
             outputs = feedforward(inputs, num_units=num_units, scope=scope, reuse=None)
-            # residual connection and layer normalization
-            return normalize(tf.add(inputs, outputs), scope='layer-norm', reuse=None)
+            return outputs
 
     def __projection(self, inputs, out_dim, scope='projection'):
         """Apply fully-connected projection layer

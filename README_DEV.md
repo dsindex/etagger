@@ -22,12 +22,11 @@ gradient clipping : 10
 epoch : 70
 batch_size : 20
 +
-mh_used : True
-mh_num_layers : 1 -> 2
-mh_num_heads : 4
-mh_num_units : 32 -> 64
-mh_keep_prob : 0.5
-positional encoding + multi head attention + feed forward net
+tf_used : True
+tf_mh_num_layers : 1
+tf_mh_num_heads : 4
+tf_mh_num_units : 32
+tf_keep_prob : 0.5
 +
 save model by f1(token)
 +

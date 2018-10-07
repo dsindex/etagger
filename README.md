@@ -11,8 +11,8 @@ etagger
     - etc embedding
       - pos embedding, etc features(gazetteer features)
   - contextual encoding
-    - multi-layer Bidirectional LSTM + multi-head attention
-    - positional encoding + multi-layer of block(multi-head attention + feed forward net)
+    - multi-layer Bidirectional LSTM
+    - transformer(encoder)
   - decoding
     - CRF decoder
 
@@ -24,34 +24,6 @@ etagger
   - [sequence_tagging/ner_model.py](https://github.com/guillaumegenthial/sequence_tagging/blob/master/model/ner_model.py)
   - [tf_ner/masked_conv.py](https://github.com/guillaumegenthial/tf_ner/blob/master/models/chars_conv_lstm_crf/masked_conv.py)
   - [bilm](https://github.com/allenai/bilm-tf)
-
-- modification
-  - refactoring
-    - [x] config.py, input.py
-    - [x] inference.py
-    - [x] extend 5 tag(class) to 9 (automatically)
-    - [x] word embedding(glove)
-      - Glove6B(lowercase), Glove840B(no lowercase)
-    - [x] character embedding
-      - conv2d, conv1d(masked)
-    - [x] gazetteer features
-      - if we construct the gazetteer vocab from the training data, the performance is decreasing.
-      - recommend constructing the gazetteer vocab from other sources.
-    - [x] learning-rate decay
-    - [x] pos embedding
-    - [x] extend language specific features
-    - [x] bidirectional lstm
-      - tf.contrib.rnn.LSTMCell() with tf.nn.bidirectional_dynamic_rnn()
-      - tf.contrib.rnn.LSTMBlockFusedCell() with tf.contrib.rnn.TimeReversedFusedRNN()
-    - [x] multi-head self-attention
-    - [x] CRF
-    - [x] early stopping
-    - [ ] IOBES tagging schemes
-    - [ ] ELMO embedding
-    - [ ] curriculum learning
-      - sort the training data ascending order by average entropy(calculated at the end of layers) 
-    - [ ] serve api
-      - freeze model and serve
 
 - model
   ![graph-1](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1.png)
@@ -263,11 +235,15 @@ in IN O O O
     - [cnn-text-classification-tf](https://github.com/dennybritz/cnn-text-classification-tf/blob/master/text_cnn.py)
     - [lstm-char-cnn-tensorflow/models/LSTMTDNN.py](https://github.com/carpedm20/lstm-char-cnn-tensorflow/blob/master/models/LSTMTDNN.py)
 
-- multi-head attention
+- transformer
+  - articles
+    - [Building the Mighty Transformer for Sequence Tagging in PyTorch](https://medium.com/@kolloldas/building-the-mighty-transformer-for-sequence-tagging-in-pytorch-part-i-a1815655cd8)
   - tensorflow impl
     - [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py)
     - [transformer-tensorflow/transformer/attention.py](https://github.com/DongjunLee/transformer-tensorflow/blob/master/transformer/attention.py)
     - [seq2seq/pooling_encoder.py](https://github.com/google/seq2seq/blob/master/seq2seq/encoders/pooling_encoder.py)
+  - pytorch impl
+    - [torchnlp](https://github.com/kolloldas/torchnlp/tree/master/torchnlp)
 
 - CRF
   - articles
