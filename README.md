@@ -13,6 +13,7 @@ etagger
   - contextual encoding
     - multi-layer Bidirectional LSTM
     - transformer(encoder)
+      - positional encoding, multi-head attention, feed-forward net
   - decoding
     - CRF decoder
 

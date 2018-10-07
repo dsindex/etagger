@@ -15,10 +15,10 @@ class Model:
     __rnn_type = 'fused'           # normal | fused
     __rnn_size = 200               # size of RNN hidden unit
     __rnn_num_layers = 2           # number of RNN layers
-    __tf_used = True               # use transformer encoder layer or not
+    __tf_used = False              # use transformer encoder layer or not
     __tf_num_layers = 1            # number of layers for transformer encoder
     __tf_mh_num_heads = 4          # number of head for multi head attention
-    __tf_mh_num_units = 64         # Q,K,V dimension for multi head attention
+    __tf_mh_num_units = 32         # Q,K,V dimension for multi head attention
     __tf_keep_prob = 0.5           # keep probability for transformer encoder
 
     def __init__(self, config):
@@ -112,7 +112,7 @@ class Model:
                                                       scope='positional-encoding',
                                                      reuse=None)
             tf_keep_prob = tf.cond(self.is_train, lambda: self.__tf_keep_prob, lambda: 1.0)
-            # inputs last dimension must be equal to model_dim because we use a residual connection. 
+            # last dimension must be equal to model_dim because we use a residual connection. 
             model_dim = transformed_output.get_shape().as_list()[-1]
             # block
             for i in range(self.__tf_num_layers):
