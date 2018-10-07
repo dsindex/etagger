@@ -144,8 +144,7 @@ def inference_line(config):
      
     def build_bucket(nlp, line):
         bucket = []
-        uline = line.decode('utf-8','ignore') # unicode
-        doc = nlp(uline)
+        doc = nlp(line)
         for token in doc:
             begin = token.idx
             end   = begin + len(token.text) - 1
@@ -159,8 +158,8 @@ def inference_line(config):
             temp.append('O')     # no chunking info
             entity = get_entity(doc, begin, end)
             temp.append(entity)  # entity by spacy
-            utemp = ' '.join(temp)
-            bucket.append(utemp.encode('utf-8'))
+            temp = ' '.join(temp)
+            bucket.append(temp)
         return bucket
 
     import spacy
