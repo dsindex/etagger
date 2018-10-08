@@ -7,9 +7,9 @@ from model import Model
 from input import Input
 from token_eval  import TokenEval
 from chunk_eval  import ChunkEval
-from viterbi import viterbi_decode
-from general_utils import Progbar
+from progbar import Progbar
 from early_stopping import EarlyStopping
+from viterbi import viterbi_decode
 import os
 import sys
 import random
