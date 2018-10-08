@@ -1,6 +1,79 @@
 
 - experiments 7
 ```
+* test 7
+word embedding size : 300(glove840B)
+keep_prob : 0.5
+chr_conv_type : conv1d
+chracter embedding size : 100
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 50
+pos embedding size : 6
+pos embedding random init : -0.5 ~ 0.5
+pos one-hot : 5
+shape vec : 9
+rnn_used : False
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.0003 / 12000 / 0.9 -> 0.001 / 12000 / 0.7
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+tf_used : True
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4 -> 5
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
++
+save model by f1(token) -> f1(chunk)
++
+CRF
++
+bug fix for masking
+
+* test 6
+word embedding size : 300(glove840B)
+keep_prob : 0.5
+chr_conv_type : conv1d
+chracter embedding size : 100
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 50
+pos embedding size : 6
+pos embedding random init : -0.5 ~ 0.5
+pos one-hot : 5
+shape vec : 9
+rnn_used : False
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.7 -> 0.0003 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+tf_used : True
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
++
+positional encoding at the begining of every blocks
++
+save model by f1(token) -> f1(chunk)
++
+CRF
+
+token : 0.8925447984832733
+chunk : 0.8813469675599436
+
 * test 5
 word embedding size : 300(glove840B)
 keep_prob : 0.5

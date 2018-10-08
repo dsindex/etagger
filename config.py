@@ -28,7 +28,7 @@ class Config:
         self.use_crf = use_crf
         self.starter_learning_rate = 0.0003
         self.decay_steps = 12000
-        self.decay_rate = 0.9
+        self.decay_rate = 0.7
         self.is_train = is_train
         if self.is_train:
             self.epoch = args.epoch

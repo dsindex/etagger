@@ -21,7 +21,6 @@ etagger
   - [ner-lstm](https://github.com/monikkinom/ner-lstm)
   - [cnn-text-classification-tf](https://github.com/dennybritz/cnn-text-classification-tf/blob/master/text_cnn.py)
   - [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py)
-  - [seq2seq/pooling_encoder.py](https://github.com/google/seq2seq/blob/master/seq2seq/encoders/pooling_encoder.py)
   - [sequence_tagging/ner_model.py](https://github.com/guillaumegenthial/sequence_tagging/blob/master/model/ner_model.py)
   - [tf_ner/masked_conv.py](https://github.com/guillaumegenthial/tf_ner/blob/master/models/chars_conv_lstm_crf/masked_conv.py)
   - [bilm](https://github.com/allenai/bilm-tf)
@@ -150,13 +149,12 @@ test, max_sentence_length = 124
 ```
 
 - train
-  - command
-  ```
-  $ python train.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --sentence_length 125 --batch_size 20 --epoch 70
-  or
-  $ python train.py --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --batch_size 20 --epoch 70
-  $ rm -rf runs; tensorboard --logdir runs/summaries/ --port 6008
-  ```
+```
+$ python train.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --sentence_length 125 --batch_size 20 --epoch 70
+or
+$ python train.py --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --batch_size 20 --epoch 70
+$ rm -rf runs; tensorboard --logdir runs/summaries/ --port 6008
+```
     
 - inference(bulk)
 ```
@@ -248,6 +246,14 @@ in IN O O O
 - etc tips
   - save best model by using token-based f1. token-based f1 is slightly better than chunk-based f1
   - be careful for word lowercase when you are using glove6B embeddings. those are all lowercased.
+
+- Transformer
+  - the f1 of train/dev by token are relatively lower than the f1 of the BiLSTM. but after applying the CRF layer, those f1 by token are increased very sharply.
+  - does it mean that the Transformer is weak for collecting context for deciding label at the current position? then, how to overcome?
+  - revise the position-wise feed forward net
+    - padding before and after
+      - (batch_size, sentence_length, model_dim) -> (batch_size, 1+sentence_length+1, model_dim)
+    - conv1d with kernel size 3
 
 ### references
 
