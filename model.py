@@ -19,7 +19,7 @@ class Model:
     __tf_num_layers = 1            # number of layers for transformer encoder
     __tf_keep_prob = 0.5           # keep probability for transformer encoder
     __tf_mh_num_heads = 4          # number of head for multi head attention
-    __tf_mh_num_units = 64 b       # Q,K,V dimension for multi head attention
+    __tf_mh_num_units = 64         # Q,K,V dimension for multi head attention
     __tf_mh_keep_prob = 0.8        # keep probability for multi head attention
     __tf_ffn_keep_prob = 0.8       # keep probability for feed forward net
 

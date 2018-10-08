@@ -25,9 +25,9 @@ batch_size : 20
 +
 tf_used : True
 tf_keep_prob : 0.5
-tf_mh_num_layers : 1 -> 3
+tf_mh_num_layers : 1
 tf_mh_num_heads : 4
-tf_mh_num_units : 32 -> 128
+tf_mh_num_units : 64
 tf_mh_keep_prob : 0.8
 tf_ffn_keep_prob : 0.8
 +
