@@ -11,7 +11,7 @@ etagger
     - etc embedding
       - pos embedding, etc features(gazetteer features)
   - contextual encoding
-    - multi-layer Bidirectional LSTM
+    - multi-layer BiLSTM
     - transformer(encoder)
       - positional encoding, multi-head attention, feed-forward net
   - decoding
@@ -32,9 +32,12 @@ etagger
 - evaluation
   - [experiments](https://github.com/dsindex/etagger/blob/master/README_DEV.md)
   - fscore
-    - experiments 6, test 7
+    - mult-layer BiLSTM : experiments 6, test 7
       - per-token(partial) micro f1 : 0.9157317073170732
       - per-chunk(exact)   micro f1 : **0.9102156238953694**
+    - transformer :
+      - per-token(partial) micro f1 :
+      - per-chunk(exact)   micro f1 :
   - comparision to previous research
     - implementations
       - [Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)

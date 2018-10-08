@@ -11,13 +11,13 @@ class Model:
     __chr_conv_type = 'conv1d'     # conv1d | conv2d
     __filter_sizes = [3]           # filter sizes
     __num_filters = 50             # number of filters
-    __rnn_used = True              # use rnn layer or not
+    __rnn_used = False             # use rnn layer or not
     __rnn_type = 'fused'           # normal | fused
     __rnn_size = 200               # size of RNN hidden unit
     __rnn_num_layers = 2           # number of RNN layers
-    __tf_used = False              # use transformer encoder layer or not
-    __tf_num_layers = 1            # number of layers for transformer encoder
-    __tf_keep_prob = 0.5           # keep probability for transformer encoder
+    __tf_used = True               # use transformer encoder layer or not
+    __tf_num_layers = 4            # number of layers for transformer encoder
+    __tf_keep_prob = 0.8           # keep probability for transformer encoder
     __tf_mh_num_heads = 4          # number of head for multi head attention
     __tf_mh_num_units = 64         # Q,K,V dimension for multi head attention
     __tf_mh_keep_prob = 0.8        # keep probability for multi head attention
@@ -110,29 +110,29 @@ class Model:
             tf_ffn_keep_prob = tf.cond(self.is_train, lambda: self.__tf_ffn_keep_prob, lambda: 1.0)
             # last dimension must be equal to model_dim because we use a residual connection. 
             model_dim = transformed_output.get_shape().as_list()[-1]
+            # add sinusoidal positional encoding
+            transformed_output += positional_encoding(self.sentence_lengths,
+                                                      self.sentence_length,
+                                                      transformed_output.get_shape().as_list()[-1],
+                                                      zero_pad=False,
+                                                      scale=False,
+                                                      scope='positional-encoding',
+                                                      reuse=None)
             # block
             for i in range(self.__tf_num_layers):
                 x = transformed_output
-                # add sinusoidal positional encoding
-                x += positional_encoding(self.sentence_lengths,
-                                         self.sentence_length,
-                                         x.get_shape().as_list()[-1],
-                                         zero_pad=False,
-                                         scale=False,
-                                         scope='positional-encoding',
-                                         reuse=None)
                 # layer norm
                 x_norm = normalize(x, scope='layer-norm-sa-%s'%i, reuse=None)
                 # multi-head attention
                 y = self.__self_attention(x_norm, model_dim=model_dim, keep_prob=tf_mh_keep_prob, scope='self-attention-%s'%i)
                 # residual and dropout
-                x = tf.nn.dropout(x + y, keep_prob=tf_keep_prob)
+                x = tf.nn.dropout(x_norm + y, keep_prob=tf_keep_prob)
                 # layer norm
                 x_norm = normalize(x, scope='layer-norm-ffn-%s'%i, reuse=None)
                 # position-wise feed forward net
                 y = self.__feedforward(x_norm, model_dim=model_dim, keep_prob=tf_ffn_keep_prob, scope='feed-forward-%s'%i)
                 # residual and dropout
-                x = tf.nn.dropout(x + y, keep_prob=tf_keep_prob)
+                x = tf.nn.dropout(x_norm + y, keep_prob=tf_keep_prob)
                 transformed_output = x
             # final layer norm
             transformed_output = normalize(transformed_output, scope='layer-norm', reuse=None)

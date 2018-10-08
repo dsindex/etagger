@@ -26,9 +26,9 @@ class Config:
         self.word_length = args.word_length
         self.restore = args.restore
         self.use_crf = use_crf
-        self.starter_learning_rate = 0.001
+        self.starter_learning_rate = 0.0003
         self.decay_steps = 12000
-        self.decay_rate = 0.7
+        self.decay_rate = 0.9
         self.is_train = is_train
         if self.is_train:
             self.epoch = args.epoch

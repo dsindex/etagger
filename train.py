@@ -75,7 +75,7 @@ def do_train(model, config, train_data, dev_data, test_data):
             dev_summary_writer.add_summary(dev_summaries, step)
             print('dev precision, recall, f1(token): ')
             token_f1 = TokenEval.compute_f1(config.class_size, logits, dev_data.sentence_tags, sentence_lengths)
-            '''
+            
             if config.use_crf:
                 viterbi_sequences = viterbi_decode(logits, trans_params, sentence_lengths)
                 tag_preds = dev_data.logits_indices_to_tags_seq(viterbi_sequences, sentence_lengths)
@@ -85,9 +85,11 @@ def do_train(model, config, train_data, dev_data, test_data):
             dev_prec, dev_rec, dev_f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
             print('dev precision, recall, f1(chunk): ', dev_prec, dev_rec, dev_f1)
             chunk_f1 = dev_f1
-            m = chunk_f1 # slightly lower than token-based f1 for test
+            m = chunk_f1
             '''
             m = token_f1
+            '''
+
             # early stopping
             if early_stopping.validate(m, measure='f1'): break
             if m > maximum:
