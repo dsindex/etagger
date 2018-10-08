@@ -6,16 +6,15 @@ etagger
 - personally, i'm interested in NER tasks. so, i decided to implement a sequence tagging module by using 
   - encoding
     - basic embedding
-      - 1) word embedding(glove) and character convolutional embedding
-      - 2) ELMO embedding
+      - [x] 1) word embedding(glove) and character convolutional embedding
+      - [ ] 2) ELMO embedding
     - etc embedding
-      - pos embedding, etc features(gazetteer features)
+      - [x] pos embedding, etc features(shape, pos, gazetteer(not used))
   - contextual encoding
-    - 1) multi-layer BiLSTM
-    - 2) Transformer(encoder)
-      - positional encoding, multi-head attention, feed-forward net
+    - [x] 1) multi-layer BiLSTM
+    - [x] 2) Transformer(encoder)
   - decoding
-    - CRF decoder
+    - [x] CRF decoder
 
 - thankfully, there are so many repositories available for reference. i borrowed those codes as many as possible to use here.
   - [ner-lstm](https://github.com/monikkinom/ner-lstm)
@@ -41,13 +40,6 @@ etagger
 - evaluation
   - [experiment logs](https://github.com/dsindex/etagger/blob/master/README_DEV.md)
   - results
-    - Transformer :
-      - setting
-        - experiments 7, test 5
-        - rnn_used : False
-        - tf_used : True
-      - per-token(partial) micro f1 : 0.8964842555793334
-      - per-chunk(exact)   micro f1 : **0.886369628262589**
     - mult-layer BiLSTM only
       - setting
         - experiments 7, test 2
@@ -59,6 +51,13 @@ etagger
       - setting : experiments 6, test 7
       - per-token(partial) micro f1 : 0.9157317073170732
       - per-chunk(exact)   micro f1 : **0.9102156238953694**
+    - Transformer
+      - setting
+        - experiments 7, test 5
+        - rnn_used : False
+        - tf_used : True
+      - per-token(partial) micro f1 : 0.8964842555793334
+      - per-chunk(exact)   micro f1 : **0.886369628262589**
   - comparision to previous research
     - implementations
       - [Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
