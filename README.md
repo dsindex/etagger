@@ -22,6 +22,7 @@ etagger
   - [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py)
   - [sequence_tagging/ner_model.py](https://github.com/guillaumegenthial/sequence_tagging/blob/master/model/ner_model.py)
   - [tf_ner/masked_conv.py](https://github.com/guillaumegenthial/tf_ner/blob/master/models/chars_conv_lstm_crf/masked_conv.py)
+  - [torchnlp/layers.py](https://github.com/kolloldas/torchnlp/blob/master/torchnlp/modules/transformer/layers.py)
   - [bilm](https://github.com/allenai/bilm-tf)
 
 - my main questions are
