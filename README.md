@@ -47,12 +47,17 @@ etagger
       - [sequence_tagging](https://github.com/guillaumegenthial/sequence_tagging)
         - tested
         - Glove6B.100
-        - per-chunk(exact) miscro F1: 0.8998
+        - per-chunk(exact) micro F1: 0.8998
       - [tf_ner](https://github.com/guillaumegenthial/tf_ner)
         - tested
         - Glove840B.300
-        - F1 : 0.905 ~ 0.907 (chars_conv_lstm_crf)
+        - per-chunk(exact) micro F1 : 0.905 ~ 0.907 (chars_conv_lstm_crf)
           - reported F1 : 0.9118
+      - [torchnlp](https://github.com/kolloldas/torchnlp)
+        - tested
+        - Glove6B.200
+        - per-chunk(exact) micro F1 : 0.8845
+          - just 1 block of transformer encoder
     - SOTA
       - [Semi-Supervised Sequence Modeling with Cross-View Training](https://arxiv.org/pdf/1809.08370.pdf)
         - reported F1 : 0.926
