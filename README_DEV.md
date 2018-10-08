@@ -34,6 +34,9 @@ save model by f1(token) -> f1(chunk)
 +
 CRF
 
+token : 0.8964842555793334 -> transformer best
+chunk : 0.886369628262589  -> transformer best
+
 
 * test 4
 word embedding size : 300(glove840B)
@@ -138,8 +141,8 @@ save model by f1(token)
 +
 CRF
 
-token : 0.9132052455016773
-chunk : 0.9064951088393407
+token : 0.9132052455016773 -> BiLSTM only best
+chunk : 0.9064951088393407 -> BiLSTM only best
 
 * test 1
 word embedding size : 300(glove840B)
@@ -428,10 +431,10 @@ save model by f1(token)
 +
 CRF
 
-token : 0.9157317073170732 -> best
-chunk : 0.9102156238953694 -> best
+token : 0.9157317073170732 -> BiLSTM + multi-head attention best
+chunk : 0.9102156238953694 -> BiLSTM + multi-head attention best
 
-# rerun #
+# re-run #
 token : 0.9121906507791018
 chunk : 0.9068618804021874
 

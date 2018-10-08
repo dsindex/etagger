@@ -3,21 +3,21 @@ etagger
 
 ### description
 
-- named entity tagger using
+- personally, i'm interested in NER tasks. so, i decided to implement a sequence tagging module by using 
   - encoding
     - basic embedding
-      - word embedding(glove) and character convolutional embedding
-      - ELMO embedding
+      - 1) word embedding(glove) and character convolutional embedding
+      - 2) ELMO embedding
     - etc embedding
       - pos embedding, etc features(gazetteer features)
   - contextual encoding
-    - multi-layer BiLSTM
-    - transformer(encoder)
+    - 1) multi-layer BiLSTM
+    - 2) Transformer(encoder)
       - positional encoding, multi-head attention, feed-forward net
   - decoding
     - CRF decoder
 
-- base repository
+- thankfully, there are so many repositories available for reference. i borrowed those codes as many as possible to use here.
   - [ner-lstm](https://github.com/monikkinom/ner-lstm)
   - [cnn-text-classification-tf](https://github.com/dennybritz/cnn-text-classification-tf/blob/master/text_cnn.py)
   - [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py)
@@ -26,38 +26,58 @@ etagger
   - [tf_ner/masked_conv.py](https://github.com/guillaumegenthial/tf_ner/blob/master/models/chars_conv_lstm_crf/masked_conv.py)
   - [bilm](https://github.com/allenai/bilm-tf)
 
-- model
-  ![graph-1](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1.png)
+- my main questions are
+  - can this module perform at the level of state of the art?
+  - how to make it faster when it comes to use the BiLSTM?
+  - can the Transformer have completing results againt the BiLSTM? and how much faster?
+
+### model and evaluation results
+
+- models
+![BiLSTM](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1-1.png)
+![Transformer](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1-2.png)
 
 - evaluation
-  - [experiments](https://github.com/dsindex/etagger/blob/master/README_DEV.md)
-  - fscore
-    - mult-layer BiLSTM : experiments 6, test 7
+  - [experiment logs](https://github.com/dsindex/etagger/blob/master/README_DEV.md)
+  - results
+    - Transformer :
+      - setting
+        - experiments 7, test 5
+        - rnn_used : False
+        - tf_used : True
+      - per-token(partial) micro f1 : 0.8964842555793334
+      - per-chunk(exact)   micro f1 : **0.886369628262589**
+    - mult-layer BiLSTM only
+      - setting
+        - experiments 7, test 2
+        - rnn_used : True
+        - tf_used : False
+      - per-token(partial) micro f1 : 0.9132052455016773
+      - per-chunk(exact)   micro f1 : **0.9064951088393407**
+    - mult-layer BiLSTM + multi-head attention
+      - setting : experiments 6, test 7
       - per-token(partial) micro f1 : 0.9157317073170732
       - per-chunk(exact)   micro f1 : **0.9102156238953694**
-    - transformer :
-      - per-token(partial) micro f1 :
-      - per-chunk(exact)   micro f1 :
   - comparision to previous research
     - implementations
       - [Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
         - tested
         - Glove6B.100
-        - per-chunk(exact) micro Prec: 0.887, Rec: 0.902, F1: 0.894
+        - Prec: 0.887, Rec: 0.902, F1: 0.894
       - [sequence_tagging](https://github.com/guillaumegenthial/sequence_tagging)
         - tested
         - Glove6B.100
-        - per-chunk(exact) micro F1: 0.8998
+        - F1: 0.8998
       - [tf_ner](https://github.com/guillaumegenthial/tf_ner)
         - tested
         - Glove840B.300
-        - per-chunk(exact) micro F1 : 0.905 ~ 0.907 (chars_conv_lstm_crf)
+        - F1 : 0.905 ~ 0.907 (chars_conv_lstm_crf)
           - reported F1 : 0.9118
       - [torchnlp](https://github.com/kolloldas/torchnlp)
         - tested
         - Glove6B.200
-        - per-chunk(exact) micro F1 : 0.8845
-          - just 1 block of transformer encoder
+        - F1 : 0.8845
+          - just 1 block of Transformer encoder
     - SOTA
       - [Semi-Supervised Sequence Modeling with Cross-View Training](https://arxiv.org/pdf/1809.08370.pdf)
         - reported F1 : 0.926
@@ -106,7 +126,7 @@ tensorflow 1.11, CUDA 9.0, cuDNN 7.31
   $ python -m spacy download en
   ```
 
-### how to 
+### how to run
 
 - convert word embedding to pickle
 ```
@@ -135,33 +155,6 @@ test, max_sentence_length = 124
   $ python train.py --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --batch_size 20 --epoch 70
   $ rm -rf runs; tensorboard --logdir runs/summaries/ --port 6008
   ```
-  - accuracy and loss
-  ![graph-2](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-2.png)
-  - abnormal case when using multi-head
-  ![graph-3](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-3.png)
-  - why? 
-  ```
-  i guess that the softmax(applied in multi-head attention functions) was corrupted by paddings.
-    -> so, i replaced the multi-head attention code to `https://github.com/Kyubyong/transformer/blob/master/modules.py`
-       which applies key and query masking for paddings.
-    -> however, simillar corruption was happended.
-    -> it was caused by the tf.contrib.layers.layer_norm() which normalizes over [begin_norm_axis ~ R-1] dimensions.
-    -> what about remove the layer_norm()? performance goes down!
-    -> try to use other layer normalization code from `https://github.com/Kyubyong/transformer/blob/master/modules.py`
-       which normalizes over the last dimension only.
-       this code perfectly matches to my intention.
-  ```
-  - after replacing layer_norm() to normalize() and applying the dropout of word embeddings
-  ![graph-4](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-4.png)
-  - train, dev accuracy after applying LSTMBlockFusedCell which is 2~3 times faster than LSTMCell
-  ![graph-5](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-5.png)
-  - tips for training speed up
-    - filter out words(which are not in train/dev/test data) from word embeddings. but not for service.
-    - use LSTMBlockFusedCell for bidirectional LSTM. this is 2~3 times faster than LSTMCell.
-    - use early stopping
-  - etc tips
-    - save best model by using token-based f1. token-based f1 is slightly better than chunk-based f1
-    - be careful for word lowercase when you are using glove6B embeddings. those are all lowercased.
     
 - inference(bulk)
 ```
@@ -220,6 +213,40 @@ in IN O O O
 . . O I-DATE O
 ```
 
+### development note
+
+- accuracy and loss
+![graph-2](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-2.png)
+
+- abnormal case when using multi-head
+![graph-3](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-3.png)
+  - why? 
+  ```
+  i guess that the softmax(applied in multi-head attention functions) was corrupted by paddings.
+    -> so, i replaced the multi-head attention code to `https://github.com/Kyubyong/transformer/blob/master/modules.py`
+       which applies key and query masking for paddings.
+    -> however, simillar corruption was happended.
+    -> it was caused by the tf.contrib.layers.layer_norm() which normalizes over [begin_norm_axis ~ R-1] dimensions.
+    -> what about remove the layer_norm()? performance goes down!
+    -> try to use other layer normalization code from `https://github.com/Kyubyong/transformer/blob/master/modules.py`
+       which normalizes over the last dimension only.
+       this code perfectly matches to my intention.
+  ```
+  - after replacing layer_norm() to normalize() and applying the dropout of word embeddings
+  ![graph-4](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-4.png)
+
+- train, dev accuracy after applying LSTMBlockFusedCell which is 2~3 times faster than LSTMCell
+![graph-5](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-5.png)
+
+- tips for training speed up
+  - filter out words(which are not in train/dev/test data) from word embeddings. but not for service.
+  - use LSTMBlockFusedCell for bidirectional LSTM. this is 2~3 times faster than LSTMCell.
+  - use early stopping
+
+- etc tips
+  - save best model by using token-based f1. token-based f1 is slightly better than chunk-based f1
+  - be careful for word lowercase when you are using glove6B embeddings. those are all lowercased.
+
 ### references
 
 - general
@@ -246,7 +273,7 @@ in IN O O O
     - [cnn-text-classification-tf/text_cnn.py](https://github.com/dennybritz/cnn-text-classification-tf/blob/master/text_cnn.py)
     - [lstm-char-cnn-tensorflow/LSTMTDNN.py](https://github.com/carpedm20/lstm-char-cnn-tensorflow/blob/master/models/LSTMTDNN.py)
 
-- transformer
+- Transformer
   - articles
     - [Building the Mighty Transformer for Sequence Tagging in PyTorch](https://medium.com/@kolloldas/building-the-mighty-transformer-for-sequence-tagging-in-pytorch-part-i-a1815655cd8)
     - [QANET: COMBINING LOCAL CONVOLUTION WITH GLOBAL SELF-ATTENTION FOR READING COMPREHENSION](https://arxiv.org/pdf/1804.09541.pdf)
