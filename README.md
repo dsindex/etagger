@@ -34,8 +34,10 @@ etagger
 ### model and evaluation results
 
 - models
-![BiLSTM](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1-1.png)
-![Transformer](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1-2.png)
+  - BiLSTM
+  ![BiLSTM](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1-1.png)
+  - Transformer
+  ![Transformer](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1-2.png)
 
 - evaluation
   - [experiment logs](https://github.com/dsindex/etagger/blob/master/README_DEV.md)
