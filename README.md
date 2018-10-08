@@ -243,11 +243,8 @@ in IN O O O
   - use LSTMBlockFusedCell for bidirectional LSTM. this is 2~3 times faster than LSTMCell.
   - use early stopping
 
-- etc tips
-  - save best model by using token-based f1. token-based f1 is slightly better than chunk-based f1
-  - be careful for word lowercase when you are using glove6B embeddings. those are all lowercased.
-
 - Transformer
+  - start with small learning rate.
   - be careful to use residual connection after multi-head attention or feed forward net.
     - `x = tf.nn.dropout(x + y)` -> `x = tf.nn.dropout(x_norm + y)`
   - the f1 of train/dev by token are relatively lower than the f1 of the BiLSTM. but after applying the CRF layer, those f1 by token are increased very sharply.
@@ -256,6 +253,10 @@ in IN O O O
       - padding before and after
         - (batch_size, sentence_length, model_dim) -> (batch_size, 1+sentence_length+1, model_dim)
       - conv1d with kernel size 3
+
+- etc tips
+  - save best model by using token-based f1. token-based f1 is slightly better than chunk-based f1
+  - be careful for word lowercase when you are using glove6B embeddings. those are all lowercased.
 
 ### references
 
