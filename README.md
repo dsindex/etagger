@@ -223,37 +223,40 @@ in IN O O O
     - [Learning Rate Decay](https://www.tensorflow.org/api_docs/python/tf/train/exponential_decay)
   - tensorflow impl
     - [ner-lstm](https://github.com/monikkinom/ner-lstm)
-    - [sequence_tagging](https://github.com/guillaumegenthial/sequence_tagging/blob/master/model/ner_model.py)
+    - [sequence_tagging](https://github.com/guillaumegenthial/sequence_tagging)
     - [tf_ner](https://github.com/guillaumegenthial/tf_ner)
   - keras impl
-    - [keras implementation](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
+    - [Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
+  - pytorch impl
+    - [torchnlp](https://github.com/kolloldas/torchnlp/tree/master/torchnlp)
 
 - character convolution
   - articles
     - [Implementing a CNN for Text Classification in TensorFlow](http://www.wildml.com/2015/12/implementing-a-cnn-for-text-classification-in-tensorflow/)
     - [Implementing a sentence classification using Char level CNN & RNN](https://github.com/cuteboydot/Sentence-Classification-using-Char-CNN-and-RNN)
   - tensorflow impl
-    - [cnn-text-classification-tf](https://github.com/dennybritz/cnn-text-classification-tf/blob/master/text_cnn.py)
-    - [lstm-char-cnn-tensorflow/models/LSTMTDNN.py](https://github.com/carpedm20/lstm-char-cnn-tensorflow/blob/master/models/LSTMTDNN.py)
+    - [cnn-text-classification-tf/text_cnn.py](https://github.com/dennybritz/cnn-text-classification-tf/blob/master/text_cnn.py)
+    - [lstm-char-cnn-tensorflow/LSTMTDNN.py](https://github.com/carpedm20/lstm-char-cnn-tensorflow/blob/master/models/LSTMTDNN.py)
 
 - transformer
   - articles
     - [Building the Mighty Transformer for Sequence Tagging in PyTorch](https://medium.com/@kolloldas/building-the-mighty-transformer-for-sequence-tagging-in-pytorch-part-i-a1815655cd8)
+    - [QANET: COMBINING LOCAL CONVOLUTION WITH GLOBAL SELF-ATTENTION FOR READING COMPREHENSION](https://arxiv.org/pdf/1804.09541.pdf)
   - tensorflow impl
     - [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py)
-    - [transformer-tensorflow/transformer/attention.py](https://github.com/DongjunLee/transformer-tensorflow/blob/master/transformer/attention.py)
+    - [transformer-tensorflow/attention.py](https://github.com/DongjunLee/transformer-tensorflow/blob/master/transformer/attention.py)
     - [seq2seq/pooling_encoder.py](https://github.com/google/seq2seq/blob/master/seq2seq/encoders/pooling_encoder.py)
   - pytorch impl
-    - [torchnlp](https://github.com/kolloldas/torchnlp/tree/master/torchnlp)
+    - [torchnlp/sublayers.py](https://github.com/kolloldas/torchnlp/blob/master/torchnlp/modules/transformer/sublayers.py)
 
 - CRF
   - articles
     - [Sequence Tagging with Tensorflow](https://guillaumegenthial.github.io/sequence-tagging-with-tensorflow.html)
     - [ADVANCED: MAKING DYNAMIC DECISIONS AND THE BI-LSTM CRF](https://pytorch.org/tutorials/beginner/nlp/advanced_tutorial.html)
   - tensorflow impl
-    - [sequence_tagging](https://github.com/guillaumegenthial/sequence_tagging/blob/master/model/ner_model.py)
-    - [tf_ner](https://github.com/guillaumegenthial/tf_ner)
-    - [tensorflow/contrib/python/opps/crf.py](https://github.com/tensorflow/tensorflow/blob/r1.10/tensorflow/contrib/crf/python/ops/crf.py)
+    - [sequence_tagging/ner_model.py](https://github.com/guillaumegenthial/sequence_tagging/blob/master/model/ner_model.py)
+    - [tf_ner/main.py](https://github.com/guillaumegenthial/tf_ner/blob/master/models/chars_conv_lstm_crf/main.py)
+    - [tensorflow/crf.py](https://github.com/tensorflow/tensorflow/blob/r1.10/tensorflow/contrib/crf/python/ops/crf.py)
   - pytorch impl
     - [allennlp/conditional_random_field.py](https://github.com/allenai/allennlp/blob/master/allennlp/modules/conditional_random_field.py)
 

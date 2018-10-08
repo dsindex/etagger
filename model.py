@@ -17,9 +17,11 @@ class Model:
     __rnn_num_layers = 2           # number of RNN layers
     __tf_used = False              # use transformer encoder layer or not
     __tf_num_layers = 1            # number of layers for transformer encoder
-    __tf_mh_num_heads = 4          # number of head for multi head attention
-    __tf_mh_num_units = 32         # Q,K,V dimension for multi head attention
     __tf_keep_prob = 0.5           # keep probability for transformer encoder
+    __tf_mh_num_heads = 4          # number of head for multi head attention
+    __tf_mh_num_units = 64 b       # Q,K,V dimension for multi head attention
+    __tf_mh_keep_prob = 0.8        # keep probability for multi head attention
+    __tf_ffn_keep_prob = 0.8       # keep probability for feed forward net
 
     def __init__(self, config):
         self.embvec = config.embvec
@@ -103,33 +105,35 @@ class Model:
         """
         transformed_output = tf.identity(self.rnn_output)
         if self.__tf_used:
-            # add sinusoidal positional encoding
-            transformed_output += positional_encoding(self.sentence_lengths,
-                                                      self.sentence_length,
-                                                      transformed_output.get_shape().as_list()[-1],
-                                                      zero_pad=False,
-                                                      scale=False,
-                                                      scope='positional-encoding',
-                                                     reuse=None)
             tf_keep_prob = tf.cond(self.is_train, lambda: self.__tf_keep_prob, lambda: 1.0)
+            tf_mh_keep_prob = tf.cond(self.is_train, lambda: self.__tf_mh_keep_prob, lambda: 1.0)
+            tf_ffn_keep_prob = tf.cond(self.is_train, lambda: self.__tf_ffn_keep_prob, lambda: 1.0)
             # last dimension must be equal to model_dim because we use a residual connection. 
             model_dim = transformed_output.get_shape().as_list()[-1]
             # block
             for i in range(self.__tf_num_layers):
                 x = transformed_output
+                # add sinusoidal positional encoding
+                x += positional_encoding(self.sentence_lengths,
+                                         self.sentence_length,
+                                         x.get_shape().as_list()[-1],
+                                         zero_pad=False,
+                                         scale=False,
+                                         scope='positional-encoding',
+                                         reuse=None)
                 # layer norm
                 x_norm = normalize(x, scope='layer-norm-sa-%s'%i, reuse=None)
                 # multi-head attention
-                y = self.__self_attention(x_norm, model_dim=model_dim, scope='self-attention-%s'%i)
+                y = self.__self_attention(x_norm, model_dim=model_dim, keep_prob=tf_mh_keep_prob, scope='self-attention-%s'%i)
                 # residual and dropout
                 x = tf.nn.dropout(x + y, keep_prob=tf_keep_prob)
                 # layer norm
                 x_norm = normalize(x, scope='layer-norm-ffn-%s'%i, reuse=None)
                 # position-wise feed forward net
-                y = self.__feedforward(x_norm, model_dim=model_dim, scope='feed-forward-%s'%i)
+                y = self.__feedforward(x_norm, model_dim=model_dim, keep_prob=tf_ffn_keep_prob, scope='feed-forward-%s'%i)
                 # residual and dropout
-                y = tf.nn.dropout(x + y, keep_prob=tf_keep_prob)
-                transformed_output = y
+                x = tf.nn.dropout(x + y, keep_prob=tf_keep_prob)
+                transformed_output = x
             # final layer norm
             transformed_output = normalize(transformed_output, scope='layer-norm', reuse=None)
         self.transformed_output = transformed_output
@@ -295,7 +299,7 @@ class Model:
             outputs = tf.transpose(outputs, perm=[1, 0, 2])
             return tf.nn.dropout(outputs, keep_prob)
 
-    def __self_attention(self, inputs, model_dim=None, scope='self-attention'):
+    def __self_attention(self, inputs, model_dim=None, keep_prob=0.5, scope='self-attention'):
         """Apply self attention 
         """
         with tf.variable_scope(scope):
@@ -308,20 +312,21 @@ class Model:
                                                    num_units=self.__tf_mh_num_units,
                                                    num_heads=self.__tf_mh_num_heads,
                                                    model_dim=model_dim,
-                                                   dropout_rate=0.0, # no dropout here
+                                                   dropout_rate=1.0 - keep_prob,
                                                    is_training=is_training,
                                                    causality=False, # no future masking
                                                    scope='multihead-attention',
                                                    reuse=None)
             return attended_queries
 
-    def __feedforward(self, inputs, model_dim=None, scope='feed-forward'):
+    def __feedforward(self, inputs, model_dim=None, keep_prob=0.5, scope='feed-forward'):
         """Apply Point-wise feed forward layer
         """
         with tf.variable_scope(scope):
             if not model_dim: model_dim = inputs.get_shape().as_list()[-1]
-            num_units = [4*model_dim, model_dim]
+            num_units = [2*model_dim, model_dim]
             outputs = feedforward(inputs, num_units=num_units, scope=scope, reuse=None)
+            outputs = tf.nn.dropout(outputs, keep_prob)
             return outputs
 
     def __projection(self, inputs, out_dim, scope='projection'):
