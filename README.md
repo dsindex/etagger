@@ -248,12 +248,14 @@ in IN O O O
   - be careful for word lowercase when you are using glove6B embeddings. those are all lowercased.
 
 - Transformer
+  - be careful to use residual connection after multi-head attention or feed forward net.
+    - `x = tf.nn.dropout(x + y)` -> `x = tf.nn.dropout(x_norm + y)`
   - the f1 of train/dev by token are relatively lower than the f1 of the BiLSTM. but after applying the CRF layer, those f1 by token are increased very sharply.
-  - does it mean that the Transformer is weak for collecting context for deciding label at the current position? then, how to overcome?
-  - revise the position-wise feed forward net
-    - padding before and after
-      - (batch_size, sentence_length, model_dim) -> (batch_size, 1+sentence_length+1, model_dim)
-    - conv1d with kernel size 3
+    - does it mean that the Transformer is weak for collecting context for deciding label at the current position? then, how to overcome?
+    - try to revise the position-wise feed forward net
+      - padding before and after
+        - (batch_size, sentence_length, model_dim) -> (batch_size, 1+sentence_length+1, model_dim)
+      - conv1d with kernel size 3
 
 ### references
 
