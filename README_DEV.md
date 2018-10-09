@@ -17,7 +17,7 @@ rnn_used : False
 rnn_type : fused
 rnn_size : 200
 rnn_num_layers : 2
-learning_rate : exponential_decay(), 0.0003 / 12000 / 0.9 -> 0.001 / 12000 / 0.7
+learning_rate : exponential_decay(), 0.0003 / 12000 / 0.7
 gradient clipping : 10
 epoch : 70
 batch_size : 20
@@ -37,7 +37,8 @@ save model by f1(token) -> f1(chunk)
 +
 CRF
 
-
+token : 0.9002635934530743 -> transformer best
+chunk : 0.8959943156585842 -> transformer best
 
 * test 7
 word embedding size : 300(glove840B)
@@ -148,8 +149,8 @@ save model by f1(token) -> f1(chunk)
 +
 CRF
 
-token : 0.8964842555793334 -> transformer best
-chunk : 0.886369628262589  -> transformer best
+token : 0.8964842555793334
+chunk : 0.886369628262589
 
 
 * test 4

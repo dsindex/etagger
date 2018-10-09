@@ -41,6 +41,14 @@ etagger
 - evaluation
   - [experiment logs](https://github.com/dsindex/etagger/blob/master/README_DEV.md)
   - results
+    - Transformer
+      - setting
+        - experiments 7, test 5
+        - rnn_used : False
+        - tf_used : True
+      - per-token(partial) micro f1 : 0.9002635934530743
+      - per-chunk(exact)   micro f1 : **0.8959943156585842**
+      - average processing time per bucket(TITAN X (Pascal) 1 GPU, 12196MiB) : 0.0199788929196833 sec
     - mult-layer BiLSTM only
       - setting
         - experiments 7, test 2
@@ -48,17 +56,11 @@ etagger
         - tf_used : False
       - per-token(partial) micro f1 : 0.9132052455016773
       - per-chunk(exact)   micro f1 : **0.9064951088393407**
+      - average processing time per bucket(TITAN X (Pascal) 1 GPU, 12196MiB) : 
     - mult-layer BiLSTM + multi-head attention
       - setting : experiments 6, test 7
       - per-token(partial) micro f1 : 0.9157317073170732
       - per-chunk(exact)   micro f1 : **0.9102156238953694**
-    - Transformer
-      - setting
-        - experiments 7, test 5
-        - rnn_used : False
-        - tf_used : True
-      - per-token(partial) micro f1 : 0.8964842555793334
-      - per-chunk(exact)   micro f1 : **0.886369628262589**
   - comparision to previous research
     - implementations
       - [Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
