@@ -132,7 +132,7 @@ tensorflow 1.11, CUDA 9.0, cuDNN 7.31
 - data
   - [download data of CoNLL 2003 shared task](https://github.com/mxhofer/Named-Entity-Recognition-BidirectionalLSTM-CNN-CoNLL/tree/master/data) 
   - place train.txt, dev.txt, test.txt in data dir
-  - merge to total.txt in data dir
+  - merge train.txt, dev.txt, test.txt to total.txt in data dir
 
 - glove embedding
   - [download Glove6B](http://nlp.stanford.edu/data/glove.6B.zip)
@@ -143,9 +143,14 @@ tensorflow 1.11, CUDA 9.0, cuDNN 7.31
   - install [bilm](https://github.com/allenai/bilm-tf)
   - download [ELMO weights and options](https://allennlp.org/elmo)
   ```
-  $ ls embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_*
+  $ ls embeddings
   embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json  embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5
   ``` 
+  - test
+  ```
+  * after run embvec.py
+  $ python test_bilm.py
+  ```
 
 - spacy [optional]
   - if you want to analyze input string and see how it detects entities, then you need to install spacy lib.
@@ -158,11 +163,11 @@ tensorflow 1.11, CUDA 9.0, cuDNN 7.31
 
 - convert word embedding to pickle
 ```
-$ python embvec.py --emb_path embeddings/glove.6B.50d.txt --wrd_dim 50 --train_path data/train.txt --total_path data/total.txt
-$ python embvec.py --emb_path embeddings/glove.6B.100d.txt --wrd_dim 100 --train_path data/train.txt --total_path data/total.txt
-$ python embvec.py --emb_path embeddings/glove.6B.200d.txt --wrd_dim 200 --train_path data/train.txt --total_path data/total.txt
-$ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt
-$ python embvec.py --emb_path embeddings/glove.840B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --lowercase 0
+$ python embvec.py --emb_path embeddings/glove.6B.50d.txt  --wrd_dim 50  --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt
+$ python embvec.py --emb_path embeddings/glove.6B.100d.txt --wrd_dim 100 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt
+$ python embvec.py --emb_path embeddings/glove.6B.200d.txt --wrd_dim 200 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt
+$ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt
+$ python embvec.py --emb_path embeddings/glove.840B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --lowercase 0 --elmo_vocab_path embeddings/elmo_vocab.txt
 ```
 
 - check max sentence length

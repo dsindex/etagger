@@ -36,6 +36,9 @@ save model by f1(token)
 +
 CRF
 
+token : 0.9016393442622951
+chunk : 0.8987274655355251
+
 * test 10
 word embedding size : 300(glove840B)
 keep_prob : 0.5

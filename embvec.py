@@ -34,8 +34,9 @@ class EmbVec:
         self.tag_prefix_b = 'B-'
         self.tag_prefix_i = 'I-'
         self.gaz_vocab = {}      # gazetteer vocab
+        self.elmo_vocab = {}     # elmo vocab
 
-        # build word/character/pos/tag vocab
+        # build word/character/pos/tag vocab and elmo vocab(case sensitive)
         wid = self.unk_wid + 1
         cid = self.unk_cid + 1
         pid = self.unk_pid + 1
@@ -48,11 +49,14 @@ class EmbVec:
             word = tokens[0]
             pos  = tokens[1]
             tag  = tokens[3]
-            # character vocab
+            # character vocab, elmo vocab
             for ch in word:
                 if ch not in self.chr_vocab:
                     self.chr_vocab[ch] = cid
                     cid += 1
+            # elmo vocab
+            if word not in self.elmo_vocab: self.elmo_vocab[word] = 1
+            else: self.elmo_vocab[word] += 1
             # word vocab
             if self.lowercase: word = word.lower()
             if word not in self.wrd_vocab:
@@ -67,6 +71,14 @@ class EmbVec:
                 self.tag_vocab[tag] = tid
                 self.itag_vocab[tid] = tag
                 tid += 1
+        # write elmo vocab
+        elmo_vocab_fd = open(args.elmo_vocab_path, 'w')
+        elmo_vocab_fd.write('<S>' + '\n')
+        elmo_vocab_fd.write('</S>' + '\n')
+        elmo_vocab_fd.write('<UNK>' + '\n')
+        for word, freq in sorted(self.elmo_vocab.items(), key=lambda x: x[1], reverse=True):
+            elmo_vocab_fd.write(word + '\n')
+        elmo_vocab_fd.close()
 
         # build word embeddings
         wrd_vocab_size = len(self.wrd_vocab)
@@ -193,6 +205,7 @@ if __name__ == '__main__':
     parser.add_argument('--train_path', type=str, help='path to a train file', required=True)
     parser.add_argument('--total_path', type=str, help='path to a train+dev+test file', required=True)
     parser.add_argument('--lowercase', type=int, help='apply lower case for word embedding', default=1)
+    parser.add_argument('--elmo_vocab_path', type=str, help='path to elmo vocab file(write)', required=True)
     args = parser.parse_args()
     embvec = EmbVec(args)
     pkl.dump(embvec, open(args.emb_path + '.pkl', 'wb'))
