@@ -33,7 +33,7 @@ etagger
   - can the Transformer have competing results againt the BiLSTM? and how much faster?
     - [x] contextual encoding by the Transformer encoder yields competing results.
       - in case the sequence to sequence model like translation, the multi-head attention mechanism might be very powerful for alignments.
-      - however, for sequence tagging, the source of power is from point-wise feed forward net with range of wide kernel size. it is not from the multi-head attention only.
+      - however, for sequence tagging, the source of power is from point-wise feed forward net with wide range of kernel size. it is not from the multi-head attention only.
         - if you are using kernel size 1, then the the performance will be very worse than you expect.
       - it seems that point-wise feed forward net collects contextual information in the layer by layer manner.
         - this is very similar with hierarchical convolutional neural network.
