@@ -16,7 +16,7 @@ etagger
   - decoding
     - [x] CRF decoder
 
-- thankfully, there are so many repositories available for reference. i borrowed those codes as many as possible to use here.
+- there are so many repositories available for reference. i borrowed those codes as many as possible to use here.
   - [ner-lstm](https://github.com/monikkinom/ner-lstm)
   - [cnn-text-classification-tf](https://github.com/dennybritz/cnn-text-classification-tf/blob/master/text_cnn.py)
   - [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py)
@@ -25,7 +25,7 @@ etagger
   - [torchnlp/layers.py](https://github.com/kolloldas/torchnlp/blob/master/torchnlp/modules/transformer/layers.py)
   - [bilm](https://github.com/allenai/bilm-tf)
 
-- my main questions are
+- my main questions are :
   - can this module perform at the level of state of the art?
     - [x] the f1 score is near SOTA(without ELMO)
   - how to make it faster when it comes to use the BiLSTM?
@@ -38,12 +38,12 @@ etagger
       - it seems that point-wise feed forward net collects contextual information in the layer by layer manner.
         - this is very similar with hierarchical convolutional neural network.
       - i'd like to say `Attention is Not All you need`
-    - [x] you can see the bellow evaluation results
+    - [x] you can see the below evaluation results
       - multi-layer BiLSTM using LSTMBlockFusedCell() is slightly faster than the Transformer with 4 layers.
       - moreover, surprisingly, the BiLSTM is a little bit faster on CPU environment than on GPU's.
         - LSTMBlockFusedCell() is well optimized for multi-core CPU via multi-threading.
 
-### model and evaluation results
+### models and evaluation
 
 - models
   - BiLSTM
@@ -56,33 +56,34 @@ etagger
   - results
     - Transformer
       - setting
-        - experiments 7, test 9
-        - rnn_used : False
-        - tf_used : True
+        - `experiments 7, test 9`
+        - rnn_used : False, tf_used : True, tf_num_layers : 4
       - per-token(partial) micro f1 : 0.9083215796897038
       - per-chunk(exact)   micro f1 : **0.904078014184397**
       - average processing time per bucket
         - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.0199788929196833 sec
-        - 32 core CPU(multi-threading) : 0.031477801056819424 sec
+        - 32 core CPU(multi-threading)      : 0.031477801056819424 sec
     - mult-layer BiLSTM only
       - setting
-        - experiments 7, test 2
-        - rnn_used : True
-        - tf_used : False
+        - `experiments 7, test 2`
+        - rnn_used : True, rnn_num_layers : 2, tf_used : False
       - per-token(partial) micro f1 : 0.9132052455016773
       - per-chunk(exact)   micro f1 : **0.9064951088393407**
       - average processing time per bucket
         - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.0166574980614628 sec 
-        - 32 core CPU(multi-threading) : **0.015211910430046686 sec**
+        - 32 core CPU(multi-threading)      : **0.015211910430046686 sec**
     - mult-layer BiLSTM + Transformer
-      - setting : experiments 7
-      - per-token(partial) micro f1 :
-      - per-chunk(exact)   micro f1 :
+      - setting
+        - `experiments 7, test 10`
+        - rnn_used : True, rnn_num_layers : 2, tf_used : True, tf_num_layers : 1
+      - per-token(partial) micro f1 : 0.910979409787988
+      - per-chunk(exact)   micro f1 : 0.9047451049567825
       - average processing time per bucket
-        - 1 GPU(TITAN X (Pascal), 12196MiB) :
-        - 32 core CPU(multi-threading) :
+        - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.019023411566478552 sec
+        - 32 core CPU(multi-threading)      : 0.021739641954792697 sec
     - mult-layer BiLSTM + multi-head attention
-      - setting : experiments 6, test 7
+      - setting
+        - `experiments 6, test 7`
       - per-token(partial) micro f1 : 0.9157317073170732
       - per-chunk(exact)   micro f1 : **0.9102156238953694**
   - comparision to previous research
