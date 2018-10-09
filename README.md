@@ -40,6 +40,8 @@ etagger
       - i'd like to say `Attention is Not All you need`
     - [x] you can see the bellow evaluation results
       - multi-layer BiLSTM using LSTMBlockFusedCell() is slightly faster than the Transformer with 4 layers.
+      - moreover, surprisingly, the BiLSTM is a little bit faster on CPU environment than on GPU's.
+        - LSTMBlockFusedCell() is well optimized for multi-core CPU.
 
 ### model and evaluation results
 
