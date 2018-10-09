@@ -63,7 +63,7 @@ etagger
       - average processing time per bucket
         - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.0199788929196833 sec
         - 32 core CPU(multi-threading)      : 0.031477801056819424 sec
-    - mult-layer BiLSTM only
+    - multi-layer BiLSTM only
       - setting
         - `experiments 7, test 2`
         - rnn_used : True, rnn_num_layers : 2, tf_used : False
@@ -72,7 +72,7 @@ etagger
       - average processing time per bucket
         - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.0166574980614628 sec 
         - 32 core CPU(multi-threading)      : **0.015211910430046686 sec**
-    - mult-layer BiLSTM + Transformer
+    - multi-layer BiLSTM + Transformer
       - setting
         - `experiments 7, test 10`
         - rnn_used : True, rnn_num_layers : 2, tf_used : True, tf_num_layers : 1
@@ -81,7 +81,7 @@ etagger
       - average processing time per bucket
         - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.019023411566478552 sec
         - 32 core CPU(multi-threading)      : 0.021739641954792697 sec
-    - mult-layer BiLSTM + multi-head attention
+    - multi-layer BiLSTM + multi-head attention
       - setting
         - `experiments 6, test 7`
       - per-token(partial) micro f1 : 0.9157317073170732
