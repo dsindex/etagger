@@ -16,11 +16,12 @@ class Model:
     __rnn_size = 200               # size of RNN hidden unit
     __rnn_num_layers = 2           # number of RNN layers
     __tf_used = True               # use transformer encoder layer or not
-    __tf_num_layers = 5            # number of layers for transformer encoder
+    __tf_num_layers = 4            # number of layers for transformer encoder
     __tf_keep_prob = 0.8           # keep probability for transformer encoder
     __tf_mh_num_heads = 4          # number of head for multi head attention
     __tf_mh_num_units = 64         # Q,K,V dimension for multi head attention
     __tf_mh_keep_prob = 0.8        # keep probability for multi head attention
+    __tf_ffn_kernel_size = 3       # conv1d kernel size for feed forward net
     __tf_ffn_keep_prob = 0.8       # keep probability for feed forward net
 
     def __init__(self, config):
@@ -129,13 +130,22 @@ class Model:
                 # layer norm
                 x_norm = normalize(x, scope='layer-norm-sa-%s'%i, reuse=None)
                 # multi-head attention
-                y = self.__self_attention(x_norm, model_dim=model_dim, keep_prob=tf_mh_keep_prob, scope='self-attention-%s'%i)
+                y = self.__self_attention(x_norm,
+                                          masks,
+                                          model_dim=model_dim,
+                                          keep_prob=tf_mh_keep_prob,
+                                          scope='self-attention-%s'%i)
                 # residual and dropout
                 x = tf.nn.dropout(x_norm + y, keep_prob=tf_keep_prob)
                 # layer norm
                 x_norm = normalize(x, scope='layer-norm-ffn-%s'%i, reuse=None)
                 # position-wise feed forward net
-                y = self.__feedforward(x_norm, model_dim=model_dim, keep_prob=tf_ffn_keep_prob, scope='feed-forward-%s'%i)
+                y = self.__feedforward(x_norm,
+                                       masks,
+                                       model_dim=model_dim,
+                                       kernel_size=self.__tf_ffn_kernel_size,
+                                       keep_prob=tf_ffn_keep_prob,
+                                       scope='feed-forward-%s'%i)
                 # residual and dropout
                 x = tf.nn.dropout(x_norm + y, keep_prob=tf_keep_prob)
                 transformed_output = x
@@ -309,10 +319,11 @@ class Model:
             outputs = tf.transpose(outputs, perm=[1, 0, 2])
             return tf.nn.dropout(outputs, keep_prob)
 
-    def __self_attention(self, inputs, model_dim=None, keep_prob=0.5, scope='self-attention'):
+    def __self_attention(self, inputs, masks, model_dim=None, keep_prob=0.5, scope='self-attention'):
         """Apply self attention 
         """
         with tf.variable_scope(scope):
+            inputs *= masks # inputs should be masked before multihead_attention()
             if not model_dim: model_dim = inputs.get_shape().as_list()[-1]
             queries = inputs
             keys = inputs
@@ -329,13 +340,13 @@ class Model:
                                                    reuse=None)
             return attended_queries
 
-    def __feedforward(self, inputs, model_dim=None, keep_prob=0.5, scope='feed-forward'):
+    def __feedforward(self, inputs, masks, model_dim=None, kernel_size=1, keep_prob=0.5, scope='feed-forward'):
         """Apply Point-wise feed forward layer
         """
         with tf.variable_scope(scope):
             if not model_dim: model_dim = inputs.get_shape().as_list()[-1]
-            num_units = [2*model_dim, model_dim]
-            outputs = feedforward(inputs, num_units=num_units, scope=scope, reuse=None)
+            num_units = [4*model_dim, model_dim]
+            outputs = feedforward(inputs, masks, num_units=num_units, kernel_size=kernel_size, scope=scope, reuse=None)
             outputs = tf.nn.dropout(outputs, keep_prob)
             return outputs
 

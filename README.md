@@ -243,7 +243,7 @@ in IN O O O
   - use LSTMBlockFusedCell for bidirectional LSTM. this is 2~3 times faster than LSTMCell.
   - use early stopping
 
-- Transformer
+- tips for Transformer
   - start with small learning rate.
   - be careful to use residual connection after multi-head attention or feed forward net.
     - `x = tf.nn.dropout(x + y)` -> `x = tf.nn.dropout(x_norm + y)`
@@ -252,9 +252,12 @@ in IN O O O
     - try to revise the position-wise feed forward net
       - padding before and after
         - (batch_size, sentence_length, model_dim) -> (batch_size, 1+sentence_length+1, model_dim)
-      - conv1d with kernel size 3
+      - conv1d with kernel size 1 -> 3
+      - this is the key to sequence taggging problems.
+    - after applying kernel_size 3
+    ![graph-6](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-6.png)
 
-- etc tips
+- tips in general
   - save best model by using token-based f1. token-based f1 is slightly better than chunk-based f1
   - be careful for word lowercase when you are using glove6B embeddings. those are all lowercased.
 

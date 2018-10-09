@@ -95,15 +95,19 @@ def multihead_attention(queries,
               
     return outputs
 
-def feedforward(inputs, 
+def feedforward(inputs,
+                masks,
                 num_units=[1600, 400],
+                kernel_size=1,
                 scope="feed-forward", 
                 reuse=None):
     '''Point-wise feed forward net.
     
     Args:
       inputs: A 3d tensor with shape of [N, T, C].
+      masks: A 2d tensor with shape of [N, T], dtype is tf.float32.
       num_units: A list of two integers.
+      kernel_size: A integer value kernel size for conv1d
       scope: Optional scope for `variable_scope`.
       reuse: Boolean, whether to reuse the weights of a previous layer
         by the same name.
@@ -113,14 +117,17 @@ def feedforward(inputs,
     '''
     with tf.variable_scope(scope, reuse=reuse):
         # Inner layer
-        params = {"inputs": inputs, "filters": num_units[0], "kernel_size": 1,
-                  "activation": tf.nn.relu, "use_bias": True}
+        inputs *= masks
+        params = {"inputs": inputs, "filters": num_units[0], "kernel_size": kernel_size,
+                  "padding": "same", "activation": tf.nn.relu, "use_bias": True}
         outputs = tf.layers.conv1d(**params)
+        outputs *= masks
         
         # Readout layer
-        params = {"inputs": outputs, "filters": num_units[1], "kernel_size": 1,
-                  "activation": None, "use_bias": True}
+        params = {"inputs": outputs, "filters": num_units[1], "kernel_size": kernel_size,
+                  "padding": "same", "activation": None, "use_bias": True}
         outputs = tf.layers.conv1d(**params)
+        outputs *= masks
     
     return outputs
 
