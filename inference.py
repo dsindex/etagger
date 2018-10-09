@@ -68,6 +68,8 @@ def inference_bucket(config):
     saver.restore(sess, config.restore)
     sys.stderr.write('model restored' +'\n')
 
+    num_buckets = 0
+    total_duration_time = 0.0
     bucket = []
     while 1:
         try: line = sys.stdin.readline()
@@ -101,6 +103,8 @@ def inference_bucket(config):
             duration_time = time.time() - start_time
             out = 'duration_time : ' + str(duration_time) + ' sec'
             sys.stderr.write(out + '\n')
+            num_buckets += 1
+            total_duration_time += duration_time
         if line : bucket.append(line)
     if len(bucket) != 0:
         start_time = time.time()
@@ -128,6 +132,12 @@ def inference_bucket(config):
         duration_time = time.time() - start_time
         out = 'duration_time : ' + str(duration_time) + ' sec'
         sys.stderr.write(out + '\n')
+        num_buckets += 1
+        total_duration_time += duration_time
+
+    out = 'total_duration_time : ' + str(total_duration_time) + ' sec' + '\n'
+    out += 'average processing time / bucket : ' + str(total_duration_time / num_buckets) + ' sec'
+    sys.stderr.write(out + '\n')
 
     sess.close()
 

@@ -27,8 +27,19 @@ etagger
 
 - my main questions are
   - can this module perform at the level of state of the art?
+    - [x] the f1 score is near SOTA(without ELMO)
   - how to make it faster when it comes to use the BiLSTM?
-  - can the Transformer have completing results againt the BiLSTM? and how much faster?
+    - [x] the solution is LSTMBlockFusedCell().
+  - can the Transformer have competing results againt the BiLSTM? and how much faster?
+    - [x] contextual encoding by the Transformer encoder yields competing results.
+      - in case the sequence to sequence model like translation, the multi-head attention mechanism might be very powerful for alignments.
+      - however, for sequence tagging, the source of power is from point-wise feed forward net with range of wide kernel size. it is not from the multi-head attention only.
+        - if you are using kernel size 1, then the the performance will be very worse than you expect.
+      - it seems that point-wise feed forward net collects contextual information in the layer by layer manner.
+        - this is very similar with hierarchical convolutional neural network.
+      - i'd like to say `Attention is Not All you need`
+    - [x] you can see the bellow evaluation results
+      - multi-layer BiLSTM using LSTMBlockFusedCell() is slightly faster than the Transformer with 4 layers.
 
 ### model and evaluation results
 
@@ -48,7 +59,9 @@ etagger
         - tf_used : True
       - per-token(partial) micro f1 : 0.9002635934530743
       - per-chunk(exact)   micro f1 : **0.8959943156585842**
-      - average processing time per bucket(TITAN X (Pascal) 1 GPU, 12196MiB) : 0.0199788929196833 sec
+      - average processing time per bucket
+        - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.0199788929196833 sec
+        - 32 core CPU : 
     - mult-layer BiLSTM only
       - setting
         - experiments 7, test 2
@@ -56,7 +69,9 @@ etagger
         - tf_used : False
       - per-token(partial) micro f1 : 0.9132052455016773
       - per-chunk(exact)   micro f1 : **0.9064951088393407**
-      - average processing time per bucket(TITAN X (Pascal) 1 GPU, 12196MiB) : 
+      - average processing time per bucket
+        - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.0166574980614628 sec 
+        - 32 core CPU : 0.015211910430046686 sec
     - mult-layer BiLSTM + multi-head attention
       - setting : experiments 6, test 7
       - per-token(partial) micro f1 : 0.9157317073170732
