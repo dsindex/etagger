@@ -40,8 +40,10 @@ etagger
       - i'd like to say `Attention is Not All you need`
     - [x] you can see the below evaluation results
       - multi-layer BiLSTM using LSTMBlockFusedCell() is slightly faster than the Transformer with 4 layers.
-      - moreover, surprisingly, the BiLSTM is a little bit faster on CPU environment than on GPU's.
+      - moreover, the BiLSTM is a little bit faster on CPU environment(multi-thread) than on GPU's.
         - LSTMBlockFusedCell() is well optimized for multi-core CPU via multi-threading.
+      - the BiLSTM is 7x ~ 8x faster than the Transformer version on 1 CPU(single-thread)
+        - surprising result!
 
 ### models and evaluation
 
@@ -63,6 +65,7 @@ etagger
       - average processing time per bucket
         - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.0199788929196833 sec
         - 32 core CPU(multi-threading)      : 0.031477801056819424 sec
+        - 1 CPU(single-thread)              : 0.1548298367589356 sec
     - multi-layer BiLSTM only
       - setting
         - `experiments 7, test 2`
@@ -72,12 +75,13 @@ etagger
       - average processing time per bucket
         - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.0166574980614628 sec 
         - 32 core CPU(multi-threading)      : **0.015211910430046686 sec**
+        - 1 CPU(single-thread)              : **0.023443293234942143 sec**
     - multi-layer BiLSTM + Transformer
       - setting
         - `experiments 7, test 10`
         - rnn_used : True, rnn_num_layers : 2, tf_used : True, tf_num_layers : 1
       - per-token(partial) micro f1 : 0.910979409787988
-      - per-chunk(exact)   micro f1 : 0.9047451049567825
+      - per-chunk(exact)   micro f1 : **0.9047451049567825**
       - average processing time per bucket
         - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.019023411566478552 sec
         - 32 core CPU(multi-threading)      : 0.021739641954792697 sec
