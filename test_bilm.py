@@ -41,3 +41,11 @@ with tf.Session() as sess:
                                      feed_dict={question_character_ids: question_ids})
     print(elmo_question_input_)
 
+##### general usage #####
+'''
+1. we have 'tokenized_question' for real input texts.
+2. get elmo_question_input_
+3. concat glove embedding + elmo_question_input_
+3. take contextual encoding(via LSTM, Transformer encoder)
+4. concat contextual encoding + elmo_question_output_
+'''
