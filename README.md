@@ -167,11 +167,11 @@ tensorflow 1.11, CUDA 9.0, cuDNN 7.31
 
 - convert word embedding to pickle
 ```
-$ python embvec.py --emb_path embeddings/glove.6B.50d.txt  --wrd_dim 50  --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt
-$ python embvec.py --emb_path embeddings/glove.6B.100d.txt --wrd_dim 100 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt
-$ python embvec.py --emb_path embeddings/glove.6B.200d.txt --wrd_dim 200 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt
-$ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt
-$ python embvec.py --emb_path embeddings/glove.840B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --lowercase 0 --elmo_vocab_path embeddings/elmo_vocab.txt
+$ python embvec.py --emb_path embeddings/glove.6B.50d.txt  --wrd_dim 50  --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_option_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weights_path elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5
+$ python embvec.py --emb_path embeddings/glove.6B.100d.txt --wrd_dim 100 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_option_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weights_path elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5
+$ python embvec.py --emb_path embeddings/glove.6B.200d.txt --wrd_dim 200 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_option_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weights_path elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5
+$ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_option_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weights_path elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5
+$ python embvec.py --emb_path embeddings/glove.840B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --lowercase 0 --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_option_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weights_path elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5
 ```
 
 - check max sentence length
@@ -277,6 +277,13 @@ in IN O O O
 - tips for training speed up
   - filter out words(which are not in train/dev/test data) from word embeddings. but not for service.
   - use LSTMBlockFusedCell for bidirectional LSTM. this is 2~3 times faster than LSTMCell.
+    - where is the LSTMBlockFusedCell() defined?
+    ```
+    https://github.com/tensorflow/tensorflow/blob/r1.11/tensorflow/contrib/rnn/python/ops/lstm_ops.py
+    vi ../lib/python3.6/site-packages/tensorflow/contrib/rnn/ops/gen_lstm_ops.py
+    https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/rnn/ops/lstm_ops.cc
+    https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/rnn/kernels/lstm_ops.cc
+    ```
   - use early stopping
 
 - tips for Transformer

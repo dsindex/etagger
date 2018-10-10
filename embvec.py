@@ -35,6 +35,8 @@ class EmbVec:
         self.tag_prefix_i = 'I-'
         self.gaz_vocab = {}      # gazetteer vocab
         self.elmo_vocab = {}     # elmo vocab
+        self.elmo_option_path = args.elmo_option_path   # elmo option  file path
+        self.elmo_weights_path = args.elmo_weights_path # elmo weights file path
 
         # build word/character/pos/tag vocab and elmo vocab(case sensitive)
         wid = self.unk_wid + 1
@@ -79,6 +81,7 @@ class EmbVec:
         for word, freq in sorted(self.elmo_vocab.items(), key=lambda x: x[1], reverse=True):
             elmo_vocab_fd.write(word + '\n')
         elmo_vocab_fd.close()
+        del(self.elmo_vocab)
 
         # build word embeddings
         wrd_vocab_size = len(self.wrd_vocab)
@@ -206,6 +209,8 @@ if __name__ == '__main__':
     parser.add_argument('--total_path', type=str, help='path to a train+dev+test file', required=True)
     parser.add_argument('--lowercase', type=int, help='apply lower case for word embedding', default=1)
     parser.add_argument('--elmo_vocab_path', type=str, help='path to elmo vocab file(write)', required=True)
+    parser.add_argument('--elmo_option_path', type=str, help='path to elmo option file', required=True)
+    parser.add_argument('--elmo_weights_path', type=str, help='path to elmo weights file', required=True)
     args = parser.parse_args()
     embvec = EmbVec(args)
     pkl.dump(embvec, open(args.emb_path + '.pkl', 'wb'))
