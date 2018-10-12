@@ -1,9 +1,8 @@
-etagger
-====
+# ETagger: Entity Tagger
 
-### description
+## Description
 
-- personally, i'm interested in NER tasks. so, i decided to implement a sequence tagging module by using 
+- personally, i'm interested in NER tasks. so, i decided to implement a sequence tagging model which consists of 
   - encoding
     - basic embedding
       - [x] 1) word embedding(glove) and character convolutional embedding
@@ -45,7 +44,7 @@ etagger
       - the BiLSTM is 7x ~ 8x faster than the Transformer version on 1 CPU(single-thread)
         - surprising result!
 
-### models and evaluation
+## Models and Evaluation
 
 - models
   - BiLSTM
@@ -118,7 +117,7 @@ etagger
       - [Semi-supervised sequence tagging with bidirectional language models](https://arxiv.org/pdf/1705.00108.pdf)
         - reported F1 : 0.9193
 
-### pre-requisites
+## Pre-requisites
 
 - python >= 3.6
 
@@ -163,15 +162,15 @@ tensorflow 1.11, CUDA 9.0, cuDNN 7.31
   $ python -m spacy download en
   ```
 
-### how to run
+## How to run
 
 - convert word embedding to pickle
 ```
-$ python embvec.py --emb_path embeddings/glove.6B.50d.txt  --wrd_dim 50  --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_option_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weights_path elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5
-$ python embvec.py --emb_path embeddings/glove.6B.100d.txt --wrd_dim 100 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_option_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weights_path elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5
-$ python embvec.py --emb_path embeddings/glove.6B.200d.txt --wrd_dim 200 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_option_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weights_path elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5
-$ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_option_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weights_path elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5
-$ python embvec.py --emb_path embeddings/glove.840B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --lowercase 0 --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_option_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weights_path elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5
+$ python embvec.py --emb_path embeddings/glove.6B.50d.txt  --wrd_dim 50  --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weight_path elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5
+$ python embvec.py --emb_path embeddings/glove.6B.100d.txt --wrd_dim 100 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weight_path elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5
+$ python embvec.py --emb_path embeddings/glove.6B.200d.txt --wrd_dim 200 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weight_path elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5
+$ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weight_path elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5
+$ python embvec.py --emb_path embeddings/glove.840B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --lowercase 0 --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weight_path elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5
 ```
 
 - check max sentence length
@@ -249,7 +248,7 @@ in IN O O O
 . . O I-DATE O
 ```
 
-### development note
+## Development note
 
 - accuracy and loss
 ![graph-2](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-2.png)
@@ -304,7 +303,7 @@ in IN O O O
   - save best model by using token-based f1. token-based f1 is slightly better than chunk-based f1
   - be careful for word lowercase when you are using glove6B embeddings. those are all lowercased.
 
-### references
+## References
 
 - general
   - articles
