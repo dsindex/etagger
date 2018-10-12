@@ -110,6 +110,8 @@
         - F1 : 0.8845
           - just 1 block of Transformer encoder
     - SOTA
+      - [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/pdf/1810.04805.pdf)
+        - reported F1 : 0.928
       - [Semi-Supervised Sequence Modeling with Cross-View Training](https://arxiv.org/pdf/1809.08370.pdf)
         - reported F1 : 0.926
       - [Deep contextualized word representations](https://arxiv.org/pdf/1802.05365.pdf)
