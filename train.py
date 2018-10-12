@@ -21,8 +21,9 @@ def do_train(model, config, train_data, dev_data, test_data):
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     sess = tf.Session(config=session_conf)
     with sess.as_default():
-        sess.run(tf.global_variables_initializer(),
-                 feed_dict={model.wrd_embeddings_init: config.embvec.wrd_embeddings}) # feed large embedding data
+        feed_dict = {}
+        if not config.use_elmo: feed_dict = {model.wrd_embeddings_init: config.embvec.wrd_embeddings}
+        sess.run(tf.global_variables_initializer(), feed_dict=feed_dict) # feed large embedding data
         saver = tf.train.Saver()
         if config.restore is not None:
             saver.restore(sess, config.restore)
@@ -40,15 +41,18 @@ def do_train(model, config, train_data, dev_data, test_data):
         for e in range(config.epoch):
             # run epoch
             idx = 0
-            nbatches = (len(train_data.sentence_word_ids) + config.batch_size - 1) // config.batch_size
+            nbatches = (len(train_data.sentence_tags) + config.batch_size - 1) // config.batch_size
             prog = Progbar(target=nbatches)
-            for ptr in range(0, len(train_data.sentence_word_ids), config.batch_size):
-                feed_dict={model.input_data_word_ids: train_data.sentence_word_ids[ptr:ptr + config.batch_size],
-                           model.input_data_wordchr_ids: train_data.sentence_wordchr_ids[ptr:ptr + config.batch_size],
-                           model.input_data_pos_ids: train_data.sentence_pos_ids[ptr:ptr + config.batch_size],
+            for ptr in range(0, len(train_data.sentence_tags), config.batch_size):
+                feed_dict={model.input_data_pos_ids: train_data.sentence_pos_ids[ptr:ptr + config.batch_size],
                            model.input_data_etcs: train_data.sentence_etcs[ptr:ptr + config.batch_size],
                            model.output_data: train_data.sentence_tags[ptr:ptr + config.batch_size],
                            model.is_train: True}
+                if config.use_elmo:
+                    feed_dict[model.elmo_input_data_wordchr_ids] = train_data.sentence_elmo_wordchr_ids[ptr:ptr + config.batch_size]
+                else:
+                    feed_dict[model.input_data_word_ids] = train_data.sentence_word_ids[ptr:ptr + config.batch_size]
+                    feed_dict[model.input_data_wordchr_ids] = train_data.sentence_wordchr_ids[ptr:ptr + config.batch_size]
                 step, train_summaries, _, train_loss, train_accuracy, learning_rate = \
                            sess.run([model.global_step, train_summary_op, model.train_op, \
                                      model.loss, model.accuracy, model.learning_rate], feed_dict=feed_dict)
@@ -60,12 +64,15 @@ def do_train(model, config, train_data, dev_data, test_data):
                              ('lr', learning_rate)])
                 idx += 1
             # evaluate on dev data
-            feed_dict={model.input_data_word_ids: dev_data.sentence_word_ids,
-                       model.input_data_wordchr_ids: dev_data.sentence_wordchr_ids,
-                       model.input_data_pos_ids: dev_data.sentence_pos_ids,
+            feed_dict={model.input_data_pos_ids: dev_data.sentence_pos_ids,
                        model.input_data_etcs: dev_data.sentence_etcs,
                        model.output_data: dev_data.sentence_tags,
                        model.is_train: False}
+            if config.use_elmo:
+                feed_dict[model.elmo_input_data_wordchr_ids] = dev_data.sentence_elmo_wordchr_ids
+            else:
+                feed_dict[model.input_data_word_ids] = dev_data.sentence_word_ids
+                feed_dict[model.input_data_wordchr_ids] = dev_data.sentence_wordchr_ids
             step, dev_summaries, logits, logits_indices, trans_params, \
                 output_data_indices, sentence_lengths, dev_loss, dev_accuracy = \
                        sess.run([model.global_step, dev_summary_op, model.logits, model.logits_indices, \
@@ -97,12 +104,15 @@ def do_train(model, config, train_data, dev_data, test_data):
                 # save best model
                 save_path = saver.save(sess, config.checkpoint_dir + '/' + 'model_max.ckpt')
                 print('max model saved in file: %s' % save_path)
-                feed_dict={model.input_data_word_ids: test_data.sentence_word_ids,
-                           model.input_data_wordchr_ids: test_data.sentence_wordchr_ids,
-                           model.input_data_pos_ids: test_data.sentence_pos_ids,
+                feed_dict={model.input_data_pos_ids: test_data.sentence_pos_ids,
                            model.input_data_etcs: test_data.sentence_etcs,
                            model.output_data: test_data.sentence_tags,
                            model.is_train: False}
+                if config.use_elmo:
+                    feed_dict[model.elmo_input_data_wordchr_ids] = test_data.sentence_elmo_wordchr_ids
+                else:
+                    feed_dict[model.input_data_word_ids] = test_data.sentence_word_ids
+                    feed_dict[model.input_data_wordchr_ids] = test_data.sentence_wordchr_ids
                 step, logits, logits_indices, trans_params, output_data_indices, \
                     sentence_lengths, test_loss, test_accuracy = \
                         sess.run([model.global_step, model.logits, model.logits_indices, \
@@ -152,5 +162,5 @@ if __name__ == '__main__':
     parser.add_argument('--summary_dir', type=str, default='./runs', help='path to save summary(ex, ./runs)')
 
     args = parser.parse_args()
-    config = Config(args, is_train=True, use_crf=True)
+    config = Config(args, is_train=True, use_elmo=True, use_crf=True)
     train(config)

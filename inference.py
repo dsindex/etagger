@@ -28,7 +28,9 @@ def inference_bulk(config):
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     sess = tf.Session(config=session_conf)
     with sess.as_default():
-        sess.run(tf.global_variables_initializer(), feed_dict={model.wrd_embeddings_init: config.embvec.wrd_embeddings})
+        feed_dict = {}
+        if not config.use_elmo: feed_dict = {model.wrd_embeddings_init: config.embvec.wrd_embeddings}
+        sess.run(tf.global_variables_initializer(), feed_dict=feed_dict)
         saver = tf.train.Saver()
         saver.restore(sess, config.restore)
         print('model restored')
@@ -69,7 +71,9 @@ def inference_bucket(config):
                                   inter_op_parallelism_threads=1,
                                   intra_op_parallelism_threads=1)
     sess = tf.Session(config=session_conf)
-    sess.run(tf.global_variables_initializer(), feed_dict={model.wrd_embeddings_init: config.embvec.wrd_embeddings})
+    feed_dict = {}
+    if not config.use_elmo: feed_dict = {model.wrd_embeddings_init: config.embvec.wrd_embeddings}
+    sess.run(tf.global_variables_initializer(), feed_dict=feed_dict)
     saver = tf.train.Saver()
     saver.restore(sess, config.restore)
     sys.stderr.write('model restored' +'\n')
@@ -187,7 +191,9 @@ def inference_line(config):
     # Restore model
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     sess = tf.Session(config=session_conf)
-    sess.run(tf.global_variables_initializer(), feed_dict={model.wrd_embeddings_init: config.embvec.wrd_embeddings})
+    feed_dict = {}
+    if not feed_dict: feed_dict = {model.wrd_embeddings_init: config.embvec.wrd_embeddings}
+    sess.run(tf.global_variables_initializer(), feed_dict=feed_dict)
     saver = tf.train.Saver()
     saver.restore(sess, config.restore)
     sys.stderr.write('model restored' +'\n')
@@ -237,7 +243,7 @@ if __name__ == '__main__':
     parser.add_argument('--mode', type=str, default='bulk', help='bulk, bucket, line')
 
     args = parser.parse_args()
-    config = Config(args, is_train=False, use_crf=True)
+    config = Config(args, is_train=False, use_elmo=True, use_crf=True)
     if args.mode == 'bulk':   inference_bulk(config)
     if args.mode == 'bucket': inference_bucket(config)
     if args.mode == 'line':   inference_line(config)

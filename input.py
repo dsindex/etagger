@@ -7,12 +7,16 @@ from embvec import EmbVec
 
 class Input:
     def __init__(self, data, config):
-        self.sentence_word_ids = []      # [batch_size, sentence_length]
-        self.sentence_wordchr_ids = []   # [batch_size, sentence_length, word_length]
-        self.sentence_pos_ids = []       # [batch_size, sentence_length]
-        self.sentence_etcs = []          # [batch_size, sentence_length, etc_dim]
-        self.sentence_tags = []          # [batch_size, sentence_length, class_size] 
+        if config.use_elmo:
+            self.sentence_elmo_wordchr_ids = [] # [batch_size, sentence_length+2, word_length]
+        else:
+            self.sentence_word_ids = []         # [batch_size, sentence_length]
+            self.sentence_wordchr_ids = []      # [batch_size, sentence_length, word_length]
+        self.sentence_pos_ids = []              # [batch_size, sentence_length]
+        self.sentence_etcs = []                 # [batch_size, sentence_length, etc_dim]
+        self.sentence_tags = []                 # [batch_size, sentence_length, class_size] 
         self.config = config
+
         if config.sentence_length == -1:
             if type(data) is list:
                 self.max_sentence_length = len(data)
@@ -23,10 +27,14 @@ class Input:
 
         if type(data) is list: # treat data as bucket
             bucket = data
-            word_ids = self.__create_word_ids(bucket)
-            self.sentence_word_ids.append(word_ids)
-            wordchr_ids = self.__create_wordchr_ids(bucket)
-            self.sentence_wordchr_ids.append(wordchr_ids)
+            if config.use_elmo:
+                elmo_wordchr_ids = self.__create_elmo_wordchr_ids(bucket)
+                self.sentence_elmo_wordchr_ids.append(elmo_wordchr_ids)
+            else:
+                word_ids = self.__create_word_ids(bucket)
+                self.sentence_word_ids.append(word_ids)
+                wordchr_ids = self.__create_wordchr_ids(bucket)
+                self.sentence_wordchr_ids.append(wordchr_ids)
             pos_ids = self.__create_pos_ids(bucket)
             self.sentence_pos_ids.append(pos_ids)
             etc, tag = self.__create_etc_and_tag(bucket)
@@ -37,10 +45,14 @@ class Input:
             bucket = []
             for line in open(path):
                 if line in ['\n', '\r\n']:
-                    word_ids = self.__create_word_ids(bucket)
-                    self.sentence_word_ids.append(word_ids)
-                    wordchr_ids = self.__create_wordchr_ids(bucket)
-                    self.sentence_wordchr_ids.append(wordchr_ids)
+                    if config.use_elmo:
+                        elmo_wordchr_ids = self.__create_elmo_wordchr_ids(bucket)
+                        self.sentence_elmo_wordchr_ids.append(elmo_wordchr_ids)
+                    else:
+                        word_ids = self.__create_word_ids(bucket)
+                        self.sentence_word_ids.append(word_ids)
+                        wordchr_ids = self.__create_wordchr_ids(bucket)
+                        self.sentence_wordchr_ids.append(wordchr_ids)
                     pos_ids = self.__create_pos_ids(bucket)
                     self.sentence_pos_ids.append(pos_ids)
                     etc, tag = self.__create_etc_and_tag(bucket)
@@ -92,13 +104,36 @@ class Input:
                 chr_ids.append(self.config.embvec.pad_cid)
             wordchr_ids.append(chr_ids)
             if sentence_length == self.max_sentence_length: break
-        # padding with empty chr_ids
+        # padding with [pad_cid, ..., pad_cid] chr_ids
         for _ in range(self.max_sentence_length - sentence_length):
             chr_ids = []
             for _ in range(self.config.word_length):
                 chr_ids.append(self.config.embvec.pad_cid)
             wordchr_ids.append(chr_ids)
         return wordchr_ids
+
+    def __create_elmo_wordchr_ids(self, bucket):
+        """Create a vector of a character id vector for elmo
+        """
+        sentence = []
+        sentence_length = 0
+        for line in bucket:
+            line = line.strip()
+            tokens = line.split()
+            assert (len(tokens) == 4)
+            sentence_length += 1
+            word = tokens[0]
+            sentence.append(word)
+            if sentence_length == self.max_sentence_length: break
+        elmo_wordchr_ids = self.config.elmo_batcher.batch_sentences([sentence])[0].tolist()
+        # padding with [0,...,0] chr_ids, '+2' stands for '<S>, </S>'
+        for _ in range(self.max_sentence_length - len(elmo_wordchr_ids) + 2):
+            chr_ids = []
+            for _ in range(self.config.word_length):
+                chr_ids.append(0)
+            elmo_wordchr_ids.append(chr_ids)
+        assert(len(elmo_wordchr_ids) == self.max_sentence_length+2)
+        return elmo_wordchr_ids
 
     def __create_pos_ids(self, bucket):
         """Create a pos id vector
@@ -120,7 +155,7 @@ class Input:
         return pos_ids
 
     def __create_etc_and_tag(self, bucket):
-        """Create a vector of a etc vector and an one-hot tag vector
+        """Create a vector of an etc vector and an one-hot tag vector
         """
         etc = []
         tag  = []
