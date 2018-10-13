@@ -39,7 +39,6 @@ class Model:
         self.class_size = config.class_size
         self.use_crf = config.use_crf
         self.use_elmo = config.use_elmo
-        self.elmo_bilm = config.elmo_bilm
         self.is_train = tf.placeholder(tf.bool, name='is_train')
         self.set_cuda_visible_devices(config.is_train)
 
@@ -47,13 +46,24 @@ class Model:
         Input layer
         """
         keep_prob = tf.cond(self.is_train, lambda: self.__keep_prob, lambda: 1.0)
+
+        # pos embedding features
+        self.input_data_pos_ids = tf.placeholder(tf.int32, shape=[None, self.sentence_length], name='input_data_pos_ids')
+        self.sentence_masks   = self.__compute_sentence_masks(self.input_data_pos_ids)
+        self.sentence_lengths = self.__compute_sentence_lengths(self.sentence_masks)
+        masks = tf.to_float(tf.expand_dims(self.sentence_masks, -1))
+        self.pos_embeddings = self.__pos_embedding(self.input_data_pos_ids, keep_prob=keep_prob, scope='pos-embedding')
+
         if self.use_elmo:
+            self.elmo_bilm = config.elmo_bilm
             self.elmo_input_data_wordchr_ids = tf.placeholder(tf.int32,
                                                               shape=[None, self.sentence_length+2, self.word_length],
                                                               name='elmo_input_data_wordchr_ids') # '+2' stands for '<S>', '</S>'
             elmo_embeddings_op = self.elmo_bilm(self.elmo_input_data_wordchr_ids)
             elmo_input = weight_layers('input', elmo_embeddings_op, l2_coef=0.0)
             self.elmo_embeddings = elmo_input['weighted_op'] # (batch_size, sentence_length, elmo_dim)
+            # masking(remove noise due to padding)
+            self.elmo_embeddings *= masks
         else:
             # (large) word embedding data
             self.wrd_embeddings_init = tf.placeholder(tf.float32, shape=[self.wrd_vocab_size, self.wrd_dim])
@@ -74,21 +84,12 @@ class Model:
                                                                           keep_prob=keep_prob,
                                                                           scope='wordchr-embedding-conv2d')
 
-        # pos embedding features
-        self.input_data_pos_ids = tf.placeholder(tf.int32, shape=[None, self.sentence_length], name='input_data_pos_ids')
-        self.sentence_masks   = self.__compute_sentence_masks(self.input_data_pos_ids)
-        self.sentence_lengths = self.__compute_sentence_lengths(self.sentence_masks)
-        masks = tf.to_float(tf.expand_dims(self.sentence_masks, -1))
-        self.pos_embeddings = self.__pos_embedding(self.input_data_pos_ids, keep_prob=keep_prob, scope='pos-embedding')
-
         # etc features 
         self.input_data_etcs = tf.placeholder(tf.float32,
                                               shape=[None, self.sentence_length, self.etc_dim],
                                               name='input_data_etcs')
 
         if self.use_elmo:
-            # masking(remove noise due to padding)
-            self.elmo_embeddings *= masks
             self.input_data = tf.concat([self.elmo_embeddings, self.pos_embeddings, self.input_data_etcs],
                                         axis=-1,
                                         name='input_data') # (batch_size, sentence_length, input_dim)

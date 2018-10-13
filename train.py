@@ -15,10 +15,12 @@ import sys
 import random
 import argparse
 
-def do_train(model, config, train_data, dev_data, test_data):
+def do_train(model, config, train_data, dev_data):
     early_stopping = EarlyStopping(patience=10, measure='f1', verbose=1)
     maximum = 0
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
+    session_conf.gpu_options.allow_growth = True
+    runopts = tf.RunOptions(report_tensor_allocations_upon_oom=True)
     sess = tf.Session(config=session_conf)
     with sess.as_default():
         feed_dict = {}
@@ -42,7 +44,7 @@ def do_train(model, config, train_data, dev_data, test_data):
             # run epoch
             idx = 0
             nbatches = (len(train_data.sentence_tags) + config.batch_size - 1) // config.batch_size
-            prog = Progbar(target=nbatches)
+            train_prog = Progbar(target=nbatches)
             for ptr in range(0, len(train_data.sentence_tags), config.batch_size):
                 feed_dict={model.input_data_pos_ids: train_data.sentence_pos_ids[ptr:ptr + config.batch_size],
                            model.input_data_etcs: train_data.sentence_etcs[ptr:ptr + config.batch_size],
@@ -55,99 +57,89 @@ def do_train(model, config, train_data, dev_data, test_data):
                     feed_dict[model.input_data_wordchr_ids] = train_data.sentence_wordchr_ids[ptr:ptr + config.batch_size]
                 step, train_summaries, _, train_loss, train_accuracy, learning_rate = \
                            sess.run([model.global_step, train_summary_op, model.train_op, \
-                                     model.loss, model.accuracy, model.learning_rate], feed_dict=feed_dict)
+                                     model.loss, model.accuracy, model.learning_rate], feed_dict=feed_dict, options=runopts)
                 train_summary_writer.add_summary(train_summaries, step)
-                prog.update(idx + 1,
-                            [('step', step),
-                             ('train loss', train_loss),
-                             ('train accuracy', train_accuracy),
-                             ('lr', learning_rate)])
+                train_prog.update(idx + 1,
+                                  [('step', step),
+                                   ('train loss', train_loss),
+                                   ('train accuracy', train_accuracy),
+                                   ('lr', learning_rate)])
                 idx += 1
             # evaluate on dev data
-            feed_dict={model.input_data_pos_ids: dev_data.sentence_pos_ids,
-                       model.input_data_etcs: dev_data.sentence_etcs,
-                       model.output_data: dev_data.sentence_tags,
-                       model.is_train: False}
-            if config.use_elmo:
-                feed_dict[model.elmo_input_data_wordchr_ids] = dev_data.sentence_elmo_wordchr_ids
-            else:
-                feed_dict[model.input_data_word_ids] = dev_data.sentence_word_ids
-                feed_dict[model.input_data_wordchr_ids] = dev_data.sentence_wordchr_ids
-            step, dev_summaries, logits, logits_indices, trans_params, \
-                output_data_indices, sentence_lengths, dev_loss, dev_accuracy = \
-                       sess.run([model.global_step, dev_summary_op, model.logits, model.logits_indices, \
-                                 model.trans_params, model.output_data_indices, model.sentence_lengths, \
-                                 model.loss, model.accuracy], feed_dict=feed_dict)
-            print('epoch: %d / %d, step: %d, dev loss: %s, dev accuracy: %s' % (e, config.epoch, step, dev_loss, dev_accuracy))
-            dev_summary_writer.add_summary(dev_summaries, step)
+            idx = 0
+            nbatches = (len(dev_data.sentence_tags) + config.batch_size - 1) // config.batch_size
+            dev_prog = Progbar(target=nbatches)
+            dev_logits = None
+            dev_logits_indices = None
+            dev_trans_params = None
+            dev_output_data_indices = None
+            dev_sentence_lengths = None
+            for ptr in range(0, len(dev_data.sentence_tags), config.batch_size):
+                feed_dict={model.input_data_pos_ids: dev_data.sentence_pos_ids[ptr:ptr + config.batch_size],
+                           model.input_data_etcs: dev_data.sentence_etcs[ptr:ptr + config.batch_size],
+                           model.output_data: dev_data.sentence_tags[ptr:ptr + config.batch_size],
+                           model.is_train: False}
+                if config.use_elmo:
+                    feed_dict[model.elmo_input_data_wordchr_ids] = dev_data.sentence_elmo_wordchr_ids[ptr:ptr + config.batch_size]
+                else:
+                    feed_dict[model.input_data_word_ids] = dev_data.sentence_word_ids[ptr:ptr + config.batch_size]
+                    feed_dict[model.input_data_wordchr_ids] = dev_data.sentence_wordchr_ids[ptr:ptr + config.batch_size]
+                step, dev_summaries, logits, logits_indices, trans_params, \
+                    output_data_indices, sentence_lengths, dev_loss, dev_accuracy = \
+                           sess.run([model.global_step, dev_summary_op, model.logits, model.logits_indices, \
+                                     model.trans_params, model.output_data_indices, model.sentence_lengths, \
+                                     model.loss, model.accuracy], feed_dict=feed_dict)
+                dev_summary_writer.add_summary(dev_summaries, step)
+                dev_prog.update(idx + 1,
+                                [('dev loss', dev_loss),
+                                 ('dev accuracy', dev_accuracy)])
+                if dev_logits is not None: dev_logits = np.concatenate((dev_logits, logits), axis=0)
+                else: dev_logits = logits
+                if dev_logits_indices is not None: dev_logits_indices = np.concatenate((dev_logits_indices, logits_indices), axis=0)
+                else: dev_logits_indices = logits_indices
+                if dev_trans_params is None: dev_trans_params = trans_params
+                if dev_output_data_indices is not None: dev_output_data_indices = np.concatenate((dev_output_data_indices, output_data_indices), axis=0)
+                else: dev_output_data_indices = output_data_indices
+                if dev_sentence_lengths is not None: dev_sentence_lengths = np.concatenate((dev_sentence_lengths, sentence_lengths), axis=0)
+                else: dev_sentence_lengths = sentence_lengths
+                idx += 1
             print('dev precision, recall, f1(token): ')
-            token_f1 = TokenEval.compute_f1(config.class_size, logits, dev_data.sentence_tags, sentence_lengths)
+            token_f1 = TokenEval.compute_f1(config.class_size, dev_logits, dev_data.sentence_tags, dev_sentence_lengths)
             ''' 
             if config.use_crf:
-                viterbi_sequences = viterbi_decode(logits, trans_params, sentence_lengths)
-                tag_preds = dev_data.logits_indices_to_tags_seq(viterbi_sequences, sentence_lengths)
+                viterbi_sequences = viterbi_decode(dev_logits, dev_trans_params, dev_sentence_lengths)
+                tag_preds = dev_data.logits_indices_to_tags_seq(viterbi_sequences, dev_sentence_lengths)
             else:
-                tag_preds = dev_data.logits_indices_to_tags_seq(logits_indices, sentence_lengths)
-            tag_corrects = dev_data.logits_indices_to_tags_seq(output_data_indices, sentence_lengths)
+                tag_preds = dev_data.logits_indices_to_tags_seq(dev_logits_indices, dev_sentence_lengths)
+            tag_corrects = dev_data.logits_indices_to_tags_seq(dev_output_data_indices, dev_sentence_lengths)
             dev_prec, dev_rec, dev_f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
             print('dev precision, recall, f1(chunk): ', dev_prec, dev_rec, dev_f1)
             chunk_f1 = dev_f1
             m = chunk_f1
             '''
             m = token_f1
-
             # early stopping
             if early_stopping.validate(m, measure='f1'): break
             if m > maximum:
-                print('new best f1 score!')
+                print('new best f1 score! : %s' % m)
                 maximum = m
                 # save best model
                 save_path = saver.save(sess, config.checkpoint_dir + '/' + 'model_max.ckpt')
                 print('max model saved in file: %s' % save_path)
-                feed_dict={model.input_data_pos_ids: test_data.sentence_pos_ids,
-                           model.input_data_etcs: test_data.sentence_etcs,
-                           model.output_data: test_data.sentence_tags,
-                           model.is_train: False}
-                if config.use_elmo:
-                    feed_dict[model.elmo_input_data_wordchr_ids] = test_data.sentence_elmo_wordchr_ids
-                else:
-                    feed_dict[model.input_data_word_ids] = test_data.sentence_word_ids
-                    feed_dict[model.input_data_wordchr_ids] = test_data.sentence_wordchr_ids
-                step, logits, logits_indices, trans_params, output_data_indices, \
-                    sentence_lengths, test_loss, test_accuracy = \
-                        sess.run([model.global_step, model.logits, model.logits_indices, \
-                                  model.trans_params, model.output_data_indices, model.sentence_lengths, \
-                                  model.loss, model.accuracy], feed_dict=feed_dict)
-                print('epoch: %d / %d, step: %d, test loss: %s, test accuracy: %s' % (e, config.epoch, step, test_loss, test_accuracy))
-                print('test precision, recall, f1(token): ')
-                TokenEval.compute_f1(config.class_size, logits, test_data.sentence_tags, sentence_lengths)
-                if config.use_crf:
-                    viterbi_sequences = viterbi_decode(logits, trans_params, sentence_lengths)
-                    tag_preds = test_data.logits_indices_to_tags_seq(viterbi_sequences, sentence_lengths)
-                else:
-                    tag_preds = test_data.logits_indices_to_tags_seq(logits_indices, sentence_lengths)
-                tag_corrects = test_data.logits_indices_to_tags_seq(output_data_indices, sentence_lengths)
-                test_prec, test_rec, test_f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
-                print('test precision, recall, f1(chunk): ', test_prec, test_rec, test_f1)
 
 def train(config):
-    # Build input data
+    # build input data
     train_file = 'data/train.txt'
     dev_file = 'data/dev.txt'
-    test_file = 'data/test.txt'
     train_data = Input(train_file, config)
-    print('max_sentence_length = %d' % train_data.max_sentence_length)
     dev_data = Input(dev_file, config)
-    print('max_sentence_length = %d' % dev_data.max_sentence_length)
-    test_data = Input(test_file, config)
-    print('max_sentence_length = %d' % test_data.max_sentence_length)
     print('loading input data ... done')
 
-    # Create model
+    # create model
     model = Model(config)
 
-    # Training
-    do_train(model, config, train_data, dev_data, test_data)
+    # training
+    do_train(model, config, train_data, dev_data)
         
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

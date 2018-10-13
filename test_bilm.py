@@ -46,7 +46,7 @@ tokenized_question = [
 # Create batches of data.
 question_ids = batcher.batch_sentences(tokenized_question) # (batch_size, sentence_length, word_length)
 
-# XXX padding test
+# padding
 question_ids = question_ids.tolist()
 print('length = ', len(question_ids[0]))
 print(question_ids)
@@ -66,9 +66,9 @@ with tf.Session() as sess:
 
     # Compute ELMo representations (here for the input only, for simplicity).
     elmo_question_input_ = sess.run([elmo_question_input['weighted_op']],
-                                     feed_dict={question_character_ids: question_ids}) # (batch_size, sentence_length, model_dim)
+                                    feed_dict={question_character_ids: question_ids}) # (batch_size, sentence_length, model_dim)
     print(elmo_question_input_)
-    # XXX padding test
+    # check padding
     for i in range(len(elmo_question_input_[0][0])):
         print(i, elmo_question_input_[0][0][i])
 

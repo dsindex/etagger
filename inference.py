@@ -19,7 +19,6 @@ def inference_bulk(config):
     # Build input data
     test_file = 'data/test.txt'
     test_data = Input(test_file, config)
-    print('max_sentence_length = %d' % test_data.max_sentence_length)
     print('loading input data ... done')
 
     # Create model
