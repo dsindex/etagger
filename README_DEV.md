@@ -2,6 +2,37 @@
 - experiments 8
 ```
 * test 1 (elmo)
+keep_prob : 0.5
+elmo embedding params : elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json
+pos embedding size : 6
+pos embedding random init : -0.5 ~ 0.5
+pos one-hot : 5
+shape vec : 9
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.7
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
+
+token : 0.923971596474045  -> BiLSTM + ELMO best
+chunk : 0.9175303392683143 -> BiLSTM + ELMO best
+
 ```
 
 - experiments 7
@@ -115,8 +146,8 @@ save model by f1(token)
 +
 CRF
 
-token : 0.9083215796897038 -> transformer best
-chunk : 0.904078014184397  -> transformer best
+token : 0.9083215796897038 -> Transformer best
+chunk : 0.904078014184397  -> Transformer best
 
 * test 8
 word embedding size : 300(glove840B)
@@ -373,8 +404,8 @@ save model by f1(token)
 +
 CRF
 
-token : 0.9132052455016773 -> BiLSTM only best
-chunk : 0.9064951088393407 -> BiLSTM only best
+token : 0.9132052455016773 -> BiLSTM best
+chunk : 0.9064951088393407 -> BiLSTM best
 
 * test 1
 word embedding size : 300(glove840B)

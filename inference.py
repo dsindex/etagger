@@ -33,12 +33,15 @@ def inference_bulk(config):
         saver = tf.train.Saver()
         saver.restore(sess, config.restore)
         print('model restored')
-        feed_dict = {model.input_data_word_ids: test_data.sentence_word_ids,
-                     model.input_data_wordchr_ids: test_data.sentence_wordchr_ids,
-                     model.input_data_pos_ids: test_data.sentence_pos_ids,
+        feed_dict = {model.input_data_pos_ids: test_data.sentence_pos_ids,
                      model.input_data_etcs: test_data.sentence_etcs,
                      model.output_data: test_data.sentence_tags,
                      model.is_train: False}
+        if config.use_elmo:
+            feed_dict[model.elmo_input_data_wordchr_ids] = test_data.sentence_elmo_wordchr_ids
+        else:
+            feed_dict[model.input_data_word_ids] = test_data.sentence_word_ids
+            feed_dict[model.input_data_wordchr_ids] = test_data.sentence_wordchr_ids
         logits, logits_indices, trans_params, output_data_indices, sentence_lengths, test_loss = \
                      sess.run([model.logits, model.logits_indices, model.trans_params, \
                                model.output_data_indices, model.sentence_lengths, model.loss], \
@@ -62,13 +65,13 @@ def inference_bucket(config):
     model = Model(config)
 
     # Restore model
-    '''
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     '''
     session_conf = tf.ConfigProto(allow_soft_placement=True,
                                   log_device_placement=False,
                                   inter_op_parallelism_threads=1,
                                   intra_op_parallelism_threads=1)
+    '''
     sess = tf.Session(config=session_conf)
     feed_dict = {}
     if not config.use_elmo: feed_dict = {model.wrd_embeddings_init: config.embvec.wrd_embeddings}
@@ -89,12 +92,15 @@ def inference_bucket(config):
             start_time = time.time()
             # Build input data
             inp = Input(bucket, config)
-            feed_dict = {model.input_data_word_ids: inp.sentence_word_ids,
-                         model.input_data_wordchr_ids: inp.sentence_wordchr_ids,
-                         model.input_data_pos_ids: inp.sentence_pos_ids,
+            feed_dict = {model.input_data_pos_ids: inp.sentence_pos_ids,
                          model.input_data_etcs: inp.sentence_etcs,
                          model.output_data: inp.sentence_tags,
                          model.is_train: False}
+            if config.use_elmo:
+                feed_dict[model.elmo_input_data_wordchr_ids] = inp.sentence_elmo_wordchr_ids
+            else:
+                feed_dict[model.input_data_word_ids] = inp.sentence_word_ids
+                feed_dict[model.input_data_wordchr_ids] = inp.sentence_wordchr_ids
             logits, trans_params, sentence_lengths, loss = \
                          sess.run([model.logits, model.trans_params, \
                                    model.sentence_lengths, model.loss], \
@@ -119,12 +125,15 @@ def inference_bucket(config):
         start_time = time.time()
         # Build input data
         inp = Input(bucket, config)
-        feed_dict = {model.input_data_word_ids: inp.sentence_word_ids,
-                     model.input_data_wordchr_ids: inp.sentence_wordchr_ids,
-                     model.input_data_pos_ids: inp.sentence_pos_ids,
+        feed_dict = {model.input_data_pos_ids: inp.sentence_pos_ids,
                      model.input_data_etcs: inp.sentence_etcs,
                      model.output_data: inp.sentence_tags,
                      model.is_train: False}
+        if config.use_elmo:
+            feed_dict[model.elmo_input_data_wordchr_ids] = inp.sentence_elmo_wordchr_ids
+        else:
+            feed_dict[model.input_data_word_ids] = inp.sentence_word_ids
+            feed_dict[model.input_data_wordchr_ids] = inp.sentence_wordchr_ids
         logits, trans_params, sentence_lengths, loss = \
                      sess.run([model.logits, model.trans_params, \
                                model.sentence_lengths, model.loss], \
@@ -210,12 +219,15 @@ def inference_line(config):
             continue
         # Build input data
         inp = Input(bucket, config)
-        feed_dict = {model.input_data_word_ids: inp.sentence_word_ids,
-                     model.input_data_wordchr_ids: inp.sentence_wordchr_ids,
-                     model.input_data_pos_ids: inp.sentence_pos_ids,
+        feed_dict = {model.input_data_pos_ids: inp.sentence_pos_ids,
                      model.input_data_etcs: inp.sentence_etcs,
                      model.output_data: inp.sentence_tags,
                      model.is_train: False}
+        if config.use_elmo:
+            feed_dict[model.elmo_input_data_wordchr_ids] = inp.sentence_elmo_wordchr_ids
+        else:
+            feed_dict[model.input_data_word_ids] = inp.sentence_word_ids
+            feed_dict[model.input_data_wordchr_ids] = inp.sentence_wordchr_ids
         logits, trans_params, sentence_lengths, loss = \
                      sess.run([model.logits, model.trans_params, \
                                model.sentence_lengths, model.loss], \

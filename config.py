@@ -39,5 +39,6 @@ class Config:
         if self.is_train:
             self.epoch = args.epoch
             self.batch_size = args.batch_size
+            self.dev_batch_size = 2*self.batch_size
             self.checkpoint_dir = args.checkpoint_dir
             self.summary_dir = args.summary_dir

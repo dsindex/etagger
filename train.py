@@ -65,34 +65,39 @@ def do_train(model, config, train_data, dev_data):
                                    ('train accuracy', train_accuracy),
                                    ('lr', learning_rate)])
                 idx += 1
-            # evaluate on dev data
+            # evaluate on dev data sliced by dev_batch_size to prevent OOM
             idx = 0
-            nbatches = (len(dev_data.sentence_tags) + config.batch_size - 1) // config.batch_size
+            nbatches = (len(dev_data.sentence_tags) + config.dev_batch_size - 1) // config.dev_batch_size
             dev_prog = Progbar(target=nbatches)
+            dev_loss = 0.0
+            dev_accuracy = 0.0
             dev_logits = None
             dev_logits_indices = None
             dev_trans_params = None
             dev_output_data_indices = None
             dev_sentence_lengths = None
-            for ptr in range(0, len(dev_data.sentence_tags), config.batch_size):
-                feed_dict={model.input_data_pos_ids: dev_data.sentence_pos_ids[ptr:ptr + config.batch_size],
-                           model.input_data_etcs: dev_data.sentence_etcs[ptr:ptr + config.batch_size],
-                           model.output_data: dev_data.sentence_tags[ptr:ptr + config.batch_size],
+            for ptr in range(0, len(dev_data.sentence_tags), config.dev_batch_size):
+                feed_dict={model.input_data_pos_ids: dev_data.sentence_pos_ids[ptr:ptr + config.dev_batch_size],
+                           model.input_data_etcs: dev_data.sentence_etcs[ptr:ptr + config.dev_batch_size],
+                           model.output_data: dev_data.sentence_tags[ptr:ptr + config.dev_batch_size],
                            model.is_train: False}
                 if config.use_elmo:
-                    feed_dict[model.elmo_input_data_wordchr_ids] = dev_data.sentence_elmo_wordchr_ids[ptr:ptr + config.batch_size]
+                    feed_dict[model.elmo_input_data_wordchr_ids] = dev_data.sentence_elmo_wordchr_ids[ptr:ptr + config.dev_batch_size]
                 else:
-                    feed_dict[model.input_data_word_ids] = dev_data.sentence_word_ids[ptr:ptr + config.batch_size]
-                    feed_dict[model.input_data_wordchr_ids] = dev_data.sentence_wordchr_ids[ptr:ptr + config.batch_size]
-                step, dev_summaries, logits, logits_indices, trans_params, \
-                    output_data_indices, sentence_lengths, dev_loss, dev_accuracy = \
+                    feed_dict[model.input_data_word_ids] = dev_data.sentence_word_ids[ptr:ptr + config.dev_batch_size]
+                    feed_dict[model.input_data_wordchr_ids] = dev_data.sentence_wordchr_ids[ptr:ptr + config.dev_batch_size]
+                step, summaries, logits, logits_indices, trans_params, \
+                    output_data_indices, sentence_lengths, loss, accuracy = \
                            sess.run([model.global_step, dev_summary_op, model.logits, model.logits_indices, \
                                      model.trans_params, model.output_data_indices, model.sentence_lengths, \
                                      model.loss, model.accuracy], feed_dict=feed_dict)
-                dev_summary_writer.add_summary(dev_summaries, step)
+                print('summaries', summaries)
+                dev_summary_writer.add_summary(summaries, step)
                 dev_prog.update(idx + 1,
-                                [('dev loss', dev_loss),
-                                 ('dev accuracy', dev_accuracy)])
+                                [('dev loss', loss),
+                                 ('dev accuracy', accuracy)])
+                dev_loss += loss
+                dev_accuracy += accuracy
                 if dev_logits is not None: dev_logits = np.concatenate((dev_logits, logits), axis=0)
                 else: dev_logits = logits
                 if dev_logits_indices is not None: dev_logits_indices = np.concatenate((dev_logits_indices, logits_indices), axis=0)
@@ -103,7 +108,7 @@ def do_train(model, config, train_data, dev_data):
                 if dev_sentence_lengths is not None: dev_sentence_lengths = np.concatenate((dev_sentence_lengths, sentence_lengths), axis=0)
                 else: dev_sentence_lengths = sentence_lengths
                 idx += 1
-            print('dev precision, recall, f1(token): ')
+            print('[epoch %s/%s] dev precision, recall, f1(token): ' % (e, config.epoch))
             token_f1 = TokenEval.compute_f1(config.class_size, dev_logits, dev_data.sentence_tags, dev_sentence_lengths)
             ''' 
             if config.use_crf:

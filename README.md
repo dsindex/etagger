@@ -26,7 +26,7 @@
 
 - my main questions are :
   - can this module perform at the level of state of the art?
-    - [x] the f1 score is near SOTA(without ELMO)
+    - [x] the f1 score is near SOTA.
   - how to make it faster when it comes to use the BiLSTM?
     - [x] the solution is LSTMBlockFusedCell().
   - can the Transformer have competing results againt the BiLSTM? and how much faster?
@@ -37,7 +37,7 @@
       - it seems that point-wise feed forward net collects contextual information in the layer by layer manner.
         - this is very similar with hierarchical convolutional neural network.
       - i'd like to say `Attention is Not All you need`
-    - [x] you can see the below evaluation results
+    - [x] you can see the below evaluation results.
       - multi-layer BiLSTM using LSTMBlockFusedCell() is slightly faster than the Transformer with 4 layers.
       - moreover, the BiLSTM is a little bit faster on CPU environment(multi-thread) than on GPU's.
         - LSTMBlockFusedCell() is well optimized for multi-core CPU via multi-threading.
@@ -56,39 +56,53 @@
   - [experiment logs](https://github.com/dsindex/etagger/blob/master/README_DEV.md)
   - results
     - Transformer
-      - setting
-        - `experiments 7, test 9`
-        - rnn_used : False, tf_used : True, tf_num_layers : 4
-      - per-token(partial) micro f1 : 0.9083215796897038
-      - per-chunk(exact)   micro f1 : **0.904078014184397**
-      - average processing time per bucket
-        - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.0199788929196833 sec
-        - 32 core CPU(multi-threading)      : 0.031477801056819424 sec
-        - 1 CPU(single-thread)              : 0.1548298367589356 sec
+      - without ELMO
+        - setting
+          - `experiments 7, test 9`
+          - rnn_used : False, tf_used : True, tf_num_layers : 4
+        - per-token(partial) micro f1 : 0.9083215796897038
+        - per-chunk(exact)   micro f1 : **0.904078014184397**
+        - average processing time per bucket
+          - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.0199788929196833 sec
+          - 32 core CPU(multi-threading)      : 0.031477801056819424 sec
+          - 1 CPU(single-thread)              : 0.1548298367589356 sec
     - multi-layer BiLSTM only
-      - setting
-        - `experiments 7, test 2`
-        - rnn_used : True, rnn_num_layers : 2, tf_used : False
-      - per-token(partial) micro f1 : 0.9132052455016773
-      - per-chunk(exact)   micro f1 : **0.9064951088393407**
-      - average processing time per bucket
-        - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.0166574980614628 sec 
-        - 32 core CPU(multi-threading)      : **0.015211910430046686 sec**
-        - 1 CPU(single-thread)              : **0.023443293234942143 sec**
+      - without ELMO
+        - setting
+          - `experiments 7, test 2`
+          - rnn_used : True, rnn_num_layers : 2, tf_used : False
+        - per-token(partial) micro f1 : 0.9132052455016773
+        - per-chunk(exact)   micro f1 : **0.9064951088393407**
+        - average processing time per bucket
+          - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.0166574980614628 sec 
+          - 32 core CPU(multi-threading)      : **0.015211910430046686 sec**
+          - 1 CPU(single-thread)              : **0.023443293234942143 sec**
+      - with ELMO
+        - setting
+          - `experiments 8, test 1`
+          - rnn_used : True, rnn_num_layers : 2, tf_used : False
+        - per-token(partial) micro f1 : 0.923971596474045
+        - per-chunk(exact)   micro f1 : **0.9175303392683143**
+        - average processing time per bucket
+          - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.06133532517637155 sec
+          - 32 core CPU(multi-threading)      :
+          - 1 CPU(single-thread)              :
     - multi-layer BiLSTM + Transformer
-      - setting
-        - `experiments 7, test 10`
-        - rnn_used : True, rnn_num_layers : 2, tf_used : True, tf_num_layers : 1
-      - per-token(partial) micro f1 : 0.910979409787988
-      - per-chunk(exact)   micro f1 : **0.9047451049567825**
-      - average processing time per bucket
-        - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.019023411566478552 sec
-        - 32 core CPU(multi-threading)      : 0.021739641954792697 sec
+      - without ELMO
+        - setting
+          - `experiments 7, test 10`
+          - rnn_used : True, rnn_num_layers : 2, tf_used : True, tf_num_layers : 1
+        - per-token(partial) micro f1 : 0.910979409787988
+        - per-chunk(exact)   micro f1 : **0.9047451049567825**
+        - average processing time per bucket
+          - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.019023411566478552 sec
+          - 32 core CPU(multi-threading)      : 0.021739641954792697 sec
     - multi-layer BiLSTM + multi-head attention
-      - setting
-        - `experiments 6, test 7`
-      - per-token(partial) micro f1 : 0.9157317073170732
-      - per-chunk(exact)   micro f1 : **0.9102156238953694**
+      - without ELMO
+        - setting
+          - `experiments 6, test 7`
+        - per-token(partial) micro f1 : 0.9157317073170732
+        - per-chunk(exact)   micro f1 : **0.9102156238953694**
   - comparision to previous research
     - implementations
       - [Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)

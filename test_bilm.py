@@ -70,7 +70,7 @@ with tf.Session() as sess:
     print(elmo_question_input_)
     # check padding
     for i in range(len(elmo_question_input_[0][0])):
-        print(i, elmo_question_input_[0][0][i])
+        print(i, len(elmo_question_input_[0][0][i]), elmo_question_input_[0][0][i])
 
 ##### general usage #####
 """
