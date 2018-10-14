@@ -79,14 +79,14 @@
           - 1 CPU(single-thread)              : **0.023443293234942143 sec**
       - with ELMO
         - setting
-          - `experiments 8, test 1`
+          - `experiments 8, test 2`
           - rnn_used : True, rnn_num_layers : 2, tf_used : False
-        - per-token(partial) micro f1 : 0.923971596474045
-        - per-chunk(exact)   micro f1 : **0.9175303392683143**
+        - per-token(partial) micro f1 : 0.9322728663199756
+        - per-chunk(exact)   micro f1 : **0.9253625751680227**
         - average processing time per bucket
           - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.06133532517637155 sec
-          - 32 core CPU(multi-threading)      :
-          - 1 CPU(single-thread)              :
+          - 32 core CPU(multi-threading)      : 0.40098162731570347 sec
+          - 1 CPU(single-thread)              : 0.7398052649182165 sec
     - multi-layer BiLSTM + Transformer
       - without ELMO
         - setting

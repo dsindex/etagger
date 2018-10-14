@@ -47,7 +47,7 @@ class Model:
         """
         keep_prob = tf.cond(self.is_train, lambda: self.__keep_prob, lambda: 1.0)
 
-        # pos embedding features
+        # pos embedding
         self.input_data_pos_ids = tf.placeholder(tf.int32, shape=[None, self.sentence_length], name='input_data_pos_ids')
         self.sentence_masks   = self.__compute_sentence_masks(self.input_data_pos_ids)
         self.sentence_lengths = self.__compute_sentence_lengths(self.sentence_masks)
@@ -60,7 +60,7 @@ class Model:
             self.elmo_input_data_wordchr_ids = tf.placeholder(tf.int32,
                                                               shape=[None, self.sentence_length+2, self.word_length],
                                                               name='elmo_input_data_wordchr_ids') # '+2' stands for '<S>', '</S>'
-            self.elmo_embeddings = self.__elmo_embedding(self.elmo_input_data_wordchr_ids, masks, keep_prob=keep_prob, scope='elmo-embedding')
+            self.elmo_embeddings = self.__elmo_embedding(self.elmo_input_data_wordchr_ids, masks, keep_prob=keep_prob)
         else:
             # (large) word embedding data
             self.wrd_embeddings_init = tf.placeholder(tf.float32, shape=[self.wrd_vocab_size, self.wrd_dim])
@@ -206,16 +206,15 @@ class Model:
             self.train_op = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss, global_step=self.global_step)
             '''
     
-    def __elmo_embedding(self, inputs, masks, keep_prob=0.5, scope='elmo-embedding'):
+    def __elmo_embedding(self, inputs, masks, keep_prob=0.5):
         """Compute ELMO embeddings
         """
-        with tf.variable_scope(scope):
-            elmo_embeddings_op = self.elmo_bilm(inputs)
-            elmo_input = weight_layers('input', elmo_embeddings_op, l2_coef=0.0)
-            elmo_embeddings = elmo_input['weighted_op'] # (batch_size, sentence_length, elmo_dim)
-            # masking(remove noise due to padding)
-            elmo_embeddings *= masks
-            return tf.nn.dropout(elmo_embeddings, keep_prob)
+        elmo_embeddings_op = self.elmo_bilm(inputs)
+        elmo_input = weight_layers('input', elmo_embeddings_op, l2_coef=0.0)
+        elmo_embeddings = elmo_input['weighted_op'] # (batch_size, sentence_length, elmo_dim)
+        # masking(remove noise due to padding)
+        elmo_embeddings *= masks
+        return tf.nn.dropout(elmo_embeddings, keep_prob)
 
     def __word_embedding(self, inputs, keep_prob=0.5, scope='word-embedding'):
         """Look up word embeddings

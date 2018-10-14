@@ -91,8 +91,8 @@ def do_train(model, config, train_data, dev_data):
                            sess.run([model.global_step, dev_summary_op, model.logits, model.logits_indices, \
                                      model.trans_params, model.output_data_indices, model.sentence_lengths, \
                                      model.loss, model.accuracy], feed_dict=feed_dict)
-                print('summaries', summaries)
-                dev_summary_writer.add_summary(summaries, step)
+                # FIXME how to write dev_loss, dev_accuracy to summary?
+                if ptr == 0: dev_summary_writer.add_summary(summaries, step)
                 dev_prog.update(idx + 1,
                                 [('dev loss', loss),
                                  ('dev accuracy', accuracy)])
@@ -108,6 +108,8 @@ def do_train(model, config, train_data, dev_data):
                 if dev_sentence_lengths is not None: dev_sentence_lengths = np.concatenate((dev_sentence_lengths, sentence_lengths), axis=0)
                 else: dev_sentence_lengths = sentence_lengths
                 idx += 1
+            dev_loss = dev_loss // nbatches
+            dev_accuracy = dev_accuracy // nbatches
             print('[epoch %s/%s] dev precision, recall, f1(token): ' % (e, config.epoch))
             token_f1 = TokenEval.compute_f1(config.class_size, dev_logits, dev_data.sentence_tags, dev_sentence_lengths)
             ''' 
