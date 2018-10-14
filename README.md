@@ -84,6 +84,15 @@
           - rnn_used : True, rnn_num_layers : 2, tf_used : False
         - per-token(partial) micro f1 : 0.9322728663199756
         - per-chunk(exact)   micro f1 : **0.9253625751680227**
+        ```
+        $ etc/conlleval < pred.txt
+        processed 46666 tokens with 5648 phrases; found: 5662 phrases; correct: 5234.
+        accuracy:  98.44%; precision:  92.44%; recall:  92.67%; FB1:  92.56
+                      LOC: precision:  94.29%; recall:  92.99%; FB1:  93.63  1645
+                     MISC: precision:  84.38%; recall:  84.62%; FB1:  84.50  704
+                      ORG: precision:  89.43%; recall:  91.69%; FB1:  90.55  1703
+                      PER: precision:  97.27%; recall:  96.85%; FB1:  97.06  1610
+        ```
         - average processing time per bucket
           - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.06133532517637155 sec
           - 32 core CPU(multi-threading)      : 0.40098162731570347 sec
