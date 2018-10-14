@@ -32,8 +32,17 @@ save model by f1(token)
 +
 CRF
 
+# train 1
 token : 0.9322728663199756 -> BiLSTM + ELMO best
 chunk : 0.9253625751680227 -> BiLSTM + ELMO best
+
+# trial 2
+token : 0.9282793139229689
+chunk : 0.922873045322025
+
+# trial 3
+token : 0.9265253771453001
+chunk : 0.9207247017233762
 
 * test 1
 keep_prob : 0.5
