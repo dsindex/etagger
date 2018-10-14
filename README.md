@@ -27,6 +27,7 @@
 - my main questions are :
   - can this module perform at the level of state of the art?
     - [x] the f1 score is near SOTA.
+      - 0.92536
   - how to make it faster when it comes to use the BiLSTM?
     - [x] the solution is LSTMBlockFusedCell().
   - can the Transformer have competing results againt the BiLSTM? and how much faster?
