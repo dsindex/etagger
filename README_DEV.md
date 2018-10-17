@@ -1,6 +1,74 @@
 
 - experiments 8
 ```
+* test 4
+keep_prob : 0.5
+elmo embedding params : elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json
+elmo embedding size : 1024
+using elmo dropout : keep_prob
+pos embedding size : 6
+pos embedding random init : -0.5 ~ 0.5
+pos one-hot : 5
+shape vec : 9
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2 -> 1
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.7
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
+
+token : 0.9283657086831301
+chunk : 0.9224785644833378
+
+* test 3
+keep_prob : 0.5
+elmo embedding params : elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json
+elmo embedding size : 1024
+using elmo dropout : keep_prob
+pos embedding size : 6
+pos embedding random init : -0.5 ~ 0.5
+pos one-hot : 5
+shape vec : 9
+rnn_used : True
+rnn_type : fused
+rnn_size : 200 -> 100
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.7
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
+
+token : 0.9300104096503582
+chunk : 0.9225059644782186
+
 * test 2
 keep_prob : 0.5
 elmo embedding params : elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json
@@ -43,6 +111,10 @@ chunk : 0.922873045322025
 # trial 3
 token : 0.9265253771453001
 chunk : 0.9207247017233762
+
+# trial 4
+token : 0.9265571358509073
+chunk : 0.9206939281288724
 
 * test 1
 keep_prob : 0.5
