@@ -188,13 +188,15 @@ def positional_encoding(lengths,
 
     N = tf.shape(lengths)[0]
     T = maxlen
+    Limit = 1024 # FIXME trick because we can't use range(T)
+
     with tf.variable_scope(scope, reuse=reuse):
         position_ind = tf.tile(tf.expand_dims(tf.range(T), 0), [N, 1]) # (batch_size, maxlen)
 
         # First part of the PE function: sin and cos argument
         position_enc = np.array([
             [pos / np.power(10000, 2.*i/num_units) for i in range(num_units)]
-            for pos in range(T)])
+            for pos in range(Limit)])
 
         # Second part, apply the cosine to even columns and sin to odds.
         position_enc[:, 0::2] = np.sin(position_enc[:, 0::2])  # dim 2i
