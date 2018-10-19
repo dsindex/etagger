@@ -40,10 +40,9 @@
       - i'd like to say `Attention is Not All you need`
     - [x] you can see the below evaluation results.
       - multi-layer BiLSTM using LSTMBlockFusedCell() is slightly faster than the Transformer with 4 layers.
-      - moreover, the BiLSTM is a little bit faster on CPU environment(multi-thread) than on GPU's.
+      - moreover, the BiLSTM is 2 times faster on CPU environment(multi-thread) than on GPU's.
         - LSTMBlockFusedCell() is well optimized for multi-core CPU via multi-threading.
-      - the BiLSTM is 7x ~ 8x faster than the Transformer version on 1 CPU(single-thread)
-        - surprising result!
+      - the BiLSTM is 3 ~ 4 times faster than the Transformer version on 1 CPU(single-thread)
 
 ## Models and Evaluation
 
@@ -64,12 +63,12 @@
         - per-token(partial) micro f1 : 0.9083215796897038
         - per-chunk(exact)   micro f1 : **0.904078014184397**
         - average processing time per bucket
-          - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.0199788929196833 sec
+          - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.02004064048410886 sec
           - 32 core CPU(multi-threading)
-            - pip version(EIGEN) : 0.031477801056819424 sec
+            - pip version(EIGEN) : 0.017194902728616093 sec
             - conda version(MKL) : 0.017211578762104145 sec
           - 1 CPU(single-thread)
-            - pip version(MKL)   : 0.1548298367589356 sec
+            - pip version(MKL)   : 0.031277301192413065 sec
             - conda version(MKL) : 0.05249898538527349 sec
     - multi-layer BiLSTM only
       - without ELMO
@@ -79,13 +78,13 @@
         - per-token(partial) micro f1 : 0.9132052455016773
         - per-chunk(exact)   micro f1 : **0.9064951088393407**
         - average processing time per bucket
-          - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.0166574980614628 sec 
+          - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.017568306024636302 sec
           - 32 core CPU(multi-threading)
-            - pip version(EIGEN) : 0.015211910430046686 sec
-            - conda version(MKL) : **0.009000271849989503 sec**
+            - pip version(EIGEN) : **0.008913323364092136 sec**
+            - conda version(MKL) : 0.009687283398921274 sec
           - 1 CPU(single-thread)
-            - pip version(EIGEN) : 0.023443293234942143 sec
-            - conda version(MKL) : 0.01017907096819303 sec
+            - pip version(EIGEN) : 0.009161499566545186 sec
+            - conda version(MKL) : 0.010258188270978897 sec
       - with ELMO
         - setting
           - `experiments 8, test 2`
@@ -384,6 +383,6 @@ in IN O O O
   - tensorflow impl
     - [bilm](https://github.com/allenai/bilm-tf)
 
-- conda for speed up on CPU
+- conda tensorflow distribution
   - [miniconda](https://conda.io/miniconda.html)
   - [tensorflow in anaconda](https://www.anaconda.com/blog/developer-blog/tensorflow-in-anaconda/)
