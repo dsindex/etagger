@@ -49,7 +49,8 @@ def do_train(model, config, train_data, dev_data):
                 feed_dict={model.input_data_pos_ids: train_data.sentence_pos_ids[ptr:ptr + config.batch_size],
                            model.input_data_etcs: train_data.sentence_etcs[ptr:ptr + config.batch_size],
                            model.output_data: train_data.sentence_tags[ptr:ptr + config.batch_size],
-                           model.is_train: True}
+                           model.is_train: True,
+                           model.sentence_length: train_data.max_sentence_length}
                 if config.use_elmo:
                     feed_dict[model.elmo_input_data_wordchr_ids] = train_data.sentence_elmo_wordchr_ids[ptr:ptr + config.batch_size]
                 else:
@@ -80,7 +81,8 @@ def do_train(model, config, train_data, dev_data):
                 feed_dict={model.input_data_pos_ids: dev_data.sentence_pos_ids[ptr:ptr + config.dev_batch_size],
                            model.input_data_etcs: dev_data.sentence_etcs[ptr:ptr + config.dev_batch_size],
                            model.output_data: dev_data.sentence_tags[ptr:ptr + config.dev_batch_size],
-                           model.is_train: False}
+                           model.is_train: False,
+                           model.sentence_length: dev_data.max_sentence_length}
                 if config.use_elmo:
                     feed_dict[model.elmo_input_data_wordchr_ids] = dev_data.sentence_elmo_wordchr_ids[ptr:ptr + config.dev_batch_size]
                 else:
@@ -152,7 +154,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--emb_path', type=str, help='path to word embedding vector(.pkl)', required=True)
     parser.add_argument('--wrd_dim', type=int, help='dimension of word embedding vector', required=True)
-    parser.add_argument('--sentence_length', type=int, help='max sentence length', required=True)
     parser.add_argument('--word_length', type=int, default=15, help='max word length')
     parser.add_argument('--batch_size', type=int, default=128, help='batch size of training')
     parser.add_argument('--epoch', type=int, default=50, help='number of epochs')

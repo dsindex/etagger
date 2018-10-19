@@ -8,22 +8,20 @@ from embvec import EmbVec
 class Input:
     def __init__(self, data, config):
         if config.use_elmo:
-            self.sentence_elmo_wordchr_ids = [] # [batch_size, sentence_length+2, word_length]
+            self.sentence_elmo_wordchr_ids = [] # [batch_size, max_sentence_length+2, word_length]
         else:
-            self.sentence_word_ids = []         # [batch_size, sentence_length]
-            self.sentence_wordchr_ids = []      # [batch_size, sentence_length, word_length]
-        self.sentence_pos_ids = []              # [batch_size, sentence_length]
-        self.sentence_etcs = []                 # [batch_size, sentence_length, etc_dim]
-        self.sentence_tags = []                 # [batch_size, sentence_length, class_size] 
+            self.sentence_word_ids = []         # [batch_size, max_sentence_length]
+            self.sentence_wordchr_ids = []      # [batch_size, max_sentence_length, word_length]
+        self.sentence_pos_ids = []              # [batch_size, max_sentence_length]
+        self.sentence_etcs = []                 # [batch_size, max_sentence_length, etc_dim]
+        self.sentence_tags = []                 # [batch_size, max_sentence_length, class_size] 
         self.config = config
 
-        if config.sentence_length == -1:
-            if type(data) is list:
-                self.max_sentence_length = len(data)
-            else: # treat as file path
-                self.max_sentence_length = self.find_max_length(data)
-        else:
-            self.max_sentence_length = config.sentence_length
+        # compute max sentence length
+        if type(data) is list:
+            self.max_sentence_length = len(data)
+        else: # treat as file path
+            self.max_sentence_length = self.find_max_length(data)
 
         if type(data) is list: # treat data as bucket
             bucket = data

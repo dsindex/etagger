@@ -27,7 +27,6 @@ class Model:
 
     def __init__(self, config):
         self.embvec = config.embvec
-        self.sentence_length = config.sentence_length
         self.wrd_vocab_size = len(self.embvec.wrd_embeddings)
         self.wrd_dim = config.wrd_dim
         self.word_length = config.word_length
@@ -39,16 +38,17 @@ class Model:
         self.class_size = config.class_size
         self.use_crf = config.use_crf
         self.use_elmo = config.use_elmo
-        self.is_train = tf.placeholder(tf.bool, name='is_train')
         self.set_cuda_visible_devices(config.is_train)
 
         """
         Input layer
         """
+        self.is_train = tf.placeholder(tf.bool, name='is_train')
+        self.sentence_length = tf.placeholder(tf.int32, name='sentence_length')
         keep_prob = tf.cond(self.is_train, lambda: self.__keep_prob, lambda: 1.0)
 
         # pos embedding
-        self.input_data_pos_ids = tf.placeholder(tf.int32, shape=[None, self.sentence_length], name='input_data_pos_ids')
+        self.input_data_pos_ids = tf.placeholder(tf.int32, shape=[None, None], name='input_data_pos_ids') # (batch_size, sentence_length)
         self.sentence_masks   = self.__compute_sentence_masks(self.input_data_pos_ids)
         self.sentence_lengths = self.__compute_sentence_lengths(self.sentence_masks)
         masks = tf.to_float(tf.expand_dims(self.sentence_masks, -1))
@@ -58,19 +58,19 @@ class Model:
             self.elmo_bilm = config.elmo_bilm
             # elmo embeddings
             self.elmo_input_data_wordchr_ids = tf.placeholder(tf.int32,
-                                                              shape=[None, self.sentence_length+2, self.word_length],
-                                                              name='elmo_input_data_wordchr_ids') # '+2' stands for '<S>', '</S>'
+                                                              shape=[None, None, self.word_length], # (batch_size, sentence_length+2, word_length)
+                                                              name='elmo_input_data_wordchr_ids')   # '+2' stands for '<S>', '</S>'
             self.elmo_embeddings = self.__elmo_embedding(self.elmo_input_data_wordchr_ids, masks, keep_prob=keep_prob)
         else:
             # (large) word embedding data
             self.wrd_embeddings_init = tf.placeholder(tf.float32, shape=[self.wrd_vocab_size, self.wrd_dim])
             self.wrd_embeddings = tf.Variable(self.wrd_embeddings_init, name='wrd_embeddings', trainable=False)
             # word embeddings
-            self.input_data_word_ids = tf.placeholder(tf.int32, shape=[None, self.sentence_length], name='input_data_word_ids')
+            self.input_data_word_ids = tf.placeholder(tf.int32, shape=[None, None], name='input_data_word_ids') # (batch_size, sentence_length)
             self.word_embeddings = self.__word_embedding(self.input_data_word_ids, keep_prob=keep_prob, scope='word-embedding')
             # character embeddings
             self.input_data_wordchr_ids = tf.placeholder(tf.int32,
-                                                         shape=[None, self.sentence_length, self.word_length],
+                                                         shape=[None, None, self.word_length], # (batch_size, sentence_length, word_length)
                                                          name='input_data_wordchr_ids')
             if self.__chr_conv_type == 'conv1d':
                 self.wordchr_embeddings = self.__wordchr_embedding_conv1d(self.input_data_wordchr_ids,
@@ -83,7 +83,7 @@ class Model:
 
         # etc features
         self.input_data_etcs = tf.placeholder(tf.float32,
-                                              shape=[None, self.sentence_length, self.etc_dim],
+                                              shape=[None, None, self.etc_dim], # (batch_size, sentence_length, etc_dim)
                                               name='input_data_etcs')
 
         if self.use_elmo:
@@ -178,7 +178,7 @@ class Model:
         Output answer
         """
         self.output_data = tf.placeholder(tf.float32,
-                                          shape=[None, self.sentence_length, self.class_size],
+                                          shape=[None, None, self.class_size], # (batch_size, sentence_length, class_size)
                                           name='output_data')
         self.output_data_indices = tf.cast(tf.argmax(self.output_data, 2), tf.int32)  # (batch_size, sentence_length)
 
@@ -377,13 +377,12 @@ class Model:
         """Apply fully-connected projection layer
         """
         with tf.variable_scope('projection'):
-            sentence_length = inputs.get_shape().as_list()[-2]
             in_dim = inputs.get_shape().as_list()[-1]
             weight = tf.Variable(tf.truncated_normal([in_dim, out_dim], stddev=0.01), name='W')
             bias = tf.Variable(tf.constant(0.1, shape=[out_dim]), name='b')
-            t_output = tf.reshape(inputs, [-1, in_dim])                 # (batch_size*sentence_length, in_dim)
-            output = tf.matmul(t_output, weight) + bias                 # (batch_size*sentence_length, out_dim)
-            output = tf.reshape(output, [-1, sentence_length, out_dim]) # (batch_size, sentence_length, out_dim)
+            t_output = tf.reshape(inputs, [-1, in_dim])                      # (batch_size*sentence_length, in_dim)
+            output = tf.matmul(t_output, weight) + bias                      # (batch_size*sentence_length, out_dim)
+            output = tf.reshape(output, [-1, self.sentence_length, out_dim]) # (batch_size, sentence_length, out_dim)
             return output
 
     def __compute_loss(self):

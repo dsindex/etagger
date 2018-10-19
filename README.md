@@ -199,41 +199,31 @@ $ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train
 $ python embvec.py --emb_path embeddings/glove.840B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --lowercase 0 --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weight_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5
 ```
 
-- check max sentence length
-```
-$ python check_sentence_length.py
-train, max_sentence_length = 113
-dev, max_sentence_length = 109
-test, max_sentence_length = 124
-
-* set 125 to sentence_length
-```
-
 - train
 ```
-$ python train.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --sentence_length 125 --batch_size 20 --epoch 70
+$ python train.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --batch_size 20 --epoch 70
 or
-$ python train.py --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --batch_size 20 --epoch 70
+$ python train.py --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --batch_size 20 --epoch 70
 $ rm -rf runs; tensorboard --logdir runs/summaries/ --port 6008
 ```
     
 - inference(bulk)
 ```
-$ python inference.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --sentence_length 125 --restore checkpoint/model_max.ckpt
+$ python inference.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --restore checkpoint/model_max.ckpt
 ```
 
 - inference(bucket)
 ```
-$ python inference.py --mode bucket --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --sentence_length 125 --restore checkpoint/model_max.ckpt < data/test.txt > pred.txt
+$ python inference.py --mode bucket --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --restore checkpoint/model_max.ckpt < data/test.txt > pred.txt
 or
-$ python inference.py --mode bucket --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --sentence_length 125 --restore checkpoint/model_max.ckpt < data/test.txt > pred.txt
+$ python inference.py --mode bucket --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --restore checkpoint/model_max.ckpt < data/test.txt > pred.txt
 $ python token_eval.py < pred.txt
 $ python chunk_eval.py < pred.txt
 ```
 
 - inference(line)
 ```
-$ python inference.py --mode line --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --sentence_length 125 --restore checkpoint/model_max.ckpt
+$ python inference.py --mode line --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --restore checkpoint/model_max.ckpt
 ...
 Obama left office in January 2017 with a 60% approval rating and currently resides in Washington, D.C.
 
@@ -382,3 +372,7 @@ in IN O O O
     - [Deep contextualized word representations](https://arxiv.org/pdf/1802.05365.pdf)
   - tensorflow impl
     - [bilm](https://github.com/allenai/bilm-tf)
+
+- conda for speed up on CPU
+  - https://conda.io/miniconda.html
+  - https://www.anaconda.com/blog/developer-blog/tensorflow-in-anaconda/

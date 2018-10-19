@@ -23,7 +23,6 @@ class Config:
         '''
         self.etc_dim = ETC_DIM
         self.class_size = len(self.embvec.tag_vocab)
-        self.sentence_length = args.sentence_length
         self.word_length = args.word_length
         self.restore = args.restore
         self.use_crf = use_crf
