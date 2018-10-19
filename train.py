@@ -162,5 +162,5 @@ if __name__ == '__main__':
     parser.add_argument('--summary_dir', type=str, default='./runs', help='path to save summary(ex, ./runs)')
 
     args = parser.parse_args()
-    config = Config(args, is_train=True, use_elmo=True, use_crf=True)
+    config = Config(args, is_train=True, use_elmo=False, use_crf=True)
     train(config)

@@ -65,8 +65,12 @@
         - per-chunk(exact)   micro f1 : **0.904078014184397**
         - average processing time per bucket
           - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.0199788929196833 sec
-          - 32 core CPU(multi-threading)      : 0.031477801056819424 sec
-          - 1 CPU(single-thread)              : 0.1548298367589356 sec
+          - 32 core CPU(multi-threading)
+            - pip version(EIGEN) : 0.031477801056819424 sec
+            - conda version(MKL) : 0.017211578762104145 sec
+          - 1 CPU(single-thread)
+            - pip version(MKL)   : 0.1548298367589356 sec
+            - conda version(MKL) : 0.05249898538527349 sec
     - multi-layer BiLSTM only
       - without ELMO
         - setting
@@ -80,8 +84,8 @@
             - pip version(EIGEN) : 0.015211910430046686 sec
             - conda version(MKL) : **0.009000271849989503 sec**
           - 1 CPU(single-thread)
-            - pip version   : 0.023443293234942143 sec
-            - conda version : 0.01017907096819303 sec
+            - pip version(EIGEN) : 0.023443293234942143 sec
+            - conda version(MKL) : 0.01017907096819303 sec
       - with ELMO
         - setting
           - `experiments 8, test 2`
@@ -101,8 +105,8 @@
           - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.06133532517637155 sec
           - 32 core CPU(multi-threading)
             - pip version(EIGEN) : 0.40098162731570347 sec
-            - conda version(MKL) : 
-          - 1 CPU(single-thread)              : 0.7398052649182165 sec
+          - 1 CPU(single-thread)
+            - pip version(EIGEN) : 0.7398052649182165 sec
     - multi-layer BiLSTM + Transformer
       - without ELMO
         - setting
@@ -112,7 +116,8 @@
         - per-chunk(exact)   micro f1 : **0.9047451049567825**
         - average processing time per bucket
           - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.019023411566478552 sec
-          - 32 core CPU(multi-threading)      : 0.021739641954792697 sec
+          - 32 core CPU(multi-threading)
+            - pip version(EIGEN) : 0.021739641954792697 sec
     - multi-layer BiLSTM + multi-head attention
       - without ELMO
         - setting
