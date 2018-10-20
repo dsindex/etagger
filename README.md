@@ -69,23 +69,23 @@
             - pip version(EIGEN) : 0.017194902728616093 sec
             - conda version(MKL) : 0.017211578762104145 sec
           - 1 CPU(single-thread)
-            - pip version(EIGEN)   : 0.031277301192413065 sec
+            - pip version(EIGEN) : 0.031277301192413065 sec
             - conda version(MKL) : 0.05249898538527349 sec
     - BiLSTM
       - without ELMO
         - setting
-          - `experiments 7, test 2`
+          - `experiments 9, test 1`
           - rnn_used : True, rnn_num_layers : 2, tf_used : False
-        - per-token(partial) micro f1 : 0.9132052455016773
-        - per-chunk(exact)   micro f1 : **0.9064951088393407**
+        - per-token(partial) micro f1 : 0.9152852267186738
+        - per-chunk(exact)   micro f1 : **0.9094911075893644**
         - average processing time per bucket
-          - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.017568306024636302 sec
+          - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.016886469142574183 sec
           - 32 core CPU(multi-threading)
-            - pip version(EIGEN) : **0.008913323364092136 sec**
-            - conda version(MKL) : 0.009687283398921274 sec
+            - pip version(EIGEN) : **0.008284030985754554 sec**
+            - conda version(MKL) : 0.009470064658166013 sec
           - 1 CPU(single-thread)
-            - pip version(EIGEN) : 0.009161499566545186 sec
-            - conda version(MKL) : 0.010258188270978897 sec
+            - pip version(EIGEN) : 0.008411417501886556 sec
+            - conda version(MKL) : 0.009789990744554517 sec
       - with ELMO
         - setting
           - `experiments 8, test 2`
@@ -325,6 +325,7 @@ in IN O O O
 - tips in general
   - save best model by using token-based f1. token-based f1 is slightly better than chunk-based f1
   - be careful for word lowercase when you are using glove6B embeddings. those are all lowercased.
+  - feed max sentence length to session. this yields huge improvement of inference speed.
 
 ## References
 

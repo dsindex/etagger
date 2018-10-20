@@ -1,4 +1,45 @@
 
+- experiments 9
+```
+* test 1
+word embedding size : 300(glove840B)
+keep_prob : 0.5
+chr_conv_type : conv1d
+chracter embedding size : 100
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 50
+pos embedding size : 6
+pos embedding random init : -0.5 ~ 0.5
+pos one-hot : 5
+shape vec : 9
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.7
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
+
+token : 0.9152852267186738 -> BiLSTM best
+chunk : 0.9094911075893644 -> BiLSTM best
+
+```
+
 - experiments 8
 ```
 * test 4
@@ -520,8 +561,8 @@ save model by f1(token)
 +
 CRF
 
-token : 0.9132052455016773 -> BiLSTM best
-chunk : 0.9064951088393407 -> BiLSTM best
+token : 0.9132052455016773
+chunk : 0.9064951088393407
 
 * test 1
 word embedding size : 300(glove840B)
