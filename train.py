@@ -13,6 +13,7 @@ from viterbi import viterbi_decode
 import os
 import sys
 import random
+import time
 import argparse
 
 def do_train(model, config, train_data, dev_data):
@@ -42,6 +43,7 @@ def do_train(model, config, train_data, dev_data):
         # training steps
         for e in range(config.epoch):
             # run epoch
+            start_time = time.time()
             idx = 0
             nbatches = (len(train_data.sentence_tags) + config.batch_size - 1) // config.batch_size
             train_prog = Progbar(target=nbatches)
@@ -66,6 +68,9 @@ def do_train(model, config, train_data, dev_data):
                                    ('train accuracy', train_accuracy),
                                    ('lr', learning_rate)])
                 idx += 1
+            duration_time = time.time() - start_time
+            out = 'duration_time : ' + str(duration_time) + ' sec for the epoch'
+            sys.stderr.write(out + '\n')
             # evaluate on dev data sliced by dev_batch_size to prevent OOM
             idx = 0
             nbatches = (len(dev_data.sentence_tags) + config.dev_batch_size - 1) // config.dev_batch_size
