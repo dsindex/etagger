@@ -383,6 +383,26 @@ in IN O O O
   - tensorflow impl
     - [bilm](https://github.com/allenai/bilm-tf)
 
-- conda tensorflow distribution
-  - [miniconda](https://conda.io/miniconda.html)
-  - [tensorflow in anaconda](https://www.anaconda.com/blog/developer-blog/tensorflow-in-anaconda/)
+- tensorflow MKL
+  - [optimizing tensorflow for cpu](https://www.tensorflow.org/performance/performance_guide#optimizing_for_cpu)
+  - conda tensorflow distribution
+    - [miniconda](https://conda.io/miniconda.html)
+    - [tensorflow in anaconda](https://www.anaconda.com/blog/developer-blog/tensorflow-in-anaconda/)
+    - [tensorflow-mkl, optimizing tensorflow for cpu](http://waslleysouza.com.br/en/2018/07/optimizing-tensorflow-for-cpu/)
+
+- tensorflow backend
+```
+- implementations of BLAS specification
+  - OpenBlas, intel MKL, Eigen(more functionality, high level library in C++)
+- Nvidia GPU
+  - CUDA language specification and library
+  - cuDNN(more functionality, high level library)
+- tensorflow
+  - GPU
+    - use mainly cuDNN
+    - some cuBlas, GOOGLE CUDA(customized by google)
+  - CPU
+    - use basically Eigen
+    - support MKL, MKL-DNN
+    - or Eigen with MKL-DNN backend
+```
