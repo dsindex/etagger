@@ -30,6 +30,8 @@
       - 0.92536
   - how to make it faster when it comes to use the BiLSTM?
     - [x] the solution is LSTMBlockFusedCell().
+      - 3.13 times faster during training time.
+      - 1.26 times faster during inference time.
   - can the Transformer have competing results againt the BiLSTM? and how much faster?
     - [x] contextual encoding by the Transformer encoder yields competing results.
       - in case the sequence to sequence model like translation, the multi-head attention mechanism might be very powerful for alignments.
@@ -304,7 +306,10 @@ in IN O O O
 - tips for training speed up
   - filter out words(which are not in train/dev/test data) from word embeddings. but not for service.
   - use LSTMBlockFusedCell for bidirectional LSTM. this is slightly faster than LSTMCell.
-    - about 1.26 times
+    - about 3.13 times faster during training time.
+      - 297.6699993610382 sec -> 94.96637988090515 sec for 1 epoch
+    - about 1.26 times faster during inference time.
+      - 0.010652577061606541 sec -> 0.008411417501886556 sec for 1 sentence
     - where is the LSTMBlockFusedCell() defined?
     ```
     https://github.com/tensorflow/tensorflow/blob/r1.11/tensorflow/contrib/rnn/python/ops/lstm_ops.py
