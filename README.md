@@ -68,7 +68,7 @@
             - pip version(EIGEN) : 0.017194902728616093 sec
             - conda version(MKL) : 0.017211578762104145 sec
           - 1 CPU(single-thread)
-            - pip version(MKL)   : 0.031277301192413065 sec
+            - pip version(EIGEN)   : 0.031277301192413065 sec
             - conda version(MKL) : 0.05249898538527349 sec
     - multi-layer BiLSTM only
       - without ELMO
