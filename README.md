@@ -42,6 +42,7 @@
       - multi-layer BiLSTM using LSTMBlockFusedCell() is slightly faster than the Transformer with 4 layers.
       - moreover, the BiLSTM is 2 times faster on CPU environment(multi-thread) than on GPU's.
         - LSTMBlockFusedCell() is well optimized for multi-core CPU via multi-threading.
+        - i guess there might be an overhead when copying b/w GPU memory and main memory.
       - the BiLSTM is 3 ~ 4 times faster than the Transformer version on 1 CPU(single-thread)
 
 ## Models and Evaluation
@@ -70,7 +71,7 @@
           - 1 CPU(single-thread)
             - pip version(EIGEN)   : 0.031277301192413065 sec
             - conda version(MKL) : 0.05249898538527349 sec
-    - multi-layer BiLSTM only
+    - BiLSTM
       - without ELMO
         - setting
           - `experiments 7, test 2`
@@ -106,18 +107,14 @@
             - pip version(EIGEN) : 0.40098162731570347 sec
           - 1 CPU(single-thread)
             - pip version(EIGEN) : 0.7398052649182165 sec
-    - multi-layer BiLSTM + Transformer
+    - BiLSTM + Transformer
       - without ELMO
         - setting
           - `experiments 7, test 10`
           - rnn_used : True, rnn_num_layers : 2, tf_used : True, tf_num_layers : 1
         - per-token(partial) micro f1 : 0.910979409787988
         - per-chunk(exact)   micro f1 : **0.9047451049567825**
-        - average processing time per bucket
-          - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.019023411566478552 sec
-          - 32 core CPU(multi-threading)
-            - pip version(EIGEN) : 0.021739641954792697 sec
-    - multi-layer BiLSTM + multi-head attention
+    - BiLSTM + multi-head attention
       - without ELMO
         - setting
           - `experiments 6, test 7`
