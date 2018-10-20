@@ -44,6 +44,7 @@
         - LSTMBlockFusedCell() is well optimized for multi-core CPU via multi-threading.
         - i guess there might be an overhead when copying b/w GPU memory and main memory.
       - the BiLSTM is 3 ~ 4 times faster than the Transformer version on 1 CPU(single-thread)
+      - during inference time, 1 layer BiLSTM on 1 CPU takes just **5.7 msec per sentence** on average.
 
 ## Models and Evaluation
 
@@ -60,36 +61,40 @@
       - without ELMO
         - setting
           - `experiments 7, test 9`
-          - rnn_used : False, tf_used : True, tf_num_layers : 4
+          - rnn_type : fused, rnn_used : False, tf_used : True, tf_num_layers : 4
         - per-token(partial) micro f1 : 0.9083215796897038
         - per-chunk(exact)   micro f1 : **0.904078014184397**
         - average processing time per bucket
-          - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.02004064048410886 sec
+          - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.02071691323051494 sec
           - 32 core CPU(multi-threading)
-            - pip version(EIGEN) : 0.017194902728616093 sec
-            - conda version(MKL) : 0.017211578762104145 sec
+            - pip version(EIGEN) : 0.017238136546748987 sec
+            - conda version(MKL) : 0.03974487513594985 sec 
           - 1 CPU(single-thread)
-            - pip version(EIGEN) : 0.031277301192413065 sec
-            - conda version(MKL) : 0.05249898538527349 sec
+            - pip version(EIGEN) : 0.03358284470571628 sec
+            - conda version(MKL) : 0.026261209470829668 sec
     - BiLSTM
       - without ELMO
         - setting
           - `experiments 9, test 1`
-          - rnn_used : True, rnn_num_layers : 2, tf_used : False
+          - rnn_type : fused, rnn_used : True, rnn_num_layers : 2, tf_used : False
         - per-token(partial) micro f1 : 0.9152852267186738
         - per-chunk(exact)   micro f1 : **0.9094911075893644**
         - average processing time per bucket
           - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.016886469142574183 sec
           - 32 core CPU(multi-threading)
-            - pip version(EIGEN) : **0.008284030985754554 sec**
+            - pip version(EIGEN) : 0.008284030985754554 sec
             - conda version(MKL) : 0.009470064658166013 sec
           - 1 CPU(single-thread)
-            - pip version(EIGEN) : 0.008411417501886556 sec
+            - pip version(EIGEN)
+              - rnn_num_layers 2, LSTMBlockFusedCell  : 0.008411417501886556 sec
+              - rnn_num_layers 2, LSTMCell            : 0.010652577061606541 sec
+              - rnn_num_layers 1, LSTMBlockFusedCell  : **0.005781734805153713 sec**
+              - rnn_num_layers 1, LSTMCell            : 0.007489144219637694 sec
             - conda version(MKL) : 0.009789990744554517 sec
       - with ELMO
         - setting
           - `experiments 8, test 2`
-          - rnn_used : True, rnn_num_layers : 2, tf_used : False
+          - rnn_type : fused, rnn_used : True, rnn_num_layers : 2, tf_used : False
         - per-token(partial) micro f1 : 0.9322728663199756
         - per-chunk(exact)   micro f1 : **0.9253625751680227**
         ```
@@ -111,7 +116,7 @@
       - without ELMO
         - setting
           - `experiments 7, test 10`
-          - rnn_used : True, rnn_num_layers : 2, tf_used : True, tf_num_layers : 1
+          - rnn_type : fused, rnn_used : True, rnn_num_layers : 2, tf_used : True, tf_num_layers : 1
         - per-token(partial) micro f1 : 0.910979409787988
         - per-chunk(exact)   micro f1 : **0.9047451049567825**
     - BiLSTM + multi-head attention
@@ -298,7 +303,8 @@ in IN O O O
 
 - tips for training speed up
   - filter out words(which are not in train/dev/test data) from word embeddings. but not for service.
-  - use LSTMBlockFusedCell for bidirectional LSTM. this is 2~3 times faster than LSTMCell.
+  - use LSTMBlockFusedCell for bidirectional LSTM. this is slightly faster than LSTMCell.
+    - about 1.26 times
     - where is the LSTMBlockFusedCell() defined?
     ```
     https://github.com/tensorflow/tensorflow/blob/r1.11/tensorflow/contrib/rnn/python/ops/lstm_ops.py
