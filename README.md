@@ -306,10 +306,11 @@ in IN O O O
   * edit etagger/inference/cc/CMakeLists.txt
     find_package(TensorFlow 1.11 EXACT REQUIRED)
   $ cd etagger/inference/cc
-  $ cmake .
+  $ mkdir build
+  $ cmake ..
   $ make
-  $ cd ..
-  $ cc/inference_cc
+  $ cd ../..
+  $ cc/build/inference_cc
   ```
 
 ## Development note
