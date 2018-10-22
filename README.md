@@ -303,6 +303,7 @@ in IN O O O
   * build and save sample model
   $ cd inference
   $ python train_example.py
+  $ python train_iris.py
   * inference using c++
   * edit etagger/inference/cc/CMakeLists.txt
     find_package(TensorFlow 1.11 EXACT REQUIRED)
@@ -311,7 +312,8 @@ in IN O O O
   $ cmake ..
   $ make
   $ cd ../..
-  $ cc/build/train_example
+  $ ./cc/build/inference_example
+  $ ./cc/build/inference_iris
   ```
 
 ## Development note
