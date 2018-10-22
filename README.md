@@ -280,6 +280,38 @@ in IN O O O
 . . O I-DATE O
 ```
 
+- inference using c++
+  - [tensorflow-cmake](https://github.com/PatWie/tensorflow-cmake)
+  - [build tensorflow from source](https://www.tensorflow.org/install/source)
+  ```
+  $ export TENSORFLOW_SOURCE_DIR='/home/tensorflow'
+  $ TENSORFLOW_BUILD_DIR='/home/tensorflow_dist'
+  $ mkdir -p ${TENSORFLOW_BUILD_DIR}/includes/tensorflow/cc/ops
+  $ git clone https://github.com/tensorflow/tensorflow.git
+  $ cd tensorflow
+  $ git checkout r1.11
+  $ ./configure
+  $ bazel build -c opt --copt=-mfpmath=both --copt=-msse4.2 //tensorflow:libtensorflow.so
+  $ bazel build -c opt --copt=-mfpmath=both --copt=-msse4.2 //tensorflow:libtensorflow_cc.so
+  $ cp -rf ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/*.so ${TENSORFLOW_BUILD_DIR}/
+  $ cp -rf ${TENSORFLOW_SOURCE_DIR}/bazel-genfiles/tensorflow/cc/ops/*.h ${TENSORFLOW_BUILD_DIR}/includes/tensorflow/cc/ops/
+  ```
+  - *test* build sample model and inference by c++
+  ```
+  $ cd /home/etagger
+  * build and save sample model
+  $ cd inference
+  $ python example.py
+  * inference using c++
+  * edit etagger/inference/cc/CMakeLists.txt
+    find_package(TensorFlow 1.11 EXACT REQUIRED)
+  $ cd etagger/inference/cc
+  $ cmake .
+  $ make
+  $ cd ..
+  $ cc/inference_cc
+  ```
+
 ## Development note
 
 - accuracy and loss
@@ -399,30 +431,6 @@ in IN O O O
     - [bilm](https://github.com/allenai/bilm-tf)
   - pytorch impl
     - [flair](https://github.com/zalandoresearch/flair)
-
-- tensorflow c/c++ api for inference
-  - [build tensorflow from source](https://www.tensorflow.org/install/source)
-  ```
-  $ git clone https://github.com/tensorflow/tensorflow.git
-  $ git checkout r1.11
-  $ ./configure
-  $ bazel build -c opt --copt=-mfpmath=both --copt=-msse4.2 //tensorflow:libtensorflow.so
-  $ bazel build -c opt --copt=-mfpmath=both --copt=-msse4.2 //tensorflow:libtensorflow_cc.so
-  ```
-  - [tensorflow-cmake](https://github.com/PatWie/tensorflow-cmake)
-  ```
-  * build and save sample model
-  $ cd tensorflow-cmake/inference
-  $ python example.py
-  * inference using c++
-  * edit tensorflow-cmake/inference/cc/CMakeLists.txt
-    find_package(TensorFlow 1.11 EXACT REQUIRED)
-  $ cd tensorflow-cmake/inference/cc
-  $ cmake .
-  $ make
-  $ cd ..
-  $ cc/inference_cc
-  ```
 
 - tensorflow MKL
   - [optimizing tensorflow for cpu](https://www.tensorflow.org/performance/performance_guide#optimizing_for_cpu)
