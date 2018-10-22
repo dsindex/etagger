@@ -302,7 +302,7 @@ in IN O O O
   $ cd /home/etagger
   * build and save sample model
   $ cd inference
-  $ python example.py
+  $ python train_example.py
   * inference using c++
   * edit etagger/inference/cc/CMakeLists.txt
     find_package(TensorFlow 1.11 EXACT REQUIRED)
@@ -311,7 +311,7 @@ in IN O O O
   $ cmake ..
   $ make
   $ cd ../..
-  $ cc/build/inference_cc
+  $ cc/build/train_example
   ```
 
 ## Development note

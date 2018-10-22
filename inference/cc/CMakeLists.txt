@@ -13,6 +13,6 @@ set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -D_GLIBCXX_USE_CXX11_ABI=
 TensorFlow_REQUIRE_C_LIBRARY()
 TensorFlow_REQUIRE_SOURCE()
 
-add_executable (inference_cc inference_cc.cc)
-target_include_directories(inference_cc PRIVATE TensorFlow_DEP)
-target_link_libraries(inference_cc PRIVATE TensorFlow_DEP)
+add_executable (inference_example inference_example.cc)
+target_include_directories(inference_example PRIVATE TensorFlow_DEP)
+target_link_libraries(inference_example PRIVATE TensorFlow_DEP)
