@@ -281,7 +281,7 @@ in IN O O O
 . . O I-DATE O
 ```
 
-- inference using c++
+- inference(line using C++)
   - [tensorflow-cmake](https://github.com/PatWie/tensorflow-cmake)
   - [build tensorflow from source](https://www.tensorflow.org/install/source)
   ```
@@ -297,7 +297,7 @@ in IN O O O
   $ cp -rf ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/*.so ${TENSORFLOW_BUILD_DIR}/
   $ cp -rf ${TENSORFLOW_SOURCE_DIR}/bazel-genfiles/tensorflow/cc/ops/*.h ${TENSORFLOW_BUILD_DIR}/includes/tensorflow/cc/ops/
   ```
-  - *test* build sample model and inference by c++
+  - *test* build sample model and inference by C++
   ```
   $ cd /home/etagger
   * build and save sample model
@@ -315,6 +315,7 @@ in IN O O O
   $ ./cc/build/inference_example
   $ ./cc/build/inference_iris
   ```
+  - build etagger model and inference by C++
 
 ## Development note
 
