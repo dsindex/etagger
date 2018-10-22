@@ -23,6 +23,7 @@
   - [tf_ner/masked_conv.py](https://github.com/guillaumegenthial/tf_ner/blob/master/models/chars_conv_lstm_crf/masked_conv.py)
   - [torchnlp/layers.py](https://github.com/kolloldas/torchnlp/blob/master/torchnlp/modules/transformer/layers.py)
   - [bilm](https://github.com/allenai/bilm-tf)
+  - [tensorflow-cmake](https://github.com/PatWie/tensorflow-cmake)
 
 - my main questions are :
   - can this module perform at the level of state of the art?
