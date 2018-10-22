@@ -400,6 +400,30 @@ in IN O O O
   - pytorch impl
     - [flair](https://github.com/zalandoresearch/flair)
 
+- tensorflow c/c++ api for inference
+  - [build tensorflow from source](https://www.tensorflow.org/install/source)
+  ```
+  $ git clone https://github.com/tensorflow/tensorflow.git
+  $ git checkout r1.11
+  $ ./configure
+  $ bazel build -c opt --copt=-mfpmath=both --copt=-msse4.2 //tensorflow:libtensorflow.so
+  $ bazel build -c opt --copt=-mfpmath=both --copt=-msse4.2 //tensorflow:libtensorflow_cc.so
+  ```
+  - [tensorflow-cmake](https://github.com/PatWie/tensorflow-cmake)
+  ```
+  * build and save sample model
+  $ cd tensorflow-cmake/inference
+  $ python example.py
+  * inference using c++
+  * edit tensorflow-cmake/inference/cc/CMakeLists.txt
+    find_package(TensorFlow 1.11 EXACT REQUIRED)
+  $ cd tensorflow-cmake/inference/cc
+  $ cmake .
+  $ make
+  $ cd ..
+  $ cc/inference_cc
+  ```
+
 - tensorflow MKL
   - [optimizing tensorflow for cpu](https://www.tensorflow.org/performance/performance_guide#optimizing_for_cpu)
   - conda tensorflow distribution
