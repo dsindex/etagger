@@ -16,3 +16,7 @@ TensorFlow_REQUIRE_SOURCE()
 add_executable (inference_example inference_example.cc)
 target_include_directories(inference_example PRIVATE TensorFlow_DEP)
 target_link_libraries(inference_example PRIVATE TensorFlow_DEP)
+
+add_executable (inference_iris inference_iris.cc)
+target_include_directories(inference_iris PRIVATE TensorFlow_DEP)
+target_link_libraries(inference_iris PRIVATE TensorFlow_DEP)
