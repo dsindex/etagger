@@ -440,6 +440,9 @@ in IN O O O
     - [bilm](https://github.com/allenai/bilm-tf)
   - pytorch impl
     - [flair](https://github.com/zalandoresearch/flair)
+    
+- tensorflow save and restore
+  - [save, restore, fine-tuning](https://cv-tricks.com/tensorflow-tutorial/save-restore-tensorflow-models-quick-complete-tutorial/amp/)
 
 - tensorflow MKL
   - [optimizing tensorflow for cpu](https://www.tensorflow.org/performance/performance_guide#optimizing_for_cpu)
