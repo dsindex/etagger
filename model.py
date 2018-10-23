@@ -4,7 +4,6 @@ import numpy as np
 from embvec import EmbVec
 from transformer import multihead_attention, feedforward, normalize, positional_encoding
 from masked_conv import masked_conv1d_and_max
-from bilm import weight_layers
 
 class Model:
 
@@ -14,7 +13,7 @@ class Model:
     __num_filters = 50             # number of filters
     __rnn_used = True              # use rnn layer or not
     __rnn_num_layers = 2           # number of RNN layers
-    __rnn_type = 'fused'           # normal | fused
+    __rnn_type = 'normal'          # normal | fused
     __rnn_size = 200               # size of RNN hidden unit
     __tf_used = False              # use transformer encoder layer or not
     __tf_num_layers = 4            # number of layers for transformer encoder
@@ -55,6 +54,7 @@ class Model:
         self.pos_embeddings = self.__pos_embedding(self.input_data_pos_ids, keep_prob=keep_prob, scope='pos-embedding')
 
         if self.use_elmo:
+            from bilm import weight_layers
             self.elmo_bilm = config.elmo_bilm
             # elmo embeddings
             self.elmo_input_data_wordchr_ids = tf.placeholder(tf.int32,
@@ -63,7 +63,7 @@ class Model:
             self.elmo_embeddings = self.__elmo_embedding(self.elmo_input_data_wordchr_ids, masks, keep_prob=keep_prob)
         else:
             # (large) word embedding data
-            self.wrd_embeddings_init = tf.placeholder(tf.float32, shape=[self.wrd_vocab_size, self.wrd_dim])
+            self.wrd_embeddings_init = tf.placeholder(tf.float32, shape=[self.wrd_vocab_size, self.wrd_dim], name='wrd_embeddings_init')
             self.wrd_embeddings = tf.Variable(self.wrd_embeddings_init, name='wrd_embeddings', trainable=False)
             # word embeddings
             self.input_data_word_ids = tf.placeholder(tf.int32, shape=[None, None], name='input_data_word_ids') # (batch_size, sentence_length)
@@ -169,10 +169,12 @@ class Model:
         """
         Projection layer
         """
-        self.logits = self.__projection(self.transformed_output,
-                                        self.class_size,
-                                        scope='projection')                # (batch_size, sentence_length, class_size)
-        self.logits_indices = tf.cast(tf.argmax(self.logits, 2), tf.int32) # (batch_size, sentence_length)
+        logits = self.__projection(self.transformed_output,
+                                   self.class_size,
+                                   scope='projection')                     # (batch_size, sentence_length, class_size)
+        self.logits = tf.identity(logits, name='logits')
+        logits_indices = tf.cast(tf.argmax(logits, 2), tf.int32)           # (batch_size, sentence_length)
+        self.logits_indices = tf.identity(logits_indices, name='logits_indices')
 
         """
         Output answer
@@ -390,9 +392,9 @@ class Model:
         """
         if self.use_crf:
             log_likelihood, trans_params = tf.contrib.crf.crf_log_likelihood(self.logits,
-                                                                             self.output_data_indices,
-                                                                             self.sentence_lengths)
-            self.trans_params = tf.identity(trans_params, name='trans_params')    # need to evaludate it for decoding
+                                                                  self.output_data_indices,
+                                                                  self.sentence_lengths)
+            self.trans_params = tf.Variable(trans_params, name='trans_params')
             return tf.reduce_mean(-log_likelihood)
         else:
             cross_entropy = self.output_data * tf.log(tf.nn.softmax(self.logits)) # (batch_size, sentence_length, class_size)
@@ -402,7 +404,8 @@ class Model:
             cross_entropy *= tf.to_float(masks)
             cross_entropy = tf.reduce_sum(cross_entropy, reduction_indices=1)     # (batch_size)
             cross_entropy /= tf.cast(self.sentence_lengths, tf.float32)           # (batch_size)
-            self.trans_params = tf.constant(0.0, shape=[self.class_size, self.class_size], name='trans_params')
+            trans_params = tf.constant(0.0, shape=[self.class_size, self.class_size])
+            self.trans_params = tf.identity(trans_params, name='trans_params')
             return tf.reduce_mean(cross_entropy)
 
     def __compute_accuracy(self):

@@ -58,6 +58,8 @@ def inference_bulk(config):
         test_prec, test_rec, test_f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
         print('test precision, recall, f1(chunk): ', test_prec, test_rec, test_f1)
 
+    sess.close()
+
 def inference_bucket(config):
     """Inference for bucket
     """

@@ -140,6 +140,9 @@ def do_train(model, config, train_data, dev_data):
                 # save best model
                 save_path = saver.save(sess, config.checkpoint_dir + '/' + 'ner_model')
                 print('max model saved in file: %s' % save_path)
+                tf.train.write_graph(sess.graph, '.', config.checkpoint_dir + '/' + 'graph.pb', as_text=False)
+                tf.train.write_graph(sess.graph, '.', config.checkpoint_dir + '/' + 'graph.pb_txt', as_text=True)
+    sess.close()
 
 def train(config):
     # build input data

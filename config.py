@@ -1,7 +1,6 @@
 from __future__ import print_function
 import numpy as np
 import pickle as pkl
-from bilm import Batcher, BidirectionalLanguageModel
 
 """
 etc dimension
@@ -28,6 +27,7 @@ class Config:
         self.use_crf = use_crf
         self.use_elmo = use_elmo
         if self.use_elmo:
+            from bilm import Batcher, BidirectionalLanguageModel
             self.word_length = 50 # replace to fixed word length for the pre-trained elmo : 'max_characters_per_token'
             self.elmo_batcher = Batcher(self.embvec.elmo_vocab_path, self.word_length) # map text to character ids
             self.elmo_bilm = BidirectionalLanguageModel(self.embvec.elmo_options_path, self.embvec.elmo_weight_path) # biLM graph

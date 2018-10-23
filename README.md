@@ -315,7 +315,11 @@ in IN O O O
   $ ./cc/build/inference_example
   $ ./cc/build/inference_iris
   ```
-  - build etagger model and inference by C++
+  - export etagger model and inference by C++
+  ```
+  $ cd inference
+  $ python export.py --restore ../checkpoint/ner_model --export exported/ner_model
+  ```
 
 ## Development note
 
