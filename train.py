@@ -138,7 +138,7 @@ def do_train(model, config, train_data, dev_data):
                 print('new best f1 score! : %s' % m)
                 maximum = m
                 # save best model
-                save_path = saver.save(sess, config.checkpoint_dir + '/' + 'model_max.ckpt')
+                save_path = saver.save(sess, config.checkpoint_dir + '/' + 'ner_model')
                 print('max model saved in file: %s' % save_path)
 
 def train(config):
@@ -163,7 +163,7 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', type=int, default=128, help='batch size of training')
     parser.add_argument('--epoch', type=int, default=50, help='number of epochs')
     parser.add_argument('--checkpoint_dir', type=str, default='./checkpoint', help='dir path to save model(ex, ./checkpoint)')
-    parser.add_argument('--restore', type=str, default=None, help='path to saved model(ex, ./checkpoint/model.ckpt)')
+    parser.add_argument('--restore', type=str, default=None, help='path to saved model(ex, ./checkpoint/ner_model)')
     parser.add_argument('--summary_dir', type=str, default='./runs', help='path to save summary(ex, ./runs)')
 
     args = parser.parse_args()

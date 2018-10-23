@@ -253,7 +253,7 @@ if __name__ == '__main__':
     parser.add_argument('--emb_path', type=str, help='path to word embedding vector(.pkl)', required=True)
     parser.add_argument('--wrd_dim', type=int, help='dimension of word embedding vector', required=True)
     parser.add_argument('--word_length', type=int, default=15, help='max word length')
-    parser.add_argument('--restore', type=str, help='path to saved model(ex, ./checkpoint/model_max.ckpt)', required=True)
+    parser.add_argument('--restore', type=str, help='path to saved model(ex, ./checkpoint/ner_model)', required=True)
     parser.add_argument('--mode', type=str, default='bulk', help='bulk, bucket, line')
 
     args = parser.parse_args()

@@ -392,7 +392,7 @@ class Model:
             log_likelihood, trans_params = tf.contrib.crf.crf_log_likelihood(self.logits,
                                                                              self.output_data_indices,
                                                                              self.sentence_lengths)
-            self.trans_params = trans_params # need to evaludate it for decoding
+            self.trans_params = tf.identity(trans_params, name='trans_params')    # need to evaludate it for decoding
             return tf.reduce_mean(-log_likelihood)
         else:
             cross_entropy = self.output_data * tf.log(tf.nn.softmax(self.logits)) # (batch_size, sentence_length, class_size)
@@ -402,7 +402,7 @@ class Model:
             cross_entropy *= tf.to_float(masks)
             cross_entropy = tf.reduce_sum(cross_entropy, reduction_indices=1)     # (batch_size)
             cross_entropy /= tf.cast(self.sentence_lengths, tf.float32)           # (batch_size)
-            self.trans_params = tf.constant(0.0, shape=[self.class_size, self.class_size])
+            self.trans_params = tf.constant(0.0, shape=[self.class_size, self.class_size], name='trans_params')
             return tf.reduce_mean(cross_entropy)
 
     def __compute_accuracy(self):
