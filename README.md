@@ -319,9 +319,13 @@ in IN O O O
   ```
   $ cd inference
   * in case we have a saved model.
-  *   BiLSTM(LSTMCell(), without ELMo) : work
-  *   BiLSTM(LSTMBlockFusedCell(), withoug ELMo) : not work, can't find `BlockLSTM` when using import_meta_graph()
-  *   Transformer(without ELMo) : work
+  *   1) BiLSTM, LSTMCell(), without ELMo
+  *     : work
+  *   2) BiLSTM, LSTMBlockFusedCell(), withoug ELMo
+  *     : not work, can't find `BlockLSTM` when using import_meta_graph()
+  *     : https://stackoverflow.com/questions/50298058/restore-trained-tensorflow-model-keyerror-blocklstm
+  *   3) Transformer, without ELMo
+  *     : work
   * restore the model to check list of placeholder and tensor names used for mapping. and export it another place.
   $ python export.py --restore ../checkpoint/ner_model --export exported/ner_model
   * restore the model and do inference via python without explicit model codes.
