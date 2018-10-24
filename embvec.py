@@ -215,12 +215,14 @@ if __name__ == '__main__':
     args = parser.parse_args()
     embvec = EmbVec(args)
     pkl.dump(embvec, open(args.emb_path + '.pkl', 'wb'))
+
     '''
     # check gazetteer vocab
     for word, tags in embvec.gaz_vocab.items():
         print(word)
         for tag, _ in tags.items(): print(tag)
     '''
+
     # test before applying gazetteer feature
     bucket = []
     for line in open(args.train_path):
@@ -241,3 +243,21 @@ if __name__ == '__main__':
             gvec = np.zeros(len(embvec.tag_vocab))
             tokens.append(gvec)
             bucket.append(tokens)
+
+    # print all vocab for inference by C++
+    # 1. wrd_vocab
+    print('# wrd_vocab')
+    for word, wid in embvec.wrd_vocab.items():
+        print(word, wid)
+    print('# chr_vocab')
+    # 2. chr_vocab
+    for ch, cid in embvec.chr_vocab.items():
+        print(ch, cid)
+    print('# pos_vocab')
+    # 3. pos_vocab
+    for pos, pid in embvec.pos_vocab.items():
+        print(pos, pid)
+    print('# tag_vocab')
+    # 4. tag_vocab
+    for tag, tid, in embvec.tag_vocab.items():
+        print(tag, tid)

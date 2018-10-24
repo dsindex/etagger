@@ -281,7 +281,7 @@ in IN O O O
 . . O I-DATE O
 ```
 
-- inference(line using C++)
+- inference(bucket using C++)
   - [tensorflow-cmake](https://github.com/PatWie/tensorflow-cmake)
   - [build tensorflow from source](https://www.tensorflow.org/install/source)
   ```
@@ -317,10 +317,12 @@ in IN O O O
   ```
   - export etagger model and inference by C++
   ```
+  * train with BiLSTM with LSTMCell(), without ELMO.
   $ cd inference
   $ python export.py --restore ../checkpoint/ner_model --export exported/ner_model
   * check using python
   $ python python/inference.py --emb_path ../embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --restore exported/ner_model < ../data/test.txt > pred.txt
+  * inspect `pred.txt`, something wrong....
   ```
 
 ## Development note
