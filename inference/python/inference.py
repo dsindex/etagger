@@ -27,28 +27,29 @@ def inference(config):
                                   intra_op_parallelism_threads=1)
     '''
     sess = tf.Session(config=session_conf)
-    # restore
+    # restore meta graph
     meta_file = config.restore + '.meta'
     loader = tf.train.import_meta_graph(meta_file)
-    loader.restore(sess, config.restore)
-    sys.stderr.write('model restored' +'\n')
-    # mapping
-    default_graph = tf.get_default_graph()
-    p_is_train = default_graph.get_tensor_by_name('is_train:0')
-    p_sentence_length = default_graph.get_tensor_by_name('sentence_length:0')
-    p_input_data_pos_ids = default_graph.get_tensor_by_name('input_data_pos_ids:0')
-    p_wrd_embeddings_init = default_graph.get_tensor_by_name('wrd_embeddings_init:0')
-    p_input_data_word_ids = default_graph.get_tensor_by_name('input_data_word_ids:0')
-    p_input_data_wordchr_ids = default_graph.get_tensor_by_name('input_data_wordchr_ids:0')
-    p_input_data_etcs = default_graph.get_tensor_by_name('input_data_etcs:0') 
-    p_output_data = default_graph.get_tensor_by_name('output_data:0') # dummy
-    t_logits = default_graph.get_tensor_by_name('logits:0')
-    t_trans_params = default_graph.get_tensor_by_name('loss/trans_params:0')
-    t_sentence_lengths = default_graph.get_tensor_by_name('sentence_lengths:0')
-
+    # mapping placeholders and tensors
+    graph = tf.get_default_graph()
+    p_is_train = graph.get_tensor_by_name('is_train:0')
+    p_sentence_length = graph.get_tensor_by_name('sentence_length:0')
+    p_input_data_pos_ids = graph.get_tensor_by_name('input_data_pos_ids:0')
+    p_wrd_embeddings_init = graph.get_tensor_by_name('wrd_embeddings_init:0')
+    p_input_data_word_ids = graph.get_tensor_by_name('input_data_word_ids:0')
+    p_input_data_wordchr_ids = graph.get_tensor_by_name('input_data_wordchr_ids:0')
+    p_input_data_etcs = graph.get_tensor_by_name('input_data_etcs:0') 
+    p_output_data = graph.get_tensor_by_name('output_data:0') # dummy
+    t_logits = graph.get_tensor_by_name('logits:0')
+    t_trans_params = graph.get_tensor_by_name('loss/trans_params:0')
+    t_sentence_lengths = graph.get_tensor_by_name('sentence_lengths:0')
+    # run global_variables_initializer() with feed_dict first
     feed_dict = {}
     if not config.use_elmo: feed_dict = {p_wrd_embeddings_init: config.embvec.wrd_embeddings}
     sess.run(tf.global_variables_initializer(), feed_dict=feed_dict)
+    # restore actual values
+    loader.restore(sess, config.restore)
+    sys.stderr.write('model restored' +'\n')
 
     num_buckets = 0
     total_duration_time = 0.0

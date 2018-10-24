@@ -6,7 +6,7 @@
   - encoding
     - basic embedding
       - [x] 1) word embedding(glove) and character convolutional embedding
-      - [x] 2) ELMO embedding
+      - [x] 2) ELMo embedding
     - etc embedding
       - [x] pos embedding, etc features(shape, pos, gazetteer(not used))
   - contextual encoding
@@ -61,7 +61,7 @@
   - [experiment logs](https://github.com/dsindex/etagger/blob/master/README_DEV.md)
   - results
     - Transformer
-      - without ELMO
+      - without ELMo
         - setting
           - `experiments 7, test 9`
           - rnn_type : fused, rnn_used : False, tf_used : True, tf_num_layers : 4
@@ -76,7 +76,7 @@
             - pip version(EIGEN) : 0.03358284470571628 sec
             - conda version(MKL) : 0.026261209470829668 sec
     - BiLSTM
-      - without ELMO
+      - without ELMo
         - setting
           - `experiments 9, test 1`
           - rnn_type : fused, rnn_used : True, rnn_num_layers : 2, tf_used : False
@@ -94,7 +94,7 @@
               - rnn_num_layers 1, LSTMBlockFusedCell  : **0.005781734805153713 sec**
               - rnn_num_layers 1, LSTMCell            : 0.007489144219637694 sec
             - conda version(MKL) : 0.009789990744554517 sec
-      - with ELMO
+      - with ELMo
         - setting
           - `experiments 8, test 2`
           - rnn_type : fused, rnn_used : True, rnn_num_layers : 2, tf_used : False
@@ -116,14 +116,14 @@
           - 1 CPU(single-thread)
             - pip version(EIGEN) : 0.7398052649182165 sec
     - BiLSTM + Transformer
-      - without ELMO
+      - without ELMo
         - setting
           - `experiments 7, test 10`
           - rnn_type : fused, rnn_used : True, rnn_num_layers : 2, tf_used : True, tf_num_layers : 1
         - per-token(partial) micro f1 : 0.910979409787988
         - per-chunk(exact)   micro f1 : **0.9047451049567825**
     - BiLSTM + multi-head attention
-      - without ELMO
+      - without ELMo
         - setting
           - `experiments 6, test 7`
         - per-token(partial) micro f1 : 0.9157317073170732
@@ -187,7 +187,7 @@ tensorflow 1.11, CUDA 9.0, cuDNN 7.31
 
 - bilm
   - install [bilm](https://github.com/allenai/bilm-tf)
-  - download [ELMO weights and options](https://allennlp.org/elmo)
+  - download [ELMo weights and options](https://allennlp.org/elmo)
   ```
   $ ls embeddings
   embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json  embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5
@@ -317,13 +317,16 @@ in IN O O O
   ```
   - export etagger model and inference by C++
   ```
-  * train with BiLSTM with LSTMCell(), without ELMO.
-  $ cd inference
+  * train model
+  *   BiLSTM(LSTMCell(), without ELMo) : work
+  *   BiLSTM(LSTMBlockFusedCell(), withoug ELMo) : not work, can't find `BlockLSTM` when using import_meta_graph()
+  *   Transformer(without ELMo) : work
   * check list of placeholder and tensor
+  $ cd inference
   $ python export.py --restore ../checkpoint/ner_model --export exported/ner_model
   * check using python
+  *   inspect `pred.txt` whether the predictions are correct or not.
   $ python python/inference.py --emb_path ../embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --restore exported/ner_model < ../data/test.txt > pred.txt
-  * inspect `pred.txt`, something wrong....
   ```
 
 ## Development note

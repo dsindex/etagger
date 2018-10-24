@@ -70,10 +70,10 @@ with sess.as_default():
     tf.train.write_graph(sess.graph, '.', "./exported/graph.pb", as_text=False)
     tf.train.write_graph(sess.graph, '.', "./exported/graph.pb_txt", as_text=True)
     '''
-    default_graph = tf.get_default_graph()
-    t1 = default_graph.get_tensor_by_name('logits:0')
-    t2 = default_graph.get_tensor_by_name('W:0')
-    t3 = default_graph.get_tensor_by_name('b:0')
+    graph = tf.get_default_graph()
+    t1 = graph.get_tensor_by_name('logits:0')
+    t2 = graph.get_tensor_by_name('W:0')
+    t3 = graph.get_tensor_by_name('b:0')
 
     t1, t2, t2, X = sess.run([t1, t2, t3, X], {X: x_data})
 

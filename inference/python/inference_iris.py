@@ -23,11 +23,11 @@ with sess.as_default():
     loader = loader.restore(sess, model_prefix)
     print(tf.global_variables())
 
-    default_graph = tf.get_default_graph()
-    W = default_graph.get_tensor_by_name('W:0')
-    b = default_graph.get_tensor_by_name('b:0')
-    X = default_graph.get_tensor_by_name('X:0')
-    logits = default_graph.get_tensor_by_name('logits:0')
+    graph = tf.get_default_graph()
+    W = graph.get_tensor_by_name('W:0')
+    b = graph.get_tensor_by_name('b:0')
+    X = graph.get_tensor_by_name('X:0')
+    logits = graph.get_tensor_by_name('logits:0')
 
     p = sess.run(logits, feed_dict={X:[[2,14,33,50]]}) # 1 0 0 -> type 0
     print(p, sess.run(tf.argmax(p, 1)))

@@ -142,8 +142,8 @@ save model by f1(token)
 CRF
 
 # train 1
-token : 0.9322728663199756 -> BiLSTM + ELMO best
-chunk : 0.9253625751680227 -> BiLSTM + ELMO best
+token : 0.9322728663199756 -> BiLSTM + ELMo best
+chunk : 0.9253625751680227 -> BiLSTM + ELMo best
 
 # trial 2
 token : 0.9282793139229689
