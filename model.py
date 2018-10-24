@@ -49,7 +49,8 @@ class Model:
         # pos embedding
         self.input_data_pos_ids = tf.placeholder(tf.int32, shape=[None, None], name='input_data_pos_ids') # (batch_size, sentence_length)
         self.sentence_masks   = self.__compute_sentence_masks(self.input_data_pos_ids)
-        self.sentence_lengths = self.__compute_sentence_lengths(self.sentence_masks)
+        sentence_lengths = self.__compute_sentence_lengths(self.sentence_masks)
+        self.sentence_lengths = tf.identity(sentence_lengths, name='sentence_lengths')
         masks = tf.to_float(tf.expand_dims(self.sentence_masks, -1))
         self.pos_embeddings = self.__pos_embedding(self.input_data_pos_ids, keep_prob=keep_prob, scope='pos-embedding')
 

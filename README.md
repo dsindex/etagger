@@ -319,6 +319,7 @@ in IN O O O
   ```
   $ cd inference
   $ python export.py --restore ../checkpoint/ner_model --export exported/ner_model
+  $ python python/inference.py --emb_path ../embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --restore exported/ner_model < ../data/test.txt > pred.txt
   ```
 
 ## Development note
