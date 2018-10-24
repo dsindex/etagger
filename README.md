@@ -324,9 +324,10 @@ in IN O O O
   * check list of placeholder and tensor
   $ cd inference
   $ python export.py --restore ../checkpoint/ner_model --export exported/ner_model
-  * check using python
-  *   inspect `pred.txt` whether the predictions are correct or not.
+  * inference using python
   $ python python/inference.py --emb_path ../embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --restore exported/ner_model < ../data/test.txt > pred.txt
+  * inspect `pred.txt` whether the predictions are same.
+  $ python ../token_eval.py < pred.txt
   ```
 
 ## Development note
