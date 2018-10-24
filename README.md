@@ -317,14 +317,14 @@ in IN O O O
   ```
   - export etagger model and inference by C++
   ```
-  * train model
+  $ cd inference
+  * in case we have a saved model.
   *   BiLSTM(LSTMCell(), without ELMo) : work
   *   BiLSTM(LSTMBlockFusedCell(), withoug ELMo) : not work, can't find `BlockLSTM` when using import_meta_graph()
   *   Transformer(without ELMo) : work
-  * check list of placeholder and tensor
-  $ cd inference
+  * restore the model to check list of placeholder and tensor names used for mapping. and export it another place.
   $ python export.py --restore ../checkpoint/ner_model --export exported/ner_model
-  * inference using python
+  * restore the model and do inference via python without explicit model codes.
   $ python python/inference.py --emb_path ../embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --restore exported/ner_model < ../data/test.txt > pred.txt
   * inspect `pred.txt` whether the predictions are same.
   $ python ../token_eval.py < pred.txt
@@ -389,6 +389,7 @@ in IN O O O
   - save best model by using token-based f1. token-based f1 is slightly better than chunk-based f1
   - be careful for word lowercase when you are using glove6B embeddings. those are all lowercased.
   - feed max sentence length to session. this yields huge improvement of inference speed.
+  - when it comes to use import_meta_graph(), you should run global_variable_initialzer() before restore().
 
 ## References
 
