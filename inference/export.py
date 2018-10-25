@@ -20,7 +20,6 @@ def export(args):
         p_input_data_word_ids = graph.get_tensor_by_name('input_data_word_ids:0')
         p_input_data_wordchr_ids = graph.get_tensor_by_name('input_data_wordchr_ids:0')
         p_input_data_etcs = graph.get_tensor_by_name('input_data_etcs:0') 
-        p_output_data = graph.get_tensor_by_name('output_data:0') # dummy
         t_logits = graph.get_tensor_by_name('logits:0')
         t_trans_params = graph.get_tensor_by_name('loss/trans_params:0')
         t_sentence_lengths = graph.get_tensor_by_name('sentence_lengths:0')
@@ -31,13 +30,13 @@ def export(args):
         print('input_data_word_ids', p_input_data_word_ids)
         print('input_data_wordchr_ids', p_input_data_wordchr_ids)
         print('input_data_etcs', p_input_data_etcs)
-        print('output_data', p_output_data)
         print('logits', t_logits)
         print('trans_params', t_trans_params)
         print('sentence_lengths', t_sentence_lengths)
         # restore actual values
         loader.restore(sess, args.restore)
         print(tf.global_variables())
+        print(tf.trainable_variables())
         print('model restored')
 
         # save

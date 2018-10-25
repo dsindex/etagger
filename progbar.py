@@ -1,5 +1,5 @@
-import time
 import sys
+import time
 import logging
 import numpy as np
 

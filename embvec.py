@@ -1,9 +1,9 @@
 from __future__ import print_function
+import sys
+import argparse
 import numpy as np
 import pickle as pkl
 from random import random
-import sys
-import argparse
 
 class EmbVec:
     def __init__(self, args):

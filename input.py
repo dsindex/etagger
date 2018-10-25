@@ -6,7 +6,7 @@ import numpy as np
 from embvec import EmbVec
 
 class Input:
-    def __init__(self, data, config):
+    def __init__(self, data, config, build_output=True):
         if config.use_elmo:
             self.sentence_elmo_wordchr_ids = [] # [batch_size, max_sentence_length+2, word_length]
         else:
@@ -14,7 +14,8 @@ class Input:
             self.sentence_wordchr_ids = []      # [batch_size, max_sentence_length, word_length]
         self.sentence_pos_ids = []              # [batch_size, max_sentence_length]
         self.sentence_etcs = []                 # [batch_size, max_sentence_length, etc_dim]
-        self.sentence_tags = []                 # [batch_size, max_sentence_length, class_size] 
+        if build_output:
+            self.sentence_tags = []             # [batch_size, max_sentence_length, class_size] 
         self.config = config
 
         # compute max sentence length
@@ -35,9 +36,11 @@ class Input:
                 self.sentence_wordchr_ids.append(wordchr_ids)
             pos_ids = self.__create_pos_ids(bucket)
             self.sentence_pos_ids.append(pos_ids)
-            etc, tag = self.__create_etc_and_tag(bucket)
+            etc = self.__create_etc(bucket)
             self.sentence_etcs.append(etc)
-            self.sentence_tags.append(tag)
+            if build_output:
+                tag = self.__create_tag(bucket)
+                self.sentence_tags.append(tag)
         else:                  # treat data as file path
             path = data
             bucket = []
@@ -53,9 +56,11 @@ class Input:
                         self.sentence_wordchr_ids.append(wordchr_ids)
                     pos_ids = self.__create_pos_ids(bucket)
                     self.sentence_pos_ids.append(pos_ids)
-                    etc, tag = self.__create_etc_and_tag(bucket)
+                    etc = self.__create_etc(bucket)
                     self.sentence_etcs.append(etc)
-                    self.sentence_tags.append(tag)
+                    if build_output:
+                        tag = self.__create_tag(bucket)
+                        self.sentence_tags.append(tag)
                     bucket = []
                 else:
                     bucket.append(line)
@@ -152,11 +157,10 @@ class Input:
             pos_ids.append(self.config.embvec.pad_pid)
         return pos_ids
 
-    def __create_etc_and_tag(self, bucket):
-        """Create a vector of an etc vector and an one-hot tag vector
+    def __create_etc(self, bucket):
+        """Create a vector of an etc vector
         """
         etc = []
-        tag  = []
         nbucket = []
         # apply gazetteer feature
         for line in bucket:
@@ -177,7 +181,6 @@ class Input:
         sentence_length = 0
         for tokens in nbucket:
             sentence_length += 1
-            word = tokens[0].lower()
             temp = self.__shape_vec(tokens[0])                              # adding shape vec(5)
             temp = np.append(temp, self.__pos_vec(tokens[1]))               # adding pos one-hot(5)
             '''
@@ -185,14 +188,29 @@ class Input:
             temp = np.append(temp, tokens[4])                               # adding gazetteer feature
             '''
             etc.append(temp)
-            tag.append(self.__tag_vec(tokens[3], self.config.class_size))   # tag one-hot(9)
             if sentence_length == self.max_sentence_length: break
         # padding with 0s
         for _ in range(self.max_sentence_length - sentence_length):
             temp = np.array([0 for _ in range(self.config.etc_dim)])
             etc.append(temp)
+        return etc
+
+    def __create_tag(self, bucket):
+        """Create a vector of an one-hot tag vector
+        """
+        tag  = []
+        sentence_length = 0
+        for line in bucket:
+            line = line.strip()
+            tokens = line.split()
+            assert (len(tokens) == 4)
+            sentence_length += 1
+            tag.append(self.__tag_vec(tokens[3], self.config.class_size))   # tag one-hot(9)
+            if sentence_length == self.max_sentence_length: break
+        # padding with 0s
+        for _ in range(self.max_sentence_length - sentence_length):
             tag.append(np.array([0] * self.config.class_size))
-        return etc, tag
+        return tag
 
     def __pos_vec(self, t):
         """Build one-hot for pos

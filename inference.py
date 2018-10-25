@@ -1,4 +1,7 @@
 from __future__ import print_function
+import sys
+import time
+import argparse
 import tensorflow as tf
 import numpy as np
 from embvec import EmbVec
@@ -8,9 +11,6 @@ from token_eval  import TokenEval
 from chunk_eval  import ChunkEval
 from viterbi import viterbi_decode
 from input import Input
-import sys
-import time
-import argparse
 
 def inference_bulk(config):
     """Inference for test file
@@ -18,7 +18,7 @@ def inference_bulk(config):
 
     # Build input data
     test_file = 'data/test.txt'
-    test_data = Input(test_file, config)
+    test_data = Input(test_file, config, build_output=True)
     print('loading input data ... done')
 
     # Create model
@@ -27,6 +27,7 @@ def inference_bulk(config):
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     sess = tf.Session(config=session_conf)
     with sess.as_default():
+        # Restore model
         feed_dict = {}
         if not config.use_elmo: feed_dict = {model.wrd_embeddings_init: config.embvec.wrd_embeddings}
         sess.run(tf.global_variables_initializer(), feed_dict=feed_dict)
@@ -43,9 +44,9 @@ def inference_bulk(config):
         else:
             feed_dict[model.input_data_word_ids] = test_data.sentence_word_ids
             feed_dict[model.input_data_wordchr_ids] = test_data.sentence_wordchr_ids
-        logits, logits_indices, trans_params, output_data_indices, sentence_lengths, test_loss = \
+        logits, logits_indices, trans_params, output_data_indices, sentence_lengths = \
                      sess.run([model.logits, model.logits_indices, model.trans_params, \
-                               model.output_data_indices, model.sentence_lengths, model.loss], \
+                               model.output_data_indices, model.sentence_lengths], \
                                feed_dict=feed_dict)
         print('test precision, recall, f1(token): ')
         TokenEval.compute_f1(config.class_size, logits, test_data.sentence_tags, sentence_lengths)
@@ -82,7 +83,10 @@ def inference_bucket(config):
     saver = tf.train.Saver()
     saver.restore(sess, config.restore)
     sys.stderr.write('model restored' +'\n')
-
+    '''
+    print(tf.global_variables())
+    print(tf.trainable_variables())
+    '''
     num_buckets = 0
     total_duration_time = 0.0
     bucket = []
@@ -94,10 +98,9 @@ def inference_bucket(config):
         if not line and len(bucket) >= 1:
             start_time = time.time()
             # Build input data
-            inp = Input(bucket, config)
+            inp = Input(bucket, config, build_output=False)
             feed_dict = {model.input_data_pos_ids: inp.sentence_pos_ids,
                          model.input_data_etcs: inp.sentence_etcs,
-                         model.output_data: inp.sentence_tags,
                          model.is_train: False,
                          model.sentence_length: inp.max_sentence_length}
             if config.use_elmo:
@@ -105,10 +108,9 @@ def inference_bucket(config):
             else:
                 feed_dict[model.input_data_word_ids] = inp.sentence_word_ids
                 feed_dict[model.input_data_wordchr_ids] = inp.sentence_wordchr_ids
-            logits, trans_params, sentence_lengths, loss = \
-                         sess.run([model.logits, model.trans_params, \
-                                   model.sentence_lengths, model.loss], \
-                                   feed_dict=feed_dict)
+            logits, trans_params, sentence_lengths = sess.run([model.logits, model.trans_params, \
+                                                               model.sentence_lengths], \
+                                                              feed_dict=feed_dict)
             if config.use_crf:
                 viterbi_sequences = viterbi_decode(logits, trans_params, sentence_lengths)
                 tags = inp.logit_indices_to_tags(viterbi_sequences[0], sentence_lengths[0])
@@ -131,7 +133,6 @@ def inference_bucket(config):
         inp = Input(bucket, config)
         feed_dict = {model.input_data_pos_ids: inp.sentence_pos_ids,
                      model.input_data_etcs: inp.sentence_etcs,
-                     model.output_data: inp.sentence_tags,
                      model.is_train: False,
                      model.sentence_length: inp.max_sentence_length}
         if config.use_elmo:
@@ -139,10 +140,9 @@ def inference_bucket(config):
         else:
             feed_dict[model.input_data_word_ids] = inp.sentence_word_ids
             feed_dict[model.input_data_wordchr_ids] = inp.sentence_wordchr_ids
-        logits, trans_params, sentence_lengths, loss = \
-                     sess.run([model.logits, model.trans_params, \
-                               model.sentence_lengths, model.loss], \
-                               feed_dict=feed_dict)
+        logits, trans_params, sentence_lengths = sess.run([model.logits, model.trans_params, \
+                                                           model.sentence_lengths], \
+                                                          feed_dict=feed_dict)
         if config.use_crf:
             viterbi_sequences = viterbi_decode(logits, trans_params, sentence_lengths)
             tags = inp.logit_indices_to_tags(viterbi_sequences[0], sentence_lengths[0])
@@ -223,10 +223,9 @@ def inference_line(config):
             sys.stderr.write(str(e) +'\n')
             continue
         # Build input data
-        inp = Input(bucket, config)
+        inp = Input(bucket, config, build_output=False)
         feed_dict = {model.input_data_pos_ids: inp.sentence_pos_ids,
                      model.input_data_etcs: inp.sentence_etcs,
-                     model.output_data: inp.sentence_tags,
                      model.is_train: False,
                      model.sentence_length: inp.max_sentence_length}
         if config.use_elmo:
@@ -234,10 +233,9 @@ def inference_line(config):
         else:
             feed_dict[model.input_data_word_ids] = inp.sentence_word_ids
             feed_dict[model.input_data_wordchr_ids] = inp.sentence_wordchr_ids
-        logits, trans_params, sentence_lengths, loss = \
-                     sess.run([model.logits, model.trans_params, \
-                               model.sentence_lengths, model.loss], \
-                               feed_dict=feed_dict)
+        logits, trans_params, sentence_lengths = sess.run([model.logits, model.trans_params, \
+                                                           model.sentence_lengths], \
+                                                          feed_dict=feed_dict)
         if config.use_crf:
             viterbi_sequences = viterbi_decode(logits, trans_params, sentence_lengths)
             tags = inp.logit_indices_to_tags(viterbi_sequences[0], sentence_lengths[0])
@@ -259,7 +257,7 @@ if __name__ == '__main__':
     parser.add_argument('--mode', type=str, default='bulk', help='bulk, bucket, line')
 
     args = parser.parse_args()
-    config = Config(args, is_train=False, use_elmo=False, use_crf=True)
+    config = Config(args, arg_train=False, use_elmo=False, use_crf=True)
     if args.mode == 'bulk':   inference_bulk(config)
     if args.mode == 'bucket': inference_bucket(config)
     if args.mode == 'line':   inference_line(config)

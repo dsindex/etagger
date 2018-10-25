@@ -10,7 +10,7 @@ etc dimension
 ETC_DIM = 9 + 5
 
 class Config:
-    def __init__(self, args, is_train=True, use_elmo=False, use_crf=True):
+    def __init__(self, args, arg_train=True, use_elmo=False, use_crf=True):
         self.emb_path = args.emb_path
         self.embvec = pkl.load(open(self.emb_path, 'rb'))
         self.wrd_dim = args.wrd_dim
@@ -34,10 +34,10 @@ class Config:
         self.starter_learning_rate = 0.001 # 0.0003
         self.decay_steps = 12000
         self.decay_rate = 0.7
-        self.is_train = is_train
-        if self.is_train:
+        if arg_train:
             self.epoch = args.epoch
             self.batch_size = args.batch_size
             self.dev_batch_size = 2*self.batch_size
             self.checkpoint_dir = args.checkpoint_dir
             self.summary_dir = args.summary_dir
+        self.arg_train = arg_train

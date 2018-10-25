@@ -1,7 +1,7 @@
 from __future__ import print_function
-import numpy as np
 import sys
 import argparse
+import numpy as np
 
 class TokenEval:
     def __init__(self):

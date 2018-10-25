@@ -1,4 +1,9 @@
 from __future__ import print_function
+import os
+import sys
+import random
+import time
+import argparse
 import tensorflow as tf
 import numpy as np
 from embvec import EmbVec
@@ -10,11 +15,6 @@ from chunk_eval  import ChunkEval
 from progbar import Progbar
 from early_stopping import EarlyStopping
 from viterbi import viterbi_decode
-import os
-import sys
-import random
-import time
-import argparse
 
 def do_train(model, config, train_data, dev_data):
     early_stopping = EarlyStopping(patience=10, measure='f1', verbose=1)
@@ -148,8 +148,8 @@ def train(config):
     # build input data
     train_file = 'data/train.txt'
     dev_file = 'data/dev.txt'
-    train_data = Input(train_file, config)
-    dev_data = Input(dev_file, config)
+    train_data = Input(train_file, config, build_output=True)
+    dev_data = Input(dev_file, config, build_output=True)
     print('loading input data ... done')
 
     # create model
@@ -170,5 +170,5 @@ if __name__ == '__main__':
     parser.add_argument('--summary_dir', type=str, default='./runs', help='path to save summary(ex, ./runs)')
 
     args = parser.parse_args()
-    config = Config(args, is_train=True, use_elmo=False, use_crf=True)
+    config = Config(args, arg_train=True, use_elmo=False, use_crf=True)
     train(config)

@@ -25,7 +25,7 @@ def multihead_attention(queries,
       num_heads: An int. Number of heads. (h)
       model_dim: output model dimension for the last linear projection. (M)
       dropout_rate: A floating point number.
-      is_training: Boolean. Controller of mechanism for dropout.
+      is_training: Boolean or A bool tensor, Controller of mechanism for dropout.
       causality: Boolean. If true, units that reference the future are masked. 
       scope: Optional scope for `variable_scope`.
       reuse: Boolean, whether to reuse the weights of a previous layer

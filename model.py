@@ -37,7 +37,7 @@ class Model:
         self.class_size = config.class_size
         self.use_crf = config.use_crf
         self.use_elmo = config.use_elmo
-        self.set_cuda_visible_devices(config.is_train)
+        self.set_cuda_visible_devices(config.arg_train)
 
         """
         Input layer
@@ -439,10 +439,10 @@ class Model:
         return word_masks
 
     @staticmethod
-    def set_cuda_visible_devices(is_train):
+    def set_cuda_visible_devices(arg_train):
         import os
         os.environ['CUDA_VISIBLE_DEVICES']='2'
-        if is_train:
+        if arg_train:
             from tensorflow.python.client import device_lib
             print(device_lib.list_local_devices())
         return True

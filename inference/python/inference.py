@@ -39,7 +39,6 @@ def inference(config):
     p_input_data_word_ids = graph.get_tensor_by_name('input_data_word_ids:0')
     p_input_data_wordchr_ids = graph.get_tensor_by_name('input_data_wordchr_ids:0')
     p_input_data_etcs = graph.get_tensor_by_name('input_data_etcs:0') 
-    p_output_data = graph.get_tensor_by_name('output_data:0') # dummy
     t_logits = graph.get_tensor_by_name('logits:0')
     t_trans_params = graph.get_tensor_by_name('loss/trans_params:0')
     t_sentence_lengths = graph.get_tensor_by_name('sentence_lengths:0')
@@ -62,10 +61,9 @@ def inference(config):
         if not line and len(bucket) >= 1:
             start_time = time.time()
             # Build input data
-            inp = Input(bucket, config)
+            inp = Input(bucket, config, build_output=False)
             feed_dict = {p_input_data_pos_ids: inp.sentence_pos_ids,
                          p_input_data_etcs: inp.sentence_etcs,
-                         p_output_data: inp.sentence_tags,
                          p_is_train: False,
                          p_sentence_length: inp.max_sentence_length}
             if config.use_elmo:
@@ -94,10 +92,9 @@ def inference(config):
     if len(bucket) != 0:
         start_time = time.time()
         # Build input data
-        inp = Input(bucket, config)
+        inp = Input(bucket, config, build_output=False)
         feed_dict = {p_input_data_pos_ids: inp.sentence_pos_ids,
                      p_input_data_etcs: inp.sentence_etcs,
-                     p_output_data: inp.sentence_tags,
                      p_is_train: False,
                      p_sentence_length: inp.max_sentence_length}
         if config.use_elmo:
@@ -136,5 +133,5 @@ if __name__ == '__main__':
     parser.add_argument('--restore', type=str, help='path to saved model(ex, ./exported/ner_model)', required=True)
 
     args = parser.parse_args()
-    config = Config(args, is_train=False, use_elmo=False, use_crf=True)
+    config = Config(args, arg_train=False, use_elmo=False, use_crf=True)
     inference(config)
