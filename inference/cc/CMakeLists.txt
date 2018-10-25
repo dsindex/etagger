@@ -20,3 +20,7 @@ target_link_libraries(inference_example PRIVATE TensorFlow_DEP)
 add_executable (inference_iris inference_iris.cc)
 target_include_directories(inference_iris PRIVATE TensorFlow_DEP)
 target_link_libraries(inference_iris PRIVATE TensorFlow_DEP)
+
+add_executable (inference inference.cc)
+target_include_directories(inference PRIVATE TensorFlow_DEP)
+target_link_libraries(inference PRIVATE TensorFlow_DEP)

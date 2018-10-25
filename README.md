@@ -323,7 +323,7 @@ in IN O O O
   *     : work
   *   2) BiLSTM, LSTMBlockFusedCell(), withoug ELMo
   *     : not work, can't find `BlockLSTM` when using import_meta_graph()
-  *     : https://stackoverflow.com/questions/50298058/restore-trained-tensorflow-model-keyerror-blocklstm
+  *     : similar issue => https://stackoverflow.com/questions/50298058/restore-trained-tensorflow-model-keyerror-blocklstm
   *   3) Transformer, without ELMo
   *     : work
   * restore the model to check list of placeholder and tensor names used for mapping. and export it another place.
@@ -455,8 +455,11 @@ in IN O O O
   - pytorch impl
     - [flair](https://github.com/zalandoresearch/flair)
     
-- tensorflow save and restore
-  - [save, restore, fine-tuning](https://cv-tricks.com/tensorflow-tutorial/save-restore-tensorflow-models-quick-complete-tutorial/amp/)
+- tensorflow save and restore from python/C/C++
+  - [save, restore tensorflow models quick complete tutorial](https://cv-tricks.com/tensorflow-tutorial/save-restore-tensorflow-models-quick-complete-tutorial/amp/)
+  - [tensorflow-cmake](https://github.com/PatWie/tensorflow-cmake)
+  - [Training a Tensorflow graph in C++ API](https://tebesu.github.io/posts/Training-a-TensorFlow-graph-in-C++-API)
+  - [how to invoke tf.initialize_all_variables in c tensorflow](https://www.queryoverflow.gdn/query/how-to-invoke-tf-initialize-all-variables-in-c-tensorflow-27_34975884.html)
 
 - tensorflow MKL
   - [optimizing tensorflow for cpu](https://www.tensorflow.org/performance/performance_guide#optimizing_for_cpu)

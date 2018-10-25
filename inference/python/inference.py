@@ -30,8 +30,9 @@ def inference(config):
     # restore meta graph
     meta_file = config.restore + '.meta'
     loader = tf.train.import_meta_graph(meta_file)
-    # mapping placeholders and tensors
+    # mapping init op, placeholders and tensors
     graph = tf.get_default_graph()
+    init_all_vars_op = graph.get_operation_by_name('init_all_vars_op')
     p_is_train = graph.get_tensor_by_name('is_train:0')
     p_sentence_length = graph.get_tensor_by_name('sentence_length:0')
     p_input_data_pos_ids = graph.get_tensor_by_name('input_data_pos_ids:0')
@@ -45,7 +46,7 @@ def inference(config):
     # run global_variables_initializer() with feed_dict first
     feed_dict = {}
     if not config.use_elmo: feed_dict = {p_wrd_embeddings_init: config.embvec.wrd_embeddings}
-    sess.run(tf.global_variables_initializer(), feed_dict=feed_dict)
+    sess.run(init_all_vars_op, feed_dict=feed_dict)
     # restore actual values
     loader.restore(sess, config.restore)
     sys.stderr.write('model restored' +'\n')

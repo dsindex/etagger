@@ -51,7 +51,8 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 xy_data = np.loadtxt('./data/iris.txt', unpack=True, dtype='float32')
 sess = tf.Session()
 with sess.as_default():
-    sess.run(tf.global_variables_initializer())
+    init_all_vars_op = tf.initialize_variables(tf.all_variables(), name='init_all_vars_op')
+    sess.run(init_all_vars_op)
     x_data, y_data = prepare_data(xy_data)
     for i in range(2000):
         if i % 100 == 0 :
