@@ -9,7 +9,7 @@ val = np.array([[1, 1]], dtype=np.float32)
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
 
-    # save graph
+    # save graph and weights
     saver = tf.train.Saver(tf.global_variables())
     saver.save(sess, './exported/my_model')
 
