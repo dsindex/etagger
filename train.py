@@ -26,7 +26,7 @@ def do_train(model, config, train_data, dev_data):
     with sess.as_default():
         feed_dict = {}
         if not config.use_elmo: feed_dict = {model.wrd_embeddings_init: config.embvec.wrd_embeddings}
-        init_all_vars_op = tf.initialize_variables(tf.all_variables(), name='init_all_vars_op')
+        init_all_vars_op = tf.variables_initializer(tf.global_variables(), name='init_all_vars_op')
         sess.run(init_all_vars_op, feed_dict=feed_dict) # feed large embedding data
         saver = tf.train.Saver()
         if config.restore is not None:
