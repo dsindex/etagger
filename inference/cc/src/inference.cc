@@ -3,7 +3,7 @@
 #include <tensorflow/core/public/session_options.h>
 #include <iostream>
 #include <string>
-#include "Vocab.h"
+#include "Input.h"
 
 typedef std::vector<std::pair<std::string, tensorflow::Tensor>> tensor_dict;
 
@@ -67,8 +67,10 @@ int main(int argc, char const *argv[]) {
   TF_CHECK_OK(tensorflow::NewSession(options, &sess));
   TF_CHECK_OK(LoadModel(sess, graph_fn, checkpoint_fn));
 
-  // prepare vocab
-  Vocab vocab = Vocab(vocab_fn);
+  // prepare config, vocab, input
+  Config config = Config();
+  Vocab vocab = Vocab(config, vocab_fn);
+  Input input = Input(vocab);
 
   // prepare inputs
   tensorflow::TensorShape data_shape({1, 4});

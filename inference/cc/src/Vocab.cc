@@ -6,7 +6,7 @@ Vocab::Vocab()
 {
 }
 
-Vocab::Vocab(std::string vocab_fn)
+Vocab::Vocab(Config& config, std::string vocab_fn)
 {
 }
 
