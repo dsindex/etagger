@@ -27,8 +27,8 @@ with sess.as_default():
     b = graph.get_tensor_by_name('b:0')
     X = graph.get_tensor_by_name('X:0')
     logits = graph.get_tensor_by_name('logits:0')
-    sess.run(init_all_vars_op)
     # restore actual values
+    sess.run(init_all_vars_op) # same as global_variables_initializer()
     loader = loader.restore(sess, model_prefix)
     print(tf.global_variables())
 

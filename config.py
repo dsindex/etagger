@@ -31,7 +31,7 @@ class Config:
             self.word_length = 50 # replace to fixed word length for the pre-trained elmo : 'max_characters_per_token'
             self.elmo_batcher = Batcher(self.embvec.elmo_vocab_path, self.word_length) # map text to character ids
             self.elmo_bilm = BidirectionalLanguageModel(self.embvec.elmo_options_path, self.embvec.elmo_weight_path) # biLM graph
-        self.starter_learning_rate = 0.0003 # 0.001
+        self.starter_learning_rate = 0.001 # 0.0003
         self.decay_steps = 12000
         self.decay_rate = 0.7
         if arg_train:

@@ -318,7 +318,7 @@ in IN O O O
   - export etagger model and inference by C++
   ```
   $ cd inference
-  * in case we have a saved model.
+  * let's assume that we have a saved model.
   *   1) BiLSTM, LSTMCell(), without ELMo
   *     : work
   *   2) BiLSTM, LSTMBlockFusedCell(), withoug ELMo
@@ -326,7 +326,7 @@ in IN O O O
   *     : similar issue => https://stackoverflow.com/questions/50298058/restore-trained-tensorflow-model-keyerror-blocklstm
   *   3) Transformer, without ELMo
   *     : work
-  * restore the model to check list of placeholder and tensor names used for mapping. and export it another place.
+  * restore the model to check list of operations, placeholders and tensors for mapping. and export it another place.
   $ python export.py --restore ../checkpoint/ner_model --export exported/ner_model
   * restore the model and do inference via python without explicit model codes.
   $ python python/inference.py --emb_path ../embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --restore exported/ner_model < ../data/test.txt > pred.txt

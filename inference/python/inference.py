@@ -43,11 +43,10 @@ def inference(config):
     t_logits = graph.get_tensor_by_name('logits:0')
     t_trans_params = graph.get_tensor_by_name('loss/trans_params:0')
     t_sentence_lengths = graph.get_tensor_by_name('sentence_lengths:0')
-    # run global_variables_initializer() with feed_dict first
+    # restore actual values
     feed_dict = {}
     if not config.use_elmo: feed_dict = {p_wrd_embeddings_init: config.embvec.wrd_embeddings}
-    sess.run(init_all_vars_op, feed_dict=feed_dict)
-    # restore actual values
+    sess.run(init_all_vars_op, feed_dict=feed_dict) # same as global_variables_initializer()
     loader.restore(sess, config.restore)
     sys.stderr.write('model restored' +'\n')
 
