@@ -309,6 +309,7 @@ in IN O O O
     find_package(TensorFlow 1.11 EXACT REQUIRED)
   $ cd etagger/inference/cc
   $ mkdir build
+  $ cd build
   $ cmake ..
   $ make
   $ cd ../..

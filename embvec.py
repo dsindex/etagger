@@ -102,7 +102,7 @@ class EmbVec:
             except: continue
             if len(vector) != self.wrd_dim: continue
             if self.lowercase: word = word.lower()
-            # FIXME for fast training. when it comes to service, comment out
+            # FIXME for fast training. when it comes to service, we need to build wrd_vocab by embedding data
             if word not in self.wrd_vocab: continue
             wid = self.wrd_vocab[word]
             self.wrd_embeddings[wid] = vector
@@ -249,15 +249,21 @@ if __name__ == '__main__':
     print('# wrd_vocab')
     for word, wid in embvec.wrd_vocab.items():
         print(word, wid)
-    print('# chr_vocab')
     # 2. chr_vocab
+    print('# chr_vocab')
     for ch, cid in embvec.chr_vocab.items():
         print(ch, cid)
-    print('# pos_vocab')
     # 3. pos_vocab
+    print('# pos_vocab')
     for pos, pid in embvec.pos_vocab.items():
         print(pos, pid)
-    print('# tag_vocab')
     # 4. tag_vocab
+    print('# tag_vocab')
     for tag, tid, in embvec.tag_vocab.items():
         print(tag, tid)
+    # 5. wrd_embeddings
+    print('# wrd_embeddings')
+    for wid in range(embvec.wrd_embeddings.shape[0]):
+        vec = embvec.wrd_embeddings[wid]
+        val = ' '.join([str(v) for v in vec.tolist()])
+        print(wid, val)

@@ -1,9 +1,9 @@
-// source template is from https://github.com/PatWie/tensorflow-cmake/blob/master/inference/cc/inference_cc.cc
 #include <tensorflow/core/protobuf/meta_graph.pb.h>
 #include <tensorflow/core/public/session.h>
 #include <tensorflow/core/public/session_options.h>
 #include <iostream>
 #include <string>
+#include "Vocab.h"
 
 typedef std::vector<std::pair<std::string, tensorflow::Tensor>> tensor_dict;
 
@@ -51,14 +51,24 @@ tensorflow::Status LoadModel(tensorflow::Session *sess, std::string graph_fn,
 }
 
 int main(int argc, char const *argv[]) {
-  const std::string graph_fn = "./exported/iris_model.meta";
-  const std::string checkpoint_fn = "./exported/iris_model";
+
+  if (argc < 4) {
+    std::cerr << argv[0] << " <meta> <model> <vocab>" << std::endl;
+    return 1;
+  } 
+
+  const std::string graph_fn = argv[1];
+  const std::string checkpoint_fn = argv[2];
+  const std::string vocab_fn = argv[3];
 
   // prepare session
   tensorflow::Session *sess;
   tensorflow::SessionOptions options;
   TF_CHECK_OK(tensorflow::NewSession(options, &sess));
   TF_CHECK_OK(LoadModel(sess, graph_fn, checkpoint_fn));
+
+  // prepare vocab
+  Vocab vocab = Vocab(vocab_fn);
 
   // prepare inputs
   tensorflow::TensorShape data_shape({1, 4});
