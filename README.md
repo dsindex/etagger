@@ -48,6 +48,8 @@
         - i guess there might be an overhead when copying b/w GPU memory and main memory.
       - the BiLSTM is 3 ~ 4 times faster than the Transformer version on 1 CPU(single-thread)
       - during inference time, 1 layer BiLSTM on 1 CPU takes just **5.7 msec per sentence** on average.
+  - how to use a trained model from C++? is it much faster?
+    - [ ] save the meta graph and trained parameters. and restore it via tensorflow C++ API.
 
 ## Models and Evaluation
 
