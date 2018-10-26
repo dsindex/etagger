@@ -52,17 +52,17 @@ def train_step(sess, model, config, data, summary_op, summary_writer):
     out = 'duration_time : ' + str(duration_time) + ' sec for this epoch'
     sys.stderr.write(out + '\n')
 
-def dev_step(sess, model, config, data, summary_op, summary_writer, e):
+def dev_step(sess, model, config, data, summary_writer, epoch):
     idx = 0
     nbatches = (len(data.sentence_tags) + config.dev_batch_size - 1) // config.dev_batch_size
     prog = Progbar(target=nbatches)
     sum_loss = 0.0
     sum_accuracy = 0.0
     sum_logits = None
-    sum_logits_indices = None
-    sum_output_data_indices = None
     sum_sentence_lengths = None
     trans_params = None
+    global_step = 0
+    # evaluate on dev data sliced by dev_batch_size to prevent OOM
     for ptr in range(0, len(data.sentence_tags), config.dev_batch_size):
         feed_dict={model.input_data_pos_ids: data.sentence_pos_ids[ptr:ptr + config.dev_batch_size],
                    model.input_data_etcs: data.sentence_etcs[ptr:ptr + config.dev_batch_size],
@@ -74,38 +74,38 @@ def dev_step(sess, model, config, data, summary_op, summary_writer, e):
         else:
             feed_dict[model.input_data_word_ids] = data.sentence_word_ids[ptr:ptr + config.dev_batch_size]
             feed_dict[model.input_data_wordchr_ids] = data.sentence_wordchr_ids[ptr:ptr + config.dev_batch_size]
-        step, summaries, logits, logits_indices, trans_params, output_data_indices, sentence_lengths, loss, accuracy = \
-                 sess.run([model.global_step, summary_op, model.logits, model.logits_indices, \
-                           model.trans_params, model.output_data_indices, model.sentence_lengths, \
+        global_step, logits, trans_params, sentence_lengths, loss, accuracy = \
+                 sess.run([model.global_step, model.logits, model.trans_params, model.sentence_lengths, \
                            model.loss, model.accuracy], feed_dict=feed_dict)
-        # FIXME how to write sum_loss, sum_accuracy to summary?
-        if ptr == 0: summary_writer.add_summary(summaries, step)
         prog.update(idx + 1,
                     [('dev loss', loss),
                      ('dev accuracy', accuracy)])
         sum_loss += loss
         sum_accuracy += accuracy
         sum_logits = np_concat(sum_logits, logits)
-        sum_logits_indices = np_concat(sum_logits_indices, logits_indices)
-        sum_output_data_indices = np_concat(sum_output_data_indices, output_data_indices)
         sum_sentence_lengths = np_concat(sum_sentence_lengths, sentence_lengths)
         idx += 1
-    sum_loss = sum_loss // nbatches
-    sum_accuracy = sum_accuracy // nbatches
-    print('[epoch %s/%s] dev precision, recall, f1(token): ' % (e, config.epoch))
+    sum_loss = sum_loss / nbatches
+    sum_accuracy = sum_accuracy / nbatches
+    # create summaries manually
+    summaries = tf.Summary(value=[tf.Summary.Value(tag='loss_1', simple_value=sum_loss), tf.Summary.Value(tag='accuracy_1', simple_value=sum_accuracy)])
+    summary_writer.add_summary(summaries, global_step)
+    print('[epoch %s/%s] dev precision, recall, f1(token): ' % (epoch, config.epoch))
     token_f1 = TokenEval.compute_f1(config.class_size, sum_logits, data.sentence_tags, sum_sentence_lengths)
-    ''' 
+    
     if config.use_crf:
         viterbi_sequences = viterbi_decode(sum_logits, trans_params, sum_sentence_lengths)
         tag_preds = data.logits_indices_to_tags_seq(viterbi_sequences, sum_sentence_lengths)
     else:
+        sum_logits_indices = np.argmax(sum_logits, 2)
         tag_preds = data.logits_indices_to_tags_seq(sum_logits_indices, sum_sentence_lengths)
+    sum_output_data_indices = np.argmax(data.sentence_tags, 2)
     tag_corrects = data.logits_indices_to_tags_seq(sum_output_data_indices, sum_sentence_lengths)
     prec, rec, f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
     print('dev precision, recall, f1(chunk): ', prec, rec, f1)
     chunk_f1 = f1
     m = chunk_f1
-    '''
+    
     m = token_f1
     return m
 
@@ -131,14 +131,11 @@ def do_train(model, config, train_data, dev_data):
         train_summary_op = tf.summary.merge([loss_summary, acc_summary])
         train_summary_dir = os.path.join(config.summary_dir, 'summaries', 'train')
         train_summary_writer = tf.summary.FileWriter(train_summary_dir, sess.graph)
-        dev_summary_op = tf.summary.merge([loss_summary, acc_summary])
         dev_summary_dir = os.path.join(config.summary_dir, 'summaries', 'dev')
         dev_summary_writer = tf.summary.FileWriter(dev_summary_dir, sess.graph)
         for e in range(config.epoch):
-            # run epoch
             train_step(sess, model, config, train_data, train_summary_op, train_summary_writer)
-            # evaluate on dev data sliced by dev_batch_size to prevent OOM
-            m = dev_step(sess, model, config, dev_data, dev_summary_op, dev_summary_writer, e)
+            m = dev_step(sess, model, config, dev_data, dev_summary_writer, e)
             # early stopping
             if early_stopping.validate(m, measure='f1'): break
             if m > maximum:

@@ -454,33 +454,34 @@ in IN O O O
     - [bilm](https://github.com/allenai/bilm-tf)
   - pytorch impl
     - [flair](https://github.com/zalandoresearch/flair)
-    
-- tensorflow save and restore from python/C/C++
-  - [save, restore tensorflow models quick complete tutorial](https://cv-tricks.com/tensorflow-tutorial/save-restore-tensorflow-models-quick-complete-tutorial/amp/)
-  - [tensorflow-cmake](https://github.com/PatWie/tensorflow-cmake)
-  - [Training a Tensorflow graph in C++ API](https://tebesu.github.io/posts/Training-a-TensorFlow-graph-in-C++-API)
-  - [how to invoke tf.initialize_all_variables in c tensorflow](https://www.queryoverflow.gdn/query/how-to-invoke-tf-initialize-all-variables-in-c-tensorflow-27_34975884.html)
-
-- tensorflow MKL
-  - [optimizing tensorflow for cpu](https://www.tensorflow.org/performance/performance_guide#optimizing_for_cpu)
-  - conda tensorflow distribution
-    - [miniconda](https://conda.io/miniconda.html)
-    - [tensorflow in anaconda](https://www.anaconda.com/blog/developer-blog/tensorflow-in-anaconda/)
-    - [tensorflow-mkl, optimizing tensorflow for cpu](http://waslleysouza.com.br/en/2018/07/optimizing-tensorflow-for-cpu/)
-
-- tensorflow backend
-```
-- implementations of BLAS specification
-  - OpenBlas, intel MKL, Eigen(more functionality, high level library in C++)
-- Nvidia GPU
-  - CUDA language specification and library
-  - cuDNN(more functionality, high level library)
-- tensorflow
-  - GPU
-    - use mainly cuDNN
-    - some cuBlas, GOOGLE CUDA(customized by google)
-  - CPU
-    - use basically Eigen
-    - support MKL, MKL-DNN
-    - or Eigen with MKL-DNN backend
-```
+   
+- tensorflow 
+  - tensorflow save and restore from python/C/C++
+    - [save, restore tensorflow models quick complete tutorial](https://cv-tricks.com/tensorflow-tutorial/save-restore-tensorflow-models-quick-complete-tutorial/amp/)
+    - [tensorflow-cmake](https://github.com/PatWie/tensorflow-cmake)
+    - [Training a Tensorflow graph in C++ API](https://tebesu.github.io/posts/Training-a-TensorFlow-graph-in-C++-API)
+    - [how to invoke tf.initialize_all_variables in c tensorflow](https://www.queryoverflow.gdn/query/how-to-invoke-tf-initialize-all-variables-in-c-tensorflow-27_34975884.html)
+  - tensorflow summary
+    - [how to manually create a tf summary](https://stackoverflow.com/questions/37902705/how-to-manually-create-a-tf-summary/37915182#37915182)
+  - tensorflow MKL
+    - [optimizing tensorflow for cpu](https://www.tensorflow.org/performance/performance_guide#optimizing_for_cpu)
+    - conda tensorflow distribution
+      - [miniconda](https://conda.io/miniconda.html)
+      - [tensorflow in anaconda](https://www.anaconda.com/blog/developer-blog/tensorflow-in-anaconda/)
+      - [tensorflow-mkl, optimizing tensorflow for cpu](http://waslleysouza.com.br/en/2018/07/optimizing-tensorflow-for-cpu/)
+  - tensorflow backend
+  ```
+  - implementations of BLAS specification
+    - OpenBlas, intel MKL, Eigen(more functionality, high level library in C++)
+  - Nvidia GPU
+    - CUDA language specification and library
+    - cuDNN(more functionality, high level library)
+  - tensorflow
+    - GPU
+      - use mainly cuDNN
+      - some cuBlas, GOOGLE CUDA(customized by google)
+    - CPU
+      - use basically Eigen
+      - support MKL, MKL-DNN
+      - or Eigen with MKL-DNN backend
+  ```

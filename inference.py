@@ -44,9 +44,8 @@ def inference_bulk(config):
         else:
             feed_dict[model.input_data_word_ids] = test_data.sentence_word_ids
             feed_dict[model.input_data_wordchr_ids] = test_data.sentence_wordchr_ids
-        logits, logits_indices, trans_params, output_data_indices, sentence_lengths = \
-                     sess.run([model.logits, model.logits_indices, model.trans_params, \
-                               model.output_data_indices, model.sentence_lengths], \
+        logits, trans_params, sentence_lengths = \
+                     sess.run([model.logits, model.trans_params, model.sentence_lengths], \
                                feed_dict=feed_dict)
         print('test precision, recall, f1(token): ')
         TokenEval.compute_f1(config.class_size, logits, test_data.sentence_tags, sentence_lengths)
@@ -54,7 +53,9 @@ def inference_bulk(config):
             viterbi_sequences = viterbi_decode(logits, trans_params, sentence_lengths)
             tag_preds = test_data.logits_indices_to_tags_seq(viterbi_sequences, sentence_lengths)
         else:
+            logits_indices = np.argmax(logits, 2)
             tag_preds = test_data.logits_indices_to_tags_seq(logits_indices, sentence_lengths)
+        output_data_indices = np.argmax(test_data.sentence_tags, 2)
         tag_corrects = test_data.logits_indices_to_tags_seq(output_data_indices, sentence_lengths)
         test_prec, test_rec, test_f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
         print('test precision, recall, f1(chunk): ', test_prec, test_rec, test_f1)
