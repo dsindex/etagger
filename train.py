@@ -16,12 +16,104 @@ from progbar import Progbar
 from early_stopping import EarlyStopping
 from viterbi import viterbi_decode
 
+def np_concat(sum_var, var):
+    if sum_var is not None: sum_var = np.concatenate((sum_var, var), axis=0)
+    else: sum_var = var
+    return sum_var
+
+def train_step(sess, model, config, data, summary_op, summary_writer):
+    start_time = time.time()
+    runopts = tf.RunOptions(report_tensor_allocations_upon_oom=True)
+    idx = 0
+    nbatches = (len(data.sentence_tags) + config.batch_size - 1) // config.batch_size
+    prog = Progbar(target=nbatches)
+    for ptr in range(0, len(data.sentence_tags), config.batch_size):
+        feed_dict={model.input_data_pos_ids: data.sentence_pos_ids[ptr:ptr + config.batch_size],
+                   model.input_data_etcs: data.sentence_etcs[ptr:ptr + config.batch_size],
+                   model.output_data: data.sentence_tags[ptr:ptr + config.batch_size],
+                   model.is_train: True,
+                   model.sentence_length: data.max_sentence_length}
+        if config.use_elmo:
+            feed_dict[model.elmo_input_data_wordchr_ids] = data.sentence_elmo_wordchr_ids[ptr:ptr + config.batch_size]
+        else:
+            feed_dict[model.input_data_word_ids] = data.sentence_word_ids[ptr:ptr + config.batch_size]
+            feed_dict[model.input_data_wordchr_ids] = data.sentence_wordchr_ids[ptr:ptr + config.batch_size]
+        step, summaries, _, loss, accuracy, learning_rate = \
+               sess.run([model.global_step, summary_op, model.train_op, \
+                         model.loss, model.accuracy, model.learning_rate], feed_dict=feed_dict, options=runopts)
+        summary_writer.add_summary(summaries, step)
+        prog.update(idx + 1,
+                    [('step', step),
+                     ('train loss', loss),
+                     ('train accuracy', accuracy),
+                     ('lr', learning_rate)])
+        idx += 1
+    duration_time = time.time() - start_time
+    out = 'duration_time : ' + str(duration_time) + ' sec for this epoch'
+    sys.stderr.write(out + '\n')
+
+def dev_step(sess, model, config, data, summary_op, summary_writer, e):
+    idx = 0
+    nbatches = (len(data.sentence_tags) + config.dev_batch_size - 1) // config.dev_batch_size
+    prog = Progbar(target=nbatches)
+    sum_loss = 0.0
+    sum_accuracy = 0.0
+    sum_logits = None
+    sum_logits_indices = None
+    sum_output_data_indices = None
+    sum_sentence_lengths = None
+    trans_params = None
+    for ptr in range(0, len(data.sentence_tags), config.dev_batch_size):
+        feed_dict={model.input_data_pos_ids: data.sentence_pos_ids[ptr:ptr + config.dev_batch_size],
+                   model.input_data_etcs: data.sentence_etcs[ptr:ptr + config.dev_batch_size],
+                   model.output_data: data.sentence_tags[ptr:ptr + config.dev_batch_size],
+                   model.is_train: False,
+                   model.sentence_length: data.max_sentence_length}
+        if config.use_elmo:
+            feed_dict[model.elmo_input_data_wordchr_ids] = data.sentence_elmo_wordchr_ids[ptr:ptr + config.dev_batch_size]
+        else:
+            feed_dict[model.input_data_word_ids] = data.sentence_word_ids[ptr:ptr + config.dev_batch_size]
+            feed_dict[model.input_data_wordchr_ids] = data.sentence_wordchr_ids[ptr:ptr + config.dev_batch_size]
+        step, summaries, logits, logits_indices, trans_params, output_data_indices, sentence_lengths, loss, accuracy = \
+                 sess.run([model.global_step, summary_op, model.logits, model.logits_indices, \
+                           model.trans_params, model.output_data_indices, model.sentence_lengths, \
+                           model.loss, model.accuracy], feed_dict=feed_dict)
+        # FIXME how to write sum_loss, sum_accuracy to summary?
+        if ptr == 0: summary_writer.add_summary(summaries, step)
+        prog.update(idx + 1,
+                    [('dev loss', loss),
+                     ('dev accuracy', accuracy)])
+        sum_loss += loss
+        sum_accuracy += accuracy
+        sum_logits = np_concat(sum_logits, logits)
+        sum_logits_indices = np_concat(sum_logits_indices, logits_indices)
+        sum_output_data_indices = np_concat(sum_output_data_indices, output_data_indices)
+        sum_sentence_lengths = np_concat(sum_sentence_lengths, sentence_lengths)
+        idx += 1
+    sum_loss = sum_loss // nbatches
+    sum_accuracy = sum_accuracy // nbatches
+    print('[epoch %s/%s] dev precision, recall, f1(token): ' % (e, config.epoch))
+    token_f1 = TokenEval.compute_f1(config.class_size, sum_logits, data.sentence_tags, sum_sentence_lengths)
+    ''' 
+    if config.use_crf:
+        viterbi_sequences = viterbi_decode(sum_logits, trans_params, sum_sentence_lengths)
+        tag_preds = data.logits_indices_to_tags_seq(viterbi_sequences, sum_sentence_lengths)
+    else:
+        tag_preds = data.logits_indices_to_tags_seq(sum_logits_indices, sum_sentence_lengths)
+    tag_corrects = data.logits_indices_to_tags_seq(sum_output_data_indices, sum_sentence_lengths)
+    prec, rec, f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
+    print('dev precision, recall, f1(chunk): ', prec, rec, f1)
+    chunk_f1 = f1
+    m = chunk_f1
+    '''
+    m = token_f1
+    return m
+
 def do_train(model, config, train_data, dev_data):
     early_stopping = EarlyStopping(patience=10, measure='f1', verbose=1)
     maximum = 0
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     session_conf.gpu_options.allow_growth = True
-    runopts = tf.RunOptions(report_tensor_allocations_upon_oom=True)
     sess = tf.Session(config=session_conf)
     with sess.as_default():
         feed_dict = {}
@@ -42,98 +134,11 @@ def do_train(model, config, train_data, dev_data):
         dev_summary_op = tf.summary.merge([loss_summary, acc_summary])
         dev_summary_dir = os.path.join(config.summary_dir, 'summaries', 'dev')
         dev_summary_writer = tf.summary.FileWriter(dev_summary_dir, sess.graph)
-        # training steps
         for e in range(config.epoch):
             # run epoch
-            start_time = time.time()
-            idx = 0
-            nbatches = (len(train_data.sentence_tags) + config.batch_size - 1) // config.batch_size
-            train_prog = Progbar(target=nbatches)
-            for ptr in range(0, len(train_data.sentence_tags), config.batch_size):
-                feed_dict={model.input_data_pos_ids: train_data.sentence_pos_ids[ptr:ptr + config.batch_size],
-                           model.input_data_etcs: train_data.sentence_etcs[ptr:ptr + config.batch_size],
-                           model.output_data: train_data.sentence_tags[ptr:ptr + config.batch_size],
-                           model.is_train: True,
-                           model.sentence_length: train_data.max_sentence_length}
-                if config.use_elmo:
-                    feed_dict[model.elmo_input_data_wordchr_ids] = train_data.sentence_elmo_wordchr_ids[ptr:ptr + config.batch_size]
-                else:
-                    feed_dict[model.input_data_word_ids] = train_data.sentence_word_ids[ptr:ptr + config.batch_size]
-                    feed_dict[model.input_data_wordchr_ids] = train_data.sentence_wordchr_ids[ptr:ptr + config.batch_size]
-                step, train_summaries, _, train_loss, train_accuracy, learning_rate = \
-                           sess.run([model.global_step, train_summary_op, model.train_op, \
-                                     model.loss, model.accuracy, model.learning_rate], feed_dict=feed_dict, options=runopts)
-                train_summary_writer.add_summary(train_summaries, step)
-                train_prog.update(idx + 1,
-                                  [('step', step),
-                                   ('train loss', train_loss),
-                                   ('train accuracy', train_accuracy),
-                                   ('lr', learning_rate)])
-                idx += 1
-            duration_time = time.time() - start_time
-            out = 'duration_time : ' + str(duration_time) + ' sec for the epoch'
-            sys.stderr.write(out + '\n')
+            train_step(sess, model, config, train_data, train_summary_op, train_summary_writer)
             # evaluate on dev data sliced by dev_batch_size to prevent OOM
-            idx = 0
-            nbatches = (len(dev_data.sentence_tags) + config.dev_batch_size - 1) // config.dev_batch_size
-            dev_prog = Progbar(target=nbatches)
-            dev_loss = 0.0
-            dev_accuracy = 0.0
-            dev_logits = None
-            dev_logits_indices = None
-            dev_trans_params = None
-            dev_output_data_indices = None
-            dev_sentence_lengths = None
-            for ptr in range(0, len(dev_data.sentence_tags), config.dev_batch_size):
-                feed_dict={model.input_data_pos_ids: dev_data.sentence_pos_ids[ptr:ptr + config.dev_batch_size],
-                           model.input_data_etcs: dev_data.sentence_etcs[ptr:ptr + config.dev_batch_size],
-                           model.output_data: dev_data.sentence_tags[ptr:ptr + config.dev_batch_size],
-                           model.is_train: False,
-                           model.sentence_length: dev_data.max_sentence_length}
-                if config.use_elmo:
-                    feed_dict[model.elmo_input_data_wordchr_ids] = dev_data.sentence_elmo_wordchr_ids[ptr:ptr + config.dev_batch_size]
-                else:
-                    feed_dict[model.input_data_word_ids] = dev_data.sentence_word_ids[ptr:ptr + config.dev_batch_size]
-                    feed_dict[model.input_data_wordchr_ids] = dev_data.sentence_wordchr_ids[ptr:ptr + config.dev_batch_size]
-                step, summaries, logits, logits_indices, trans_params, \
-                    output_data_indices, sentence_lengths, loss, accuracy = \
-                           sess.run([model.global_step, dev_summary_op, model.logits, model.logits_indices, \
-                                     model.trans_params, model.output_data_indices, model.sentence_lengths, \
-                                     model.loss, model.accuracy], feed_dict=feed_dict)
-                # FIXME how to write dev_loss, dev_accuracy to summary?
-                if ptr == 0: dev_summary_writer.add_summary(summaries, step)
-                dev_prog.update(idx + 1,
-                                [('dev loss', loss),
-                                 ('dev accuracy', accuracy)])
-                dev_loss += loss
-                dev_accuracy += accuracy
-                if dev_logits is not None: dev_logits = np.concatenate((dev_logits, logits), axis=0)
-                else: dev_logits = logits
-                if dev_logits_indices is not None: dev_logits_indices = np.concatenate((dev_logits_indices, logits_indices), axis=0)
-                else: dev_logits_indices = logits_indices
-                if dev_trans_params is None: dev_trans_params = trans_params
-                if dev_output_data_indices is not None: dev_output_data_indices = np.concatenate((dev_output_data_indices, output_data_indices), axis=0)
-                else: dev_output_data_indices = output_data_indices
-                if dev_sentence_lengths is not None: dev_sentence_lengths = np.concatenate((dev_sentence_lengths, sentence_lengths), axis=0)
-                else: dev_sentence_lengths = sentence_lengths
-                idx += 1
-            dev_loss = dev_loss // nbatches
-            dev_accuracy = dev_accuracy // nbatches
-            print('[epoch %s/%s] dev precision, recall, f1(token): ' % (e, config.epoch))
-            token_f1 = TokenEval.compute_f1(config.class_size, dev_logits, dev_data.sentence_tags, dev_sentence_lengths)
-            ''' 
-            if config.use_crf:
-                viterbi_sequences = viterbi_decode(dev_logits, dev_trans_params, dev_sentence_lengths)
-                tag_preds = dev_data.logits_indices_to_tags_seq(viterbi_sequences, dev_sentence_lengths)
-            else:
-                tag_preds = dev_data.logits_indices_to_tags_seq(dev_logits_indices, dev_sentence_lengths)
-            tag_corrects = dev_data.logits_indices_to_tags_seq(dev_output_data_indices, dev_sentence_lengths)
-            dev_prec, dev_rec, dev_f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
-            print('dev precision, recall, f1(chunk): ', dev_prec, dev_rec, dev_f1)
-            chunk_f1 = dev_f1
-            m = chunk_f1
-            '''
-            m = token_f1
+            m = dev_step(sess, model, config, dev_data, dev_summary_op, dev_summary_writer, e)
             # early stopping
             if early_stopping.validate(m, measure='f1'): break
             if m > maximum:
