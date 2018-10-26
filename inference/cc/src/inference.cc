@@ -53,7 +53,7 @@ tensorflow::Status LoadModel(tensorflow::Session *sess, std::string graph_fn,
 int main(int argc, char const *argv[]) {
 
   if (argc < 4) {
-    std::cerr << argv[0] << " <meta> <model> <vocab>" << std::endl;
+    std::cerr << argv[0] << " <graph_fn> <checkpoint_fn> <vocab_fn>" << std::endl;
     return 1;
   } 
 
