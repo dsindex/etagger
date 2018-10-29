@@ -49,8 +49,7 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 # training
 xy_data = np.loadtxt('./data/iris.txt', unpack=True, dtype='float32')
-sess = tf.Session()
-with sess.as_default():
+with tf.Session() as sess:
     init_all_vars_op = tf.variables_initializer(tf.global_variables(), name='init_all_vars_op')
     sess.run(init_all_vars_op)
     x_data, y_data = prepare_data(xy_data)
@@ -67,11 +66,11 @@ with sess.as_default():
     checkpoint_dir = './exported'
     checkpoint_file = 'iris_model'
     saver.save(sess, checkpoint_dir + '/' + checkpoint_file)
-    '''
     tf.train.write_graph(sess.graph, '.', "./exported/graph.pb", as_text=False)
     tf.train.write_graph(sess.graph, '.', "./exported/graph.pb_txt", as_text=True)
-    '''
     graph = tf.get_default_graph()
+    for op in graph.get_operations():
+        print(op.name)
     t1 = graph.get_tensor_by_name('logits:0')
     t2 = graph.get_tensor_by_name('W:0')
     t3 = graph.get_tensor_by_name('b:0')

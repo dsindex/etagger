@@ -26,39 +26,38 @@ def inference_bulk(config):
 
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     sess = tf.Session(config=session_conf)
-    with sess.as_default():
-        # Restore model
-        feed_dict = {}
-        if not config.use_elmo: feed_dict = {model.wrd_embeddings_init: config.embvec.wrd_embeddings}
-        sess.run(tf.global_variables_initializer(), feed_dict=feed_dict)
-        saver = tf.train.Saver()
-        saver.restore(sess, config.restore)
-        print('model restored')
-        feed_dict = {model.input_data_pos_ids: test_data.sentence_pos_ids,
-                     model.input_data_etcs: test_data.sentence_etcs,
-                     model.output_data: test_data.sentence_tags,
-                     model.is_train: False,
-                     model.sentence_length: test_data.max_sentence_length}
-        if config.use_elmo:
-            feed_dict[model.elmo_input_data_wordchr_ids] = test_data.sentence_elmo_wordchr_ids
-        else:
-            feed_dict[model.input_data_word_ids] = test_data.sentence_word_ids
-            feed_dict[model.input_data_wordchr_ids] = test_data.sentence_wordchr_ids
-        logits, trans_params, sentence_lengths = \
-                     sess.run([model.logits, model.trans_params, model.sentence_lengths], \
-                               feed_dict=feed_dict)
-        print('test precision, recall, f1(token): ')
-        TokenEval.compute_f1(config.class_size, logits, test_data.sentence_tags, sentence_lengths)
-        if config.use_crf:
-            viterbi_sequences = viterbi_decode(logits, trans_params, sentence_lengths)
-            tag_preds = test_data.logits_indices_to_tags_seq(viterbi_sequences, sentence_lengths)
-        else:
-            logits_indices = np.argmax(logits, 2)
-            tag_preds = test_data.logits_indices_to_tags_seq(logits_indices, sentence_lengths)
-        output_data_indices = np.argmax(test_data.sentence_tags, 2)
-        tag_corrects = test_data.logits_indices_to_tags_seq(output_data_indices, sentence_lengths)
-        test_prec, test_rec, test_f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
-        print('test precision, recall, f1(chunk): ', test_prec, test_rec, test_f1)
+    # Restore model
+    feed_dict = {}
+    if not config.use_elmo: feed_dict = {model.wrd_embeddings_init: config.embvec.wrd_embeddings}
+    sess.run(tf.global_variables_initializer(), feed_dict=feed_dict)
+    saver = tf.train.Saver()
+    saver.restore(sess, config.restore)
+    print('model restored')
+    feed_dict = {model.input_data_pos_ids: test_data.sentence_pos_ids,
+                 model.input_data_etcs: test_data.sentence_etcs,
+                 model.output_data: test_data.sentence_tags,
+                 model.is_train: False,
+                 model.sentence_length: test_data.max_sentence_length}
+    if config.use_elmo:
+        feed_dict[model.elmo_input_data_wordchr_ids] = test_data.sentence_elmo_wordchr_ids
+    else:
+        feed_dict[model.input_data_word_ids] = test_data.sentence_word_ids
+        feed_dict[model.input_data_wordchr_ids] = test_data.sentence_wordchr_ids
+    logits, trans_params, sentence_lengths = \
+                 sess.run([model.logits, model.trans_params, model.sentence_lengths], \
+                           feed_dict=feed_dict)
+    print('test precision, recall, f1(token): ')
+    TokenEval.compute_f1(config.class_size, logits, test_data.sentence_tags, sentence_lengths)
+    if config.use_crf:
+        viterbi_sequences = viterbi_decode(logits, trans_params, sentence_lengths)
+        tag_preds = test_data.logits_indices_to_tags_seq(viterbi_sequences, sentence_lengths)
+    else:
+        logits_indices = np.argmax(logits, 2)
+        tag_preds = test_data.logits_indices_to_tags_seq(logits_indices, sentence_lengths)
+    output_data_indices = np.argmax(test_data.sentence_tags, 2)
+    tag_corrects = test_data.logits_indices_to_tags_seq(output_data_indices, sentence_lengths)
+    test_prec, test_rec, test_f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
+    print('test precision, recall, f1(chunk): ', test_prec, test_rec, test_f1)
 
     sess.close()
 

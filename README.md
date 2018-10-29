@@ -17,13 +17,15 @@
 
 - there are so many repositories available for reference. i borrowed those codes as many as possible to use here.
   - [ner-lstm](https://github.com/monikkinom/ner-lstm)
-  - [cnn-text-classification-tf](https://github.com/dennybritz/cnn-text-classification-tf/blob/master/text_cnn.py)
+  - [cnn-text-classification-tf/text_cnn.py](https://github.com/dennybritz/cnn-text-classification-tf/blob/master/text_cnn.py)
   - [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py)
   - [sequence_tagging/ner_model.py](https://github.com/guillaumegenthial/sequence_tagging/blob/master/model/ner_model.py)
   - [tf_ner/masked_conv.py](https://github.com/guillaumegenthial/tf_ner/blob/master/models/chars_conv_lstm_crf/masked_conv.py)
   - [torchnlp/layers.py](https://github.com/kolloldas/torchnlp/blob/master/torchnlp/modules/transformer/layers.py)
-  - [bilm](https://github.com/allenai/bilm-tf)
+  - [bilm-tf](https://github.com/allenai/bilm-tf)
   - [tensorflow-cmake](https://github.com/PatWie/tensorflow-cmake)
+  - [medium-tffreeze-1.py](https://gist.github.com/morgangiraud/249505f540a5e53a48b0c1a869d370bf#file-medium-tffreeze-1-py)
+  - [medium-tffreeze-2.py](https://gist.github.com/morgangiraud/5ef49adc3c608bf639164b1dd5ed3dab#file-medium-tffreeze-2-py)
 
 - my main questions are :
   - can this module perform at the level of state of the art?
@@ -168,11 +170,14 @@
 
 - tensorflow >= 1.10
 ```
-tensorflow 1.10, CUDA 9.0, cuDNN 7.12
-(cuda-9.0-pkg/cuda-9.0/lib64, cudnn-9.0/lib64)
-
-tensorflow 1.11, CUDA 9.0, cuDNN 7.31
-(cuda-9.0-pkg/cuda-9.0/lib64, cudnn-9.0-v73/lib64)
+$ python -m pip install tensorflow-gpu
+* version matches
+  tensorflow 1.10, CUDA 9.0, cuDNN 7.12
+  (cuda-9.0-pkg/cuda-9.0/lib64, cudnn-9.0/lib64)
+  tensorflow 1.11, CUDA 9.0, cuDNN 7.31
+  (cuda-9.0-pkg/cuda-9.0/lib64, cudnn-9.0-v73/lib64)
+  tensorflow 1.11, CUDA 9.0, cuDNN 7.31, TensorRT 4.0
+  (cuda-9.0-pkg/cuda-9.0/lib64, cudnn-9.0-v73/lib64, TensorRT-4.0.1.6/lib)
 ```
 
 - numpy
@@ -188,7 +193,7 @@ tensorflow 1.11, CUDA 9.0, cuDNN 7.31
   - unzip to 'embeddings' dir
 
 - bilm
-  - install [bilm](https://github.com/allenai/bilm-tf)
+  - install [bilm-tf](https://github.com/allenai/bilm-tf)
   - download [ELMo weights and options](https://allennlp.org/elmo)
   ```
   $ ls embeddings
@@ -304,8 +309,9 @@ in IN O O O
   $ cd /home/etagger
   * build and save sample model
   $ cd inference
-  $ python train_example.py
-  $ python train_iris.py
+  $ python train_sample.py
+  * inference using python
+  $ python python/inference_sample.py
   * inference using c++
   * edit etagger/inference/cc/CMakeLists.txt
     find_package(TensorFlow 1.11 EXACT REQUIRED)
@@ -315,7 +321,27 @@ in IN O O O
   $ cmake ..
   $ make
   $ cd ../..
-  $ ./cc/build/inference_example
+  $ ./cc/build/inference_sample
+  ```
+  - *test* build iris model, freezing and inference by C++
+  ```
+  $ cd /home/etagger
+  * build and save iris model
+  $ cd inference
+  $ python train_iris.py
+  * freeze graph
+  $ python freeze.py --model_dir exported --output_node_names logits
+  * inference using python
+  $ python python/inference_iris.py
+  * inference using c++
+  * edit etagger/inference/cc/CMakeLists.txt
+    find_package(TensorFlow 1.11 EXACT REQUIRED)
+  $ cd etagger/inference/cc
+  $ mkdir build
+  $ cd build
+  $ cmake ..
+  $ make
+  $ cd ../..
   $ ./cc/build/inference_iris
   ```
   - export etagger model and inference by C++
@@ -330,7 +356,9 @@ in IN O O O
   *   3) Transformer, without ELMo
   *     : work
   * restore the model to check list of operations, placeholders and tensors for mapping. and export it another place.
-  $ python export.py --restore ../checkpoint/ner_model --export exported/ner_model
+  $ python export.py --restore ../checkpoint/ner_model --export exported/ner_model --export-pb exported
+  * freeze graph
+  $ python freeze.py --model_dir=exported --output_node_names=logits,loss/trans_params,sentence_lengths
   * restore the model and do inference via python without explicit model codes.
   $ python python/inference.py --emb_path ../embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --restore exported/ner_model < ../data/test.txt > pred.txt
   * inspect `pred.txt` whether the predictions are same.
@@ -454,7 +482,7 @@ in IN O O O
     - [Deep contextualized word representations](https://arxiv.org/pdf/1802.05365.pdf)
     - [Semi-supervised sequence tagging with bidirectional language models](https://arxiv.org/pdf/1705.00108.pdf)
   - tensorflow impl
-    - [bilm](https://github.com/allenai/bilm-tf)
+    - [bilm-tf](https://github.com/allenai/bilm-tf)
   - pytorch impl
     - [flair](https://github.com/zalandoresearch/flair)
    

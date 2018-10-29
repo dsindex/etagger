@@ -44,6 +44,8 @@ def export(args):
         # save
         saver = tf.train.Saver(tf.global_variables())
         saver.save(sess, args.export)
+        tf.train.write_graph(sess.graph, args.export_pb, "graph.pb", as_text=False)
+        tf.train.write_graph(sess.graph, args.export_pb, "graph.pb_txt", as_text=True)
         print('model exported')
     sess.close()
 
@@ -51,6 +53,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--restore', type=str, help='path to saved model(ex, ../checkpoint/ner_model)', required=True)
     parser.add_argument('--export', type=str, help='path to exporting model(ex, exported/ner_model)', required=True)
+    parser.add_argument('--export-pb', type=str, help='path to exporting graph proto(ex, exported)', required=True)
 
     args = parser.parse_args()
     export(args)

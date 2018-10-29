@@ -115,37 +115,36 @@ def do_train(model, config, train_data, dev_data):
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     session_conf.gpu_options.allow_growth = True
     sess = tf.Session(config=session_conf)
-    with sess.as_default():
-        feed_dict = {}
-        if not config.use_elmo: feed_dict = {model.wrd_embeddings_init: config.embvec.wrd_embeddings}
-        # same as global_variables_initializer(), created for restoring model from C/C++
-        init_all_vars_op = tf.variables_initializer(tf.global_variables(), name='init_all_vars_op')
-        sess.run(init_all_vars_op, feed_dict=feed_dict) # feed large embedding data
-        saver = tf.train.Saver()
-        if config.restore is not None:
-            saver.restore(sess, config.restore)
-            print('model restored')
-        # summary setting
-        loss_summary = tf.summary.scalar('loss', model.loss)
-        acc_summary = tf.summary.scalar('accuracy', model.accuracy)
-        train_summary_op = tf.summary.merge([loss_summary, acc_summary])
-        train_summary_dir = os.path.join(config.summary_dir, 'summaries', 'train')
-        train_summary_writer = tf.summary.FileWriter(train_summary_dir, sess.graph)
-        dev_summary_dir = os.path.join(config.summary_dir, 'summaries', 'dev')
-        dev_summary_writer = tf.summary.FileWriter(dev_summary_dir, sess.graph)
-        for e in range(config.epoch):
-            train_step(sess, model, config, train_data, train_summary_op, train_summary_writer)
-            m = dev_step(sess, model, config, dev_data, dev_summary_writer, e)
-            # early stopping
-            if early_stopping.validate(m, measure='f1'): break
-            if m > maximum:
-                print('new best f1 score! : %s' % m)
-                maximum = m
-                # save best model
-                save_path = saver.save(sess, config.checkpoint_dir + '/' + 'ner_model')
-                print('max model saved in file: %s' % save_path)
-                tf.train.write_graph(sess.graph, '.', config.checkpoint_dir + '/' + 'graph.pb', as_text=False)
-                tf.train.write_graph(sess.graph, '.', config.checkpoint_dir + '/' + 'graph.pb_txt', as_text=True)
+    feed_dict = {}
+    if not config.use_elmo: feed_dict = {model.wrd_embeddings_init: config.embvec.wrd_embeddings}
+    # same as global_variables_initializer(), created for restoring model from C/C++
+    init_all_vars_op = tf.variables_initializer(tf.global_variables(), name='init_all_vars_op')
+    sess.run(init_all_vars_op, feed_dict=feed_dict) # feed large embedding data
+    saver = tf.train.Saver()
+    if config.restore is not None:
+        saver.restore(sess, config.restore)
+        print('model restored')
+    # summary setting
+    loss_summary = tf.summary.scalar('loss', model.loss)
+    acc_summary = tf.summary.scalar('accuracy', model.accuracy)
+    train_summary_op = tf.summary.merge([loss_summary, acc_summary])
+    train_summary_dir = os.path.join(config.summary_dir, 'summaries', 'train')
+    train_summary_writer = tf.summary.FileWriter(train_summary_dir, sess.graph)
+    dev_summary_dir = os.path.join(config.summary_dir, 'summaries', 'dev')
+    dev_summary_writer = tf.summary.FileWriter(dev_summary_dir, sess.graph)
+    for e in range(config.epoch):
+        train_step(sess, model, config, train_data, train_summary_op, train_summary_writer)
+        m = dev_step(sess, model, config, dev_data, dev_summary_writer, e)
+        # early stopping
+        if early_stopping.validate(m, measure='f1'): break
+        if m > maximum:
+            print('new best f1 score! : %s' % m)
+            maximum = m
+            # save best model
+            save_path = saver.save(sess, config.checkpoint_dir + '/' + 'ner_model')
+            print('max model saved in file: %s' % save_path)
+            tf.train.write_graph(sess.graph, '.', config.checkpoint_dir + '/' + 'graph.pb', as_text=False)
+            tf.train.write_graph(sess.graph, '.', config.checkpoint_dir + '/' + 'graph.pb_txt', as_text=True)
     sess.close()
 
 def train(config):

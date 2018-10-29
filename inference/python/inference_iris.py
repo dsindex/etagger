@@ -4,32 +4,35 @@ import sys
 import tensorflow as tf
 import numpy as np
 
-'''
-X = tf.placeholder("float", [None, 4], name='X')
-Y = tf.placeholder("float", [None, 3], name='Y')
-W = tf.Variable(tf.truncated_normal([4,3], stddev=0.01), name='W')
-b = tf.Variable(tf.constant(0.1, shape=[3]), name='b')
-logits = tf.nn.softmax(tf.matmul(X, W) + b, name='logits')
-'''
+def load_graph(frozen_graph_filename, prefix='prefix'):
+    with tf.gfile.GFile(frozen_graph_filename, "rb") as f:
+        graph_def = tf.GraphDef()
+        graph_def.ParseFromString(f.read())
 
-sess = tf.Session()
-with sess.as_default():
-    checkpoint_dir = './exported'
-    checkpoint_file = 'iris_model'
-    model_prefix = checkpoint_dir + '/' + checkpoint_file
-    # restore meta graph
-    meta_file = model_prefix + '.meta'
-    loader = tf.train.import_meta_graph(meta_file)
-    # mapping init op, placeholders and tensors
-    graph = tf.get_default_graph()
-    init_all_vars_op = graph.get_operation_by_name('init_all_vars_op')
-    W = graph.get_tensor_by_name('W:0')
-    b = graph.get_tensor_by_name('b:0')
-    X = graph.get_tensor_by_name('X:0')
-    logits = graph.get_tensor_by_name('logits:0')
-    # restore actual values
-    sess.run(init_all_vars_op) # same as global_variables_initializer()
-    loader = loader.restore(sess, model_prefix)
+    with tf.Graph().as_default() as graph:
+        tf.import_graph_def(
+            graph_def, 
+            input_map=None, 
+            return_elements=None, 
+            op_dict=None, 
+            producer_op_list=None,
+            name=prefix,
+        )
+        
+    return graph
+
+frozen_graph_filename = './exported/frozen_model.pb'
+graph = load_graph(frozen_graph_filename, prefix='prefix')
+for op in graph.get_operations():
+    print(op.name)   
+
+W = graph.get_tensor_by_name('prefix/W:0')
+b = graph.get_tensor_by_name('prefix/b:0')
+X = graph.get_tensor_by_name('prefix/X:0')
+logits = graph.get_tensor_by_name('prefix/logits:0')
+
+
+with tf.Session(graph=graph) as sess:
     print(tf.global_variables())
 
     p = sess.run(logits, feed_dict={X:[[2,14,33,50]]}) # 1 0 0 -> type 0
