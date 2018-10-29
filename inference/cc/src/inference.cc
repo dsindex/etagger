@@ -20,11 +20,6 @@ tensorflow::Status LoadModel(tensorflow::Session *sess, std::string graph_fn,
   status = sess->Create(graph_def.graph_def());
   if (status != tensorflow::Status::OK()) return status;
 
-  // initialize all variables
-  tensor_dict feed_dict_init = {}; 
-  status = sess->Run(feed_dict_init, {}, {"init_all_vars_op"}, nullptr);
-  if (status != tensorflow::Status::OK()) return status;
-
   // restore model from checkpoint, iff checkpoint is given
   if (checkpoint_fn != "") {
     const std::string restore_op_name = graph_def.saver_def().restore_op_name();

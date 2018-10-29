@@ -310,8 +310,10 @@ in IN O O O
   * build and save sample model
   $ cd inference
   $ python train_sample.py
+
   * inference using python
   $ python python/inference_sample.py
+
   * inference using c++
   * edit etagger/inference/cc/CMakeLists.txt
     find_package(TensorFlow 1.11 EXACT REQUIRED)
@@ -329,10 +331,13 @@ in IN O O O
   * build and save iris model
   $ cd inference
   $ python train_iris.py
+
   * freeze graph
   $ python freeze.py --model_dir exported --output_node_names logits
+
   * inference using python
   $ python python/inference_iris.py
+
   * inference using c++
   * edit etagger/inference/cc/CMakeLists.txt
     find_package(TensorFlow 1.11 EXACT REQUIRED)
@@ -344,7 +349,7 @@ in IN O O O
   $ cd ../..
   $ ./cc/build/inference_iris
   ```
-  - export etagger model and inference by C++
+  - export etagger model, freezing and inference by C++
   ```
   $ cd inference
   * let's assume that we have a saved model.
@@ -355,12 +360,22 @@ in IN O O O
   *     : similar issue => https://stackoverflow.com/questions/50298058/restore-trained-tensorflow-model-keyerror-blocklstm
   *   3) Transformer, without ELMo
   *     : work
+
   * restore the model to check list of operations, placeholders and tensors for mapping. and export it another place.
   $ python export.py --restore ../checkpoint/ner_model --export exported/ner_model --export-pb exported
-  * freeze graph
-  $ python freeze.py --model_dir=exported --output_node_names=logits,loss/trans_params,sentence_lengths
-  * restore the model and do inference via python without explicit model codes.
+
+  * restore the model and do inference via python
   $ python python/inference.py --emb_path ../embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --restore exported/ner_model < ../data/test.txt > pred.txt
+
+  * inspect `pred.txt` whether the predictions are same.
+  $ python ../token_eval.py < pred.txt
+
+  * freeze graph
+  $ python freeze.py --model_dir exported --output_node_names wrd_embeddings_init,logits,loss/trans_params,sentence_lengths
+
+  * load the frozen model and do inference via python
+  $ python python/inference_frozen.py --emb_path ../embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --frozen exported/frozen_model.pb < ../data/test.txt > pred.txt
+
   * inspect `pred.txt` whether the predictions are same.
   $ python ../token_eval.py < pred.txt
   ```
