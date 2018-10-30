@@ -246,24 +246,18 @@ if __name__ == '__main__':
 
     # print all vocab for inference by C++
     # 1. wrd_vocab
-    print('# wrd_vocab')
+    print('# wrd_vocab', len(embvec.wrd_vocab))
     for word, wid in embvec.wrd_vocab.items():
         print(word, wid)
     # 2. chr_vocab
-    print('# chr_vocab')
+    print('# chr_vocab', len(embvec.chr_vocab))
     for ch, cid in embvec.chr_vocab.items():
         print(ch, cid)
     # 3. pos_vocab
-    print('# pos_vocab')
+    print('# pos_vocab', len(embvec.pos_vocab))
     for pos, pid in embvec.pos_vocab.items():
         print(pos, pid)
     # 4. tag_vocab
-    print('# tag_vocab')
+    print('# tag_vocab', len(embvec.tag_vocab))
     for tag, tid, in embvec.tag_vocab.items():
         print(tag, tid)
-    # 5. wrd_embeddings
-    print('# wrd_embeddings')
-    for wid in range(embvec.wrd_embeddings.shape[0]):
-        vec = embvec.wrd_embeddings[wid]
-        val = ' '.join([str(v) for v in vec.tolist()])
-        print(wid, val)
