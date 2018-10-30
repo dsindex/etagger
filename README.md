@@ -72,7 +72,10 @@
         - per-token(partial) micro f1 : 0.9083215796897038
         - per-chunk(exact)   micro f1 : **0.904078014184397**
         - average processing time per bucket
-          - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.02071691323051494 sec
+          - 1 GPU(TITAN X (Pascal), 12196MiB)
+            - restore version        : 0.013825567226844812 sec
+            - frozen version         : 0.015376264122228799 sec
+            - tensorRT(FP16) version : 
           - 32 core CPU(multi-threading)
             - pip version(EIGEN) : 0.017238136546748987 sec
             - conda version(MKL) : 0.03974487513594985 sec 
@@ -87,7 +90,10 @@
         - per-token(partial) micro f1 : 0.9152852267186738
         - per-chunk(exact)   micro f1 : **0.9094911075893644**
         - average processing time per bucket
-          - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.016886469142574183 sec
+          - 1 GPU(TITAN X (Pascal), 12196MiB)
+            - restore version        : 0.02362948727271197 sec
+            - frozen version         : 0.02356414207288678 sec
+            - tensorRT(FP16) version :
           - 32 core CPU(multi-threading)
             - pip version(EIGEN) : 0.008284030985754554 sec
             - conda version(MKL) : 0.009470064658166013 sec
@@ -368,7 +374,10 @@ in IN O O O
   $ python freeze.py --model_dir exported --output_node_names logits,loss/trans_params,sentence_lengths --frozen_model_name ner_frozen.pb
 
   * inference using python
-  $ python python/inference.py --emb_path ../embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --frozen exported/ner_frozen.pb < ../data/test.txt > pred.txt
+  $ python python/inference.py --emb_path ../embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
+
+  * inference using python with optimized graph_def via tensorRT (only for GPU)
+  $ python python/inference_trt.py --emb_path ../embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
 
   * inspect `pred.txt` whether the predictions are same.
   $ python ../token_eval.py < pred.txt

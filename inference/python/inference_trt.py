@@ -6,6 +6,7 @@ sys.path.append(path)
 import time
 import argparse
 import tensorflow as tf
+from tensorflow.contrib import tensorrt as trt
 import numpy as np
 
 from embvec import EmbVec
@@ -15,11 +16,13 @@ from chunk_eval  import ChunkEval
 from viterbi import viterbi_decode
 from input import Input
 
-def load_graph(frozen_graph_filename, prefix='prefix'):
+def load_graph_def(frozen_graph_filename):
     with tf.gfile.GFile(frozen_graph_filename, "rb") as f:
         graph_def = tf.GraphDef()
         graph_def.ParseFromString(f.read())
+    return graph_def
 
+def load_graph(graph_def, prefix='prefix'):
     with tf.Graph().as_default() as graph:
         tf.import_graph_def(
             graph_def, 
@@ -36,17 +39,30 @@ def inference(config, frozen_pb_path):
     """Inference for bucket
     """
 
-    # load graph
-    graph = load_graph(frozen_pb_path)
+    # load graph_def
+    graph_def = load_graph_def(frozen_pb_path)
+    
+    # get optimized graph_def
+    trt_graph_def = trt.create_inference_graph(
+      input_graph_def=graph_def,
+      outputs=['logits', 'loss/trans_params', 'sentence_lengths'],
+      max_batch_size=128,
+      max_workspace_size_bytes=1 << 30,
+      precision_mode='FP16',  # TRT Engine precision "FP32","FP16" or "INT8"
+      minimum_segment_size=3  # minimum number of nodes in an engine
+    )
+
+    # reset graph
+    tf.reset_default_graph()
+
+    # load optimized graph_def to default graph
+    graph = load_graph(trt_graph_def, prefix='prefix')
     for op in graph.get_operations():
         sys.stderr.write(op.name + '\n')
 
-    # create session with graph
-    # if graph is optimized by tensorRT, then
-    # from tensorflow.contrib import tensorrt as trt
-    # gpu_ops = tf.GPUOptions(per_process_gpu_memory_fraction = 0.50)
-    gpu_ops = tf.GPUOptions()
-    session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False, gpu_options=gpu_ops)
+    # create session with optimized graph
+    trt_gpu_ops = tf.GPUOptions(per_process_gpu_memory_fraction = 0.50)
+    session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False, gpu_options=trt_gpu_ops)
     '''
     session_conf = tf.ConfigProto(allow_soft_placement=True,
                                   log_device_placement=False,
