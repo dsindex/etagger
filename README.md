@@ -338,7 +338,7 @@ in IN O O O
   * inference using python
   $ python python/inference_iris.py
 
-  * inference using c++
+  * inference using C++
   * edit etagger/inference/cc/CMakeLists.txt
     find_package(TensorFlow 1.11 EXACT REQUIRED)
   $ cd etagger/inference/cc
@@ -367,11 +367,14 @@ in IN O O O
   * freeze graph
   $ python freeze.py --model_dir exported --output_node_names logits,loss/trans_params,sentence_lengths --frozen_model_name ner_frozen.pb
 
-  * load the frozen model and do inference via python
+  * inference using python
   $ python python/inference.py --emb_path ../embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --frozen exported/ner_frozen.pb < ../data/test.txt > pred.txt
 
   * inspect `pred.txt` whether the predictions are same.
   $ python ../token_eval.py < pred.txt
+
+  * inference using C++ [doing.....]
+  $ ./cc/build/inference exported/iris_frozen.pb ../embeddings/vocab.txt
   ```
 
 ## Development note
