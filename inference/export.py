@@ -10,7 +10,7 @@ def export(args):
     with sess.as_default():
         # restore meta graph
         meta_file = args.restore + '.meta'
-        loader = tf.train.import_meta_graph(meta_file)
+        loader = tf.train.import_meta_graph(meta_file, clear_devices=True)
         # mapping placeholders and tensors
         graph = tf.get_default_graph()
         p_is_train = graph.get_tensor_by_name('is_train:0')

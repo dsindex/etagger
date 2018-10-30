@@ -16,7 +16,7 @@ from chunk_eval  import ChunkEval
 from viterbi import viterbi_decode
 from input import Input
 
-def load_graph_def(frozen_graph_filename):
+def load_frozen_graph_def(frozen_graph_filename):
     with tf.gfile.GFile(frozen_graph_filename, "rb") as f:
         graph_def = tf.GraphDef()
         graph_def.ParseFromString(f.read())
@@ -40,7 +40,7 @@ def inference(config, frozen_pb_path):
     """
 
     # load graph_def
-    graph_def = load_graph_def(frozen_pb_path)
+    graph_def = load_frozen_graph_def(frozen_pb_path)
     
     # get optimized graph_def
     trt_graph_def = trt.create_inference_graph(

@@ -4,7 +4,7 @@ import sys
 import tensorflow as tf
 import numpy as np
 
-def load_graph(frozen_graph_filename, prefix='prefix'):
+def load_frozen_graph(frozen_graph_filename, prefix='prefix'):
     with tf.gfile.GFile(frozen_graph_filename, "rb") as f:
         graph_def = tf.GraphDef()
         graph_def.ParseFromString(f.read())
@@ -22,7 +22,7 @@ def load_graph(frozen_graph_filename, prefix='prefix'):
     return graph
 
 frozen_graph_filename = './exported/iris_frozen.pb'
-graph = load_graph(frozen_graph_filename, prefix='prefix')
+graph = load_frozen_graph(frozen_graph_filename, prefix='prefix')
 for op in graph.get_operations():
     print(op.name)   
 
