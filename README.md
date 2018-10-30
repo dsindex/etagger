@@ -523,16 +523,24 @@ in IN O O O
         - [Speed up TensorFlow Inference on GPUs with TensorRT](https://medium.com/tensorflow/speed-up-tensorflow-inference-on-gpus-with-tensorrt-13b49f3db3fa)
         - [how to use tensorRT](https://hiseon.me/2018/03/28/tensorflow-tensorrt/)
         - [Speed up Inference by TensorRT](https://tsmatz.wordpress.com/2018/07/07/tensorrt-tensorflow-python-on-azure-tutorial/amp/)
+        - experiments
+          - [x] no meaningful difference.
     - CPU
       - quantizing graph
         - [tf.contrib.quantize](https://www.tensorflow.org/api_docs/python/tf/contrib/quantize)
         - [Quantizing neural network to 8-bit using Tensorflow(pdf)](https://armkeil.blob.core.windows.net/developer/developer/technologies/Machine%20learning%20on%20Arm/Tutorials/Quantizing%20neural%20networks%20to%208-it%20using%20Tensorflow/Quantizing%20neural%20networks%20to%208-bit%20using%20TensorFlow.pdf)
+        - [Quantizing deep convolutional networks for efficient inference: A whitepaper](https://arxiv.org/pdf/1806.08342.pdf)
+        - experiments
+          - [x] tf.import_graph_def() error after training with tf.contrib.quantize.create_training_graph(), freezing, exporting. 
+            - hm...
       - tensorflow MKL
         - [optimizing tensorflow for cpu](https://www.tensorflow.org/performance/performance_guide#optimizing_for_cpu)
         - conda tensorflow distribution
           - [miniconda](https://conda.io/miniconda.html)
           - [tensorflow in anaconda](https://www.anaconda.com/blog/developer-blog/tensorflow-in-anaconda/)
           - [tensorflow-mkl, optimizing tensorflow for cpu](http://waslleysouza.com.br/en/2018/07/optimizing-tensorflow-for-cpu/)
+        - experiments
+          - [x] no meaningful difference.
   - tensorflow summary
     - [how to manually create a tf summary](https://stackoverflow.com/questions/37902705/how-to-manually-create-a-tf-summary/37915182#37915182)
   - tensorflow backend
