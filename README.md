@@ -333,7 +333,7 @@ in IN O O O
   $ python train_iris.py
 
   * freeze graph
-  $ python freeze.py --model_dir exported --output_node_names logits
+  $ python freeze.py --model_dir exported --output_node_names logits --frozen_model_name iris_frozen.pb
 
   * inference using python
   $ python python/inference_iris.py
@@ -364,17 +364,11 @@ in IN O O O
   * restore the model to check list of operations, placeholders and tensors for mapping. and export it another place.
   $ python export.py --restore ../checkpoint/ner_model --export exported/ner_model --export-pb exported
 
-  * restore the model and do inference via python
-  $ python python/inference.py --emb_path ../embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --restore exported/ner_model < ../data/test.txt > pred.txt
-
-  * inspect `pred.txt` whether the predictions are same.
-  $ python ../token_eval.py < pred.txt
-
   * freeze graph
-  $ python freeze.py --model_dir exported --output_node_names wrd_embeddings_init,logits,loss/trans_params,sentence_lengths
+  $ python freeze.py --model_dir exported --output_node_names logits,loss/trans_params,sentence_lengths --frozen_model_name ner_frozen.pb
 
   * load the frozen model and do inference via python
-  $ python python/inference_frozen.py --emb_path ../embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --frozen exported/frozen_model.pb < ../data/test.txt > pred.txt
+  $ python python/inference.py --emb_path ../embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --frozen exported/ner_frozen.pb < ../data/test.txt > pred.txt
 
   * inspect `pred.txt` whether the predictions are same.
   $ python ../token_eval.py < pred.txt

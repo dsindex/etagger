@@ -10,13 +10,14 @@ source is from https://gist.github.com/morgangiraud/249505f540a5e53a48b0c1a869d3
 
 dir = os.path.dirname(os.path.realpath(__file__))
 
-def freeze_graph(model_dir, output_node_names):
+def freeze_graph(model_dir, output_node_names, frozen_model_name):
     """Extract the sub graph defined by the output nodes and convert 
     all its variables into constant 
     Args:
         model_dir: the root folder containing the checkpoint state file
         output_node_names: a string, containing all the output node's names, 
                             comma separated
+        frozen_model_name: a string, the name of the frozen model
     """
     if not tf.gfile.Exists(model_dir):
         raise AssertionError(
@@ -33,7 +34,7 @@ def freeze_graph(model_dir, output_node_names):
     
     # We precise the file fullname of our freezed graph
     absolute_model_dir = "/".join(input_checkpoint.split('/')[:-1])
-    output_graph = absolute_model_dir + "/frozen_model.pb"
+    output_graph = absolute_model_dir + "/" + frozen_model_name
 
     # We clear devices to allow TensorFlow to control on which device it will load operations
     clear_devices = True
@@ -63,7 +64,8 @@ def freeze_graph(model_dir, output_node_names):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_dir", type=str, help="Model folder to export", required=True)
+    parser.add_argument("--frozen_model_name", type=str, help="The name of the frozen model", required=True)
     parser.add_argument("--output_node_names", type=str, help="The name of the output nodes, comma separated.", required=True)
     args = parser.parse_args()
 
-    freeze_graph(args.model_dir, args.output_node_names)
+    freeze_graph(args.model_dir, args.output_node_names, args.frozen_model_name)

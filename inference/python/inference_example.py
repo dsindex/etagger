@@ -13,7 +13,6 @@ with tf.Session() as sess:
     kernel = tf.get_default_graph().get_tensor_by_name('dense/kernel:0')
     bias = tf.get_default_graph().get_tensor_by_name('dense/bias:0')
     # restore actual values
-    sess.run(tf.global_variables_initializer())
     loader = loader.restore(sess, './exported/my_model')
 
     x, output, kernel, bias = sess.run([x, output, kernel, bias], {x: val})

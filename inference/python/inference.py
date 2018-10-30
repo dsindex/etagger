@@ -15,10 +15,33 @@ from chunk_eval  import ChunkEval
 from viterbi import viterbi_decode
 from input import Input
 
-def inference(config):
+def load_graph(frozen_graph_filename, prefix='prefix'):
+    with tf.gfile.GFile(frozen_graph_filename, "rb") as f:
+        graph_def = tf.GraphDef()
+        graph_def.ParseFromString(f.read())
+
+    with tf.Graph().as_default() as graph:
+        tf.import_graph_def(
+            graph_def, 
+            input_map=None, 
+            return_elements=None, 
+            op_dict=None, 
+            producer_op_list=None,
+            name=prefix,
+        )
+        
+    return graph
+
+def inference(config, frozen_pb_path):
     """Inference for bucket
     """
 
+    # load graph
+    graph = load_graph(frozen_pb_path)
+    for op in graph.get_operations():
+        sys.stderr.write(op.name + '\n')
+
+    # create session with graph
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     '''
     session_conf = tf.ConfigProto(allow_soft_placement=True,
@@ -26,25 +49,18 @@ def inference(config):
                                   inter_op_parallelism_threads=1,
                                   intra_op_parallelism_threads=1)
     '''
-    sess = tf.Session(config=session_conf)
-    # restore meta graph
-    meta_file = config.restore + '.meta'
-    loader = tf.train.import_meta_graph(meta_file)
+    sess = tf.Session(graph=graph, config=session_conf)
+
     # mapping placeholders and tensors
-    graph = tf.get_default_graph()
-    p_is_train = graph.get_tensor_by_name('is_train:0')
-    p_sentence_length = graph.get_tensor_by_name('sentence_length:0')
-    p_input_data_pos_ids = graph.get_tensor_by_name('input_data_pos_ids:0')
-    p_wrd_embeddings_init = graph.get_tensor_by_name('wrd_embeddings_init:0')
-    p_input_data_word_ids = graph.get_tensor_by_name('input_data_word_ids:0')
-    p_input_data_wordchr_ids = graph.get_tensor_by_name('input_data_wordchr_ids:0')
-    p_input_data_etcs = graph.get_tensor_by_name('input_data_etcs:0') 
-    t_logits = graph.get_tensor_by_name('logits:0')
-    t_trans_params = graph.get_tensor_by_name('loss/trans_params:0')
-    t_sentence_lengths = graph.get_tensor_by_name('sentence_lengths:0')
-    # restore actual values
-    loader.restore(sess, config.restore)
-    sys.stderr.write('model restored' +'\n')
+    p_is_train = graph.get_tensor_by_name('prefix/is_train:0')
+    p_sentence_length = graph.get_tensor_by_name('prefix/sentence_length:0')
+    p_input_data_pos_ids = graph.get_tensor_by_name('prefix/input_data_pos_ids:0')
+    p_input_data_word_ids = graph.get_tensor_by_name('prefix/input_data_word_ids:0')
+    p_input_data_wordchr_ids = graph.get_tensor_by_name('prefix/input_data_wordchr_ids:0')
+    p_input_data_etcs = graph.get_tensor_by_name('prefix/input_data_etcs:0') 
+    t_logits = graph.get_tensor_by_name('prefix/logits:0')
+    t_trans_params = graph.get_tensor_by_name('prefix/loss/trans_params:0')
+    t_sentence_lengths = graph.get_tensor_by_name('prefix/sentence_lengths:0')
 
     num_buckets = 0
     total_duration_time = 0.0
@@ -126,8 +142,9 @@ if __name__ == '__main__':
     parser.add_argument('--emb_path', type=str, help='path to word embedding vector(.pkl)', required=True)
     parser.add_argument('--wrd_dim', type=int, help='dimension of word embedding vector', required=True)
     parser.add_argument('--word_length', type=int, default=15, help='max word length')
-    parser.add_argument('--restore', type=str, help='path to saved model(ex, ./exported/ner_model)', required=True)
+    parser.add_argument('--frozen', type=str, help='path to frozen model(ex, ./exported/ner_frozen.pb)', required=True)
 
     args = parser.parse_args()
+    args.restore = None
     config = Config(args, arg_train=False, use_elmo=False, use_crf=True)
-    inference(config)
+    inference(config, args.frozen)

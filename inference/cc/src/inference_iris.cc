@@ -1,4 +1,3 @@
-// source template is from https://github.com/PatWie/tensorflow-cmake/blob/master/inference/cc/inference_cc.cc
 #include <tensorflow/core/protobuf/meta_graph.pb.h>
 #include <tensorflow/core/public/session.h>
 #include <tensorflow/core/public/session_options.h>
@@ -24,7 +23,7 @@ tensorflow::Status LoadFrozenModel(tensorflow::Session *sess, std::string graph_
 
 int main(int argc, char const *argv[]) {
 
-  const std::string graph_fn = "./exported/frozen_model.pb";
+  const std::string graph_fn = "./exported/iris_frozen.pb";
 
   // prepare session
   tensorflow::Session *sess;

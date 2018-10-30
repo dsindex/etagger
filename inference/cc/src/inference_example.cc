@@ -1,3 +1,4 @@
+// source is from https://github.com/PatWie/tensorflow-cmake/blob/master/inference/cc/inference_cc.cc
 // 2018, Patrick Wieschollek <mail@patwie.com>
 #include <tensorflow/core/protobuf/meta_graph.pb.h>
 #include <tensorflow/core/public/session.h>
