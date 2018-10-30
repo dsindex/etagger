@@ -120,7 +120,7 @@ def inference(config, frozen_pb_path):
             out = 'duration_time : ' + str(duration_time) + ' sec'
             sys.stderr.write(out + '\n')
             num_buckets += 1
-            total_duration_time += duration_time
+            total_duration_time += duration_time    
         if line : bucket.append(line)
     if len(bucket) != 0:
         start_time = time.time()

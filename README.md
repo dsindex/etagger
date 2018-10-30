@@ -75,7 +75,7 @@
           - 1 GPU(TITAN X (Pascal), 12196MiB)
             - restore version        : 0.013825567226844812 sec
             - frozen version         : 0.015376264122228799 sec
-            - tensorRT(FP16) version : 
+            - tensorRT(FP16) version : no meaningful difference
           - 32 core CPU(multi-threading)
             - pip version(EIGEN) : 0.017238136546748987 sec
             - conda version(MKL) : 0.03974487513594985 sec 
@@ -93,7 +93,7 @@
           - 1 GPU(TITAN X (Pascal), 12196MiB)
             - restore version        : 0.02362948727271197 sec
             - frozen version         : 0.02356414207288678 sec
-            - tensorRT(FP16) version :
+            - tensorRT(FP16) version : no meaningful difference
           - 32 core CPU(multi-threading)
             - pip version(EIGEN) : 0.008284030985754554 sec
             - conda version(MKL) : 0.009470064658166013 sec
