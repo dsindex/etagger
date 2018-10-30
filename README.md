@@ -294,7 +294,7 @@ in IN O O O
 . . O I-DATE O
 ```
 
-- inference(bucket using C++)
+- inference(bucket) using frozen model, tensorRT, C++
   - [tensorflow-cmake](https://github.com/PatWie/tensorflow-cmake)
   - [build tensorflow from source](https://www.tensorflow.org/install/source)
   ```
