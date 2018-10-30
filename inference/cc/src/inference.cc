@@ -100,5 +100,11 @@ int main(int argc, char const *argv[]) {
   std::cout << "input           " << data.DebugString() << std::endl;
   std::cout << "logits          " << outputs[0].DebugString() << std::endl;
 
+  tensorflow::TTypes<float>::Flat logits_flat = outputs[0].flat<float>();
+  for( int i = 0; i < 3; i++ ) {
+    const float logit = logits_flat(i);
+    std::cout << "logit           " << i << "," << logit << std::endl; 
+  } 
+
   return 0;
 }
