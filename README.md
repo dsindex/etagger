@@ -524,7 +524,7 @@ in IN O O O
         - [how to use tensorRT](https://hiseon.me/2018/03/28/tensorflow-tensorrt/)
         - [Speed up Inference by TensorRT](https://tsmatz.wordpress.com/2018/07/07/tensorrt-tensorflow-python-on-azure-tutorial/amp/)
         - experiments
-          - [x] no meaningful difference.
+          - [x] no meaningful difference. is it not effective for batch size 1 ?
     - CPU
       - quantizing graph
         - [tf.contrib.quantize](https://www.tensorflow.org/api_docs/python/tf/contrib/quantize)
@@ -532,7 +532,7 @@ in IN O O O
         - [Quantizing deep convolutional networks for efficient inference: A whitepaper](https://arxiv.org/pdf/1806.08342.pdf)
         - experiments
           - [x] tf.import_graph_def() error after training with tf.contrib.quantize.create_training_graph(), freezing, exporting. 
-            - hm...
+            - hmm... something messy.
       - tensorflow MKL
         - [optimizing tensorflow for cpu](https://www.tensorflow.org/performance/performance_guide#optimizing_for_cpu)
         - conda tensorflow distribution
