@@ -31,10 +31,10 @@
   - can this module perform at the level of state of the art?
     - [x] the f1 score is near SOTA.
       - 0.92536
-  - how to make it faster when it comes to use the BiLSTM?
+  - how to make it faster when it comes to using the BiLSTM?
     - [x] the solution is LSTMBlockFusedCell().
-      - 3.13 times faster during training time.
-      - 1.26 times faster during inference time.
+      - 3.13 times faster than LSTMCell() during training time.
+      - 1.26 times faster than LSTMCell() during inference time.
   - can the Transformer have competing results againt the BiLSTM? and how much faster?
     - [x] contextual encoding by the Transformer encoder yields competing results.
       - in case the sequence to sequence model like translation, the multi-head attention mechanism might be very powerful for alignments.
@@ -44,12 +44,12 @@
         - this is very similar with hierarchical convolutional neural network.
       - i'd like to say `Attention is Not All you need`
     - [x] you can see the below evaluation results.
-      - multi-layer BiLSTM using LSTMBlockFusedCell() is slightly faster than the Transformer with 4 layers.
-      - moreover, the BiLSTM is 2 times faster on CPU environment(multi-thread) than on GPU's.
+      - multi-layer BiLSTM using LSTMBlockFusedCell() is slightly faster than the Transformer with 4 layers on GPU.
+      - moreover, the BiLSTM is 2 times faster on CPU environment(multi-thread) than on GPU.
         - LSTMBlockFusedCell() is well optimized for multi-core CPU via multi-threading.
         - i guess there might be an overhead when copying b/w GPU memory and main memory.
       - the BiLSTM is 3 ~ 4 times faster than the Transformer version on 1 CPU(single-thread)
-      - during inference time, 1 layer BiLSTM on 1 CPU takes just **5.7 msec per sentence** on average.
+      - during inference time, 1 layer BiLSTM on 1 CPU takes just **5.1 msec per sentence** on average.
   - how to use a trained model from C++? is it much faster?
     - [ ] save the meta graph and trained parameters. and restore it via tensorflow C++ API.
 
@@ -76,12 +76,8 @@
             - restore version        : 0.013825567226844812 sec
             - frozen version         : 0.015376264122228799 sec
             - tensorRT(FP16) version : no meaningful difference
-          - 32 core CPU(multi-threading)
-            - pip version(EIGEN) : 0.017238136546748987 sec
-            - conda version(MKL) : 0.03974487513594985 sec 
-          - 1 CPU(single-thread)
-            - pip version(EIGEN) : 0.03358284470571628 sec
-            - conda version(MKL) : 0.026261209470829668 sec
+          - 32 core CPU(multi-threading) : 0.017238136546748987 sec
+          - 1 CPU(single-thread)         : 0.03358284470571628 sec
     - BiLSTM
       - without ELMo
         - setting
@@ -91,19 +87,14 @@
         - per-chunk(exact)   micro f1 : **0.9094911075893644**
         - average processing time per bucket
           - 1 GPU(TITAN X (Pascal), 12196MiB)
-            - restore version        : 0.02362948727271197 sec
-            - frozen version         : 0.02356414207288678 sec
+            - restore version        : 0.010454932072004718 sec
+            - frozen version         : 0.011339560587942018 sec
             - tensorRT(FP16) version : no meaningful difference
-          - 32 core CPU(multi-threading)
-            - pip version(EIGEN) : 0.008284030985754554 sec
-            - conda version(MKL) : 0.009470064658166013 sec
+          - 32 core CPU(multi-threading) : 0.006132203450549827 sec
           - 1 CPU(single-thread)
             - pip version(EIGEN)
-              - rnn_num_layers 2, LSTMBlockFusedCell  : 0.008411417501886556 sec
-              - rnn_num_layers 2, LSTMCell            : 0.010652577061606541 sec
-              - rnn_num_layers 1, LSTMBlockFusedCell  : **0.005781734805153713 sec**
-              - rnn_num_layers 1, LSTMCell            : 0.007489144219637694 sec
-            - conda version(MKL) : 0.009789990744554517 sec
+              - rnn_num_layers 2 : 0.008001159379070668 sec 
+              - rnn_num_layers 1 : 0.0051817628640952506 sec
       - with ELMo
         - setting
           - `experiments 8, test 2`
@@ -121,10 +112,8 @@
         ```
         - average processing time per bucket
           - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.06133532517637155 sec
-          - 32 core CPU(multi-threading)
-            - pip version(EIGEN) : 0.40098162731570347 sec
-          - 1 CPU(single-thread)
-            - pip version(EIGEN) : 0.7398052649182165 sec
+          - 32 core CPU(multi-threading)      : 0.40098162731570347 sec
+          - 1 CPU(single-thread)              : 0.7398052649182165 sec
     - BiLSTM + Transformer
       - without ELMo
         - setting
@@ -298,17 +287,32 @@ in IN O O O
   - [tensorflow-cmake](https://github.com/PatWie/tensorflow-cmake)
   - [build tensorflow from source](https://www.tensorflow.org/install/source)
   ```
-  $ export TENSORFLOW_SOURCE_DIR='/home/tensorflow'
-  $ TENSORFLOW_BUILD_DIR='/home/tensorflow_dist'
+  $ export TENSORFLOW_SOURCE_DIR='/home/tensorflow-src-cpu'
+  $ export TENSORFLOW_BUILD_DIR='/home/tensorflow-dist-cpu'
   $ mkdir -p ${TENSORFLOW_BUILD_DIR}/includes/tensorflow/cc/ops
   $ git clone https://github.com/tensorflow/tensorflow.git
   $ cd tensorflow
+  * you must install same version of tensorflow with the pip version.
   $ git checkout r1.11
   $ ./configure
   $ bazel build -c opt --copt=-mfpmath=both --copt=-msse4.2 //tensorflow:libtensorflow.so
   $ bazel build -c opt --copt=-mfpmath=both --copt=-msse4.2 //tensorflow:libtensorflow_cc.so
   $ cp -rf ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/*.so ${TENSORFLOW_BUILD_DIR}/
   $ cp -rf ${TENSORFLOW_SOURCE_DIR}/bazel-genfiles/tensorflow/cc/ops/*.h ${TENSORFLOW_BUILD_DIR}/includes/tensorflow/cc/ops/
+
+  * for LSTMBlockFusedCell()
+  $ rnn_path=`python -c "import tensorflow; print(tensorflow.contrib.rnn.__path__[0])"`
+  $ rnn_ops_lib=${rnn_path}/python/ops/_lstm_ops.so
+  $ cp -rf ${rnn_ops_lib} ${TENSORFLOW_BUILD_DIR}
+  $ export LD_LIBRARY_PATH=${TENSORFLOW_BUILD_DIR}:$LD_LIBRARY_PATH
+  ```
+  - `.bashrc` sample
+  ```
+  # tensorflow so, header dist
+  export TENSORFLOW_SOURCE_DIR='/home/tensorflow-src-cpu'
+  export TENSORFLOW_BUILD_DIR='/home/tensorflow-dist-cpu'
+  # for loading _lstm_ops.so
+  export LD_LIBRARY_PATH=${TENSORFLOW_BUILD_DIR}:$LD_LIBRARY_PATH
   ```
   - *test* build sample model and inference by C++
   ```
@@ -358,14 +362,15 @@ in IN O O O
   - export etagger model, freezing and inference by C++
   ```
   $ cd inference
-  * let's assume that we have a saved model.
+  * let's assume that we have a saved model :
   *   1) BiLSTM, LSTMCell(), without ELMo
-  *     : work
   *   2) BiLSTM, LSTMBlockFusedCell(), withoug ELMo
-  *     : not work, can't find `BlockLSTM` when using import_meta_graph()
+  *     : can't find `BlockLSTM` when using import_meta_graph()
   *     : similar issue => https://stackoverflow.com/questions/50298058/restore-trained-tensorflow-model-keyerror-blocklstm
+        : how to fix? => https://github.com/tensorflow/tensorflow/issues/23369
+        : what about C++? => https://stackoverflow.com/questions/50475320/executing-frozen-tensorflow-graph-that-uses-tensorflow-contrib-resampler-using-c
+          we can load '_lstm_ops.so' for LSTMBlockFusedCell().
   *   3) Transformer, without ELMo
-  *     : work
 
   * restore the model to check list of operations, placeholders and tensors for mapping. and export it another place.
   $ python export.py --restore ../checkpoint/ner_model --export exported/ner_model --export-pb exported
@@ -445,7 +450,7 @@ in IN O O O
   - save best model by using token-based f1. token-based f1 is slightly better than chunk-based f1
   - be careful for word lowercase when you are using glove6B embeddings. those are all lowercased.
   - feed max sentence length to session. this yields huge improvement of inference speed.
-  - when it comes to use import_meta_graph(), you should run global_variable_initialzer() before restore().
+  - when it comes to using import_meta_graph(), you should run global_variable_initialzer() before restore().
 
 ## References
 
@@ -540,7 +545,7 @@ in IN O O O
           - [tensorflow in anaconda](https://www.anaconda.com/blog/developer-blog/tensorflow-in-anaconda/)
           - [tensorflow-mkl, optimizing tensorflow for cpu](http://waslleysouza.com.br/en/2018/07/optimizing-tensorflow-for-cpu/)
         - experiments
-          - [x] no meaningful difference.
+          - [x] no meaningful improvement.
   - tensorflow summary
     - [how to manually create a tf summary](https://stackoverflow.com/questions/37902705/how-to-manually-create-a-tf-summary/37915182#37915182)
   - tensorflow backend

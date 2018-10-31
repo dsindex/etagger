@@ -6,6 +6,8 @@ sys.path.append(path)
 import time
 import argparse
 import tensorflow as tf
+# for LSTMBlockFusedCell(), https://github.com/tensorflow/tensorflow/issues/23369
+tf.contrib.rnn
 import numpy as np
 
 from embvec import EmbVec
@@ -46,14 +48,14 @@ def inference(config, frozen_pb_path):
     # from tensorflow.contrib import tensorrt as trt
     # gpu_ops = tf.GPUOptions(per_process_gpu_memory_fraction = 0.50)
     gpu_ops = tf.GPUOptions()
+    '''
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False, gpu_options=gpu_ops)
     '''
     session_conf = tf.ConfigProto(allow_soft_placement=True,
                                   log_device_placement=False,
-                                  gpu_options=trt_gpu_ops,
+                                  gpu_options=gpu_ops,
                                   inter_op_parallelism_threads=1,
                                   intra_op_parallelism_threads=1)
-    '''
     sess = tf.Session(graph=graph, config=session_conf)
 
     # mapping placeholders and tensors

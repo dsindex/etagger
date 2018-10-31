@@ -6,6 +6,8 @@ sys.path.append(path)
 import time
 import argparse
 import tensorflow as tf
+# for LSTMBlockFusedCell(), https://github.com/tensorflow/tensorflow/issues/23369
+tf.contrib.rnn
 from tensorflow.contrib import tensorrt as trt
 import numpy as np
 

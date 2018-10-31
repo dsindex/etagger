@@ -14,7 +14,7 @@ tensorflow::Status LoadFrozenModel(tensorflow::Session *sess, std::string graph_
   status = ReadBinaryProto(tensorflow::Env::Default(), graph_fn, &graph_def);
   if (status != tensorflow::Status::OK()) return status;
 
-  // create the graph in the current session
+  // Create the graph in the current session
   status = sess->Create(graph_def);
   if (status != tensorflow::Status::OK()) return status;
 
@@ -25,13 +25,13 @@ int main(int argc, char const *argv[]) {
 
   const std::string graph_fn = "./exported/iris_frozen.pb";
 
-  // prepare session
+  // Prepare session
   tensorflow::Session *sess;
   tensorflow::SessionOptions options;
   TF_CHECK_OK(tensorflow::NewSession(options, &sess));
   TF_CHECK_OK(LoadFrozenModel(sess, graph_fn));
 
-  // prepare inputs
+  // Prepare inputs
   tensorflow::TensorShape data_shape({1, 4});
   tensorflow::Tensor data(tensorflow::DT_FLOAT, data_shape);
   auto data_ = data.flat<float>().data();

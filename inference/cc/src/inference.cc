@@ -1,11 +1,24 @@
 #include <tensorflow/core/protobuf/meta_graph.pb.h>
 #include <tensorflow/core/public/session.h>
 #include <tensorflow/core/public/session_options.h>
+#include <tensorflow/c/c_api.h>
 #include <iostream>
 #include <string>
+#include <cstdlib>
 #include "Input.h"
 
 typedef std::vector<std::pair<std::string, tensorflow::Tensor>> tensor_dict;
+
+void LoadLSTMLibrary() {
+  // Load _lstm_ops.so library(from LB_LIBRARY_PATH) for LSTMBlockFusedCell()
+  TF_Status* status = TF_NewStatus();
+  TF_LoadLibrary("_lstm_ops.so", status);
+  if (TF_GetCode(status) != TF_OK) {
+    std::cerr << "fail to load _lstm_ops.so" << std::endl;
+    exit(1);
+  }
+  TF_DeleteStatus(status);
+}
 
 tensorflow::Status LoadModel(tensorflow::Session *sess, std::string graph_fn,
                              std::string checkpoint_fn = "") {
@@ -16,11 +29,11 @@ tensorflow::Status LoadModel(tensorflow::Session *sess, std::string graph_fn,
   status = ReadBinaryProto(tensorflow::Env::Default(), graph_fn, &graph_def);
   if (status != tensorflow::Status::OK()) return status;
 
-  // create the graph in the current session
+  // Create the graph in the current session
   status = sess->Create(graph_def.graph_def());
   if (status != tensorflow::Status::OK()) return status;
 
-  // restore model from checkpoint, iff checkpoint is given
+  // Restore model from checkpoint, iff checkpoint is given
   if (checkpoint_fn != "") {
     const std::string restore_op_name = graph_def.saver_def().restore_op_name();
     const std::string filename_tensor_name =
@@ -53,7 +66,7 @@ tensorflow::Status LoadFrozenModel(tensorflow::Session *sess, std::string graph_
   status = ReadBinaryProto(tensorflow::Env::Default(), graph_fn, &graph_def);
   if (status != tensorflow::Status::OK()) return status;
 
-  // create the graph in the current session
+  // Create the graph in the current session
   status = sess->Create(graph_def);
   if (status != tensorflow::Status::OK()) return status;
 
@@ -70,18 +83,21 @@ int main(int argc, char const *argv[]) {
   const std::string frozen_graph_fn = argv[1];
   const std::string vocab_fn = argv[2];
 
-  // prepare session
+  // Prepare session
   tensorflow::Session *sess;
   tensorflow::SessionOptions options;
   TF_CHECK_OK(tensorflow::NewSession(options, &sess));
+  LoadLSTMLibrary();
   TF_CHECK_OK(LoadFrozenModel(sess, frozen_graph_fn));
 
-  // prepare config, vocab, input
+  // Prepare config, vocab, input
   Config config = Config();
   Vocab vocab = Vocab(config, vocab_fn);
   Input input = Input(vocab);
 
-  // prepare inputs
+  return 0;
+
+  // Prepare inputs
   tensorflow::TensorShape data_shape({1, 4});
   tensorflow::Tensor data(tensorflow::DT_FLOAT, data_shape);
   auto data_ = data.flat<float>().data();

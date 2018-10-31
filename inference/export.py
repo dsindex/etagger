@@ -3,6 +3,8 @@ import sys
 import time
 import argparse
 import tensorflow as tf
+# for LSTMBlockFusedCell(), https://github.com/tensorflow/tensorflow/issues/23369
+tf.contrib.rnn
 
 def export(args):
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
