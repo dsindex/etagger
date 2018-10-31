@@ -12,8 +12,8 @@ class Model:
     __filter_sizes = [3]           # filter sizes
     __num_filters = 50             # number of filters
     __rnn_used = True              # use rnn layer or not
-    __rnn_num_layers = 2           # number of RNN layers
-    __rnn_type = 'normal'          # normal | fused
+    __rnn_num_layers = 1           # number of RNN layers
+    __rnn_type = 'fused'           # normal | fused
     __rnn_size = 200               # size of RNN hidden unit
     __tf_used = False              # use transformer encoder layer or not
     __tf_num_layers = 4            # number of layers for transformer encoder
