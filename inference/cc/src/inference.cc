@@ -7,8 +7,6 @@
 #include <cstdlib>
 #include "Input.h"
 
-typedef std::vector<std::pair<std::string, tensorflow::Tensor>> tensor_dict;
-
 void LoadLSTMLibrary() {
   // Load _lstm_ops.so library(from LB_LIBRARY_PATH) for LSTMBlockFusedCell()
   TF_Status* status = TF_NewStatus();
@@ -92,9 +90,11 @@ int main(int argc, char const *argv[]) {
 
   // Prepare config, vocab, input
   Config config = Config(300, 15, true); // wrd_dim=300, word_length=15, use_crf=true
-  Vocab vocab = Vocab(config);
-  if( !vocab.LoadVocab(vocab_fn) ) return 1;
-  Input input = Input(vocab);
+  Vocab vocab = Vocab(vocab_fn);
+  // set class_size to config
+  config.SetClassSize(vocab.GetTagVocabSize());
+  std::cerr << "class size = " << config.GetClassSize() << std::endl;
+  Input input = Input(config, vocab);
 
   return 0;
 

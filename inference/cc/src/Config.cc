@@ -2,6 +2,10 @@
 #include <string>
 #include "Config.h"
 
+/*
+ *  public methods
+ */
+
 Config::Config()
 {
 }

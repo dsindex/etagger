@@ -2,11 +2,11 @@
 #include <string>
 #include "Input.h"
 
-Input::Input()
-{
-}
+/*
+ *  public methods
+ */
 
-Input::Input(Vocab& vocab)
+Input::Input(Config& config, Vocab& vocab)
 {
 }
 

@@ -3,17 +3,17 @@
 
 #include <map>
 #include <vector>
-#include "Config.h"
 
 class Vocab {
 
   public:
-    Vocab(Config& config);
-    bool LoadVocab(std::string vocab_fn);
+    Vocab(std::string vocab_fn);
+    int GetTagVocabSize();
+    void Split(std::string s, std::vector<std::string>& tokens);
     ~Vocab();
   
   private:
-    Config config;
+    bool LoadVocab(std::string vocab_fn);
     std::map<std::string, int> wrd_vocab;
     std::map<std::string, int> chr_vocab;
     std::map<std::string, int> pos_vocab;
