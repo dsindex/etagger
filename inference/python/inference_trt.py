@@ -63,15 +63,15 @@ def inference(config, frozen_pb_path):
         sys.stderr.write(op.name + '\n')
 
     # create session with optimized graph
-    trt_gpu_ops = tf.GPUOptions(per_process_gpu_memory_fraction = 0.50)
-    session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False, gpu_options=trt_gpu_ops)
+    gpu_ops = tf.GPUOptions(per_process_gpu_memory_fraction = 0.50)
+    '''
+    session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False, gpu_options=gpu_ops)
     '''
     session_conf = tf.ConfigProto(allow_soft_placement=True,
                                   log_device_placement=False,
-                                  gpu_options=trt_gpu_ops,
+                                  gpu_options=gpu_ops,
                                   inter_op_parallelism_threads=1,
                                   intra_op_parallelism_threads=1)
-    '''
     sess = tf.Session(graph=graph, config=session_conf)
 
     # mapping placeholders and tensors

@@ -90,11 +90,12 @@
             - restore version        : 0.010454932072004718 sec
             - frozen version         : 0.011339560587942018 sec
             - tensorRT(FP16) version : no meaningful difference
-          - 32 core CPU(multi-threading) : 0.006132203450549827 sec
+          - 32 core CPU(multi-threading)
+            - rnn_num_layers 2 : 0.006132203450549827 sec
+            - rnn_num_layers 1 : 0.0041805055967241884 sec
           - 1 CPU(single-thread)
-            - pip version(EIGEN)
-              - rnn_num_layers 2 : 0.008001159379070668 sec 
-              - rnn_num_layers 1 : 0.0051817628640952506 sec
+            - rnn_num_layers 2 : 0.008001159379070668 sec 
+            - rnn_num_layers 1 : 0.0051817628640952506 sec
       - with ELMo
         - setting
           - `experiments 8, test 2`
@@ -388,7 +389,7 @@ in IN O O O
   $ python ../token_eval.py < pred.txt
 
   * inference using C++ [doing.....]
-  $ ./cc/build/inference exported/iris_frozen.pb ../embeddings/vocab.txt
+  $ ./cc/build/inference exported/ner_frozen.pb ../embeddings/vocab.txt
   ```
 
 ## Development note

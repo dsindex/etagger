@@ -13,7 +13,7 @@ void LoadLSTMLibrary() {
   // Load _lstm_ops.so library(from LB_LIBRARY_PATH) for LSTMBlockFusedCell()
   TF_Status* status = TF_NewStatus();
   TF_LoadLibrary("_lstm_ops.so", status);
-  if (TF_GetCode(status) != TF_OK) {
+  if( TF_GetCode(status) != TF_OK ) {
     std::cerr << "fail to load _lstm_ops.so" << std::endl;
     exit(1);
   }
@@ -27,14 +27,14 @@ tensorflow::Status LoadModel(tensorflow::Session *sess, std::string graph_fn,
   // Read in the protobuf graph we exported
   tensorflow::MetaGraphDef graph_def;
   status = ReadBinaryProto(tensorflow::Env::Default(), graph_fn, &graph_def);
-  if (status != tensorflow::Status::OK()) return status;
+  if( status != tensorflow::Status::OK() ) return status;
 
   // Create the graph in the current session
   status = sess->Create(graph_def.graph_def());
-  if (status != tensorflow::Status::OK()) return status;
+  if( status != tensorflow::Status::OK() ) return status;
 
   // Restore model from checkpoint, iff checkpoint is given
-  if (checkpoint_fn != "") {
+  if( checkpoint_fn != "" ) {
     const std::string restore_op_name = graph_def.saver_def().restore_op_name();
     const std::string filename_tensor_name =
         graph_def.saver_def().filename_tensor_name();
@@ -45,14 +45,14 @@ tensorflow::Status LoadModel(tensorflow::Session *sess, std::string graph_fn,
 
     tensor_dict feed_dict = {{filename_tensor_name, filename_tensor}};
     status = sess->Run(feed_dict, {}, {restore_op_name}, nullptr);
-    if (status != tensorflow::Status::OK()) return status;
+    if( status != tensorflow::Status::OK() ) return status;
   } else {
     // virtual Status Run(const std::vector<std::pair<string, Tensor> >& inputs,
     //                  const std::vector<string>& output_tensor_names,
     //                  const std::vector<string>& target_node_names,
     //                  std::vector<Tensor>* outputs) = 0;
     status = sess->Run({}, {}, {"init"}, nullptr);
-    if (status != tensorflow::Status::OK()) return status;
+    if( status != tensorflow::Status::OK() ) return status;
   }
 
   return tensorflow::Status::OK();
@@ -64,18 +64,18 @@ tensorflow::Status LoadFrozenModel(tensorflow::Session *sess, std::string graph_
   // Read in the protobuf graph we exported
   tensorflow::GraphDef graph_def;
   status = ReadBinaryProto(tensorflow::Env::Default(), graph_fn, &graph_def);
-  if (status != tensorflow::Status::OK()) return status;
+  if( status != tensorflow::Status::OK() ) return status;
 
   // Create the graph in the current session
   status = sess->Create(graph_def);
-  if (status != tensorflow::Status::OK()) return status;
+  if( status != tensorflow::Status::OK() ) return status;
 
   return tensorflow::Status::OK();
 }
 
 int main(int argc, char const *argv[]) {
 
-  if (argc < 3) {
+  if( argc < 3 ) {
     std::cerr << argv[0] << " <frozen_graph_fn> <vocab_fn>" << std::endl;
     return 1;
   } 
@@ -91,8 +91,9 @@ int main(int argc, char const *argv[]) {
   TF_CHECK_OK(LoadFrozenModel(sess, frozen_graph_fn));
 
   // Prepare config, vocab, input
-  Config config = Config();
-  Vocab vocab = Vocab(config, vocab_fn);
+  Config config = Config(300, 15, true); // wrd_dim=300, word_length=15, use_crf=true
+  Vocab vocab = Vocab(config);
+  if( !vocab.LoadVocab(vocab_fn) ) return 1;
   Input input = Input(vocab);
 
   return 0;
