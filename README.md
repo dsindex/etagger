@@ -389,7 +389,7 @@ in IN O O O
   $ python ../token_eval.py < pred.txt
 
   * inference using C++ [doing.....]
-  $ ./cc/build/inference exported/ner_frozen.pb ../embeddings/vocab.txt
+  $ ./cc/build/inference exported/ner_frozen.pb ../embeddings/vocab.txt < ../data/test.txt
   ```
 
 ## Development note

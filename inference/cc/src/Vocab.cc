@@ -5,27 +5,17 @@
 #include <string>
 #include "Vocab.h"
 
-using namespace std;
-
 /*
  *  public methods
  */
 
-Vocab::Vocab(string vocab_fn)
+Vocab::Vocab(string vocab_fn, bool lowercase=true)
 {
   bool loaded = LoadVocab(vocab_fn);
   if( !loaded ) {
-    throw std::runtime_error("LoadVocab() failed!");
+    throw runtime_error("LoadVocab() failed!");
   }
-}
-
-int Vocab::GetTagVocabSize()
-{
-  return this->tag_vocab.size();
-}
-
-Vocab::~Vocab()
-{
+  this->lowercase = lowercase;
 }
 
 void Vocab::Split(string s, vector<string>& tokens)
@@ -33,6 +23,20 @@ void Vocab::Split(string s, vector<string>& tokens)
   istringstream iss(s);
   for( string ts; iss >> ts; )
     tokens.push_back(ts);
+}
+
+int Vocab::GetWid(string word) 
+{
+  if( this->lowercase ) {
+  }
+  if( this->wrd_vocab.find(word) != this->wrd_vocab.end() ) {
+    return this->wrd_vocab[word];
+  }  
+  return this->unk_wid;
+}
+
+Vocab::~Vocab()
+{
 }
 
 /* 

@@ -7,19 +7,21 @@
 #include <cstdlib>
 #include "Input.h"
 
+typedef vector<pair<string, tensorflow::Tensor>> tensor_dict;
+
 void LoadLSTMLibrary() {
   // Load _lstm_ops.so library(from LB_LIBRARY_PATH) for LSTMBlockFusedCell()
   TF_Status* status = TF_NewStatus();
   TF_LoadLibrary("_lstm_ops.so", status);
   if( TF_GetCode(status) != TF_OK ) {
-    std::cerr << "fail to load _lstm_ops.so" << std::endl;
+    cerr << "fail to load _lstm_ops.so" << endl;
     exit(1);
   }
   TF_DeleteStatus(status);
 }
 
-tensorflow::Status LoadModel(tensorflow::Session *sess, std::string graph_fn,
-                             std::string checkpoint_fn = "") {
+tensorflow::Status LoadModel(tensorflow::Session *sess, string graph_fn,
+                             string checkpoint_fn = "") {
   tensorflow::Status status;
 
   // Read in the protobuf graph we exported
@@ -33,22 +35,22 @@ tensorflow::Status LoadModel(tensorflow::Session *sess, std::string graph_fn,
 
   // Restore model from checkpoint, iff checkpoint is given
   if( checkpoint_fn != "" ) {
-    const std::string restore_op_name = graph_def.saver_def().restore_op_name();
-    const std::string filename_tensor_name =
+    const string restore_op_name = graph_def.saver_def().restore_op_name();
+    const string filename_tensor_name =
         graph_def.saver_def().filename_tensor_name();
 
     tensorflow::Tensor filename_tensor(tensorflow::DT_STRING,
                                        tensorflow::TensorShape());
-    filename_tensor.scalar<std::string>()() = checkpoint_fn;
+    filename_tensor.scalar<string>()() = checkpoint_fn;
 
     tensor_dict feed_dict = {{filename_tensor_name, filename_tensor}};
     status = sess->Run(feed_dict, {}, {restore_op_name}, nullptr);
     if( status != tensorflow::Status::OK() ) return status;
   } else {
-    // virtual Status Run(const std::vector<std::pair<string, Tensor> >& inputs,
-    //                  const std::vector<string>& output_tensor_names,
-    //                  const std::vector<string>& target_node_names,
-    //                  std::vector<Tensor>* outputs) = 0;
+    // virtual Status Run(const vector<pair<string, Tensor> >& inputs,
+    //                  const vector<string>& output_tensor_names,
+    //                  const vector<string>& target_node_names,
+    //                  vector<Tensor>* outputs) = 0;
     status = sess->Run({}, {}, {"init"}, nullptr);
     if( status != tensorflow::Status::OK() ) return status;
   }
@@ -56,7 +58,7 @@ tensorflow::Status LoadModel(tensorflow::Session *sess, std::string graph_fn,
   return tensorflow::Status::OK();
 }
 
-tensorflow::Status LoadFrozenModel(tensorflow::Session *sess, std::string graph_fn) {
+tensorflow::Status LoadFrozenModel(tensorflow::Session *sess, string graph_fn) {
   tensorflow::Status status;
 
   // Read in the protobuf graph we exported
@@ -74,12 +76,12 @@ tensorflow::Status LoadFrozenModel(tensorflow::Session *sess, std::string graph_
 int main(int argc, char const *argv[]) {
 
   if( argc < 3 ) {
-    std::cerr << argv[0] << " <frozen_graph_fn> <vocab_fn>" << std::endl;
+    cerr << argv[0] << " <frozen_graph_fn> <vocab_fn>" << endl;
     return 1;
   } 
 
-  const std::string frozen_graph_fn = argv[1];
-  const std::string vocab_fn = argv[2];
+  const string frozen_graph_fn = argv[1];
+  const string vocab_fn = argv[2];
 
   // Prepare session
   tensorflow::Session *sess;
@@ -90,12 +92,22 @@ int main(int argc, char const *argv[]) {
 
   // Prepare config, vocab, input
   Config config = Config(300, 15, true); // wrd_dim=300, word_length=15, use_crf=true
-  Vocab vocab = Vocab(vocab_fn);
+  Vocab vocab = Vocab(vocab_fn, false);  // lowercase=false
   // set class_size to config
   config.SetClassSize(vocab.GetTagVocabSize());
-  std::cerr << "class size = " << config.GetClassSize() << std::endl;
-  Input input = Input(config, vocab);
+  cerr << "class size = " << config.GetClassSize() << endl;
 
+  vector<string> bucket;
+  for( string line; getline(cin, line); ) {
+    if( line == "" ) {
+       Input input = Input(config, vocab, bucket);
+       bucket.clear();
+    } else {
+       bucket.push_back(line);
+    }
+  }
+
+  sess->Close();
   return 0;
 
   // Prepare inputs

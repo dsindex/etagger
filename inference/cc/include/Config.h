@@ -6,15 +6,20 @@ class Config {
   public:
     Config();
     Config(int wrd_dim, int word_length, bool use_crf);
-    void SetClassSize(int class_size);
-    int  GetClassSize();
+    int  GetWrdDim() { return wrd_dim; }
+    int  GetChrDim() { return chr_dim; }
+    int  GetPosDim() { return pos_dim; }
+    int  GetEtcDim() { return etc_dim; }
+    void SetClassSize(int class_size) { this->class_size = class_size; }
+    int  GetClassSize()  { return class_size; }
+    int  GetWordLength() { return word_length; }
     ~Config();
   
   private:
     int wrd_dim;
     int chr_dim = 100;  // same as config.py
-    int pos_dim = 6;    // same as config.py
-    int etc_dim = 14;   // same as config.py
+    int pos_dim = 6;
+    int etc_dim = 14;
     int class_size;     // assigned after loading vocab
     int word_length;
     bool use_crf;

@@ -1,18 +1,21 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#include <tensorflow/core/public/session.h>
 #include "Config.h"
 #include "Vocab.h"
 
-typedef std::vector<std::pair<std::string, tensorflow::Tensor>> tensor_dict;
-
 class Input {
   public:
-    Input(Config& config, Vocab& vocab);
+    Input(Config& config, Vocab& vocab, vector<string>& bucket);
+    int GetMaxSentenceLength() { return max_sentence_length; }
     ~Input();
   
   private:
+    int max_sentence_length;
+    vector<int> sentence_word_ids;
+    vector<vector<int>> sentence_wordchr_ids;
+    vector<int> sentence_pos_ids;
+    vector<vector<int>> sentence_etcs;
 };
 
 #endif
