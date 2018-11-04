@@ -1,6 +1,12 @@
 #ifndef VOCAB_H
 #define VOCAB_H
 
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <stdexcept>
+#include <algorithm>
+#include <string>
 #include <map>
 #include <vector>
 

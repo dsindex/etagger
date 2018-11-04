@@ -1,8 +1,3 @@
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <stdexcept>
-#include <string>
 #include "Vocab.h"
 
 /*
@@ -28,6 +23,7 @@ void Vocab::Split(string s, vector<string>& tokens)
 int Vocab::GetWid(string word) 
 {
   if( this->lowercase ) {
+    transform(word.begin(), word.end(), word.begin(),::tolower);
   }
   if( this->wrd_vocab.find(word) != this->wrd_vocab.end() ) {
     return this->wrd_vocab[word];

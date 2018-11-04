@@ -6,6 +6,8 @@
 #include <string>
 #include <cstdlib>
 #include "Input.h"
+#include <iostream>
+#include <string>
 
 typedef vector<pair<string, tensorflow::Tensor>> tensor_dict;
 
@@ -14,8 +16,7 @@ void LoadLSTMLibrary() {
   TF_Status* status = TF_NewStatus();
   TF_LoadLibrary("_lstm_ops.so", status);
   if( TF_GetCode(status) != TF_OK ) {
-    cerr << "fail to load _lstm_ops.so" << endl;
-    exit(1);
+    throw runtime_error("fail to load _lstm_ops.so");
   }
   TF_DeleteStatus(status);
 }
@@ -102,6 +103,15 @@ int main(int argc, char const *argv[]) {
     if( line == "" ) {
        Input input = Input(config, vocab, bucket);
        bucket.clear();
+#ifdef DEBUG
+       int max_sentence_length = input.GetMaxSentenceLength();
+       tensorflow::Tensor* sentence_word_ids = input.GetSentenceWordIds();
+       auto data_ = sentence_word_ids->flat<float>().data();
+       for( int i=0; i < max_sentence_length; i++ ) {
+         cout << data_[i] << " ";
+       }
+       cout << endl;
+#endif
     } else {
        bucket.push_back(line);
     }
