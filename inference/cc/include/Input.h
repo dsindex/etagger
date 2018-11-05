@@ -13,6 +13,8 @@ class Input {
     tensorflow::Tensor* GetSentenceWordChrIds() { return sentence_wordchr_ids; }
     tensorflow::Tensor* GetSentencePosIds() { return sentence_pos_ids; }
     tensorflow::Tensor* GetSentenceEtcs() { return sentence_etcs; }
+    tensorflow::Tensor* GetSentenceLength() { return sentence_length; }
+    tensorflow::Tensor* GetIsTrain() { return is_train; }
     ~Input();
   
   private:
@@ -21,6 +23,8 @@ class Input {
     tensorflow::Tensor* sentence_wordchr_ids; // (1, max_sentence_length, word_length)
     tensorflow::Tensor* sentence_pos_ids;     // (1, max_sentence_length)
     tensorflow::Tensor* sentence_etcs;        // (1, max_sentence_length, etc_dim)
+    tensorflow::Tensor* sentence_length;      // scalar tensor
+    tensorflow::Tensor* is_train;             // scalar tensor
 
     bool is_digits(const string& str); 
     bool is_alphas(const string& str);

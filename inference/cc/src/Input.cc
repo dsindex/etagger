@@ -12,17 +12,22 @@ Input::Input(Config& config, Vocab& vocab, vector<string>& bucket)
   int word_length = config.GetWordLength();
   int etc_dim = config.GetEtcDim();
   tensorflow::TensorShape shape1({1, this->max_sentence_length});
-  this->sentence_word_ids = new tensorflow::Tensor(tensorflow::DT_FLOAT, shape1);
+  this->sentence_word_ids = new tensorflow::Tensor(tensorflow::DT_INT32, shape1);
   tensorflow::TensorShape shape2({1, this->max_sentence_length, word_length});
-  this->sentence_wordchr_ids = new tensorflow::Tensor(tensorflow::DT_FLOAT, shape2);
-  this->sentence_pos_ids = new tensorflow::Tensor(tensorflow::DT_FLOAT, shape1);
+  this->sentence_wordchr_ids = new tensorflow::Tensor(tensorflow::DT_INT32, shape2);
+  this->sentence_pos_ids = new tensorflow::Tensor(tensorflow::DT_INT32, shape1);
   tensorflow::TensorShape shape3({1, this->max_sentence_length, etc_dim});
   this->sentence_etcs = new tensorflow::Tensor(tensorflow::DT_FLOAT, shape3);
+  // additional scalar tensor for sentence_length, is_train
+  this->sentence_length = new tensorflow::Tensor(tensorflow::DT_INT32, tensorflow::TensorShape());
+  this->is_train = new tensorflow::Tensor(tensorflow::DT_BOOL, tensorflow::TensorShape());
 
-  auto data_word_ids = this->sentence_word_ids->flat<float>().data();
-  auto data_wordchr_ids = this->sentence_wordchr_ids->flat<float>().data();
-  auto data_pos_ids = this->sentence_pos_ids->flat<float>().data();
+  auto data_word_ids = this->sentence_word_ids->flat<int>().data();
+  auto data_wordchr_ids = this->sentence_wordchr_ids->flat<int>().data();
+  auto data_pos_ids = this->sentence_pos_ids->flat<int>().data();
   auto data_etcs = this->sentence_etcs->flat<float>().data();
+  auto data_sentence_length = this->sentence_length->flat<int>().data();
+  auto data_is_train = this->is_train->flat<bool>().data();
   
   for( int i = 0; i < max_sentence_length; i++ ) {
     string line = bucket[i];
@@ -64,6 +69,8 @@ Input::Input(Config& config, Vocab& vocab, vector<string>& bucket)
       data_etcs[i*etc_dim + 9 + j] = pos_vec[j];
     } 
   }
+  *data_sentence_length = this->max_sentence_length;
+  *data_is_train = false;
 }
 
 Input::~Input()
@@ -72,6 +79,8 @@ Input::~Input()
   if( this->sentence_wordchr_ids ) delete this->sentence_wordchr_ids;
   if( this->sentence_pos_ids ) delete this->sentence_pos_ids;
   if( this->sentence_etcs ) delete this->sentence_etcs;
+  if( this->sentence_length ) delete this->sentence_length;
+  if( this->is_train ) delete this->is_train;
 }
 
 /*

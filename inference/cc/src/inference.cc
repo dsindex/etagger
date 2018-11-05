@@ -102,19 +102,22 @@ int main(int argc, char const *argv[]) {
   for( string line; getline(cin, line); ) {
     if( line == "" ) {
        Input input = Input(config, vocab, bucket);
-       bucket.clear();
-//#ifdef DEBUG
        int max_sentence_length = input.GetMaxSentenceLength();
-       cout << "[word ids]" << endl;
        tensorflow::Tensor* sentence_word_ids = input.GetSentenceWordIds();
-       auto data_word_ids = sentence_word_ids->flat<float>().data();
+       tensorflow::Tensor* sentence_wordchr_ids = input.GetSentenceWordChrIds();
+       tensorflow::Tensor* sentence_pos_ids = input.GetSentencePosIds();
+       tensorflow::Tensor* sentence_etcs = input.GetSentenceEtcs();
+       tensorflow::Tensor* sentence_length = input.GetSentenceLength();
+       tensorflow::Tensor* is_train = input.GetIsTrain();
+//#ifdef DEBUG
+       cout << "[word ids]" << endl;
+       auto data_word_ids = sentence_word_ids->flat<int>().data();
        for( int i = 0; i < max_sentence_length; i++ ) {
          cout << data_word_ids[i] << " ";
        }
        cout << endl;
        cout << "[wordchr ids]" << endl;
-       tensorflow::Tensor* sentence_wordchr_ids = input.GetSentenceWordChrIds();
-       auto data_wordchr_ids = sentence_wordchr_ids->flat<float>().data();
+       auto data_wordchr_ids = sentence_wordchr_ids->flat<int>().data();
        int word_length = config.GetWordLength();
        for( int i = 0; i < max_sentence_length; i++ ) {
          for( int j = 0; j < word_length; j++ ) {
@@ -123,14 +126,12 @@ int main(int argc, char const *argv[]) {
          cout << endl;
        }
        cout << "[pos ids]" << endl;
-       tensorflow::Tensor* sentence_pos_ids = input.GetSentencePosIds();
-       auto data_pos_ids = sentence_pos_ids->flat<float>().data();
+       auto data_pos_ids = sentence_pos_ids->flat<int>().data();
        for( int i = 0; i < max_sentence_length; i++ ) {
          cout << data_pos_ids[i] << " ";
        }
        cout << endl;
        cout << "[etcs]" << endl;
-       tensorflow::Tensor* sentence_etcs = input.GetSentenceEtcs();
        auto data_etcs = sentence_etcs->flat<float>().data();
        int etc_dim = config.GetEtcDim();
        for( int i = 0; i < max_sentence_length; i++ ) {
@@ -139,9 +140,29 @@ int main(int argc, char const *argv[]) {
          }
          cout << endl;
        }
+       cout << "[sentence length]" << endl;
+       auto data_sentence_length = sentence_length->flat<int>().data();
+       cout << *data_sentence_length << endl;
+       cout << "[is_train]" << endl;
+       auto data_is_train = is_train->flat<bool>().data();
+       cout << *data_is_train << endl;
 
        cout << endl;
 //#endif
+       tensor_dict feed_dict = {
+         {"input_data_word_ids", *sentence_word_ids},
+         {"input_data_wordchr_ids", *sentence_wordchr_ids},
+         {"input_data_pos_ids", *sentence_pos_ids},
+         {"input_data_etcs", *sentence_etcs},
+         {"sentence_length", *sentence_length},
+         {"is_train", *is_train},
+       };
+       std::vector<tensorflow::Tensor> outputs;
+       TF_CHECK_OK(sess->Run(feed_dict, {"logits"},
+                        {}, &outputs));
+
+       cout << "logits          " << outputs[0].DebugString() << std::endl;
+       bucket.clear();
     } else {
        bucket.push_back(line);
     }
