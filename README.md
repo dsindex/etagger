@@ -35,7 +35,7 @@
     - [x] the solution is LSTMBlockFusedCell().
       - 3.13 times faster than LSTMCell() during training time.
       - 1.26 times faster than LSTMCell() during inference time.
-  - can the Transformer have competing results againt the BiLSTM? and how much faster?
+  - can the Transformer have competing results against the BiLSTM? and how much faster?
     - [x] contextual encoding by the Transformer encoder yields competing results.
       - in case the sequence to sequence model like translation, the multi-head attention mechanism might be very powerful for alignments.
       - however, for sequence tagging, the source of power is from point-wise feed forward net with wide range of kernel size. it is not from the multi-head attention only.
