@@ -192,30 +192,11 @@ int main(int argc, char const *argv[]) {
   sess->Close();
   return 0;
 
-  // Prepare inputs
-  tensorflow::TensorShape data_shape({1, 4});
-  tensorflow::Tensor data(tensorflow::DT_FLOAT, data_shape);
-  auto data_ = data.flat<float>().data();
-  data_[0] = 2;
-  data_[1] = 14;
-  data_[2] = 33;
-  data_[3] = 50;
-  tensor_dict feed_dict = {
-      {"X", data},
-  };
-
-  std::vector<tensorflow::Tensor> outputs;
-  TF_CHECK_OK(sess->Run(feed_dict, {"logits"},
-                        {}, &outputs));
-
-  std::cout << "input           " << data.DebugString() << std::endl;
-  std::cout << "logits          " << outputs[0].DebugString() << std::endl;
-
+  /*
   tensorflow::TTypes<float>::Flat logits_flat = outputs[0].flat<float>();
   for( int i = 0; i < 3; i++ ) {
     const float logit = logits_flat(i);
     std::cout << "logit           " << i << "," << logit << std::endl; 
   } 
-
-  return 0;
+  */
 }
