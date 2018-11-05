@@ -9,15 +9,20 @@ Input::Input(Config& config, Vocab& vocab, vector<string>& bucket)
   this->max_sentence_length = bucket.size();
 
   // create input tensors
+  int word_length = config.GetWordLength();
   tensorflow::TensorShape shape1({1, this->max_sentence_length});
   this->sentence_word_ids = new tensorflow::Tensor(tensorflow::DT_FLOAT, shape1);
-  tensorflow::TensorShape shape2({1, this->max_sentence_length, config.GetWordLength()});
+  tensorflow::TensorShape shape2({1, this->max_sentence_length, word_length});
   this->sentence_wordchr_ids = new tensorflow::Tensor(tensorflow::DT_FLOAT, shape2);
   this->sentence_pos_ids = new tensorflow::Tensor(tensorflow::DT_FLOAT, shape1);
   tensorflow::TensorShape shape3({1, this->max_sentence_length, config.GetEtcDim()});
   this->sentence_etcs = new tensorflow::Tensor(tensorflow::DT_FLOAT, shape3);
+
+  auto data_word_ids = this->sentence_word_ids->flat<float>().data();
+  auto data_wordchr_ids = this->sentence_wordchr_ids->flat<float>().data();
+  auto data_pos_ids = this->sentence_pos_ids->flat<float>().data();
   
-  for( int i=0; i < max_sentence_length; i++ ) {
+  for( int i = 0; i < max_sentence_length; i++ ) {
     string line = bucket[i];
     vector<string> tokens;
     vocab.Split(line, tokens);
@@ -30,10 +35,21 @@ Input::Input(Config& config, Vocab& vocab, vector<string>& bucket)
     string tag   = tokens[3];
     // build sentence_word_ids
     int wid = vocab.GetWid(word);
-    auto data_ = this->sentence_word_ids->flat<float>().data();
-    data_[i] = wid;
+    data_word_ids[i] = wid;
     // build sentence_wordchr_ids
+    int wlen = word.length();
+    for( int j = 0; j < wlen; j++ ) {
+      string ch = string() + word[j];
+      int cid = vocab.GetCid(ch);
+      data_wordchr_ids[i*word_length + j] = cid;
+    }
+    for( int j = 0; j < word_length - wlen; j++ ) { // padding cid
+      int pad_cid = vocab.GetPadCid();
+      data_wordchr_ids[i*word_length + wlen + j] = pad_cid;
+    }
     // build sentence_pos_ids
+    int pid = vocab.GetPid(pos);
+    data_pos_ids[i] = pid;
     // build sentence_etcs
     
   }

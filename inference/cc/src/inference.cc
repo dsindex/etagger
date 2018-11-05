@@ -103,15 +103,35 @@ int main(int argc, char const *argv[]) {
     if( line == "" ) {
        Input input = Input(config, vocab, bucket);
        bucket.clear();
-#ifdef DEBUG
+//#ifdef DEBUG
        int max_sentence_length = input.GetMaxSentenceLength();
+       cout << "[word ids]" << endl;
        tensorflow::Tensor* sentence_word_ids = input.GetSentenceWordIds();
-       auto data_ = sentence_word_ids->flat<float>().data();
-       for( int i=0; i < max_sentence_length; i++ ) {
-         cout << data_[i] << " ";
+       auto data_word_ids = sentence_word_ids->flat<float>().data();
+       for( int i = 0; i < max_sentence_length; i++ ) {
+         cout << data_word_ids[i] << " ";
        }
        cout << endl;
-#endif
+       cout << "[wordchr ids]" << endl;
+       tensorflow::Tensor* sentence_wordchr_ids = input.GetSentenceWordChrIds();
+       auto data_wordchr_ids = sentence_wordchr_ids->flat<float>().data();
+       int word_length = config.GetWordLength();
+       for( int i = 0; i < max_sentence_length; i++ ) {
+         for( int j = 0; j < word_length; j++ ) {
+           cout << data_wordchr_ids[i*word_length + j] << " ";
+         }
+         cout << endl;
+       }
+       cout << "[pos ids]" << endl;
+       tensorflow::Tensor* sentence_pos_ids = input.GetSentencePosIds();
+       auto data_pos_ids = sentence_pos_ids->flat<float>().data();
+       for( int i = 0; i < max_sentence_length; i++ ) {
+         cout << data_pos_ids[i] << " ";
+       }
+       cout << endl;
+
+       cout << endl;
+//#endif
     } else {
        bucket.push_back(line);
     }

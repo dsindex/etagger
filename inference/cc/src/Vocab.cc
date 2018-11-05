@@ -31,6 +31,22 @@ int Vocab::GetWid(string word)
   return this->unk_wid;
 }
 
+int Vocab::GetCid(string ch)
+{
+  if( this->chr_vocab.find(ch) != this->chr_vocab.end() ) {
+    return this->chr_vocab[ch];
+  }
+  return this->unk_cid;
+}
+
+int Vocab::GetPid(string pos)
+{
+  if( this->pos_vocab.find(pos) != this->pos_vocab.end() ) {
+    return this->pos_vocab[pos];
+  }
+  return this->unk_pid;
+}
+
 Vocab::~Vocab()
 {
 }

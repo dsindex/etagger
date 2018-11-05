@@ -19,12 +19,16 @@ class Vocab {
     int GetTagVocabSize() { return tag_vocab.size(); }
     void Split(string s, vector<string>& tokens);
     int GetWid(string word);
+    int GetCid(string ch);
+    int GetPadCid() { return pad_cid; }
+    int GetPid(string pos);
     ~Vocab();
   
   private:
     bool LoadVocab(string vocab_fn);
     bool lowercase;
-    int pad_wid = 0; // same as config.py
+    // same as config.py
+    int pad_wid = 0;
     int unk_wid = 1; 
     int pad_cid = 0;
     int unk_cid = 1;

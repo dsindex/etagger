@@ -10,6 +10,9 @@ class Input {
     Input(Config& config, Vocab& vocab, vector<string>& bucket);
     int GetMaxSentenceLength() { return max_sentence_length; }
     tensorflow::Tensor* GetSentenceWordIds() { return sentence_word_ids; }
+    tensorflow::Tensor* GetSentenceWordChrIds() { return sentence_wordchr_ids; }
+    tensorflow::Tensor* GetSentencePosIds() { return sentence_pos_ids; }
+    tensorflow::Tensor* GetSentenceEtcs() { return sentence_etcs; }
     ~Input();
   
   private:

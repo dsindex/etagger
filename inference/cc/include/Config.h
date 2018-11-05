@@ -16,8 +16,9 @@ class Config {
     ~Config();
   
   private:
+    // same as config.py
     int wrd_dim;
-    int chr_dim = 100;  // same as config.py
+    int chr_dim = 100;
     int pos_dim = 6;
     int etc_dim = 14;
     int class_size;     // assigned after loading vocab
