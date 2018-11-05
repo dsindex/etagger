@@ -45,7 +45,7 @@ Input::Input(Config& config, Vocab& vocab, vector<string>& bucket)
     data_word_ids[i] = wid;
     // build sentence_wordchr_ids
     int wlen = word.length();
-    for( int j = 0; j < wlen; j++ ) {
+    for( int j = 0; j < wlen && j < word_length; j++ ) {
       string ch = string() + word[j];
       int cid = vocab.GetCid(ch);
       data_wordchr_ids[i*word_length + j] = cid;

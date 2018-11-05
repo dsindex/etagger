@@ -6,8 +6,10 @@
 #include <string>
 #include <cstdlib>
 #include "Input.h"
-#include <iostream>
-#include <string>
+
+#include <cstdio>
+#include <sys/time.h>
+
 
 typedef vector<pair<string, tensorflow::Tensor>> tensor_dict;
 
@@ -98,9 +100,16 @@ int main(int argc, char const *argv[]) {
   config.SetClassSize(vocab.GetTagVocabSize());
   cerr << "class size = " << config.GetClassSize() << endl;
 
+  struct timeval t1,t2,t3,t4;
+  int num_buckets = 0;
+  double total_duration_time = 0.0;
+  gettimeofday(&t1, NULL);
+
   vector<string> bucket;
   for( string line; getline(cin, line); ) {
     if( line == "" ) {
+       gettimeofday(&t3, NULL);
+
        Input input = Input(config, vocab, bucket);
        int max_sentence_length = input.GetMaxSentenceLength();
        tensorflow::Tensor* sentence_word_ids = input.GetSentenceWordIds();
@@ -109,7 +118,7 @@ int main(int argc, char const *argv[]) {
        tensorflow::Tensor* sentence_etcs = input.GetSentenceEtcs();
        tensorflow::Tensor* sentence_length = input.GetSentenceLength();
        tensorflow::Tensor* is_train = input.GetIsTrain();
-//#ifdef DEBUG
+#ifdef DEBUG
        cout << "[word ids]" << endl;
        auto data_word_ids = sentence_word_ids->flat<int>().data();
        for( int i = 0; i < max_sentence_length; i++ ) {
@@ -148,7 +157,7 @@ int main(int argc, char const *argv[]) {
        cout << *data_is_train << endl;
 
        cout << endl;
-//#endif
+#endif
        tensor_dict feed_dict = {
          {"input_data_word_ids", *sentence_word_ids},
          {"input_data_wordchr_ids", *sentence_wordchr_ids},
@@ -158,15 +167,27 @@ int main(int argc, char const *argv[]) {
          {"is_train", *is_train},
        };
        std::vector<tensorflow::Tensor> outputs;
-       TF_CHECK_OK(sess->Run(feed_dict, {"logits"},
+       TF_CHECK_OK(sess->Run(feed_dict, {"logits", "loss/trans_params", "sentence_lengths"},
                         {}, &outputs));
 
-       cout << "logits          " << outputs[0].DebugString() << std::endl;
+       cout << "logits           " << outputs[0].DebugString() << endl;
+       cout << "trans_params     " << outputs[1].DebugString() << endl;
+       cout << "sentence_lengths " << outputs[2].DebugString() << endl;
+       num_buckets += 1;
        bucket.clear();
+
+       gettimeofday(&t4, NULL);
+       double duration_time = ((t4.tv_sec - t3.tv_sec)*1000000 + t4.tv_usec - t3.tv_usec)/(double)1000000;
+       fprintf(stderr,"elapsed time per sentence = %lf sec\n", duration_time);
+       total_duration_time += duration_time;
     } else {
        bucket.push_back(line);
     }
   }
+  gettimeofday(&t2, NULL);
+  double duration_time = ((t2.tv_sec - t1.tv_sec)*1000000 + t2.tv_usec - t1.tv_usec)/(double)1000000;
+  fprintf(stderr,"elapsed time = %lf sec\n", duration_time);
+  fprintf(stderr,"duration time on average = %lf sec\n", total_duration_time / num_buckets);
 
   sess->Close();
   return 0;
