@@ -177,16 +177,16 @@ int main(int argc, char const *argv[])
          {"is_train", *is_train},
        };
        std::vector<tensorflow::Tensor> outputs;
-       TF_CHECK_OK(sess->Run(feed_dict, {"logits", "loss/trans_params", "sentence_lengths"},
+       TF_CHECK_OK(sess->Run(feed_dict, {"logits", "loss/trans_params"},
                         {}, &outputs));
        /*
        cout << "logits           " << outputs[0].DebugString() << endl;
        cout << "trans_params     " << outputs[1].DebugString() << endl;
-       cout << "sentence_lengths " << outputs[2].DebugString() << endl;
        */
        int class_size = config.GetClassSize();
        for( int i = 0; i < max_sentence_length; i++ ) {
          tensorflow::TTypes<float>::Flat logits_flat = outputs[0].flat<float>();
+         // TODO apply viterbi decoding
          int max_j = 0;
          float max_logit = numeric_limits<float>::min();
          for( int j = 0; j < class_size; j++ ) {
@@ -199,6 +199,7 @@ int main(int argc, char const *argv[])
          string tag = vocab.GetTag(max_j);
          cout << bucket[i] + " " + tag << endl;
        }
+       // TODO backtracking 
        cout << endl;
 
        num_buckets += 1;
