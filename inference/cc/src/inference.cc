@@ -13,7 +13,8 @@
 
 typedef vector<pair<string, tensorflow::Tensor>> tensor_dict;
 
-void LoadLSTMLibrary() {
+void LoadLSTMLibrary()
+{
   // Load _lstm_ops.so library(from LB_LIBRARY_PATH) for LSTMBlockFusedCell()
   TF_Status* status = TF_NewStatus();
   TF_LoadLibrary("_lstm_ops.so", status);
@@ -23,8 +24,10 @@ void LoadLSTMLibrary() {
   TF_DeleteStatus(status);
 }
 
-tensorflow::Status LoadModel(tensorflow::Session *sess, string graph_fn,
-                             string checkpoint_fn = "") {
+tensorflow::Status LoadModel(tensorflow::Session *sess,
+                             string graph_fn,
+                             string checkpoint_fn = "")
+{
   tensorflow::Status status;
 
   // Read in the protobuf graph we exported
@@ -61,7 +64,8 @@ tensorflow::Status LoadModel(tensorflow::Session *sess, string graph_fn,
   return tensorflow::Status::OK();
 }
 
-tensorflow::Status LoadFrozenModel(tensorflow::Session *sess, string graph_fn) {
+tensorflow::Status LoadFrozenModel(tensorflow::Session *sess, string graph_fn)
+{
   tensorflow::Status status;
 
   // Read in the protobuf graph we exported
@@ -76,8 +80,8 @@ tensorflow::Status LoadFrozenModel(tensorflow::Session *sess, string graph_fn) {
   return tensorflow::Status::OK();
 }
 
-int main(int argc, char const *argv[]) {
-
+int main(int argc, char const *argv[])
+{
   if( argc < 3 ) {
     cerr << argv[0] << " <frozen_graph_fn> <vocab_fn>" << endl;
     return 1;
@@ -89,14 +93,20 @@ int main(int argc, char const *argv[]) {
   // Prepare session
   tensorflow::Session *sess;
   tensorflow::SessionOptions options;
+  tensorflow::ConfigProto& conf = options.config;
+   
+  conf.set_inter_op_parallelism_threads(1);
+  conf.set_intra_op_parallelism_threads(1);
+  
   TF_CHECK_OK(tensorflow::NewSession(options, &sess));
+
+  // Load frozen model
   LoadLSTMLibrary();
   TF_CHECK_OK(LoadFrozenModel(sess, frozen_graph_fn));
 
   // Prepare config, vocab, input
   Config config = Config(300, 15, true); // wrd_dim=300, word_length=15, use_crf=true
   Vocab vocab = Vocab(vocab_fn, false);  // lowercase=false
-  // set class_size to config
   config.SetClassSize(vocab.GetTagVocabSize());
   cerr << "class size = " << config.GetClassSize() << endl;
 
@@ -169,10 +179,28 @@ int main(int argc, char const *argv[]) {
        std::vector<tensorflow::Tensor> outputs;
        TF_CHECK_OK(sess->Run(feed_dict, {"logits", "loss/trans_params", "sentence_lengths"},
                         {}, &outputs));
-
+       /*
        cout << "logits           " << outputs[0].DebugString() << endl;
        cout << "trans_params     " << outputs[1].DebugString() << endl;
        cout << "sentence_lengths " << outputs[2].DebugString() << endl;
+       */
+       int class_size = config.GetClassSize();
+       for( int i = 0; i < max_sentence_length; i++ ) {
+         tensorflow::TTypes<float>::Flat logits_flat = outputs[0].flat<float>();
+         int max_j = 0;
+         float max_logit = numeric_limits<float>::min();
+         for( int j = 0; j < class_size; j++ ) {
+           const float logit = logits_flat(i*class_size + j);
+           if( logit > max_logit ) {
+             max_logit = logit;
+             max_j = j;
+           }
+         }
+         string tag = vocab.GetTag(max_j);
+         cout << bucket[i] + " " + tag << endl;
+       }
+       cout << endl;
+
        num_buckets += 1;
        bucket.clear();
 
@@ -191,12 +219,4 @@ int main(int argc, char const *argv[]) {
 
   sess->Close();
   return 0;
-
-  /*
-  tensorflow::TTypes<float>::Flat logits_flat = outputs[0].flat<float>();
-  for( int i = 0; i < 3; i++ ) {
-    const float logit = logits_flat(i);
-    std::cout << "logit           " << i << "," << logit << std::endl; 
-  } 
-  */
 }

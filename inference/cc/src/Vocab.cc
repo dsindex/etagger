@@ -47,6 +47,14 @@ int Vocab::GetPid(string pos)
   return this->unk_pid;
 }
 
+string Vocab::GetTag(int tid)
+{
+  if( this->itag_vocab.find(tid) != this->itag_vocab.end() ) {
+    return this->itag_vocab[tid];
+  }
+  return this->oot_tag;
+}
+
 Vocab::~Vocab()
 {
 }

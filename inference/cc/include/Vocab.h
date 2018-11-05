@@ -9,6 +9,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <limits>
 
 using namespace std;
 
@@ -22,11 +23,12 @@ class Vocab {
     int GetCid(string ch);
     int GetPadCid() { return pad_cid; }
     int GetPid(string pos);
+    string GetTag(int tid);
     ~Vocab();
   
   private:
-    bool lowercase;
     // same as config.py
+    bool lowercase;
     int pad_wid = 0;
     int unk_wid = 1; 
     int pad_cid = 0;

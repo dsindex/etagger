@@ -52,7 +52,8 @@
       - during inference time, 1 layer BiLSTM on 1 CPU takes just **5.1 msec** per sentence on average.
   - how to use a trained model from C++? is it much faster?
     - [x] save the meta graph and trained parameters. and restore it via tensorflow C++ API.
-      - **2.7 msec** per sentence on average. (without viterbi decoding)
+      - 1 layer BiLSTM on multi CPU takes **2.7 msec** per sentence on average. (without viterbi decoding)
+      - 1 layer BiLSTM on single CPU takes **3.9 msec** per sentence on average. (without viterbi decoding)
       - ...ing
 
 ## Models and Evaluation
@@ -94,12 +95,14 @@
             - tensorRT(FP16) version : no meaningful difference
           - 32 core CPU(multi-threading)
             - rnn_num_layers 2 : 0.006132203450549827 sec
-            - rnn_num_layers 1 : 0.0041805055967241884 sec
+            - rnn_num_layers 1
+              - python : 0.0041805055967241884 sec
+              - C++    : 0.002735 sec
           - 1 CPU(single-thread)
             - rnn_num_layers 2 : 0.008001159379070668 sec 
             - rnn_num_layers 1
               - python : 0.0051817628640952506 sec
-              - C++    : 0.002735 sec
+              - C++    : 0.003998 sec
       - with ELMo
         - setting
           - `experiments 8, test 2`
@@ -388,12 +391,13 @@ in IN O O O
 
   * inference using python with optimized graph_def via tensorRT (only for GPU)
   $ python python/inference_trt.py --emb_path ../embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
-
   * inspect `pred.txt` whether the predictions are same.
   $ python ../token_eval.py < pred.txt
 
   * inference using C++ [doing.....]
-  $ ./cc/build/inference exported/ner_frozen.pb ../embeddings/vocab.txt < ../data/test.txt
+  $ ./cc/build/inference exported/ner_frozen.pb ../embeddings/vocab.txt < ../data/test.txt > pred.txt
+  * inspect `pred.txt` whether the predictions are same.
+  $ python ../token_eval.py < pred.txt
   ```
 
 ## Development note

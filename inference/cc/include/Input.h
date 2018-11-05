@@ -18,8 +18,9 @@ class Input {
     ~Input();
   
   private:
+    // same as input.py
     int max_sentence_length;
-    tensorflow::Tensor* sentence_word_ids;    // (1, max_sentence_length), same as input.py
+    tensorflow::Tensor* sentence_word_ids;    // (1, max_sentence_length)
     tensorflow::Tensor* sentence_wordchr_ids; // (1, max_sentence_length, word_length)
     tensorflow::Tensor* sentence_pos_ids;     // (1, max_sentence_length)
     tensorflow::Tensor* sentence_etcs;        // (1, max_sentence_length, etc_dim)
