@@ -6,9 +6,9 @@
 
 Vocab::Vocab(string vocab_fn, bool lowercase=true)
 {
-  bool loaded = LoadVocab(vocab_fn);
+  bool loaded = load_vocab(vocab_fn);
   if( !loaded ) {
-    throw runtime_error("LoadVocab() failed!");
+    throw runtime_error("load_vocab() failed!");
   }
   this->lowercase = lowercase;
 }
@@ -55,7 +55,7 @@ Vocab::~Vocab()
  *  private methods
  */
 
-bool Vocab::LoadVocab(string vocab_fn)
+bool Vocab::load_vocab(string vocab_fn)
 {
   cerr << "Loading Vocab From " << vocab_fn  << endl; 
   fstream fs(vocab_fn, ios_base::in);

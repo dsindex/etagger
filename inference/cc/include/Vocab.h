@@ -25,7 +25,6 @@ class Vocab {
     ~Vocab();
   
   private:
-    bool LoadVocab(string vocab_fn);
     bool lowercase;
     // same as config.py
     int pad_wid = 0;
@@ -41,6 +40,8 @@ class Vocab {
     map<string, int> pos_vocab;
     map<string, int> tag_vocab;
     map<int, string> itag_vocab;
+
+    bool load_vocab(string vocab_fn);
 };
 
 #endif

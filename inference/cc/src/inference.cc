@@ -129,6 +129,16 @@ int main(int argc, char const *argv[]) {
          cout << data_pos_ids[i] << " ";
        }
        cout << endl;
+       cout << "[etcs]" << endl;
+       tensorflow::Tensor* sentence_etcs = input.GetSentenceEtcs();
+       auto data_etcs = sentence_etcs->flat<float>().data();
+       int etc_dim = config.GetEtcDim();
+       for( int i = 0; i < max_sentence_length; i++ ) {
+         for( int j = 0; j < etc_dim; j++ ) {
+           cout << data_etcs[i*etc_dim + j] << " ";
+         }
+         cout << endl;
+       }
 
        cout << endl;
 //#endif

@@ -21,6 +21,13 @@ class Input {
     tensorflow::Tensor* sentence_wordchr_ids; // (1, max_sentence_length, word_length)
     tensorflow::Tensor* sentence_pos_ids;     // (1, max_sentence_length)
     tensorflow::Tensor* sentence_etcs;        // (1, max_sentence_length, etc_dim)
+
+    bool is_digits(const string& str); 
+    bool is_alphas(const string& str);
+    bool is_capital(const char ch);
+    bool is_symbol(const char ch);
+    void set_shape_vec(string word, vector<float>& shape_vec);
+    void set_pos_vec(string pos, vector<float>& pos_vec);
 };
 
 #endif
