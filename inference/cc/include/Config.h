@@ -13,6 +13,7 @@ class Config {
     void SetClassSize(int class_size) { this->class_size = class_size; }
     int  GetClassSize()  { return class_size; }
     int  GetWordLength() { return word_length; }
+    bool GetUseCRF() { return use_crf; }
     ~Config();
   
   private:

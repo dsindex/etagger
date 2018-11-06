@@ -156,6 +156,7 @@ void Input::set_shape_vec(string word, vector<float>& shape_vec)
 void Input::set_pos_vec(string pos, vector<float>& pos_vec)
 {
   // pos_vec : 5, same as input.py
+  // build language specific features
 
   if( pos == "NN" || pos == "NNS" ) pos_vec[0] = 1;
   else if( pos == "FW" ) pos_vec[1] = 1;
