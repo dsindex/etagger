@@ -22,6 +22,7 @@ class TFUtil {
     void DestroySession(tensorflow::Session* sess);
     void LoadLSTMLibrary();
     tensorflow::Status LoadFrozenModel(tensorflow::Session *sess, string graph_fn);
+    tensorflow::Status LoadModel(tensorflow::Session *sess, string graph_fn, string checkpoint_fn);
     ~TFUtil();
   
   private:
