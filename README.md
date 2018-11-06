@@ -52,9 +52,8 @@
       - during inference time, 1 layer BiLSTM on 1 CPU takes just **5.1 msec** per sentence on average.
   - how to use a trained model from C++? is it much faster?
     - [x] save the meta graph and trained parameters. and restore it via tensorflow C++ API.
-      - 1 layer BiLSTM on multi CPU takes **2.7 msec** per sentence on average. (without viterbi decoding)
-      - 1 layer BiLSTM on single CPU takes **3.9 msec** per sentence on average. (without viterbi decoding)
-      - ...ing
+      - 1 layer BiLSTM on multi CPU takes **2.7 msec** per sentence on average.
+      - 1 layer BiLSTM on single CPU takes **3.9 msec** per sentence on average.
 
 ## Models and Evaluation
 
@@ -394,7 +393,7 @@ in IN O O O
   * inspect `pred.txt` whether the predictions are same.
   $ python ../token_eval.py < pred.txt
 
-  * inference using C++ [doing.....]
+  * inference using C++
   $ ./cc/build/inference exported/ner_frozen.pb ../embeddings/vocab.txt < ../data/test.txt > pred.txt
   * inspect `pred.txt` whether the predictions are same.
   $ python ../token_eval.py < pred.txt
