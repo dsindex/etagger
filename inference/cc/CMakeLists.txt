@@ -22,6 +22,6 @@ target_include_directories(inference_iris PRIVATE TensorFlow_DEP)
 target_link_libraries(inference_iris PRIVATE TensorFlow_DEP)
 
 include_directories(include)
-add_executable (inference src/inference.cc src/Config.cc src/Vocab.cc src/Input.cc)
+add_executable (inference src/inference.cc src/Config.cc src/Vocab.cc src/Input.cc src/TFUtil.cc)
 target_include_directories(inference PRIVATE TensorFlow_DEP)
 target_link_libraries(inference PRIVATE TensorFlow_DEP)
