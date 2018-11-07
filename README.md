@@ -96,12 +96,16 @@
             - rnn_num_layers 2 : 0.006132203450549827 sec
             - rnn_num_layers 1
               - python : 0.0041805055967241884 sec
-              - C++    : 0.002735 sec
+              - C++
+                - 0.002735 sec
+                - 0.002175 sec (`experiments 9, test 2`, extremely optimized version with scarifying accuracy)
           - 1 CPU(single-thread)
             - rnn_num_layers 2 : 0.008001159379070668 sec 
             - rnn_num_layers 1
               - python : 0.0051817628640952506 sec
-              - C++    : 0.003998 sec
+              - C++
+                - 0.003998 sec
+                - 0.002853 sec (`experiments 9, test 2`, extremely optimized version with scarifying accuracy)
       - with ELMo
         - setting
           - `experiments 8, test 2`
@@ -218,11 +222,11 @@ $ python -m pip install tensorflow-gpu
 
 - convert word embedding to pickle
 ```
-$ python embvec.py --emb_path embeddings/glove.6B.50d.txt  --wrd_dim 50  --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weight_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5
-$ python embvec.py --emb_path embeddings/glove.6B.100d.txt --wrd_dim 100 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weight_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5
-$ python embvec.py --emb_path embeddings/glove.6B.200d.txt --wrd_dim 200 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weight_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5
-$ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weight_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5
-$ python embvec.py --emb_path embeddings/glove.840B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --lowercase 0 --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weight_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5
+$ python embvec.py --emb_path embeddings/glove.6B.50d.txt  --wrd_dim 50  --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weight_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5 > embeddings/vocab.txt
+$ python embvec.py --emb_path embeddings/glove.6B.100d.txt --wrd_dim 100 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weight_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5 > embeddings/vocab.txt
+$ python embvec.py --emb_path embeddings/glove.6B.200d.txt --wrd_dim 200 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weight_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5 > embeddings/vocab.txt
+$ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weight_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5 > embeddings/vocab.txt
+$ python embvec.py --emb_path embeddings/glove.840B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --lowercase 0 --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weight_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5 > embeddings/vocab.txt
 ```
 
 - train
@@ -386,9 +390,13 @@ in IN O O O
   $ python freeze.py --model_dir exported --output_node_names logits,loss/trans_params,sentence_lengths --frozen_model_name ner_frozen.pb
 
   * inference using python
+  $ python python/inference.py --emb_path ../embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
+  or
   $ python python/inference.py --emb_path ../embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
 
   * inference using python with optimized graph_def via tensorRT (only for GPU)
+  $ python python/inference_trt.py --emb_path ../embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
+  or
   $ python python/inference_trt.py --emb_path ../embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
   * inspect `pred.txt` whether the predictions are same.
   $ python ../token_eval.py < pred.txt
