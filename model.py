@@ -10,11 +10,11 @@ class Model:
     __keep_prob = 0.5              # keep probability for dropout
     __chr_conv_type = 'conv1d'     # conv1d | conv2d
     __filter_sizes = [3]           # filter sizes
-    __num_filters = 50             # number of filters
+    __num_filters = 25             # number of filters
     __rnn_used = True              # use rnn layer or not
     __rnn_num_layers = 1           # number of RNN layers
     __rnn_type = 'fused'           # normal | fused
-    __rnn_size = 200               # size of RNN hidden unit
+    __rnn_size = 100               # size of RNN hidden unit
     __tf_used = False              # use transformer encoder layer or not
     __tf_num_layers = 4            # number of layers for transformer encoder
     __tf_keep_prob = 0.8           # keep probability for transformer encoder

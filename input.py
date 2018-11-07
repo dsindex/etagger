@@ -182,8 +182,8 @@ class Input:
         for tokens in nbucket:
             sentence_length += 1
             temp = self.__shape_vec(tokens[0])                              # adding shape vec(9)
-            temp = np.append(temp, self.__pos_vec(tokens[1]))               # adding pos one-hot(5)
             '''
+            temp = np.append(temp, self.__pos_vec(tokens[1]))               # adding pos one-hot(5)
             temp = np.append(temp, self.__chunk_vec(tokens[2]))             # adding chunk one-hot(5)
             temp = np.append(temp, tokens[4])                               # adding gazetteer feature
             '''

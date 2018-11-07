@@ -19,7 +19,7 @@ int main(int argc, char const *argv[])
   TF_CHECK_OK(util.LoadFrozenModel(sess, frozen_graph_fn));
 
   Config config = Config(300, 15, true); // wrd_dim=300, word_length=15, use_crf=true
-  Vocab vocab = Vocab(vocab_fn, false);  // lowercase=false
+  Vocab vocab = Vocab(vocab_fn, true);  // lowercase=true
   config.SetClassSize(vocab.GetTagVocabSize());
   cerr << "class size = " << config.GetClassSize() << endl;
 

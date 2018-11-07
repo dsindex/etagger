@@ -34,13 +34,14 @@ class EmbVec:
         self.tag_prefix_b = 'B-'
         self.tag_prefix_i = 'I-'
         self.gaz_vocab = {}      # gazetteer vocab
+    
+        self.wrd_vocab_tmp = {}  # word vocab for train/dev/test
         self.elmo_vocab = {}     # elmo vocab
         self.elmo_vocab_path  = args.elmo_vocab_path
         self.elmo_options_path = args.elmo_options_path
         self.elmo_weight_path = args.elmo_weight_path
 
-        # build word/character/pos/tag vocab and elmo vocab(case sensitive)
-        wid = self.unk_wid + 1
+        # build character/pos/tag vocab and elmo vocab(case sensitive)
         cid = self.unk_cid + 1
         pid = self.unk_pid + 1
         tid = self.oot_tid + 1
@@ -60,11 +61,6 @@ class EmbVec:
             # elmo vocab
             if word not in self.elmo_vocab: self.elmo_vocab[word] = 1
             else: self.elmo_vocab[word] += 1
-            # word vocab
-            if self.lowercase: word = word.lower()
-            if word not in self.wrd_vocab:
-                self.wrd_vocab[word] = wid
-                wid += 1
             # pos vocab
             if pos not in self.pos_vocab:
                 self.pos_vocab[pos] = pid
@@ -74,6 +70,10 @@ class EmbVec:
                 self.tag_vocab[tag] = tid
                 self.itag_vocab[tid] = tag
                 tid += 1
+            # word vocab for train/dev/test
+            if self.lowercase: word = word.lower()
+            if word not in self.wrd_vocab_tmp:
+                self.wrd_vocab_tmp[word] = 0
         # write elmo vocab
         elmo_vocab_fd = open(self.elmo_vocab_path, 'w')
         elmo_vocab_fd.write('<S>' + '\n')
@@ -84,8 +84,14 @@ class EmbVec:
         elmo_vocab_fd.close()
         del(self.elmo_vocab)
 
-        # build word embeddings
-        wrd_vocab_size = len(self.wrd_vocab)
+        # build word embeddings and word vocab
+        wrd_vocab_size = 0
+        if self.lowercase: # glove 8B
+            for line in open(args.emb_path): wrd_vocab_size += 1
+        else: # glove 840B
+            wrd_vocab_size = len(self.wrd_vocab_tmp)
+        wrd_vocab_size += 2 # for pad, unk
+        sys.stderr.write('wrd_vocab_size = %s\n' % (wrd_vocab_size))
         self.wrd_dim = args.wrd_dim
         self.wrd_embeddings = np.zeros((wrd_vocab_size, self.wrd_dim))
         # 0 id for padding
@@ -94,6 +100,7 @@ class EmbVec:
         # 1 wid for unknown
         vector = np.array([random() for i in range(self.wrd_dim)])
         self.wrd_embeddings[self.unk_wid] = vector
+        wid = self.unk_wid + 1
         for line in open(args.emb_path):
             line = line.strip()
             tokens = line.split()
@@ -102,10 +109,12 @@ class EmbVec:
             except: continue
             if len(vector) != self.wrd_dim: continue
             if self.lowercase: word = word.lower()
-            # FIXME for fast training. when it comes to service, we need to build wrd_vocab by embedding data
-            if word not in self.wrd_vocab: continue
-            wid = self.wrd_vocab[word]
+            if not self.lowercase : # for glove 840B
+                if word not in self.wrd_vocab_tmp: continue
             self.wrd_embeddings[wid] = vector
+            self.wrd_vocab[word] = wid
+            wid += 1
+        del(self.wrd_vocab_tmp)
 
         # build gazetteer vocab
         bucket = []

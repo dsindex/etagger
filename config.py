@@ -4,17 +4,17 @@ import pickle as pkl
 
 """
 etc dimension
-  you should define etc dimension by refering __create_etc_and_tag() of input.txt
-  shape vec(9) + pos one-hot(5) + [optional] chunk one-hot(5)
+  you should define etc dimension by refering __create_etc() of input.txt
+  shape vec(9) + [optional] pos one-hot(5) + [optional] chunk one-hot(5)
 """
-ETC_DIM = 9 + 5
+ETC_DIM = 9
 
 class Config:
     def __init__(self, args, arg_train=True, use_elmo=False, use_crf=True):
         self.emb_path = args.emb_path
         self.embvec = pkl.load(open(self.emb_path, 'rb'))
         self.wrd_dim = args.wrd_dim
-        self.chr_dim = 100
+        self.chr_dim = 50
         self.pos_dim = 6
         '''
         # basic features + gazetteer feature
