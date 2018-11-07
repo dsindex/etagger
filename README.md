@@ -99,6 +99,8 @@
               - C++
                 - 0.002735 sec
                 - 0.002175 sec (`experiments 9, test 2`, extremely optimized version with scarifying accuracy)
+                - 0.002783 sec (`experiments 9, test 3`)
+                - 0.004407 sec (`experiments 9, test 4`)
           - 1 CPU(single-thread)
             - rnn_num_layers 2 : 0.008001159379070668 sec 
             - rnn_num_layers 1
@@ -106,6 +108,8 @@
               - C++
                 - 0.003998 sec
                 - 0.002853 sec (`experiments 9, test 2`, extremely optimized version with scarifying accuracy)
+                - 0.003474 sec (`experiments 9, test 3`)
+                - 0.005118 sec (`experiments 9, test 4`)
       - with ELMo
         - setting
           - `experiments 8, test 2`
@@ -232,7 +236,7 @@ $ python embvec.py --emb_path embeddings/glove.840B.300d.txt --wrd_dim 300 --tra
 - train
 ```
 $ python train.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --batch_size 20 --epoch 70
-or
+$ python train.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --batch_size 20 --epoch 70
 $ python train.py --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --batch_size 20 --epoch 70
 $ rm -rf runs; tensorboard --logdir runs/summaries/ --port 6008
 ```
@@ -245,7 +249,7 @@ $ python inference.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 
 - inference(bucket)
 ```
 $ python inference.py --mode bucket --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --restore checkpoint/ner_model < data/test.txt > pred.txt
-or
+$ python inference.py --mode bucket --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/test.txt > pred.txt
 $ python inference.py --mode bucket --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/test.txt > pred.txt
 $ python token_eval.py < pred.txt
 $ python chunk_eval.py < pred.txt
@@ -301,8 +305,8 @@ in IN O O O
   $ export TENSORFLOW_SOURCE_DIR='/home/tensorflow-src-cpu'
   $ export TENSORFLOW_BUILD_DIR='/home/tensorflow-dist-cpu'
   $ mkdir -p ${TENSORFLOW_BUILD_DIR}/includes/tensorflow/cc/ops
-  $ git clone https://github.com/tensorflow/tensorflow.git
-  $ cd tensorflow
+  $ git clone https://github.com/tensorflow/tensorflow.git tensorflow-src-cpu
+  $ cd tensorflow-src-cpu
   * you must install same version of tensorflow with the pip version.
   $ git checkout r1.11
   $ ./configure
@@ -390,13 +394,13 @@ in IN O O O
   $ python freeze.py --model_dir exported --output_node_names logits,loss/trans_params,sentence_lengths --frozen_model_name ner_frozen.pb
 
   * inference using python
+  $ python python/inference.py --emb_path ../embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
   $ python python/inference.py --emb_path ../embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
-  or
   $ python python/inference.py --emb_path ../embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
 
   * inference using python with optimized graph_def via tensorRT (only for GPU)
+  $ python python/inference_trt.py --emb_path ../embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
   $ python python/inference_trt.py --emb_path ../embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
-  or
   $ python python/inference_trt.py --emb_path ../embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
   * inspect `pred.txt` whether the predictions are same.
   $ python ../token_eval.py < pred.txt
