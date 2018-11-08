@@ -5,8 +5,7 @@ class Config {
   
   public:
     Config();
-    Config(int wrd_dim, int word_length, bool use_crf);
-    int  GetWrdDim() { return wrd_dim; }
+    Config(int word_length, bool use_crf);
     int  GetChrDim() { return chr_dim; }
     int  GetPosDim() { return pos_dim; }
     int  GetEtcDim() { return etc_dim; }
@@ -18,7 +17,6 @@ class Config {
   
   private:
     // same as config.py
-    int wrd_dim;
     int chr_dim = 50;
     int pos_dim = 6;
     int etc_dim = 9;
