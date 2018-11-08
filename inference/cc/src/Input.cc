@@ -60,18 +60,14 @@ Input::Input(Config& config, Vocab& vocab, vector<string>& bucket)
     // build sentence_etcs
     vector<float> shape_vec(9, 0); // same as input.py
     set_shape_vec(word, shape_vec);
-    /*
     vector<float> pos_vec(5, 0);   // same as input.py
     set_pos_vec(pos, pos_vec);
-    */
     for( int j = 0; j < 9; j++ ) {
       data_etcs[i*etc_dim + j] = shape_vec[j];
     }
-    /*
     for( int j = 0; j < 5; j++ ) {
       data_etcs[i*etc_dim + 9 + j] = pos_vec[j];
     }
-    */
   }
   *data_sentence_length = this->max_sentence_length;
   *data_is_train = false;
