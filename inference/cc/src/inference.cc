@@ -15,7 +15,7 @@ int main(int argc, char const *argv[])
   const string vocab_fn = argv[2];
 
   TFUtil util = TFUtil();
-  tensorflow::Session* sess = util.CreateSession();
+  tensorflow::Session* sess = util.CreateSession(0); // num_threads = 0(all cores), 1(1 core)
   TF_CHECK_OK(util.LoadFrozenModel(sess, frozen_graph_fn));
 
   Config config = Config(15, true); // word_length=15, use_crf=true

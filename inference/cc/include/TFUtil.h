@@ -18,7 +18,7 @@ class TFUtil {
   
   public:
     TFUtil();
-    tensorflow::Session* CreateSession();
+    tensorflow::Session* CreateSession(int num_threads);
     void DestroySession(tensorflow::Session* sess);
     tensorflow::Status LoadFrozenModel(tensorflow::Session *sess, string graph_fn);
     tensorflow::Status LoadModel(tensorflow::Session *sess, string graph_fn, string checkpoint_fn);

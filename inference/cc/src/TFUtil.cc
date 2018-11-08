@@ -8,13 +8,15 @@ TFUtil::TFUtil()
 {
 }
 
-tensorflow::Session* TFUtil::CreateSession()
+tensorflow::Session* TFUtil::CreateSession(int num_threads = 0)
 {
   tensorflow::Session* sess;
   tensorflow::SessionOptions options;
   tensorflow::ConfigProto& conf = options.config;
-  conf.set_inter_op_parallelism_threads(1);
-  conf.set_intra_op_parallelism_threads(1);
+  if( num_threads > 0 ) {
+    conf.set_inter_op_parallelism_threads(num_threads);
+    conf.set_intra_op_parallelism_threads(num_threads);
+  }
   TF_CHECK_OK(tensorflow::NewSession(options, &sess));
   return sess;
 }
