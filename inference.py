@@ -250,7 +250,7 @@ def inference_line(config):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--emb_path', type=str, help='path to word embedding vector(.pkl)', required=True)
+    parser.add_argument('--emb_path', type=str, help='path to word embedding vector + vocab(.pkl)', required=True)
     parser.add_argument('--wrd_dim', type=int, help='dimension of word embedding vector', required=True)
     parser.add_argument('--word_length', type=int, default=15, help='max word length')
     parser.add_argument('--restore', type=str, help='path to saved model(ex, ./checkpoint/ner_model)', required=True)

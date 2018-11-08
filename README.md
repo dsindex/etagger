@@ -98,18 +98,22 @@
               - python : 0.0041805055967241884 sec
               - C++
                 - 0.002735 sec
-                - 0.002175 sec (`experiments 9, test 2`, extremely optimized version with scarifying accuracy)
-                - 0.002783 sec (`experiments 9, test 3`)
-                - 0.004407 sec (`experiments 9, test 4`)
+                - 0.002175 sec (`experiments 9, test 2`), 0.8800
+                - 0.002783 sec (`experiments 9, test 3`), 0.8858
+                - 0.004407 sec (`experiments 9, test 4`), 0.8887
+                - 0.003687 sec (`experiments 9, test 5`), 0.8835
+                - 0.002976 sec (`experiments 9, test 6`), 0.8782
           - 1 CPU(single-thread)
             - rnn_num_layers 2 : 0.008001159379070668 sec 
             - rnn_num_layers 1
               - python : 0.0051817628640952506 sec
               - C++
                 - 0.003998 sec
-                - 0.002853 sec (`experiments 9, test 2`, extremely optimized version with scarifying accuracy)
+                - 0.002853 sec (`experiments 9, test 2`)
                 - 0.003474 sec (`experiments 9, test 3`)
                 - 0.005118 sec (`experiments 9, test 4`)
+                - 0.004139 sec (`experiments 9, test 5`)
+                - 0.004133 sec (`experiments 9, test 6`)
       - with ELMo
         - setting
           - `experiments 8, test 2`

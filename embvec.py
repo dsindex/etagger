@@ -41,7 +41,7 @@ class EmbVec:
         self.elmo_options_path = args.elmo_options_path
         self.elmo_weight_path = args.elmo_weight_path
 
-        # build character/pos/tag vocab and elmo vocab(case sensitive)
+        # build character/pos/tag/elmo vocab
         cid = self.unk_cid + 1
         pid = self.unk_pid + 1
         tid = self.oot_tid + 1
@@ -53,12 +53,12 @@ class EmbVec:
             word = tokens[0]
             pos  = tokens[1]
             tag  = tokens[3]
-            # character vocab, elmo vocab
+            # character vocab
             for ch in word:
                 if ch not in self.chr_vocab:
                     self.chr_vocab[ch] = cid
                     cid += 1
-            # elmo vocab
+            # elmo vocab(case sensitive)
             if word not in self.elmo_vocab: self.elmo_vocab[word] = 1
             else: self.elmo_vocab[word] += 1
             # pos vocab
@@ -70,7 +70,7 @@ class EmbVec:
                 self.tag_vocab[tag] = tid
                 self.itag_vocab[tid] = tag
                 tid += 1
-            # word vocab for train/dev/test
+            # temp word vocab for train/dev/test
             if self.lowercase: word = word.lower()
             if word not in self.wrd_vocab_tmp:
                 self.wrd_vocab_tmp[word] = 0
@@ -86,9 +86,10 @@ class EmbVec:
 
         # build word embeddings and word vocab
         wrd_vocab_size = 0
-        if self.lowercase: # glove 8B
+        if self.lowercase: # glove 6B
             for line in open(args.emb_path): wrd_vocab_size += 1
-        else: # glove 840B
+        else:              # glove 840B
+            # FIXME filtering for fast training
             wrd_vocab_size = len(self.wrd_vocab_tmp)
         wrd_vocab_size += 2 # for pad, unk
         sys.stderr.write('wrd_vocab_size = %s\n' % (wrd_vocab_size))
@@ -109,7 +110,8 @@ class EmbVec:
             except: continue
             if len(vector) != self.wrd_dim: continue
             if self.lowercase: word = word.lower()
-            if not self.lowercase : # for glove 840B
+            if not self.lowercase : # glove 840B
+                # FIXME filtering for fast training
                 if word not in self.wrd_vocab_tmp: continue
             self.wrd_embeddings[wid] = vector
             self.wrd_vocab[word] = wid
