@@ -78,8 +78,12 @@
             - restore version        : 0.013825567226844812 sec
             - frozen version         : 0.015376264122228799 sec
             - tensorRT(FP16) version : no meaningful difference
-          - 32 core CPU(multi-threading) : 0.017238136546748987 sec
-          - 1 CPU(single-thread)         : 0.03358284470571628 sec
+          - 32 core CPU(multi-threading)
+            - python : 0.017238136546748987 sec
+            - C++ : 0.013 sec
+          - 1 CPU(single-thread)
+            - python : 0.03358284470571628 sec
+            - C++ : 0.021510 sec
     - BiLSTM
       - without ELMo
         - setting
