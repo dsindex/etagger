@@ -104,6 +104,7 @@
                 - 0.003687 sec (`experiments 9, test 5`), 0.8835
                 - 0.002976 sec (`experiments 9, test 6`), 0.8782
                 - 0.002855 sec (`experiments 9, test 7`), 0.8906
+                  - 0.002697 sec with optimizations for FMA, AVX and SSE. no meaningful difference.
           - 1 CPU(single-thread)
             - rnn_num_layers 2 : 0.008001159379070668 sec 
             - rnn_num_layers 1
@@ -116,6 +117,7 @@
                 - 0.004139 sec (`experiments 9, test 5`)
                 - 0.004133 sec (`experiments 9, test 6`)
                 - 0.003334 sec (`experiments 9, test 7`)
+                  - 0.003078 sec with optimizations for FMA, AVX and SSE. no meaningful difference.
       - with ELMo
         - setting
           - `experiments 8, test 2`
@@ -308,16 +310,34 @@ in IN O O O
   - [tensorflow-cmake](https://github.com/PatWie/tensorflow-cmake)
   - [build tensorflow from source](https://www.tensorflow.org/install/source)
   ```
+  * create virtual env `python -m venv python3.6_tfsrc` and activate it.
+  $ python -m vent python3.6_tfsrc
+  $ source /home/python3.6_tfsrc/bin/activate
+
+  * build tensorflow from source.
+  $ git clone https://github.com/tensorflow/tensorflow.git tensorflow-src-cpu
+  $ cd tensorflow-src-cpu
+  * you should checkout the same version of pip used for training.
+  $ git checkout r1.11
+  * configure without CUDA
+  $ ./configure
+
+  * build pip package with optimizations for FMA, AVX and SSE( https://medium.com/@sometimescasey/building-tensorflow-from-source-for-sse-avx-fma-instructions-worth-the-effort-fbda4e30eec3 ).
+  $ python -m pip install --upgrade pip
+  $ python -m pip install --upgrade setuptools
+  $ bazel build -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.2 //tensorflow/tools/pip_package:build_pip_package
+  $ bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
+  * install pip package
+  $ python -m pip install /tmp/tensorflow_pkg/tensorflow-1.11.0-cp36-cp36m-linux_x86_64.whl
+
+  * build libraries we need.
+  $ bazel build -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.2 //tensorflow:libtensorflow.so
+  $ bazel build -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.2 //tensorflow:libtensorflow_cc.so
+
+  * copy libraries and headers to dist directory.
   $ export TENSORFLOW_SOURCE_DIR='/home/tensorflow-src-cpu'
   $ export TENSORFLOW_BUILD_DIR='/home/tensorflow-dist-cpu'
   $ mkdir -p ${TENSORFLOW_BUILD_DIR}/includes/tensorflow/cc/ops
-  $ git clone https://github.com/tensorflow/tensorflow.git tensorflow-src-cpu
-  $ cd tensorflow-src-cpu
-  * you must install same version of tensorflow with the pip version.
-  $ git checkout r1.11
-  $ ./configure
-  $ bazel build -c opt --copt=-mfpmath=both --copt=-msse4.2 //tensorflow:libtensorflow.so
-  $ bazel build -c opt --copt=-mfpmath=both --copt=-msse4.2 //tensorflow:libtensorflow_cc.so
   $ cp -rf ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/*.so ${TENSORFLOW_BUILD_DIR}/
   $ cp -rf ${TENSORFLOW_SOURCE_DIR}/bazel-genfiles/tensorflow/cc/ops/*.h ${TENSORFLOW_BUILD_DIR}/includes/tensorflow/cc/ops/
 
