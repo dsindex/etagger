@@ -7,6 +7,7 @@
     - basic embedding
       - [x] 1) word embedding(glove) and character convolutional embedding
       - [x] 2) ELMo embedding
+      - [ ] 3) BERT embedding
     - etc embedding
       - [x] pos embedding, etc features(shape, pos, gazetteer(not used))
   - contextual encoding
@@ -67,7 +68,7 @@
   - [experiment logs](https://github.com/dsindex/etagger/blob/master/README_DEV.md)
   - results
     - Transformer
-      - without ELMo
+      - Glove
         - setting
           - `experiments 7, test 9`
           - rnn_type : fused, rnn_used : False, tf_used : True, tf_num_layers : 4
@@ -85,7 +86,7 @@
             - python : 0.03358284470571628 sec
             - C++ : 0.021510 sec
     - BiLSTM
-      - without ELMo
+      - Glove
         - setting
           - `experiments 9, test 1`
           - rnn_type : fused, rnn_used : True, rnn_num_layers : 2, tf_used : False
@@ -122,7 +123,7 @@
                 - 0.004133 sec (`experiments 9, test 6`)
                 - 0.003334 sec (`experiments 9, test 7`)
                   - 0.003078 sec with optimizations for FMA, AVX and SSE. no meaningful difference.
-      - with ELMo
+      - ELMo
         - setting
           - `experiments 8, test 2`
           - rnn_type : fused, rnn_used : True, rnn_num_layers : 2, tf_used : False
@@ -142,14 +143,14 @@
           - 32 core CPU(multi-threading)      : 0.40098162731570347 sec
           - 1 CPU(single-thread)              : 0.7398052649182165 sec
     - BiLSTM + Transformer
-      - without ELMo
+      - Glove
         - setting
           - `experiments 7, test 10`
           - rnn_type : fused, rnn_used : True, rnn_num_layers : 2, tf_used : True, tf_num_layers : 1
         - per-token(partial) micro f1 : 0.910979409787988
         - per-chunk(exact)   micro f1 : **0.9047451049567825**
     - BiLSTM + multi-head attention
-      - without ELMo
+      - Glove
         - setting
           - `experiments 6, test 7`
         - per-token(partial) micro f1 : 0.9157317073170732
@@ -553,12 +554,14 @@ in IN O O O
 - pretrained LM
   - articles
     - [Contextual String Embeddings for Sequence Labeling](https://drive.google.com/file/d/17yVpFA7MmXaQFTe-HDpZuqw9fJlmzg56/view)
-    - [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/pdf/1810.04805.pdf)
     - [Semi-Supervised Sequence Modeling with Cross-View Training](https://arxiv.org/pdf/1809.08370.pdf)
     - [Deep contextualized word representations](https://arxiv.org/pdf/1802.05365.pdf)
     - [Semi-supervised sequence tagging with bidirectional language models](https://arxiv.org/pdf/1705.00108.pdf)
+    - [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/pdf/1810.04805.pdf)
   - tensorflow impl
     - [bilm-tf](https://github.com/allenai/bilm-tf)
+    - [BERT-NER](https://github.com/kyzhouhzau/BERT-NER)
+    - [BERT-BiLSTM-CRF-NER](https://github.com/macanv/BERT-BiLSMT-CRF-NER)
   - pytorch impl
     - [flair](https://github.com/zalandoresearch/flair)
    
