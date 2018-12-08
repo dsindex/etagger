@@ -55,7 +55,6 @@ class Model:
         self.pos_embeddings = self.__pos_embedding(self.input_data_pos_ids, keep_prob=keep_prob, scope='pos-embedding')
 
         if self.use_elmo:
-            from bilm import weight_layers
             self.elmo_bilm = config.elmo_bilm
             # elmo embeddings
             self.elmo_input_data_wordchr_ids = tf.placeholder(tf.int32,
@@ -212,6 +211,7 @@ class Model:
     def __elmo_embedding(self, inputs, masks, keep_prob=0.5):
         """Compute ELMO embeddings
         """
+        from bilm import weight_layers
         elmo_embeddings_op = self.elmo_bilm(inputs)
         elmo_input = weight_layers('input', elmo_embeddings_op, l2_coef=0.0)
         elmo_embeddings = elmo_input['weighted_op'] # (batch_size, sentence_length, elmo_dim)
