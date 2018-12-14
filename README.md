@@ -206,8 +206,6 @@ $ python -m pip install tensorflow-gpu
 - numpy
 
 - data
-  - [download data of CoNLL 2003 shared task](https://github.com/mxhofer/Named-Entity-Recognition-BidirectionalLSTM-CNN-CoNLL/tree/master/data) 
-  - place train.txt, dev.txt, test.txt in data dir
   - merge train.txt, dev.txt, test.txt to total.txt in data dir
 
 - glove embedding
