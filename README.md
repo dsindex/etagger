@@ -140,6 +140,7 @@
         ```
         - average processing time per bucket
           - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.06133532517637155 sec
+          - 1 GPU(Tesla V100)                 : 0.029950057644797457 sec
           - 32 core CPU(multi-threading)      : 0.40098162731570347 sec
           - 1 CPU(single-thread)              : 0.7398052649182165 sec
     - BiLSTM + Transformer
