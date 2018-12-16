@@ -72,8 +72,8 @@
         - setting
           - `experiments 7, test 9`
           - rnn_type : fused, rnn_used : False, tf_used : True, tf_num_layers : 4
-        - per-token(partial) micro f1 : 0.9083215796897038
-        - per-chunk(exact)   micro f1 : **0.904078014184397**
+        - per-token(partial) f1 : 0.9083215796897038
+        - per-chunk(exact)   f1 : **0.904078014184397**
         - average processing time per bucket
           - 1 GPU(TITAN X (Pascal), 12196MiB)
             - restore version        : 0.013825567226844812 sec
@@ -90,8 +90,8 @@
         - setting
           - `experiments 9, test 1`
           - rnn_type : fused, rnn_used : True, rnn_num_layers : 2, tf_used : False
-        - per-token(partial) micro f1 : 0.9152852267186738
-        - per-chunk(exact)   micro f1 : **0.9094911075893644**
+        - per-token(partial) f1 : 0.9152852267186738
+        - per-chunk(exact)   f1 : **0.9094911075893644**
         - average processing time per bucket
           - 1 GPU(TITAN X (Pascal), 12196MiB)
             - restore version        : 0.010454932072004718 sec
@@ -127,8 +127,8 @@
         - setting
           - `experiments 8, test 2`
           - rnn_type : fused, rnn_used : True, rnn_num_layers : 2, tf_used : False
-        - per-token(partial) micro f1 : 0.9322728663199756
-        - per-chunk(exact)   micro f1 : **0.9253625751680227**
+        - per-token(partial) f1 : 0.9322728663199756
+        - per-chunk(exact)   f1 : **0.9253625751680227**
         ```
         $ etc/conlleval < pred.txt
         processed 46666 tokens with 5648 phrases; found: 5662 phrases; correct: 5234.
@@ -148,14 +148,14 @@
         - setting
           - `experiments 7, test 10`
           - rnn_type : fused, rnn_used : True, rnn_num_layers : 2, tf_used : True, tf_num_layers : 1
-        - per-token(partial) micro f1 : 0.910979409787988
-        - per-chunk(exact)   micro f1 : **0.9047451049567825**
+        - per-token(partial) f1 : 0.910979409787988
+        - per-chunk(exact)   f1 : **0.9047451049567825**
     - BiLSTM + multi-head attention
       - Glove
         - setting
           - `experiments 6, test 7`
-        - per-token(partial) micro f1 : 0.9157317073170732
-        - per-chunk(exact)   micro f1 : **0.9102156238953694**
+        - per-token(partial) f1 : 0.9157317073170732
+        - per-chunk(exact)   f1 : **0.9102156238953694**
   - comparision to previous research
     - implementations
       - [Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
