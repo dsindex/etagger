@@ -75,13 +75,14 @@ class EmbVec:
             if word not in self.wrd_vocab_tmp:
                 self.wrd_vocab_tmp[word] = 0
         # write elmo vocab
-        elmo_vocab_fd = open(self.elmo_vocab_path, 'w')
-        elmo_vocab_fd.write('<S>' + '\n')
-        elmo_vocab_fd.write('</S>' + '\n')
-        elmo_vocab_fd.write('<UNK>' + '\n')
-        for word, freq in sorted(self.elmo_vocab.items(), key=lambda x: x[1], reverse=True):
-            elmo_vocab_fd.write(word + '\n')
-        elmo_vocab_fd.close()
+        if self.elmo_vocab_path:
+            elmo_vocab_fd = open(self.elmo_vocab_path, 'w')
+            elmo_vocab_fd.write('<S>' + '\n')
+            elmo_vocab_fd.write('</S>' + '\n')
+            elmo_vocab_fd.write('<UNK>' + '\n')
+            for word, freq in sorted(self.elmo_vocab.items(), key=lambda x: x[1], reverse=True):
+                elmo_vocab_fd.write(word + '\n')
+            elmo_vocab_fd.close()
         del(self.elmo_vocab)
 
         # build word embeddings and word vocab
@@ -220,9 +221,9 @@ if __name__ == '__main__':
     parser.add_argument('--train_path', type=str, help='path to a train file', required=True)
     parser.add_argument('--total_path', type=str, help='path to a train+dev+test file', required=True)
     parser.add_argument('--lowercase', type=int, help='apply lower case for word embedding', default=1)
-    parser.add_argument('--elmo_vocab_path', type=str, help='path to elmo vocab file(write)', required=True)
-    parser.add_argument('--elmo_options_path', type=str, help='path to elmo options file', required=True)
-    parser.add_argument('--elmo_weight_path', type=str, help='path to elmo weight file', required=True)
+    parser.add_argument('--elmo_vocab_path', type=str, help='path to elmo vocab file(write)', default='')
+    parser.add_argument('--elmo_options_path', type=str, help='path to elmo options file', default='')
+    parser.add_argument('--elmo_weight_path', type=str, help='path to elmo weight file', default='')
     args = parser.parse_args()
     embvec = EmbVec(args)
     pkl.dump(embvec, open(args.emb_path + '.pkl', 'wb'))
