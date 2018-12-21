@@ -149,6 +149,10 @@ def train(config):
     # build input data
     train_file = 'data/train.txt'
     dev_file = 'data/dev.txt'
+    '''KOR
+    train_file = 'data/kor.train.txt'
+    dev_file = 'data/kor.dev.txt'
+    '''
     train_data = Input(train_file, config, build_output=True)
     dev_data = Input(dev_file, config, build_output=True)
     print('loading input data ... done')

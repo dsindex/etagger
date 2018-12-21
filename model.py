@@ -1,5 +1,6 @@
 from __future__ import print_function
 import tensorflow as tf
+from tensorflow.contrib.layers.python.layers import initializers
 import numpy as np
 from embvec import EmbVec
 from transformer import multihead_attention, feedforward, normalize, positional_encoding
@@ -7,14 +8,14 @@ from masked_conv import masked_conv1d_and_max
 
 class Model:
 
-    __keep_prob = 0.5              # keep probability for dropout
+    __keep_prob = 0.7              # keep probability for dropout
     __chr_conv_type = 'conv1d'     # conv1d | conv2d
     __filter_sizes = [3]           # filter sizes
     __num_filters = 25             # number of filters
     __rnn_used = True              # use rnn layer or not
-    __rnn_num_layers = 1           # number of RNN layers
+    __rnn_num_layers = 2           # number of RNN layers
     __rnn_type = 'fused'           # normal | fused
-    __rnn_size = 200               # size of RNN hidden unit
+    __rnn_size = 200 # 512(KOR)    # size of RNN hidden unit
     __tf_used = False              # use transformer encoder layer or not
     __tf_num_layers = 4            # number of layers for transformer encoder
     __tf_keep_prob = 0.8           # keep probability for transformer encoder
@@ -94,6 +95,11 @@ class Model:
             self.input_data = tf.concat([self.word_embeddings, self.wordchr_embeddings, self.pos_embeddings, self.input_data_etcs],
                                         axis=-1,
                                         name='input_data') # (batch_size, sentence_length, input_dim)
+            '''KOR
+            self.input_data = tf.concat([self.word_embeddings, self.wordchr_embeddings, self.pos_embeddings],
+                                        axis=-1,
+                                        name='input_data') # (batch_size, sentence_length, input_dim)
+            '''
         # masking (for confirmation)
         self.input_data *= masks
 
@@ -391,11 +397,15 @@ class Model:
     def __compute_loss(self):
         """Compute loss(self.output_data, self.logits)
         """
+        trans_params = tf.get_variable('trans_params',
+                                       shape=[self.class_size, self.class_size],
+                                       initializer=initializers.xavier_initializer())
+        self.trans_params = trans_params
         if self.use_crf:
-            log_likelihood, trans_params = tf.contrib.crf.crf_log_likelihood(self.logits,
-                                                                  self.output_data_indices,
-                                                                  self.sentence_lengths)
-            self.trans_params = tf.Variable(trans_params, name='trans_params')
+            log_likelihood, trans_params = tf.contrib.crf.crf_log_likelihood(inputs=self.logits,
+                                                                             tag_indices=self.output_data_indices,
+                                                                             transition_params=trans_params,
+                                                                             sequence_lengths=self.sentence_lengths)
             return tf.reduce_mean(-log_likelihood)
         else:
             cross_entropy = self.output_data * tf.log(tf.nn.softmax(self.logits)) # (batch_size, sentence_length, class_size)
@@ -406,7 +416,6 @@ class Model:
             cross_entropy = tf.reduce_sum(cross_entropy, reduction_indices=1)     # (batch_size)
             cross_entropy /= tf.cast(self.sentence_lengths, tf.float32)           # (batch_size)
             trans_params = tf.constant(0.0, shape=[self.class_size, self.class_size])
-            self.trans_params = tf.identity(trans_params, name='trans_params')
             return tf.reduce_mean(cross_entropy)
 
     def __compute_accuracy(self):
@@ -441,7 +450,7 @@ class Model:
     @staticmethod
     def set_cuda_visible_devices(arg_train):
         import os
-        os.environ['CUDA_VISIBLE_DEVICES']='2'
+        os.environ['CUDA_VISIBLE_DEVICES']='3'
         if arg_train:
             from tensorflow.python.client import device_lib
             print(device_lib.list_local_devices())

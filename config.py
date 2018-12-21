@@ -14,8 +14,8 @@ class Config:
         self.emb_path = args.emb_path
         self.embvec = pkl.load(open(self.emb_path, 'rb'))
         self.wrd_dim = args.wrd_dim
-        self.chr_dim = 50
-        self.pos_dim = 7
+        self.chr_dim = 50 # 100(KOR)
+        self.pos_dim = 7  #  64(KOR)
         '''
         # basic features + gazetteer feature
         self.etc_dim = ETC_DIM + len(self.embvec.tag_vocab)
@@ -33,7 +33,7 @@ class Config:
             self.elmo_bilm = BidirectionalLanguageModel(self.embvec.elmo_options_path, self.embvec.elmo_weight_path) # biLM graph
         self.starter_learning_rate = 0.001 # 0.0003
         self.decay_steps = 12000
-        self.decay_rate = 0.7
+        self.decay_rate = 0.9
         if arg_train:
             self.epoch = args.epoch
             self.batch_size = args.batch_size
