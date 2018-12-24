@@ -34,6 +34,78 @@ $ python inference.py --mode bucket --emb_path embeddings/kor.glove.300d.txt.pkl
 - experimements
 ```
 
+* test 7
+word embedding size : 300
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 100
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 25
+pos embedding size : 64 -> 65
+pos embedding random init : -0.5 ~ 0.5
+#pos one-hot : 5
+#shape vec : 9
+rnn_used : True
+rnn_type : fused
+rnn_size : 512
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
+
+* test 6
+word embedding size : 300
+keep_prob : 0.8 -> 0.7
+chr_conv_type : conv1d
+chracter embedding size : 100
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 50 -> 25
+pos embedding size : 64
+pos embedding random init : -0.5 ~ 0.5
+#pos one-hot : 5
+#shape vec : 9
+rnn_used : True
+rnn_type : fused
+rnn_size : 512
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
+
+token : 0.9108174851701928
+chunk : 0.9185380985669346
+conlleval : 91.85          -> best
+
 * test 5
 word embedding size : 300
 keep_prob : 0.8 -> 0.7
