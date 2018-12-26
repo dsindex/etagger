@@ -34,7 +34,6 @@ def inference_bulk(config):
     saver.restore(sess, config.restore)
     print('model restored')
     feed_dict = {model.input_data_pos_ids: test_data.sentence_pos_ids,
-                 model.input_data_etcs: test_data.sentence_etcs,
                  model.output_data: test_data.sentence_tags,
                  model.is_train: False,
                  model.sentence_length: test_data.max_sentence_length}
@@ -100,7 +99,6 @@ def inference_bucket(config):
             # Build input data
             inp = Input(bucket, config, build_output=False)
             feed_dict = {model.input_data_pos_ids: inp.sentence_pos_ids,
-                         model.input_data_etcs: inp.sentence_etcs,
                          model.is_train: False,
                          model.sentence_length: inp.max_sentence_length}
             if config.use_elmo:
@@ -132,7 +130,6 @@ def inference_bucket(config):
         # Build input data
         inp = Input(bucket, config)
         feed_dict = {model.input_data_pos_ids: inp.sentence_pos_ids,
-                     model.input_data_etcs: inp.sentence_etcs,
                      model.is_train: False,
                      model.sentence_length: inp.max_sentence_length}
         if config.use_elmo:
@@ -225,7 +222,6 @@ def inference_line(config):
         # Build input data
         inp = Input(bucket, config, build_output=False)
         feed_dict = {model.input_data_pos_ids: inp.sentence_pos_ids,
-                     model.input_data_etcs: inp.sentence_etcs,
                      model.is_train: False,
                      model.sentence_length: inp.max_sentence_length}
         if config.use_elmo:

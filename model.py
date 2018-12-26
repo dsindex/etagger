@@ -34,7 +34,6 @@ class Model:
         self.chr_dim = config.chr_dim
         self.pos_vocab_size = len(self.embvec.pos_vocab)
         self.pos_dim = config.pos_dim
-        self.etc_dim = config.etc_dim
         self.class_size = config.class_size
         self.use_crf = config.use_crf
         self.use_elmo = config.use_elmo
@@ -82,24 +81,14 @@ class Model:
                                                                           keep_prob=keep_prob,
                                                                           scope='wordchr-embedding-conv2d')
 
-        # etc features
-        self.input_data_etcs = tf.placeholder(tf.float32,
-                                              shape=[None, None, self.etc_dim], # (batch_size, sentence_length, etc_dim)
-                                              name='input_data_etcs')
-
         if self.use_elmo:
-            self.input_data = tf.concat([self.elmo_embeddings, self.pos_embeddings, self.input_data_etcs],
+            self.input_data = tf.concat([self.elmo_embeddings, self.pos_embeddings],
                                         axis=-1,
                                         name='input_data') # (batch_size, sentence_length, input_dim)
         else:
-            self.input_data = tf.concat([self.word_embeddings, self.wordchr_embeddings, self.pos_embeddings, self.input_data_etcs],
-                                        axis=-1,
-                                        name='input_data') # (batch_size, sentence_length, input_dim)
-            '''KOR
             self.input_data = tf.concat([self.word_embeddings, self.wordchr_embeddings, self.pos_embeddings],
                                         axis=-1,
                                         name='input_data') # (batch_size, sentence_length, input_dim)
-            '''
         # masking (for confirmation)
         self.input_data *= masks
 

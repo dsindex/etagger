@@ -38,7 +38,6 @@ int main(int argc, char const *argv[])
        tensorflow::Tensor* sentence_word_ids = input.GetSentenceWordIds();
        tensorflow::Tensor* sentence_wordchr_ids = input.GetSentenceWordChrIds();
        tensorflow::Tensor* sentence_pos_ids = input.GetSentencePosIds();
-       tensorflow::Tensor* sentence_etcs = input.GetSentenceEtcs();
        tensorflow::Tensor* sentence_length = input.GetSentenceLength();
        tensorflow::Tensor* is_train = input.GetIsTrain();
 #ifdef DEBUG
@@ -63,15 +62,6 @@ int main(int argc, char const *argv[])
          cout << data_pos_ids[i] << " ";
        }
        cout << endl;
-       cout << "[etcs]" << endl;
-       auto data_etcs = sentence_etcs->flat<float>().data();
-       int etc_dim = config.GetEtcDim();
-       for( int i = 0; i < max_sentence_length; i++ ) {
-         for( int j = 0; j < etc_dim; j++ ) {
-           cout << data_etcs[i*etc_dim + j] << " ";
-         }
-         cout << endl;
-       }
        cout << "[sentence length]" << endl;
        auto data_sentence_length = sentence_length->flat<int>().data();
        cout << *data_sentence_length << endl;
@@ -85,7 +75,6 @@ int main(int argc, char const *argv[])
          {"input_data_word_ids", *sentence_word_ids},
          {"input_data_wordchr_ids", *sentence_wordchr_ids},
          {"input_data_pos_ids", *sentence_pos_ids},
-         {"input_data_etcs", *sentence_etcs},
          {"sentence_length", *sentence_length},
          {"is_train", *is_train},
        };

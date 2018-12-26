@@ -2,25 +2,13 @@ from __future__ import print_function
 import numpy as np
 import pickle as pkl
 
-"""
-etc dimension
-  you should define etc dimension by refering __create_etc() of input.txt
-  shape vec(9) + [optional] pos one-hot(5) + [optional] chunk one-hot(5)
-"""
-ETC_DIM = 9 + 5
-
 class Config:
     def __init__(self, args, arg_train=True, use_elmo=False, use_crf=True):
         self.emb_path = args.emb_path
         self.embvec = pkl.load(open(self.emb_path, 'rb'))
         self.wrd_dim = args.wrd_dim
         self.chr_dim = 50 # 100(KOR)
-        self.pos_dim = 7  #  64(KOR)
-        '''
-        # basic features + gazetteer feature
-        self.etc_dim = ETC_DIM + len(self.embvec.tag_vocab)
-        '''
-        self.etc_dim = ETC_DIM
+        self.pos_dim = 7  #  65(KOR)
         self.class_size = len(self.embvec.tag_vocab)
         self.word_length = args.word_length
         self.restore = args.restore

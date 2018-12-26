@@ -80,7 +80,6 @@ def inference(config, frozen_pb_path):
     p_input_data_pos_ids = graph.get_tensor_by_name('prefix/input_data_pos_ids:0')
     p_input_data_word_ids = graph.get_tensor_by_name('prefix/input_data_word_ids:0')
     p_input_data_wordchr_ids = graph.get_tensor_by_name('prefix/input_data_wordchr_ids:0')
-    p_input_data_etcs = graph.get_tensor_by_name('prefix/input_data_etcs:0') 
     t_logits = graph.get_tensor_by_name('prefix/logits:0')
     t_trans_params = graph.get_tensor_by_name('prefix/loss/trans_params:0')
     t_sentence_lengths = graph.get_tensor_by_name('prefix/sentence_lengths:0')
@@ -98,7 +97,6 @@ def inference(config, frozen_pb_path):
             # Build input data
             inp = Input(bucket, config, build_output=False)
             feed_dict = {p_input_data_pos_ids: inp.sentence_pos_ids,
-                         p_input_data_etcs: inp.sentence_etcs,
                          p_is_train: False,
                          p_sentence_length: inp.max_sentence_length}
             if config.use_elmo:
@@ -129,7 +127,6 @@ def inference(config, frozen_pb_path):
         # Build input data
         inp = Input(bucket, config, build_output=False)
         feed_dict = {p_input_data_pos_ids: inp.sentence_pos_ids,
-                     p_input_data_etcs: inp.sentence_etcs,
                      p_is_train: False,
                      p_sentence_length: inp.max_sentence_length}
         if config.use_elmo:

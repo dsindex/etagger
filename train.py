@@ -29,7 +29,6 @@ def train_step(sess, model, config, data, summary_op, summary_writer):
     prog = Progbar(target=nbatches)
     for ptr in range(0, len(data.sentence_tags), config.batch_size):
         feed_dict={model.input_data_pos_ids: data.sentence_pos_ids[ptr:ptr + config.batch_size],
-                   model.input_data_etcs: data.sentence_etcs[ptr:ptr + config.batch_size],
                    model.output_data: data.sentence_tags[ptr:ptr + config.batch_size],
                    model.is_train: True,
                    model.sentence_length: data.max_sentence_length}
@@ -65,7 +64,6 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
     # evaluate on dev data sliced by dev_batch_size to prevent OOM
     for ptr in range(0, len(data.sentence_tags), config.dev_batch_size):
         feed_dict={model.input_data_pos_ids: data.sentence_pos_ids[ptr:ptr + config.dev_batch_size],
-                   model.input_data_etcs: data.sentence_etcs[ptr:ptr + config.dev_batch_size],
                    model.output_data: data.sentence_tags[ptr:ptr + config.dev_batch_size],
                    model.is_train: False,
                    model.sentence_length: data.max_sentence_length}

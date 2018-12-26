@@ -13,7 +13,6 @@ class Input:
             self.sentence_word_ids = []         # [batch_size, max_sentence_length]
             self.sentence_wordchr_ids = []      # [batch_size, max_sentence_length, word_length]
         self.sentence_pos_ids = []              # [batch_size, max_sentence_length]
-        self.sentence_etcs = []                 # [batch_size, max_sentence_length, etc_dim]
         if build_output:
             self.sentence_tags = []             # [batch_size, max_sentence_length, class_size] 
         self.config = config
@@ -36,8 +35,6 @@ class Input:
                 self.sentence_wordchr_ids.append(wordchr_ids)
             pos_ids = self.__create_pos_ids(bucket)
             self.sentence_pos_ids.append(pos_ids)
-            etc = self.__create_etc(bucket)
-            self.sentence_etcs.append(etc)
             if build_output:
                 tag = self.__create_tag(bucket)
                 self.sentence_tags.append(tag)
@@ -56,8 +53,6 @@ class Input:
                         self.sentence_wordchr_ids.append(wordchr_ids)
                     pos_ids = self.__create_pos_ids(bucket)
                     self.sentence_pos_ids.append(pos_ids)
-                    etc = self.__create_etc(bucket)
-                    self.sentence_etcs.append(etc)
                     if build_output:
                         tag = self.__create_tag(bucket)
                         self.sentence_tags.append(tag)
@@ -157,44 +152,6 @@ class Input:
             pos_ids.append(self.config.embvec.pad_pid)
         return pos_ids
 
-    def __create_etc(self, bucket):
-        """Create a vector of an etc vector
-        """
-        etc = []
-        nbucket = []
-        # apply gazetteer feature
-        for line in bucket:
-            line = line.strip()
-            tokens = line.split()
-            assert (len(tokens) == 4)
-            gvec = np.zeros(self.config.class_size)
-            tokens.append(gvec)
-            nbucket.append(tokens)
-        bucket_size = len(nbucket)
-        i = 0
-        while 1:
-            if i >= bucket_size: break
-            tokens = nbucket[i]
-            j = self.config.embvec.apply_gaz(nbucket, bucket_size, i)
-            i += j # jump
-            i += 1
-        sentence_length = 0
-        for tokens in nbucket:
-            sentence_length += 1
-            temp = self.__shape_vec(tokens[0])                              # adding shape vec(9)
-            temp = np.append(temp, self.__pos_vec(tokens[1]))               # adding pos one-hot(5)
-            '''
-            temp = np.append(temp, self.__chunk_vec(tokens[2]))             # adding chunk one-hot(5)
-            temp = np.append(temp, tokens[4])                               # adding gazetteer feature
-            '''
-            etc.append(temp)
-            if sentence_length == self.max_sentence_length: break
-        # padding with 0s
-        for _ in range(self.max_sentence_length - sentence_length):
-            temp = np.array([0 for _ in range(self.config.etc_dim)])
-            etc.append(temp)
-        return etc
-
     def __create_tag(self, bucket):
         """Create a vector of an one-hot tag vector
         """
@@ -211,90 +168,6 @@ class Input:
         for _ in range(self.max_sentence_length - sentence_length):
             tag.append(np.array([0] * self.config.class_size))
         return tag
-
-    def __pos_vec(self, t):
-        """Build one-hot for pos
-
-        build language specific features
-        """
-        one_hot = np.zeros(5)
-        if t == 'NN' or t == 'NNS':
-            one_hot[0] = 1
-        elif t == 'FW':
-            one_hot[1] = 1
-        elif t == 'NNP' or t == 'NNPS':
-            one_hot[2] = 1
-        elif 'VB' in t:
-            one_hot[3] = 1
-        else:
-            one_hot[4] = 1
-        return one_hot
-
-    def __chunk_vec(self, t):
-        """Build one-hot for chunk
-
-        build language specific features
-        """
-        one_hot = np.zeros(5)
-        if 'NP' in t:
-            one_hot[0] = 1
-        elif 'VP' in t:
-            one_hot[1] = 1
-        elif 'PP' in t:
-            one_hot[2] = 1
-        elif t == 'O':
-            one_hot[3] = 1
-        else:
-            one_hot[4] = 1
-        return one_hot
-
-    def __shape_vec(self, word):
-        """Build shape vector
-
-        build language specific features:
-          no-info[0], allDigits[1], mixedDigits[2], allSymbols[3],
-          mixedSymbols[4], upperInitial[5], lowercase[6], allCaps[7], mixedCaps[8]
-        """
-
-        def is_capital(ch):
-            if ord('A') <= ord(ch) <= ord('Z'): return True
-            return False
-
-        def is_symbol(ch):
-            if not ch.isalpha() and not ch.isdigit() : return True
-            return False
-
-        one_hot = np.zeros(9)
-        size = len(word)
-        if word.isdigit():
-            one_hot[1] = 1                            # allDigits
-        elif word.isalpha():
-            n_caps = 0
-            for i in range(size):
-                if is_capital(word[i]): n_caps += 1
-            if n_caps == 0:
-                one_hot[6] = 1                        # lowercase
-            else:
-                if size == n_caps: 
-                    one_hot[7] = 1                    # allCaps
-                else:
-                    if is_capital(word[0]): 
-                        one_hot[5] = 1                # upperInitial
-                    else:
-                        one_hot[8] = 1                # mixedCaps
-        else:
-            n_digits = 0
-            n_symbols = 0
-            for i in range(size):
-                if word[i].isdigit(): n_digits += 1
-                if is_symbol(word[i]): n_symbols += 1
-            if n_digits >= 1: one_hot[2] = 1          # mixedDigits
-            if n_symbols > 0:
-                if size == n_symbols: one_hot[3] = 1  # allSymbols
-                else: one_hot[4] = 1                  # mixedSymbols
-            if n_digits == 0 and n_symbols == 0:
-                one_hot[0] = 1                        # no-info
-        return one_hot
 
     def __tag_vec(self, tag, class_size):
         """Build one-hot for tag
@@ -341,14 +214,14 @@ class Input:
         return tags
 
     def logits_indices_to_tags_seq(self, logits_indices, lengths):
-        """Convert logits_indices to tags sequence
+        """Convert logits_indices to sequence of tags
 
         Args:
           logits_indices: [batch_size, sentence_length]
           lengths: [batch_size]
 
         Returns:
-          sequence of tag sequence
+          sequence of tags
         """
         tags_seq = []
         for logit_indices, length in zip(logits_indices, lengths):

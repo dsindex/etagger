@@ -31,9 +31,6 @@ class EmbVec:
         self.itag_vocab = {}     # inverse tag vocab (id -> tag)
         self.tag_vocab[self.oot_tag] = self.oot_tid
         self.itag_vocab[0] = self.oot_tag
-        self.tag_prefix_b = 'B-'
-        self.tag_prefix_i = 'I-'
-        self.gaz_vocab = {}      # gazetteer vocab
     
         self.wrd_vocab_tmp = {}  # word vocab for train/dev/test
         self.elmo_vocab = {}     # elmo vocab
@@ -119,33 +116,6 @@ class EmbVec:
             wid += 1
         del(self.wrd_vocab_tmp)
 
-        # build gazetteer vocab
-        bucket = []
-        for line in open(args.train_path): # train data only
-            if line in ['\n', '\r\n']:
-                bucket_size = len(bucket)
-                for i in range(bucket_size):
-                    tokens = bucket[i]
-                    word = tokens[0]
-                    tag  = tokens[3]
-                    if self.tag_prefix_b not in tag: continue
-                    segment = self.__get_segment(bucket, bucket_size, i)
-                    if not segment: continue
-                    tag_suffix = tag.split('-')[1]
-                    # noise filtering
-                    if len(segment) <= 3: continue
-                    if segment not in self.gaz_vocab:
-                        self.gaz_vocab[segment] = {}
-                        self.gaz_vocab[segment][tag_suffix] = 1
-                    else:
-                        self.gaz_vocab[segment][tag_suffix] = 1
-                bucket = []
-            else:
-                line = line.strip()
-                tokens = line.split()
-                assert(len(tokens) == 4)
-                bucket.append(tokens)
-        
     def get_wid(self, word):
         if self.lowercase: word = word.lower()
         if word in self.wrd_vocab:
@@ -171,48 +141,6 @@ class EmbVec:
         if tid in self.itag_vocab:
             return self.itag_vocab[tid]
         return self.oot_tag
-
-    def __get_segment(self, bucket, bucket_size, i):
-        segment = []
-        for j in range(i, bucket_size):
-            tokens = bucket[j]
-            word = tokens[0]
-            tag  = tokens[3]
-            valid = False
-            if i == j : valid = True
-            if i != j and self.tag_prefix_i in tag: valid = True
-            if valid:
-                segment.append(word)
-            else: break
-        return ''.join(segment)
-
-    def get_gaz(self, word):
-        if word in self.gaz_vocab:
-            return self.gaz_vocab[word]
-        return None
-
-    def apply_gaz(self, bucket, bucket_size, i):
-        # 1gram ~ 5gram
-        for j in range(5, 0, -1): # max ngram size == 5
-            if i+5 >= bucket_size: continue
-            segment = []
-            # bucket[i+0][0] ~ bucket[i+k][0]
-            for k in range(j): segment.append(bucket[i+k][0])
-            key = ''.join(segment)
-            if key in self.gaz_vocab:
-                for k in range(j):
-                    gvec = bucket[i+k][4]
-                    for tag_suffix, _ in self.gaz_vocab[key].items():
-                        if k == 0: tag = self.tag_prefix_b + tag_suffix
-                        else: tag = self.tag_prefix_i + tag_suffix
-                        tid = self.get_tid(tag)
-                        gvec[tid] = 1
-                    '''
-                    print(bucket[i+k])
-                    '''
-                # longest prefer
-                return j
-        return 0
                 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -227,34 +155,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     embvec = EmbVec(args)
     pkl.dump(embvec, open(args.emb_path + '.pkl', 'wb'))
-
-    '''
-    # check gazetteer vocab
-    for word, tags in embvec.gaz_vocab.items():
-        print(word)
-        for tag, _ in tags.items(): print(tag)
-    '''
-
-    # test before applying gazetteer feature
-    bucket = []
-    for line in open(args.train_path):
-        if line in ['\n', '\r\n']:
-            bucket_size = len(bucket)
-            i = 0
-            while 1:
-                if i >= bucket_size: break
-                tokens = bucket[i]
-                j = embvec.apply_gaz(bucket, bucket_size, i)
-                i += j # jump
-                i += 1
-            bucket = []
-        else:
-            line = line.strip()
-            tokens = line.split()
-            assert(len(tokens) == 4)
-            gvec = np.zeros(len(embvec.tag_vocab))
-            tokens.append(gvec)
-            bucket.append(tokens)
 
     # print all vocab for inference by C++
     # 1. wrd_vocab
