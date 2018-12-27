@@ -43,8 +43,6 @@ filter_sizes : [3]
 num_filters : 25
 pos embedding size : 65 -> 7
 pos embedding random init : -0.5 ~ 0.5
-#pos one-hot : 5
-#shape vec : 9
 rnn_used : True
 rnn_type : fused
 rnn_size : 512 -> 200
@@ -66,6 +64,10 @@ tf_ffn_kernel_size : 3
 save model by f1(token)
 +
 CRF
+
+token : 0.9133262846267709
+chunk : 0.9209801552311596
+conlleval : 92.09
 
 * test 7
 word embedding size : 300
