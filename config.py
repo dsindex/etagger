@@ -7,8 +7,8 @@ class Config:
         self.emb_path = args.emb_path
         self.embvec = pkl.load(open(self.emb_path, 'rb'))
         self.wrd_dim = args.wrd_dim
-        self.chr_dim = 50 # 100(KOR)
-        self.pos_dim = 7  #  65(KOR)
+        self.chr_dim = 50
+        self.pos_dim = 7
         self.class_size = len(self.embvec.tag_vocab)
         self.word_length = args.word_length
         self.restore = args.restore

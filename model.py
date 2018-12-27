@@ -15,7 +15,7 @@ class Model:
     __rnn_used = True              # use rnn layer or not
     __rnn_num_layers = 2           # number of RNN layers
     __rnn_type = 'fused'           # normal | fused
-    __rnn_size = 200 # 512(KOR)    # size of RNN hidden unit
+    __rnn_size = 200               # size of RNN hidden unit
     __tf_used = False              # use transformer encoder layer or not
     __tf_num_layers = 4            # number of layers for transformer encoder
     __tf_keep_prob = 0.8           # keep probability for transformer encoder
