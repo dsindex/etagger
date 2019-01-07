@@ -39,6 +39,7 @@ def inference_bulk(config):
                  model.sentence_length: test_data.max_sentence_length}
     if config.use_elmo:
         feed_dict[model.elmo_input_data_wordchr_ids] = test_data.sentence_elmo_wordchr_ids
+        feed_dict[model.input_data_wordchr_ids] = test_data.sentence_wordchr_ids
     else:
         feed_dict[model.input_data_word_ids] = test_data.sentence_word_ids
         feed_dict[model.input_data_wordchr_ids] = test_data.sentence_wordchr_ids
@@ -103,6 +104,7 @@ def inference_bucket(config):
                          model.sentence_length: inp.max_sentence_length}
             if config.use_elmo:
                 feed_dict[model.elmo_input_data_wordchr_ids] = inp.sentence_elmo_wordchr_ids
+                feed_dict[model.input_data_wordchr_ids] = inp.sentence_wordchr_ids
             else:
                 feed_dict[model.input_data_word_ids] = inp.sentence_word_ids
                 feed_dict[model.input_data_wordchr_ids] = inp.sentence_wordchr_ids
@@ -134,6 +136,7 @@ def inference_bucket(config):
                      model.sentence_length: inp.max_sentence_length}
         if config.use_elmo:
             feed_dict[model.elmo_input_data_wordchr_ids] = inp.sentence_elmo_wordchr_ids
+            feed_dict[model.input_data_wordchr_ids] = inp.sentence_wordchr_ids
         else:
             feed_dict[model.input_data_word_ids] = inp.sentence_word_ids
             feed_dict[model.input_data_wordchr_ids] = inp.sentence_wordchr_ids
@@ -226,6 +229,7 @@ def inference_line(config):
                      model.sentence_length: inp.max_sentence_length}
         if config.use_elmo:
             feed_dict[model.elmo_input_data_wordchr_ids] = inp.sentence_elmo_wordchr_ids
+            feed_dict[model.input_data_wordchr_ids] = inp.sentence_wordchr_ids
         else:
             feed_dict[model.input_data_word_ids] = inp.sentence_word_ids
             feed_dict[model.input_data_wordchr_ids] = inp.sentence_wordchr_ids

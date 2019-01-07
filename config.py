@@ -9,6 +9,8 @@ class Config:
         self.wrd_dim = args.wrd_dim
         self.chr_dim = 50
         self.pos_dim = 7
+        if use_elmo:
+            self.pos_dim = 8
         self.class_size = len(self.embvec.tag_vocab)
         self.word_length = args.word_length
         self.restore = args.restore

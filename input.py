@@ -9,6 +9,7 @@ class Input:
     def __init__(self, data, config, build_output=True):
         if config.use_elmo:
             self.sentence_elmo_wordchr_ids = [] # [batch_size, max_sentence_length+2, word_length]
+            self.sentence_wordchr_ids = []      # [batch_size, max_sentence_length, word_length]
         else:
             self.sentence_word_ids = []         # [batch_size, max_sentence_length]
             self.sentence_wordchr_ids = []      # [batch_size, max_sentence_length, word_length]
@@ -28,6 +29,8 @@ class Input:
             if config.use_elmo:
                 elmo_wordchr_ids = self.__create_elmo_wordchr_ids(bucket)
                 self.sentence_elmo_wordchr_ids.append(elmo_wordchr_ids)
+                wordchr_ids = self.__create_wordchr_ids(bucket)
+                self.sentence_wordchr_ids.append(wordchr_ids)
             else:
                 word_ids = self.__create_word_ids(bucket)
                 self.sentence_word_ids.append(word_ids)
@@ -46,6 +49,8 @@ class Input:
                     if config.use_elmo:
                         elmo_wordchr_ids = self.__create_elmo_wordchr_ids(bucket)
                         self.sentence_elmo_wordchr_ids.append(elmo_wordchr_ids)
+                        wordchr_ids = self.__create_wordchr_ids(bucket)
+                        self.sentence_wordchr_ids.append(wordchr_ids)
                     else:
                         word_ids = self.__create_word_ids(bucket)
                         self.sentence_word_ids.append(word_ids)

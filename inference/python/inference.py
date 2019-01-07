@@ -85,6 +85,7 @@ def inference(config, frozen_pb_path):
                          p_sentence_length: inp.max_sentence_length}
             if config.use_elmo:
                 feed_dict[p_elmo_input_data_wordchr_ids] = inp.sentence_elmo_wordchr_ids
+                feed_dict[p_input_data_wordchr_ids] = inp.sentence_wordchr_ids
             else:
                 feed_dict[p_input_data_word_ids] = inp.sentence_word_ids
                 feed_dict[p_input_data_wordchr_ids] = inp.sentence_wordchr_ids
@@ -115,6 +116,7 @@ def inference(config, frozen_pb_path):
                      p_sentence_length: inp.max_sentence_length}
         if config.use_elmo:
             feed_dict[p_elmo_input_data_wordchr_ids] = inp.sentence_elmo_wordchr_ids
+            feed_dict[p_input_data_wordchr_ids] = inp.sentence_wordchr_ids
         else:
             feed_dict[p_input_data_word_ids] = inp.sentence_word_ids
             feed_dict[p_input_data_wordchr_ids] = inp.sentence_wordchr_ids
