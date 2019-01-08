@@ -61,18 +61,6 @@ class Model:
                                                               shape=[None, None, self.word_length], # (batch_size, sentence_length+2, word_length)
                                                               name='elmo_input_data_wordchr_ids')   # '+2' stands for '<S>', '</S>'
             self.elmo_embeddings = self.__elmo_embedding(self.elmo_input_data_wordchr_ids, masks, keep_prob=keep_prob)
-            # character embeddings
-            self.input_data_wordchr_ids = tf.placeholder(tf.int32,
-                                                         shape=[None, None, self.word_length], # (batch_size, sentence_length, word_length)
-                                                         name='input_data_wordchr_ids')
-            if self.__chr_conv_type == 'conv1d':
-                self.wordchr_embeddings = self.__wordchr_embedding_conv1d(self.input_data_wordchr_ids,
-                                                                          keep_prob=keep_prob,
-                                                                          scope='wordchr-embedding-conv1d')
-            else:
-                self.wordchr_embeddings = self.__wordchr_embedding_conv2d(self.input_data_wordchr_ids,
-                                                                          keep_prob=keep_prob,
-                                                                          scope='wordchr-embedding-conv2d')
         else:
             # (large) word embedding data
             self.wrd_embeddings_init = tf.placeholder(tf.float32, shape=[self.wrd_vocab_size, self.wrd_dim], name='wrd_embeddings_init')
