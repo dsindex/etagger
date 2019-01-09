@@ -7,7 +7,7 @@ from embvec import EmbVec
 
 class Input:
     def __init__(self, data, config, build_output=True):
-        if config.use_elmo:
+        if config.emb_class == 'elmo':
             self.sentence_elmo_wordchr_ids = [] # [batch_size, max_sentence_length+2, word_length]
         else:
             self.sentence_word_ids = []         # [batch_size, max_sentence_length]
@@ -25,7 +25,7 @@ class Input:
 
         if type(data) is list: # treat data as bucket
             bucket = data
-            if config.use_elmo:
+            if config.emb_class == 'elmo':
                 elmo_wordchr_ids = self.__create_elmo_wordchr_ids(bucket)
                 self.sentence_elmo_wordchr_ids.append(elmo_wordchr_ids)
             else:
@@ -43,7 +43,7 @@ class Input:
             bucket = []
             for line in open(path):
                 if line in ['\n', '\r\n']:
-                    if config.use_elmo:
+                    if config.emb_class == 'elmo':
                         elmo_wordchr_ids = self.__create_elmo_wordchr_ids(bucket)
                         self.sentence_elmo_wordchr_ids.append(elmo_wordchr_ids)
                     else:

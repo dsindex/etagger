@@ -87,7 +87,7 @@ class EmbVec:
         if self.lowercase: # glove 6B
             for line in open(args.emb_path): wrd_vocab_size += 1
         else:              # glove 840B
-            # FIXME filtering for fast training
+            # FIXME glove 840B, filtering for fast training
             wrd_vocab_size = len(self.wrd_vocab_tmp)
         wrd_vocab_size += 2 # for pad, unk
         sys.stderr.write('wrd_vocab_size = %s\n' % (wrd_vocab_size))

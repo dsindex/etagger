@@ -36,7 +36,7 @@ class Model:
         self.pos_dim = config.pos_dim
         self.class_size = config.class_size
         self.use_crf = config.use_crf
-        self.use_elmo = config.use_elmo
+        self.emb_class = config.emb_class
         self.set_cuda_visible_devices(config.arg_train)
 
         """
@@ -54,7 +54,7 @@ class Model:
         masks = tf.to_float(tf.expand_dims(self.sentence_masks, -1))
         self.pos_embeddings = self.__pos_embedding(self.input_data_pos_ids, keep_prob=keep_prob, scope='pos-embedding')
 
-        if self.use_elmo:
+        if self.emb_class == 'elmo':
             self.elmo_bilm = config.elmo_bilm
             # elmo embeddings
             self.elmo_input_data_wordchr_ids = tf.placeholder(tf.int32,
@@ -81,7 +81,7 @@ class Model:
                                                                           keep_prob=keep_prob,
                                                                           scope='wordchr-embedding-conv2d')
 
-        if self.use_elmo:
+        if self.emb_class == 'elmo':
             self.input_data = tf.concat([self.elmo_embeddings, self.pos_embeddings],
                                         axis=-1,
                                         name='input_data') # (batch_size, sentence_length, input_dim)
