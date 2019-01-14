@@ -99,11 +99,10 @@ def inference(config, frozen_pb_path):
             feed_dict = {p_input_data_pos_ids: inp.sentence_pos_ids,
                          p_is_train: False,
                          p_sentence_length: inp.max_sentence_length}
+            feed_dict[p_input_data_word_ids] = inp.sentence_word_ids
+            feed_dict[p_input_data_wordchr_ids] = inp.sentence_wordchr_ids
             if config.emb_class == 'elmo':
                 feed_dict[p_elmo_input_data_wordchr_ids] = inp.sentence_elmo_wordchr_ids
-            else:
-                feed_dict[p_input_data_word_ids] = inp.sentence_word_ids
-                feed_dict[p_input_data_wordchr_ids] = inp.sentence_wordchr_ids
             logits, trans_params, sentence_lengths = sess.run([t_logits, t_trans_params, t_sentence_lengths], \
                                                               feed_dict=feed_dict)
             if config.use_crf:
@@ -129,11 +128,10 @@ def inference(config, frozen_pb_path):
         feed_dict = {p_input_data_pos_ids: inp.sentence_pos_ids,
                      p_is_train: False,
                      p_sentence_length: inp.max_sentence_length}
+        feed_dict[p_input_data_word_ids] = inp.sentence_word_ids
+        feed_dict[p_input_data_wordchr_ids] = inp.sentence_wordchr_ids
         if config.emb_class == 'elmo':
             feed_dict[p_elmo_input_data_wordchr_ids] = inp.sentence_elmo_wordchr_ids
-        else:
-            feed_dict[p_input_data_word_ids] = inp.sentence_word_ids
-            feed_dict[p_input_data_wordchr_ids] = inp.sentence_wordchr_ids
         logits, trans_params, sentence_lengths = sess.run([t_logits, t_trans_params, t_sentence_lengths], \
                                                           feed_dict=feed_dict)
         if config.use_crf:

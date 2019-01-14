@@ -16,7 +16,6 @@ class Config:
         self.emb_class = emb_class
         if self.emb_class == 'elmo':
             from bilm import Batcher, BidirectionalLanguageModel
-            self.pos_dim = 8
             self.word_length = 50 # replace to fixed word length for the pre-trained elmo : 'max_characters_per_token'
             self.elmo_batcher = Batcher(self.embvec.elmo_vocab_path, self.word_length) # map text to character ids
             self.elmo_bilm = BidirectionalLanguageModel(self.embvec.elmo_options_path, self.embvec.elmo_weight_path) # biLM graph

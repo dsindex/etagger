@@ -27,8 +27,7 @@ def inference_bulk(config):
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     sess = tf.Session(config=session_conf)
     # Restore model
-    feed_dict = {}
-    if config.emb_class == 'glove': feed_dict = {model.wrd_embeddings_init: config.embvec.wrd_embeddings}
+    feed_dict = {model.wrd_embeddings_init: config.embvec.wrd_embeddings}
     sess.run(tf.global_variables_initializer(), feed_dict=feed_dict)
     saver = tf.train.Saver()
     saver.restore(sess, config.restore)
@@ -37,11 +36,10 @@ def inference_bulk(config):
                  model.output_data: test_data.sentence_tags,
                  model.is_train: False,
                  model.sentence_length: test_data.max_sentence_length}
+    feed_dict[model.input_data_word_ids] = test_data.sentence_word_ids
+    feed_dict[model.input_data_wordchr_ids] = test_data.sentence_wordchr_ids
     if config.emb_class == 'elmo':
         feed_dict[model.elmo_input_data_wordchr_ids] = test_data.sentence_elmo_wordchr_ids
-    else:
-        feed_dict[model.input_data_word_ids] = test_data.sentence_word_ids
-        feed_dict[model.input_data_wordchr_ids] = test_data.sentence_wordchr_ids
     logits, trans_params, sentence_lengths = \
                  sess.run([model.logits, model.trans_params, model.sentence_lengths], \
                            feed_dict=feed_dict)
@@ -76,8 +74,7 @@ def inference_bucket(config):
                                   intra_op_parallelism_threads=1)
     '''
     sess = tf.Session(config=session_conf)
-    feed_dict = {}
-    if config.emb_class == 'glove': feed_dict = {model.wrd_embeddings_init: config.embvec.wrd_embeddings}
+    feed_dict = {model.wrd_embeddings_init: config.embvec.wrd_embeddings}
     sess.run(tf.global_variables_initializer(), feed_dict=feed_dict)
     saver = tf.train.Saver()
     saver.restore(sess, config.restore)
@@ -101,11 +98,10 @@ def inference_bucket(config):
             feed_dict = {model.input_data_pos_ids: inp.sentence_pos_ids,
                          model.is_train: False,
                          model.sentence_length: inp.max_sentence_length}
+            feed_dict[model.input_data_word_ids] = inp.sentence_word_ids
+            feed_dict[model.input_data_wordchr_ids] = inp.sentence_wordchr_ids
             if config.emb_class == 'elmo':
                 feed_dict[model.elmo_input_data_wordchr_ids] = inp.sentence_elmo_wordchr_ids
-            else:
-                feed_dict[model.input_data_word_ids] = inp.sentence_word_ids
-                feed_dict[model.input_data_wordchr_ids] = inp.sentence_wordchr_ids
             logits, trans_params, sentence_lengths = sess.run([model.logits, model.trans_params, \
                                                                model.sentence_lengths], \
                                                               feed_dict=feed_dict)
@@ -132,11 +128,10 @@ def inference_bucket(config):
         feed_dict = {model.input_data_pos_ids: inp.sentence_pos_ids,
                      model.is_train: False,
                      model.sentence_length: inp.max_sentence_length}
+        feed_dict[model.input_data_word_ids] = inp.sentence_word_ids
+        feed_dict[model.input_data_wordchr_ids] = inp.sentence_wordchr_ids
         if config.emb_class == 'elmo':
             feed_dict[model.elmo_input_data_wordchr_ids] = inp.sentence_elmo_wordchr_ids
-        else:
-            feed_dict[model.input_data_word_ids] = inp.sentence_word_ids
-            feed_dict[model.input_data_wordchr_ids] = inp.sentence_wordchr_ids
         logits, trans_params, sentence_lengths = sess.run([model.logits, model.trans_params, \
                                                            model.sentence_lengths], \
                                                           feed_dict=feed_dict)
@@ -202,7 +197,7 @@ def inference_line(config):
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     sess = tf.Session(config=session_conf)
     feed_dict = {}
-    if not feed_dict: feed_dict = {model.wrd_embeddings_init: config.embvec.wrd_embeddings}
+    feed_dict = {model.wrd_embeddings_init: config.embvec.wrd_embeddings}
     sess.run(tf.global_variables_initializer(), feed_dict=feed_dict)
     saver = tf.train.Saver()
     saver.restore(sess, config.restore)
@@ -224,11 +219,10 @@ def inference_line(config):
         feed_dict = {model.input_data_pos_ids: inp.sentence_pos_ids,
                      model.is_train: False,
                      model.sentence_length: inp.max_sentence_length}
+        feed_dict[model.input_data_word_ids] = inp.sentence_word_ids
+        feed_dict[model.input_data_wordchr_ids] = inp.sentence_wordchr_ids
         if config.emb_class == 'elmo':
             feed_dict[model.elmo_input_data_wordchr_ids] = inp.sentence_elmo_wordchr_ids
-        else:
-            feed_dict[model.input_data_word_ids] = inp.sentence_word_ids
-            feed_dict[model.input_data_wordchr_ids] = inp.sentence_wordchr_ids
         logits, trans_params, sentence_lengths = sess.run([model.logits, model.trans_params, \
                                                            model.sentence_lengths], \
                                                           feed_dict=feed_dict)
@@ -253,7 +247,7 @@ if __name__ == '__main__':
     parser.add_argument('--mode', type=str, default='bulk', help='bulk, bucket, line')
 
     args = parser.parse_args()
-    config = Config(args, arg_train=False, emb_class='glove', use_crf=True)
+    config = Config(args, arg_train=False, emb_class='elmo', use_crf=True)
     if args.mode == 'bulk':   inference_bulk(config)
     if args.mode == 'bucket': inference_bucket(config)
     if args.mode == 'line':   inference_line(config)

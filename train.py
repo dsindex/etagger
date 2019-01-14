@@ -32,11 +32,10 @@ def train_step(sess, model, config, data, summary_op, summary_writer):
                    model.output_data: data.sentence_tags[ptr:ptr + config.batch_size],
                    model.is_train: True,
                    model.sentence_length: data.max_sentence_length}
+        feed_dict[model.input_data_word_ids] = data.sentence_word_ids[ptr:ptr + config.batch_size]
+        feed_dict[model.input_data_wordchr_ids] = data.sentence_wordchr_ids[ptr:ptr + config.batch_size]
         if config.emb_class == 'elmo':
             feed_dict[model.elmo_input_data_wordchr_ids] = data.sentence_elmo_wordchr_ids[ptr:ptr + config.batch_size]
-        else:
-            feed_dict[model.input_data_word_ids] = data.sentence_word_ids[ptr:ptr + config.batch_size]
-            feed_dict[model.input_data_wordchr_ids] = data.sentence_wordchr_ids[ptr:ptr + config.batch_size]
         step, summaries, _, loss, accuracy, learning_rate = \
                sess.run([model.global_step, summary_op, model.train_op, \
                          model.loss, model.accuracy, model.learning_rate], feed_dict=feed_dict, options=runopts)
@@ -67,11 +66,10 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
                    model.output_data: data.sentence_tags[ptr:ptr + config.dev_batch_size],
                    model.is_train: False,
                    model.sentence_length: data.max_sentence_length}
+        feed_dict[model.input_data_word_ids] = data.sentence_word_ids[ptr:ptr + config.dev_batch_size]
+        feed_dict[model.input_data_wordchr_ids] = data.sentence_wordchr_ids[ptr:ptr + config.dev_batch_size]
         if config.emb_class == 'elmo':
             feed_dict[model.elmo_input_data_wordchr_ids] = data.sentence_elmo_wordchr_ids[ptr:ptr + config.dev_batch_size]
-        else:
-            feed_dict[model.input_data_word_ids] = data.sentence_word_ids[ptr:ptr + config.dev_batch_size]
-            feed_dict[model.input_data_wordchr_ids] = data.sentence_wordchr_ids[ptr:ptr + config.dev_batch_size]
         global_step, logits, trans_params, sentence_lengths, loss, accuracy = \
                  sess.run([model.global_step, model.logits, model.trans_params, model.sentence_lengths, \
                            model.loss, model.accuracy], feed_dict=feed_dict)
@@ -113,8 +111,7 @@ def do_train(model, config, train_data, dev_data):
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     session_conf.gpu_options.allow_growth = True
     sess = tf.Session(config=session_conf)
-    feed_dict = {}
-    if config.emb_class == 'glove': feed_dict = {model.wrd_embeddings_init: config.embvec.wrd_embeddings}
+    feed_dict = {model.wrd_embeddings_init: config.embvec.wrd_embeddings}
     sess.run(tf.global_variables_initializer(), feed_dict=feed_dict) # feed large embedding data
     saver = tf.train.Saver()
     if config.restore is not None:
@@ -173,5 +170,5 @@ if __name__ == '__main__':
     parser.add_argument('--summary_dir', type=str, default='./runs', help='path to save summary(ex, ./runs)')
 
     args = parser.parse_args()
-    config = Config(args, arg_train=True, emb_class='glove', use_crf=True)
+    config = Config(args, arg_train=True, emb_class='elmo', use_crf=True)
     train(config)

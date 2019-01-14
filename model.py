@@ -54,35 +54,36 @@ class Model:
         masks = tf.to_float(tf.expand_dims(self.sentence_masks, -1))
         self.pos_embeddings = self.__pos_embedding(self.input_data_pos_ids, keep_prob=keep_prob, scope='pos-embedding')
 
+        # (large) word embedding data
+        self.wrd_embeddings_init = tf.placeholder(tf.float32, shape=[self.wrd_vocab_size, self.wrd_dim], name='wrd_embeddings_init')
+        self.wrd_embeddings = tf.Variable(self.wrd_embeddings_init, name='wrd_embeddings', trainable=False)
+        # word embeddings
+        self.input_data_word_ids = tf.placeholder(tf.int32, shape=[None, None], name='input_data_word_ids') # (batch_size, sentence_length)
+        self.word_embeddings = self.__word_embedding(self.input_data_word_ids, keep_prob=keep_prob, scope='word-embedding')
+
+        # character embeddings
+        self.input_data_wordchr_ids = tf.placeholder(tf.int32,
+                                                     shape=[None, None, self.word_length], # (batch_size, sentence_length, word_length)
+                                                     name='input_data_wordchr_ids')
+        if self.__chr_conv_type == 'conv1d':
+            self.wordchr_embeddings = self.__wordchr_embedding_conv1d(self.input_data_wordchr_ids,
+                                                                      keep_prob=keep_prob,
+                                                                      scope='wordchr-embedding-conv1d')
+        else:
+            self.wordchr_embeddings = self.__wordchr_embedding_conv2d(self.input_data_wordchr_ids,
+                                                                      keep_prob=keep_prob,
+                                                                      scope='wordchr-embedding-conv2d')
+
         if self.emb_class == 'elmo':
-            self.elmo_bilm = config.elmo_bilm
             # elmo embeddings
+            self.elmo_bilm = config.elmo_bilm
             self.elmo_input_data_wordchr_ids = tf.placeholder(tf.int32,
                                                               shape=[None, None, self.word_length], # (batch_size, sentence_length+2, word_length)
                                                               name='elmo_input_data_wordchr_ids')   # '+2' stands for '<S>', '</S>'
             self.elmo_embeddings = self.__elmo_embedding(self.elmo_input_data_wordchr_ids, masks, keep_prob=keep_prob)
-        else:
-            # (large) word embedding data
-            self.wrd_embeddings_init = tf.placeholder(tf.float32, shape=[self.wrd_vocab_size, self.wrd_dim], name='wrd_embeddings_init')
-            self.wrd_embeddings = tf.Variable(self.wrd_embeddings_init, name='wrd_embeddings', trainable=False)
-            # word embeddings
-            self.input_data_word_ids = tf.placeholder(tf.int32, shape=[None, None], name='input_data_word_ids') # (batch_size, sentence_length)
-            self.word_embeddings = self.__word_embedding(self.input_data_word_ids, keep_prob=keep_prob, scope='word-embedding')
-            # character embeddings
-            self.input_data_wordchr_ids = tf.placeholder(tf.int32,
-                                                         shape=[None, None, self.word_length], # (batch_size, sentence_length, word_length)
-                                                         name='input_data_wordchr_ids')
-            if self.__chr_conv_type == 'conv1d':
-                self.wordchr_embeddings = self.__wordchr_embedding_conv1d(self.input_data_wordchr_ids,
-                                                                          keep_prob=keep_prob,
-                                                                          scope='wordchr-embedding-conv1d')
-            else:
-                self.wordchr_embeddings = self.__wordchr_embedding_conv2d(self.input_data_wordchr_ids,
-                                                                          keep_prob=keep_prob,
-                                                                          scope='wordchr-embedding-conv2d')
 
         if self.emb_class == 'elmo':
-            self.input_data = tf.concat([self.elmo_embeddings, self.pos_embeddings],
+            self.input_data = tf.concat([self.word_embeddings, self.wordchr_embeddings, self.elmo_embeddings, self.pos_embeddings],
                                         axis=-1,
                                         name='input_data') # (batch_size, sentence_length, input_dim)
         else:

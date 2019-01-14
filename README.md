@@ -139,10 +139,26 @@
                       PER: precision:  97.27%; recall:  96.85%; FB1:  97.06  1610
         ```
         - average processing time per bucket
-          - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.06133532517637155 sec
+          - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.06133532517637155 sec -> need to recompute
           - 1 GPU(Tesla V100)                 : 0.029950057644797457 sec
           - 32 core CPU(multi-threading)      : 0.40098162731570347 sec
           - 1 CPU(single-thread)              : 0.7398052649182165 sec
+      - ELMo + Glove
+        - setting
+          - `experiments 10, test 5`
+          - rnn_type : fused, rnn_used : True, rnn_num_layers : 2, tf_used : False
+        - per-token(partial) f1 : 0.9280469897209985
+        - per-chunk(exact)   f1 : 0.9212688875143589
+        ```
+        processed 46666 tokens with 5648 phrases; found: 5675 phrases; correct: 5214.
+        accuracy:  98.34%; precision:  91.88%; recall:  92.32%; FB1:  92.10
+              LOC: precision:  93.32%; recall:  93.82%; FB1:  93.57  1677
+             MISC: precision:  81.78%; recall:  83.76%; FB1:  82.76  719
+              ORG: precision:  89.51%; recall:  89.89%; FB1:  89.70  1668
+              PER: precision:  97.33%; recall:  96.97%; FB1:  97.15  1611
+        ```
+        - average processing time per bucket
+          - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.036233977567360014 sec
     - BiLSTM + Transformer
       - Glove
         - setting
@@ -247,6 +263,7 @@ $ python embvec.py --emb_path embeddings/glove.840B.300d.txt --wrd_dim 300 --tra
 
 * for ELMo
 $ python embvec.py --emb_path embeddings/glove.6B.50d.txt --wrd_dim 50 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weight_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5 > embeddings/vocab.txt
+$ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weight_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5 > embeddings/vocab.txt
 ```
 
 - train
@@ -258,6 +275,7 @@ $ python train.py --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --
 
 * form ELMo
 $ python train.py --emb_path embeddings/glove.6B.50d.txt.pkl --wrd_dim 50 --batch_size 20 --epoch 70
+$ python train.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --batch_size 20 --epoch 70
 
 $ rm -rf runs; tensorboard --logdir runs/summaries/ --port 6008
 ```
@@ -276,6 +294,7 @@ $ python inference.py --mode bucket --emb_path embeddings/glove.840B.300d.txt.pk
 
 * for ELMo
 $ python inference.py --mode bucket --emb_path embeddings/glove.6B.50d.txt.pkl --wrd_dim 50 --restore checkpoint/ner_model < data/test.txt > pred.txt
+$ python inference.py --mode bucket --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/test.txt > pred.txt
 
 $ python token_eval.py < pred.txt
 $ python chunk_eval.py < pred.txt

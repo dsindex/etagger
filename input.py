@@ -7,11 +7,10 @@ from embvec import EmbVec
 
 class Input:
     def __init__(self, data, config, build_output=True):
+        self.sentence_word_ids = []             # [batch_size, max_sentence_length]
+        self.sentence_wordchr_ids = []          # [batch_size, max_sentence_length, word_length]
         if config.emb_class == 'elmo':
             self.sentence_elmo_wordchr_ids = [] # [batch_size, max_sentence_length+2, word_length]
-        else:
-            self.sentence_word_ids = []         # [batch_size, max_sentence_length]
-            self.sentence_wordchr_ids = []      # [batch_size, max_sentence_length, word_length]
         self.sentence_pos_ids = []              # [batch_size, max_sentence_length]
         if build_output:
             self.sentence_tags = []             # [batch_size, max_sentence_length, class_size] 
@@ -25,14 +24,13 @@ class Input:
 
         if type(data) is list: # treat data as bucket
             bucket = data
+            word_ids = self.__create_word_ids(bucket)
+            self.sentence_word_ids.append(word_ids)
+            wordchr_ids = self.__create_wordchr_ids(bucket)
+            self.sentence_wordchr_ids.append(wordchr_ids)
             if config.emb_class == 'elmo':
                 elmo_wordchr_ids = self.__create_elmo_wordchr_ids(bucket)
                 self.sentence_elmo_wordchr_ids.append(elmo_wordchr_ids)
-            else:
-                word_ids = self.__create_word_ids(bucket)
-                self.sentence_word_ids.append(word_ids)
-                wordchr_ids = self.__create_wordchr_ids(bucket)
-                self.sentence_wordchr_ids.append(wordchr_ids)
             pos_ids = self.__create_pos_ids(bucket)
             self.sentence_pos_ids.append(pos_ids)
             if build_output:
@@ -43,14 +41,13 @@ class Input:
             bucket = []
             for line in open(path):
                 if line in ['\n', '\r\n']:
+                    word_ids = self.__create_word_ids(bucket)
+                    self.sentence_word_ids.append(word_ids)
+                    wordchr_ids = self.__create_wordchr_ids(bucket)
+                    self.sentence_wordchr_ids.append(wordchr_ids)
                     if config.emb_class == 'elmo':
                         elmo_wordchr_ids = self.__create_elmo_wordchr_ids(bucket)
                         self.sentence_elmo_wordchr_ids.append(elmo_wordchr_ids)
-                    else:
-                        word_ids = self.__create_word_ids(bucket)
-                        self.sentence_word_ids.append(word_ids)
-                        wordchr_ids = self.__create_wordchr_ids(bucket)
-                        self.sentence_wordchr_ids.append(wordchr_ids)
                     pos_ids = self.__create_pos_ids(bucket)
                     self.sentence_pos_ids.append(pos_ids)
                     if build_output:
