@@ -247,7 +247,7 @@ if __name__ == '__main__':
     parser.add_argument('--mode', type=str, default='bulk', help='bulk, bucket, line')
 
     args = parser.parse_args()
-    config = Config(args, arg_train=False, emb_class='elmo', use_crf=True)
+    config = Config(args, arg_train=False, emb_class='glove', use_crf=True)
     if args.mode == 'bulk':   inference_bulk(config)
     if args.mode == 'bucket': inference_bucket(config)
     if args.mode == 'line':   inference_line(config)
