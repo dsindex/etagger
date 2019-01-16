@@ -147,15 +147,15 @@
         - setting
           - `experiments 10, test 5`
           - rnn_type : fused, rnn_used : True, rnn_num_layers : 2, tf_used : False
-        - per-token(partial) f1 : 0.9280469897209985
-        - per-chunk(exact)   f1 : 0.9212688875143589
+        - per-token(partial) f1 : 0.92896509491733
+        - per-chunk(exact)   f1 : 0.9235392910810573
         ```
-        processed 46666 tokens with 5648 phrases; found: 5675 phrases; correct: 5214.
-        accuracy:  98.34%; precision:  91.88%; recall:  92.32%; FB1:  92.10
-              LOC: precision:  93.32%; recall:  93.82%; FB1:  93.57  1677
-             MISC: precision:  81.78%; recall:  83.76%; FB1:  82.76  719
-              ORG: precision:  89.51%; recall:  89.89%; FB1:  89.70  1668
-              PER: precision:  97.33%; recall:  96.97%; FB1:  97.15  1611
+        processed 46666 tokens with 5648 phrases; found: 5669 phrases; correct: 5224.
+        accuracy:  98.37%; precision:  92.15%; recall:  92.49%; FB1:  92.32
+                      LOC: precision:  93.47%; recall:  93.59%; FB1:  93.53  1670
+                     MISC: precision:  84.06%; recall:  81.91%; FB1:  82.97  684
+                      ORG: precision:  89.22%; recall:  91.21%; FB1:  90.21  1698
+                      PER: precision:  97.28%; recall:  97.28%; FB1:  97.28  1617
         ```
         - average processing time per bucket
           - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.036233977567360014 sec
