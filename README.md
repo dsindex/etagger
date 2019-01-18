@@ -264,6 +264,7 @@ $ python embvec.py --emb_path embeddings/glove.840B.300d.txt --wrd_dim 300 --tra
 * for ELMo
 $ python embvec.py --emb_path embeddings/glove.6B.50d.txt --wrd_dim 50 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weight_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5 > embeddings/vocab.txt
 $ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weight_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5 > embeddings/vocab.txt
+$ python embvec.py --emb_path embeddings/glove.840B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --lowercase 0 --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weight_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5 > embeddings/vocab.txt 
 ```
 
 - train
@@ -276,6 +277,7 @@ $ python train.py --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --
 * form ELMo
 $ python train.py --emb_path embeddings/glove.6B.50d.txt.pkl --wrd_dim 50 --batch_size 20 --epoch 70
 $ python train.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --batch_size 20 --epoch 70
+$ python train.py --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --batch_size 20 --epoch 70
 
 $ rm -rf runs; tensorboard --logdir runs/summaries/ --port 6008
 ```
@@ -295,6 +297,7 @@ $ python inference.py --mode bucket --emb_path embeddings/glove.840B.300d.txt.pk
 * for ELMo
 $ python inference.py --mode bucket --emb_path embeddings/glove.6B.50d.txt.pkl --wrd_dim 50 --restore checkpoint/ner_model < data/test.txt > pred.txt
 $ python inference.py --mode bucket --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/test.txt > pred.txt
+$ python inference.py --mode bucket --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/test.txt > pred.txt
 
 $ python token_eval.py < pred.txt
 $ python chunk_eval.py < pred.txt
