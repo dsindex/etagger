@@ -155,11 +155,11 @@ word embedding size : 300(glove6B)
 elmo embedding params : elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json
 elmo embedding size : 1024
 keep_prob : 0.7
-#chr_conv_type : conv1d
-#chracter embedding size : 50
-#chracter embedding random init : -1.0 ~ 1.0
-#filter_sizes : [3]
-#num_filters : 25
+chr_conv_type : conv1d
+chracter embedding size : 50
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 25
 pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 rnn_used : True
@@ -199,6 +199,10 @@ chunk : 0.9235392910810573 -> BiLSTM + ELMo + Glove best
 # trial 4
 token : 0.9258261933904528
 chunk : 0.9212528755972395
+
+# trial 5
+token : 0.9266772577294391
+chunk : 0.9211896566940252
 
 
 * test 4
