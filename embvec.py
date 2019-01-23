@@ -33,10 +33,20 @@ class EmbVec:
         self.itag_vocab[0] = self.oot_tag
     
         self.wrd_vocab_tmp = {}  # word vocab for train/dev/test
+
+        # elmo
         self.elmo_vocab = {}     # elmo vocab
-        self.elmo_vocab_path  = args.elmo_vocab_path
+        self.elmo_vocab_path   = args.elmo_vocab_path
         self.elmo_options_path = args.elmo_options_path
-        self.elmo_weight_path = args.elmo_weight_path
+        self.elmo_weight_path  = args.elmo_weight_path
+
+        # bert
+        self.bert_config_path = args.bert_config_path
+        self.bert_vocab_path  = args.bert_vocab_path
+        self.bert_do_lower_case = False
+        if args.bert_do_lower_case: self.bert_do_lower_case = True
+        self.bert_init_checkpoint = args.bert_init_checkpoint
+        self.bert_max_seq_length = args.bert_max_seq_length
 
         # build character/pos/tag/elmo vocab
         cid = self.unk_cid + 1
@@ -152,6 +162,11 @@ if __name__ == '__main__':
     parser.add_argument('--elmo_vocab_path', type=str, help='path to elmo vocab file(write)', default='')
     parser.add_argument('--elmo_options_path', type=str, help='path to elmo options file', default='')
     parser.add_argument('--elmo_weight_path', type=str, help='path to elmo weight file', default='')
+    parser.add_argument('--bert_config_path', type=str, help='path to bert config file', default='')
+    parser.add_argument('--bert_vocab_path', type=str, help='path to bert vocab file', default='')
+    parser.add_argument('--bert_do_lower_case', type=int, help='apply lower case for bert', default=0)
+    parser.add_argument('--bert_init_checkpoint', type=str, help='path to bert init checkpoint', default='')
+    parser.add_argument('--bert_max_seq_length', type=int, help='maximum total input sequence length after WordPiece tokenization.', default=150)
     args = parser.parse_args()
     embvec = EmbVec(args)
     pkl.dump(embvec, open(args.emb_path + '.pkl', 'wb'))

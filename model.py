@@ -81,6 +81,18 @@ class Model:
                                                               shape=[None, None, self.word_length], # (batch_size, sentence_length+2, word_length)
                                                               name='elmo_input_data_wordchr_ids')   # '+2' stands for '<S>', '</S>'
             self.elmo_embeddings = self.__elmo_embedding(self.elmo_input_data_wordchr_ids, masks, keep_prob=keep_prob)
+        if self.emb_class == 'bert':
+            # bert embeddings
+            self.bert_config = config.bert_config
+            self.bert_init_checkpoint = config.bert_init_checkpoint
+            self.bert_max_seq_length = config.bert_max_seq_length
+            self.bert_input_data_token_ids   = tf.placeholder(tf.int32, shape=[None, self.bert_max_seq_length], name='bert_input_data_token_ids') 
+            self.bert_input_data_token_masks = tf.placeholder(tf.int32, shape=[None, self.bert_max_seq_length], name='bert_input_data_token_masks') 
+            self.bert_input_data_segment_ids = tf.placeholder(tf.int32, shape=[None, self.bert_max_seq_length], name='bert_input_data_segment_ids') 
+            self.bert_embeddings = self.__bert_embedding(self.bert_input_data_token_ids,
+                                                         self.bert_input_data_token_masks,
+                                                         self.bert_input_data_segment_ids,
+                                                         keep_prob=keep_prob)
 
         if self.emb_class == 'elmo':
             self.input_data = tf.concat([self.word_embeddings, self.wordchr_embeddings, self.elmo_embeddings, self.pos_embeddings],
@@ -204,17 +216,6 @@ class Model:
             self.train_op = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss, global_step=self.global_step)
             '''
     
-    def __elmo_embedding(self, inputs, masks, keep_prob=0.5):
-        """Compute ELMO embeddings
-        """
-        from bilm import weight_layers
-        elmo_embeddings_op = self.elmo_bilm(inputs)
-        elmo_input = weight_layers('input', elmo_embeddings_op, l2_coef=0.0)
-        elmo_embeddings = elmo_input['weighted_op'] # (batch_size, sentence_length, elmo_dim)
-        # masking(remove noise due to padding)
-        elmo_embeddings *= masks
-        return tf.nn.dropout(elmo_embeddings, keep_prob)
-
     def __word_embedding(self, inputs, keep_prob=0.5, scope='word-embedding'):
         """Look up word embeddings
         """
@@ -299,6 +300,41 @@ class Model:
             # (batch_size*sentence_length, num_filters_total) -> (batch_size, sentence_length, num_filters_total)
             wordchr_embeddings = tf.reshape(h_pool_flat, [-1, self.sentence_length, num_filters_total])
             return tf.nn.dropout(wordchr_embeddings, keep_prob)
+
+    def __elmo_embedding(self, inputs, masks, keep_prob=0.5):
+        """Compute ELMo embeddings
+        """
+        from bilm import weight_layers
+        elmo_embeddings_op = self.elmo_bilm(inputs)
+        elmo_input = weight_layers('input', elmo_embeddings_op, l2_coef=0.0)
+        elmo_embeddings = elmo_input['weighted_op'] # (batch_size, sentence_length, elmo_dim)
+        # masking(remove noise due to padding)
+        elmo_embeddings *= masks
+        return tf.nn.dropout(elmo_embeddings, keep_prob)
+
+    def __bert_embedding(self, token_ids, token_masks, segment_ids, keep_prob=0.5):
+        """Compute BERT embeddings 
+        """
+        from bert import modeling
+        bert_model = modeling.BertModel(
+            config=self.bert_config,
+            is_training=True,
+            input_ids=token_ids,
+            input_mask=token_masks,
+            token_type_ids=segment_ids,
+            use_one_hot_embeddings=False)
+        bert_embeddings = bert_model.get_sequence_output() # (batch_size, bert_max_seq_length, bert_embedding_size)
+        tvars = tf.trainable_variables()
+        if self.bert_init_checkpoint:
+            (assignment_map, initialized_variable_names) = modeling.get_assignment_map_from_checkpoint(tvars, self.bert_init_checkpoint)
+            tf.train.init_from_checkpoint(self.bert_init_checkpoint, assignment_map)
+            tf.logging.info("**** Trainable Variables ****")
+            for var in tvars:
+                init_string = ""
+                if var.name in initialized_variable_names:
+                    init_string = ", *INIT_FROM_CKPT*"
+                tf.logging.info("  name = %s, shape = %s%s", var.name, var.shape, init_string)
+        return tf.nn.dropout(bert_embeddings, keep_prob)
 
     def __pos_embedding(self, inputs, keep_prob=0.5, scope='pos-embedding'):
         """Computing pos embeddings
@@ -440,7 +476,7 @@ class Model:
     @staticmethod
     def set_cuda_visible_devices(arg_train):
         import os
-        os.environ['CUDA_VISIBLE_DEVICES']='3'
+        os.environ['CUDA_VISIBLE_DEVICES']='1'
         if arg_train:
             from tensorflow.python.client import device_lib
             print(device_lib.list_local_devices())

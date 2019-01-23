@@ -103,6 +103,10 @@ def inference(config, frozen_pb_path):
             feed_dict[p_input_data_wordchr_ids] = inp.sentence_wordchr_ids
             if config.emb_class == 'elmo':
                 feed_dict[p_elmo_input_data_wordchr_ids] = inp.sentence_elmo_wordchr_ids
+            if config.emb_class == 'bert':
+                feed_dict[p_bert_input_data_token_ids] = inp.sentence_bert_token_ids
+                feed_dict[p_bert_input_data_token_masks] = inp.sentence_bert_token_masks
+                feed_dict[p_bert_input_data_segment_ids] = inp.sentence_bert_segment_ids
             logits, trans_params, sentence_lengths = sess.run([t_logits, t_trans_params, t_sentence_lengths], \
                                                               feed_dict=feed_dict)
             if config.use_crf:
@@ -132,6 +136,10 @@ def inference(config, frozen_pb_path):
         feed_dict[p_input_data_wordchr_ids] = inp.sentence_wordchr_ids
         if config.emb_class == 'elmo':
             feed_dict[p_elmo_input_data_wordchr_ids] = inp.sentence_elmo_wordchr_ids
+        if config.emb_class == 'bert':
+            feed_dict[p_bert_input_data_token_ids] = inp.sentence_bert_token_ids
+            feed_dict[p_bert_input_data_token_masks] = inp.sentence_bert_token_masks
+            feed_dict[p_bert_input_data_segment_ids] = inp.sentence_bert_segment_ids
         logits, trans_params, sentence_lengths = sess.run([t_logits, t_trans_params, t_sentence_lengths], \
                                                           feed_dict=feed_dict)
         if config.use_crf:

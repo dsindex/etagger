@@ -27,6 +27,7 @@
   - [tensorflow-cmake](https://github.com/PatWie/tensorflow-cmake)
   - [medium-tffreeze-1.py](https://gist.github.com/morgangiraud/249505f540a5e53a48b0c1a869d370bf#file-medium-tffreeze-1-py)
   - [medium-tffreeze-2.py](https://gist.github.com/morgangiraud/5ef49adc3c608bf639164b1dd5ed3dab#file-medium-tffreeze-2-py)
+  - [bert_lstm_ner.py](https://github.com/dsindex/BERT-BiLSTM-CRF-NER/blob/master/bert_lstm_ner.py)
 
 - my main questions are :
   - can this module perform at the level of state of the art?
@@ -243,6 +244,14 @@ $ python -m pip install tensorflow-gpu
   $ python test_bilm.py
   ```
 
+- bert
+  - clone [bert](https://github.com/google-research/bert)
+  - download `cased_L-24_H-1024_A-16`
+  ```
+  $ ls embeddings
+  cased_L-24_H-1024_A-16
+  ```
+
 - spacy [optional]
   - if you want to analyze input string and see how it detects entities, then you need to install spacy lib.
   ```
@@ -265,17 +274,15 @@ $ python embvec.py --emb_path embeddings/glove.840B.300d.txt --wrd_dim 300 --tra
 $ python embvec.py --emb_path embeddings/glove.6B.50d.txt --wrd_dim 50 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weight_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5 > embeddings/vocab.txt
 $ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weight_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5 > embeddings/vocab.txt
 $ python embvec.py --emb_path embeddings/glove.840B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --lowercase 0 --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weight_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5 > embeddings/vocab.txt 
+
+* form BERT
+$ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --bert_config_path embeddings/cased_L-24_H-1024_A-16/bert_config.json --bert_vocab_path embeddings/cased_L-24_H-1024_A-16/vocab.txt --bert_do_lower_case 0 --bert_init_checkpoint embeddings/cased_L-24_H-1024_A-16/bert_model.ckpt --bert_max_seq_length 150 > embeddings/vocab.txt
+
 ```
 
 - train
 ```
-* for Glove
 $ python train.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --batch_size 20 --epoch 70
-$ python train.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --batch_size 20 --epoch 70
-$ python train.py --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --batch_size 20 --epoch 70
-
-* form ELMo
-$ python train.py --emb_path embeddings/glove.6B.50d.txt.pkl --wrd_dim 50 --batch_size 20 --epoch 70
 $ python train.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --batch_size 20 --epoch 70
 $ python train.py --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --batch_size 20 --epoch 70
 
@@ -289,13 +296,7 @@ $ python inference.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 
 
 - inference(bucket)
 ```
-* for Glove
 $ python inference.py --mode bucket --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --restore checkpoint/ner_model < data/test.txt > pred.txt
-$ python inference.py --mode bucket --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/test.txt > pred.txt
-$ python inference.py --mode bucket --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/test.txt > pred.txt
-
-* for ELMo
-$ python inference.py --mode bucket --emb_path embeddings/glove.6B.50d.txt.pkl --wrd_dim 50 --restore checkpoint/ner_model < data/test.txt > pred.txt
 $ python inference.py --mode bucket --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/test.txt > pred.txt
 $ python inference.py --mode bucket --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/test.txt > pred.txt
 

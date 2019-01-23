@@ -40,6 +40,10 @@ def inference_bulk(config):
     feed_dict[model.input_data_wordchr_ids] = test_data.sentence_wordchr_ids
     if config.emb_class == 'elmo':
         feed_dict[model.elmo_input_data_wordchr_ids] = test_data.sentence_elmo_wordchr_ids
+    if config.emb_class == 'bert':
+        feed_dict[model.bert_input_data_token_ids] = test_data.sentence_bert_token_ids
+        feed_dict[model.bert_input_data_token_masks] = test_data.sentence_bert_token_masks
+        feed_dict[model.bert_input_data_segment_ids] = test_data.sentence_bert_segment_ids
     logits, trans_params, sentence_lengths = \
                  sess.run([model.logits, model.trans_params, model.sentence_lengths], \
                            feed_dict=feed_dict)
@@ -102,6 +106,10 @@ def inference_bucket(config):
             feed_dict[model.input_data_wordchr_ids] = inp.sentence_wordchr_ids
             if config.emb_class == 'elmo':
                 feed_dict[model.elmo_input_data_wordchr_ids] = inp.sentence_elmo_wordchr_ids
+            if config.emb_class == 'bert':
+                feed_dict[model.bert_input_data_token_ids] = inp.sentence_bert_token_ids
+                feed_dict[model.bert_input_data_token_masks] = inp.sentence_bert_token_masks
+                feed_dict[model.bert_input_data_segment_ids] = inp.sentence_bert_segment_ids
             logits, trans_params, sentence_lengths = sess.run([model.logits, model.trans_params, \
                                                                model.sentence_lengths], \
                                                               feed_dict=feed_dict)
@@ -132,6 +140,10 @@ def inference_bucket(config):
         feed_dict[model.input_data_wordchr_ids] = inp.sentence_wordchr_ids
         if config.emb_class == 'elmo':
             feed_dict[model.elmo_input_data_wordchr_ids] = inp.sentence_elmo_wordchr_ids
+        if config.emb_class == 'bert':
+            feed_dict[model.bert_input_data_token_ids] = inp.sentence_bert_token_ids
+            feed_dict[model.bert_input_data_token_masks] = inp.sentence_bert_token_masks
+            feed_dict[model.bert_input_data_segment_ids] = inp.sentence_bert_segment_ids
         logits, trans_params, sentence_lengths = sess.run([model.logits, model.trans_params, \
                                                            model.sentence_lengths], \
                                                           feed_dict=feed_dict)
@@ -223,6 +235,10 @@ def inference_line(config):
         feed_dict[model.input_data_wordchr_ids] = inp.sentence_wordchr_ids
         if config.emb_class == 'elmo':
             feed_dict[model.elmo_input_data_wordchr_ids] = inp.sentence_elmo_wordchr_ids
+        if config.emb_class == 'bert':
+            feed_dict[model.bert_input_data_token_ids] = inp.sentence_bert_token_ids
+            feed_dict[model.bert_input_data_token_masks] = inp.sentence_bert_token_masks
+            feed_dict[model.bert_input_data_segment_ids] = inp.sentence_bert_segment_ids
         logits, trans_params, sentence_lengths = sess.run([model.logits, model.trans_params, \
                                                            model.sentence_lengths], \
                                                           feed_dict=feed_dict)
@@ -247,7 +263,7 @@ if __name__ == '__main__':
     parser.add_argument('--mode', type=str, default='bulk', help='bulk, bucket, line')
 
     args = parser.parse_args()
-    config = Config(args, arg_train=False, emb_class='glove', use_crf=True)
+    config = Config(args, arg_train=False, emb_class='bert', use_crf=True)
     if args.mode == 'bulk':   inference_bulk(config)
     if args.mode == 'bucket': inference_bucket(config)
     if args.mode == 'line':   inference_line(config)

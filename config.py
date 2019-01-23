@@ -19,6 +19,14 @@ class Config:
             self.word_length = 50 # replace to fixed word length for the pre-trained elmo : 'max_characters_per_token'
             self.elmo_batcher = Batcher(self.embvec.elmo_vocab_path, self.word_length) # map text to character ids
             self.elmo_bilm = BidirectionalLanguageModel(self.embvec.elmo_options_path, self.embvec.elmo_weight_path) # biLM graph
+        if self.emb_class == 'bert':
+            from bert import modeling
+            from bert import tokenization
+            self.bert_config = modeling.BertConfig.from_json_file(self.embvec.bert_config_path)
+            self.bert_tokenizer = tokenization.FullTokenizer(
+                vocab_file=self.embvec.bert_vocab_path, do_lower_case=self.embvec.bert_do_lower_case)
+            self.bert_init_checkpoint = self.embvec.bert_init_checkpoint
+            self.bert_max_seq_length = self.embvec.bert_max_seq_length
         self.starter_learning_rate = 0.001 # 0.001, 0.0003
         self.decay_steps = 12000
         self.decay_rate = 0.9
