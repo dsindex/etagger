@@ -14,6 +14,16 @@ class Config:
         self.restore = args.restore
         self.use_crf = use_crf
         self.emb_class = emb_class
+        self.starter_learning_rate = 0.001 # 0.001, 0.0003
+        self.decay_steps = 12000
+        self.decay_rate = 0.9
+        if arg_train:
+            self.epoch = args.epoch
+            self.batch_size = args.batch_size
+            self.dev_batch_size = 2*self.batch_size
+            self.checkpoint_dir = args.checkpoint_dir
+            self.summary_dir = args.summary_dir
+        self.arg_train = arg_train
         if self.emb_class == 'elmo':
             from bilm import Batcher, BidirectionalLanguageModel
             self.word_length = 50 # replace to fixed word length for the pre-trained elmo : 'max_characters_per_token'
@@ -27,13 +37,5 @@ class Config:
                 vocab_file=self.embvec.bert_vocab_path, do_lower_case=self.embvec.bert_do_lower_case)
             self.bert_init_checkpoint = self.embvec.bert_init_checkpoint
             self.bert_max_seq_length = self.embvec.bert_max_seq_length
-        self.starter_learning_rate = 0.001 # 0.001, 0.0003
-        self.decay_steps = 12000
-        self.decay_rate = 0.9
-        if arg_train:
-            self.epoch = args.epoch
-            self.batch_size = args.batch_size
-            self.dev_batch_size = 2*self.batch_size
-            self.checkpoint_dir = args.checkpoint_dir
-            self.summary_dir = args.summary_dir
-        self.arg_train = arg_train
+            if arg_train:
+                self.dev_batch_size = self.batch_size
