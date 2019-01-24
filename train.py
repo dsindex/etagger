@@ -40,6 +40,7 @@ def train_step(sess, model, config, data, summary_op, summary_writer):
             feed_dict[model.bert_input_data_token_ids] = data.sentence_bert_token_ids[ptr:ptr + config.batch_size]
             feed_dict[model.bert_input_data_token_masks] = data.sentence_bert_token_masks[ptr:ptr + config.batch_size]
             feed_dict[model.bert_input_data_segment_ids] = data.sentence_bert_segment_ids[ptr:ptr + config.batch_size]
+            feed_dict[model.bert_input_data_token2word_indices] = data.sentence_bert_token2word_indices[ptr:ptr + config.batch_size]
         step, summaries, _, loss, accuracy, learning_rate = \
                sess.run([model.global_step, summary_op, model.train_op, \
                          model.loss, model.accuracy, model.learning_rate], feed_dict=feed_dict, options=runopts)
@@ -78,6 +79,7 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
             feed_dict[model.bert_input_data_token_ids] = data.sentence_bert_token_ids[ptr:ptr + config.batch_size]
             feed_dict[model.bert_input_data_token_masks] = data.sentence_bert_token_masks[ptr:ptr + config.batch_size]
             feed_dict[model.bert_input_data_segment_ids] = data.sentence_bert_segment_ids[ptr:ptr + config.batch_size]
+            feed_dict[model.bert_input_data_token2word_indices] = data.sentence_bert_token2word_indices[ptr:ptr + config.batch_size]
         global_step, logits, trans_params, sentence_lengths, loss, accuracy = \
                  sess.run([model.global_step, model.logits, model.trans_params, model.sentence_lengths, \
                            model.loss, model.accuracy], feed_dict=feed_dict)
