@@ -7,7 +7,7 @@
     - basic embedding
       - [x] 1) word embedding(glove) and character convolutional embedding
       - [x] 2) ELMo embedding
-      - [ ] 3) BERT embedding
+      - [x] 3) BERT embedding
     - etc embedding
       - [x] pos embedding, etc features(shape, pos, gazetteer(not used))
   - contextual encoding
@@ -160,6 +160,10 @@
         ```
         - average processing time per bucket
           - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.036233977567360014 sec
+      - BERT
+        - setting(on-going)
+      - BERT + Glove
+        - setting(on-going)
     - BiLSTM + Transformer
       - Glove
         - setting
