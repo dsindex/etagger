@@ -93,9 +93,6 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
         idx += 1
     sum_loss = sum_loss / nbatches
     sum_accuracy = sum_accuracy / nbatches
-    # create summaries manually
-    summaries = tf.Summary(value=[tf.Summary.Value(tag='loss_1', simple_value=sum_loss), tf.Summary.Value(tag='accuracy_1', simple_value=sum_accuracy)])
-    summary_writer.add_summary(summaries, global_step)
     print('[epoch %s/%s] dev precision, recall, f1(token): ' % (epoch, config.epoch))
     token_f1 = TokenEval.compute_f1(config.class_size, sum_logits, data.sentence_tags, sum_sentence_lengths)
     
@@ -111,6 +108,13 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
     print('dev precision, recall, f1(chunk): ', prec, rec, f1)
     chunk_f1 = f1
     m = chunk_f1
+    # create summaries manually
+    summary_value = [tf.Summary.Value(tag='loss_1', simple_value=sum_loss),
+                     tf.Summary.Value(tag='accuracy_1', simple_value=sum_accuracy),
+                     tf.Summary.Value(tag='token_f1', simple_value=token_f1),
+                     tf.Summary.Value(tag='chunk_f1', simple_value=chunk_f1)]
+    summaries = tf.Summary(value=summary_value)
+    summary_writer.add_summary(summaries, global_step)
     
     m = token_f1
     return m

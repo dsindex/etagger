@@ -8,24 +8,8 @@ from masked_conv import masked_conv1d_and_max
 
 class Model:
 
-    __keep_prob = 0.7              # keep probability for dropout
-    __chr_conv_type = 'conv1d'     # conv1d | conv2d
-    __filter_sizes = [3]           # filter sizes
-    __num_filters = 25             # number of filters
-    __rnn_used = True              # use rnn layer or not
-    __rnn_num_layers = 2           # number of RNN layers
-    __rnn_type = 'fused'           # normal | fused
-    __rnn_size = 200               # size of RNN hidden unit
-    __tf_used = False              # use transformer encoder layer or not
-    __tf_num_layers = 4            # number of layers for transformer encoder
-    __tf_keep_prob = 0.8           # keep probability for transformer encoder
-    __tf_mh_num_heads = 4          # number of head for multi head attention
-    __tf_mh_num_units = 64         # Q,K,V dimension for multi head attention
-    __tf_mh_keep_prob = 0.8        # keep probability for multi head attention
-    __tf_ffn_kernel_size = 3       # conv1d kernel size for feed forward net
-    __tf_ffn_keep_prob = 0.8       # keep probability for feed forward net
-
     def __init__(self, config):
+        self.config = config
         self.embvec = config.embvec
         self.wrd_vocab_size = len(self.embvec.wrd_embeddings)
         self.wrd_dim = config.wrd_dim
@@ -44,7 +28,7 @@ class Model:
         """
         self.is_train = tf.placeholder(tf.bool, name='is_train')
         self.sentence_length = tf.placeholder(tf.int32, name='sentence_length')
-        keep_prob = tf.cond(self.is_train, lambda: self.__keep_prob, lambda: 1.0)
+        keep_prob = tf.cond(self.is_train, lambda: config.keep_prob, lambda: 1.0)
 
         # pos embedding
         self.input_data_pos_ids = tf.placeholder(tf.int32, shape=[None, None], name='input_data_pos_ids') # (batch_size, sentence_length)
@@ -65,7 +49,7 @@ class Model:
         self.input_data_wordchr_ids = tf.placeholder(tf.int32,
                                                      shape=[None, None, self.word_length], # (batch_size, sentence_length, word_length)
                                                      name='input_data_wordchr_ids')
-        if self.__chr_conv_type == 'conv1d':
+        if config.chr_conv_type == 'conv1d':
             self.wordchr_embeddings = self.__wordchr_embedding_conv1d(self.input_data_wordchr_ids,
                                                                       keep_prob=keep_prob,
                                                                       scope='wordchr-embedding-conv1d')
@@ -77,15 +61,17 @@ class Model:
         if self.emb_class == 'elmo':
             # elmo embeddings
             self.elmo_bilm = config.elmo_bilm
+            elmo_keep_prob = tf.cond(self.is_train, lambda: config.elmo_keep_prob, lambda: 1.0)
             self.elmo_input_data_wordchr_ids = tf.placeholder(tf.int32,
                                                               shape=[None, None, self.word_length], # (batch_size, sentence_length+2, word_length)
                                                               name='elmo_input_data_wordchr_ids')   # '+2' stands for '<S>', '</S>'
-            self.elmo_embeddings = self.__elmo_embedding(self.elmo_input_data_wordchr_ids, masks, keep_prob=keep_prob)
+            self.elmo_embeddings = self.__elmo_embedding(self.elmo_input_data_wordchr_ids, masks, keep_prob=elmo_keep_prob)
         if self.emb_class == 'bert':
             # bert embeddings
             self.bert_config = config.bert_config
             self.bert_init_checkpoint = config.bert_init_checkpoint
             self.bert_max_seq_length = config.bert_max_seq_length
+            bert_keep_prob = tf.cond(self.is_train, lambda: config.bert_keep_prob, lambda: 1.0)
             self.bert_input_data_token_ids   = tf.placeholder(tf.int32, shape=[None, self.bert_max_seq_length], name='bert_input_data_token_ids')
             self.bert_input_data_token_masks = tf.placeholder(tf.int32, shape=[None, self.bert_max_seq_length], name='bert_input_data_token_masks') 
             self.bert_input_data_segment_ids = tf.placeholder(tf.int32, shape=[None, self.bert_max_seq_length], name='bert_input_data_segment_ids') 
@@ -95,7 +81,7 @@ class Model:
                                                          self.bert_input_data_segment_ids,
                                                          self.bert_input_data_token2word_indices,
                                                          masks,
-                                                         keep_prob=keep_prob)
+                                                         keep_prob=bert_keep_prob)
 
         if self.emb_class == 'elmo':
             self.input_data = tf.concat([self.word_embeddings, self.wordchr_embeddings, self.elmo_embeddings, self.pos_embeddings],
@@ -116,20 +102,20 @@ class Model:
         RNN layer
         """
         rnn_output = tf.identity(self.input_data)
-        if self.__rnn_used:
-            for i in range(self.__rnn_num_layers):
-                if self.__rnn_type == 'fused':
+        if config.rnn_used:
+            for i in range(config.rnn_num_layers):
+                if config.rnn_type == 'fused':
                     scope = 'bi-lstm-fused-%s' % i
                     rnn_output = self.__bi_lstm_fused(rnn_output,
                                                       self.sentence_lengths,
-                                                      rnn_size=self.__rnn_size,
+                                                      rnn_size=config.rnn_size,
                                                       keep_prob=keep_prob,
                                                       scope=scope)                # (batch_size, sentence_length, 2*rnn_size)
                 else:
                     scope = 'bi-lstm-%s' % i
                     rnn_output = self.__bi_lstm(rnn_output,
                                                 self.sentence_lengths,
-                                                rnn_size=self.__rnn_size,
+                                                rnn_size=config.rnn_size,
                                                 keep_prob=keep_prob, scope=scope) # (batch_size, sentence_length, 2*rnn_size)
         self.rnn_output = rnn_output
 
@@ -137,10 +123,10 @@ class Model:
         Transformer layer
         """
         transformed_output = tf.identity(self.rnn_output)
-        if self.__tf_used:
-            tf_keep_prob = tf.cond(self.is_train, lambda: self.__tf_keep_prob, lambda: 1.0)
-            tf_mh_keep_prob = tf.cond(self.is_train, lambda: self.__tf_mh_keep_prob, lambda: 1.0)
-            tf_ffn_keep_prob = tf.cond(self.is_train, lambda: self.__tf_ffn_keep_prob, lambda: 1.0)
+        if config.tf_used:
+            tf_keep_prob = tf.cond(self.is_train, lambda: config.tf_keep_prob, lambda: 1.0)
+            tf_mh_keep_prob = tf.cond(self.is_train, lambda: config.tf_mh_keep_prob, lambda: 1.0)
+            tf_ffn_keep_prob = tf.cond(self.is_train, lambda: config.tf_ffn_keep_prob, lambda: 1.0)
             # last dimension must be equal to model_dim because we use a residual connection. 
             model_dim = transformed_output.get_shape().as_list()[-1]
             # sinusoidal positional signal
@@ -153,7 +139,7 @@ class Model:
                                          reuse=None)
             transformed_output += signal
             # block
-            for i in range(self.__tf_num_layers):
+            for i in range(config.tf_num_layers):
                 x = transformed_output
                 # layer norm
                 x_norm = normalize(x, scope='layer-norm-sa-%s'%i, reuse=None)
@@ -171,7 +157,7 @@ class Model:
                 y = self.__feedforward(x_norm,
                                        masks,
                                        model_dim=model_dim,
-                                       kernel_size=self.__tf_ffn_kernel_size,
+                                       kernel_size=config.tf_ffn_kernel_size,
                                        keep_prob=tf_ffn_keep_prob,
                                        scope='feed-forward-%s'%i)
                 # residual and dropout
@@ -217,7 +203,7 @@ class Model:
                                                             staircase=True)
             optimizer = tf.train.AdamOptimizer(self.learning_rate)
             tvars = tf.trainable_variables()
-            grads, _ = tf.clip_by_global_norm(tf.gradients(self.loss, tvars), 10)
+            grads, _ = tf.clip_by_global_norm(tf.gradients(self.loss, tvars), config.clip_norm)
             self.train_op = optimizer.apply_gradients(zip(grads, tvars), global_step=self.global_step)
             '''
             self.train_op = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss, global_step=self.global_step)
@@ -245,8 +231,8 @@ class Model:
             # masking
             t = tf.reshape(inputs, [-1, self.word_length])  # (batch_size*sentence_length, word_length) 
             masks = self.__compute_word_masks(t)            # (batch_size*sentence_length, word_length)
-            filters = self.__num_filters
-            kernel_size = self.__filter_sizes[0]
+            filters = self.config.num_filters
+            kernel_size = self.config.filter_sizes[0]
             wordchr_embeddings = masked_conv1d_and_max(wordchr_embeddings_t, masks, filters, kernel_size, tf.nn.relu)
             # (batch_size*sentence_length, filters) -> (batch_size, sentence_length, filters)
             wordchr_embeddings = tf.reshape(wordchr_embeddings, [-1, self.sentence_length, filters])
@@ -270,10 +256,10 @@ class Model:
             # conv and max-pooling
             wordchr_embeddings = tf.expand_dims(wordchr_embeddings_t, -1)   # (batch_size*sentence_length, word_length, chr_dim, 1)
             pooled_outputs = []
-            for i, filter_size in enumerate(self.__filter_sizes):
+            for i, filter_size in enumerate(self.config.filter_sizes):
                 with tf.variable_scope('conv-maxpool-%s' % filter_size):
                     # convolution layer
-                    filter_shape = [filter_size, self.chr_dim, 1, self.__num_filters]
+                    filter_shape = [filter_size, self.chr_dim, 1, self.config.num_filters]
                     W = tf.Variable(tf.truncated_normal(filter_shape, stddev=0.1), name='W')
                     conv = tf.nn.conv2d(
                         wordchr_embeddings,
@@ -282,7 +268,7 @@ class Model:
                         padding='VALID',
                         name='conv')
                     # apply nonlinearity
-                    b = tf.Variable(tf.constant(0.1, shape=[self.__num_filters]), name='b')
+                    b = tf.Variable(tf.constant(0.1, shape=[self.config.num_filters]), name='b')
                     h = tf.nn.relu(tf.nn.bias_add(conv, b), name='relu')
                     # max-pooling over the outputs
                     pooled = tf.nn.max_pool(
@@ -297,7 +283,7 @@ class Model:
                     pooled Tensor("conv-maxpool-3/pool:0", shape=(?, 1, 1, num_filters), dtype=float32)
                     """
             # combine all the pooled features
-            num_filters_total = self.__num_filters * len(self.__filter_sizes)
+            num_filters_total = self.config.num_filters * len(self.config.filter_sizes)
             h_pool = tf.concat(pooled_outputs, axis=-1)
             h_pool_flat = tf.reshape(h_pool, [-1, num_filters_total])
             """
@@ -325,7 +311,7 @@ class Model:
         from bert import modeling
         bert_model = modeling.BertModel(
             config=self.bert_config,
-            is_training=True,
+            is_training=False, # feature extraction(for fine-tuning, set True)
             input_ids=token_ids,
             input_mask=token_masks,
             token_type_ids=segment_ids,
@@ -399,8 +385,8 @@ class Model:
             is_training = tf.cond(self.is_train, lambda: True, lambda: False)
             attended_queries = multihead_attention(queries,
                                                    keys,
-                                                   num_units=self.__tf_mh_num_units,
-                                                   num_heads=self.__tf_mh_num_heads,
+                                                   num_units=self.config.tf_mh_num_units,
+                                                   num_heads=self.config.tf_mh_num_heads,
                                                    model_dim=model_dim,
                                                    dropout_rate=1.0 - keep_prob,
                                                    is_training=is_training,

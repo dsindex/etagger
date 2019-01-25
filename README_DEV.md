@@ -4,6 +4,7 @@
 * test 1
 word embedding size : 300(glove6B)
 bert embedding : cased_L-24_H-1024_A-16
+bert_keep_prob : 0.8
 keep_prob : 0.7
 #chr_conv_type : conv1d
 #chracter embedding size : 50
@@ -43,6 +44,7 @@ CRF
 word embedding size : 300(glove6B) -> 300(glove840B)
 elmo embedding params : elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json
 elmo embedding size : 1024
+elmo_keep_prob : 0.7
 keep_prob : 0.7
 #chr_conv_type : conv1d
 #chracter embedding size : 50
@@ -80,6 +82,7 @@ chunk : 0.9179051663128095
 word embedding size : 300(glove6B)
 elmo embedding params : elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json
 elmo embedding size : 1024
+elmo_keep_prob : 0.7
 keep_prob : 0.7
 chr_conv_type : conv1d
 chracter embedding size : 50
@@ -117,6 +120,7 @@ chunk : 0.9184724689165186
 word embedding size : 300(glove6B)
 elmo embedding params : elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json
 elmo embedding size : 1024
+elmo_keep_prob : 0.7
 keep_prob : 0.7
 chr_conv_type : conv1d
 chracter embedding size : 50
@@ -154,6 +158,7 @@ chunk : 0.9152152771638229
 word embedding size : 300(glove6B)
 elmo embedding params : elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json
 elmo embedding size : 1024
+elmo_keep_prob : 0.7
 keep_prob : 0.7
 chr_conv_type : conv1d
 chracter embedding size : 50
@@ -191,6 +196,7 @@ chunk : 0.9194512838550827
 word embedding size : 300(glove6B)
 elmo embedding params : elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json
 elmo embedding size : 1024
+elmo_keep_prob : 0.7
 keep_prob : 0.7
 chr_conv_type : conv1d
 chracter embedding size : 50
@@ -245,6 +251,7 @@ chunk : 0.9211896566940252
 * test 4
 elmo embedding params : elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json
 elmo embedding size : 1024
+elmo_keep_prob : 0.7
 keep_prob : 0.7
 #chr_conv_type : conv1d
 #chracter embedding size : 50
@@ -281,6 +288,7 @@ chunk : 0.9179978700745474
 * test 3
 elmo embedding params : elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json
 elmo embedding size : 1024
+elmo_keep_prob : 0.7 -> 0.5
 keep_prob : 0.7 -> 0.5
 chr_conv_type : conv1d
 chracter embedding size : 50
@@ -317,6 +325,7 @@ chunk : 0.9174620007069636
 * test 2
 elmo embedding params : elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json
 elmo embedding size : 1024
+elmo_keep_prob : 0.7
 keep_prob : 0.7
 chr_conv_type : conv1d
 chracter embedding size : 50

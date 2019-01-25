@@ -9,7 +9,7 @@
       - [x] 2) ELMo embedding
       - [x] 3) BERT embedding
     - etc embedding
-      - [x] pos embedding, etc features(shape, pos, gazetteer(not used))
+      - [x] pos embedding
   - contextual encoding
     - [x] 1) multi-layer BiLSTM
     - [x] 2) Transformer(encoder)
@@ -250,10 +250,10 @@ $ python -m pip install tensorflow-gpu
 
 - bert
   - clone [bert](https://github.com/google-research/bert)
-  - download `cased_L-24_H-1024_A-16`
+  - download `cased_L-12_H-768_A-12`
   ```
   $ ls embeddings
-  cased_L-24_H-1024_A-16
+  cased_L-12_H-768_A-12
   ```
 
 - spacy [optional]
@@ -280,7 +280,7 @@ $ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train
 $ python embvec.py --emb_path embeddings/glove.840B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --lowercase 0 --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weight_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5 > embeddings/vocab.txt 
 
 * for BERT
-$ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --bert_config_path embeddings/cased_L-24_H-1024_A-16/bert_config.json --bert_vocab_path embeddings/cased_L-24_H-1024_A-16/vocab.txt --bert_do_lower_case 0 --bert_init_checkpoint embeddings/cased_L-24_H-1024_A-16/bert_model.ckpt --bert_max_seq_length 180 > embeddings/vocab.txt
+$ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --bert_config_path embeddings/cased_L-12_H-768_A-12/bert_config.json --bert_vocab_path embeddings/cased_L-12_H-768_A-12/vocab.txt --bert_do_lower_case 0 --bert_init_checkpoint embeddings/cased_L-12_H-768_A-12/bert_model.ckpt --bert_max_seq_length 180 > embeddings/vocab.txt
 ```
 
 - train

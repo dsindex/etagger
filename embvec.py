@@ -97,7 +97,7 @@ class EmbVec:
         if self.lowercase: # glove 6B
             for line in open(args.emb_path): wrd_vocab_size += 1
         else:              # glove 840B
-            # FIXME glove 840B, filtering for fast training
+            # glove 840B, filtering for fast training
             wrd_vocab_size = len(self.wrd_vocab_tmp)
         wrd_vocab_size += 2 # for pad, unk
         sys.stderr.write('wrd_vocab_size = %s\n' % (wrd_vocab_size))
@@ -119,7 +119,7 @@ class EmbVec:
             if len(vector) != self.wrd_dim: continue
             if self.lowercase: word = word.lower()
             if not self.lowercase : # glove 840B
-                # FIXME filtering for fast training
+                # filtering for fast training
                 if word not in self.wrd_vocab_tmp: continue
             self.wrd_embeddings[wid] = vector
             self.wrd_vocab[word] = wid
@@ -166,7 +166,7 @@ if __name__ == '__main__':
     parser.add_argument('--bert_vocab_path', type=str, help='path to bert vocab file', default='')
     parser.add_argument('--bert_do_lower_case', type=int, help='apply lower case for bert', default=0)
     parser.add_argument('--bert_init_checkpoint', type=str, help='path to bert init checkpoint', default='')
-    parser.add_argument('--bert_max_seq_length', type=int, help='maximum total input sequence length after WordPiece tokenization.', default=150)
+    parser.add_argument('--bert_max_seq_length', type=int, help='maximum total input sequence length after WordPiece tokenization.', default=180)
     args = parser.parse_args()
     embvec = EmbVec(args)
     pkl.dump(embvec, open(args.emb_path + '.pkl', 'wb'))
