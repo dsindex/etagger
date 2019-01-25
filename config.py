@@ -37,12 +37,13 @@ class Config:
         self.tf_ffn_keep_prob = 0.8         # keep probability for feed forward net
 
         self.arg_train = arg_train
-        if arg_train:
+        if self.arg_train:
             self.epoch = args.epoch
             self.batch_size = args.batch_size
             self.dev_batch_size = 2*self.batch_size
             self.checkpoint_dir = args.checkpoint_dir
             self.summary_dir = args.summary_dir
+
         if self.emb_class == 'elmo':
             from bilm import Batcher, BidirectionalLanguageModel
             self.word_length = 50 # replace to fixed word length for the pre-trained elmo : 'max_characters_per_token'
@@ -62,5 +63,5 @@ class Config:
             self.decay_steps = 5000
             self.decay_rate = 0.9
             self.clip_norm = 1.5
-            if arg_train:
+            if self.arg_train:
                 self.dev_batch_size = self.batch_size # set batch_size == dev_batch_size
