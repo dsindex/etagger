@@ -83,18 +83,12 @@ class Model:
                                                          masks,
                                                          keep_prob=bert_keep_prob)
 
+        concat_in = [self.word_embeddings, self.wordchr_embeddings, self.pos_embeddings]
         if self.emb_class == 'elmo':
-            self.input_data = tf.concat([self.word_embeddings, self.wordchr_embeddings, self.elmo_embeddings, self.pos_embeddings],
-                                        axis=-1,
-                                        name='input_data') # (batch_size, sentence_length, input_dim)
-        elif self.emb_class == 'bert':
-            self.input_data = tf.concat([self.word_embeddings, self.wordchr_embeddings, self.bert_embeddings, self.pos_embeddings],
-                                        axis=-1,
-                                        name='input_data') # (batch_size, sentence_length, input_dim)
-        else:
-            self.input_data = tf.concat([self.word_embeddings, self.wordchr_embeddings, self.pos_embeddings],
-                                        axis=-1,
-                                        name='input_data') # (batch_size, sentence_length, input_dim)
+            concat_in = [self.word_embeddings, self.wordchr_embeddings, self.elmo_embeddings, self.pos_embeddings]
+        if self.emb_class == 'bert':
+            concat_in = [self.word_embeddings, self.wordchr_embeddings, self.bert_embeddings, self.pos_embeddings]
+        self.input_data = tf.concat(concat_in, axis=-1, name='input_data') # (batch_size, sentence_length, input_dim)
         # masking (for confirmation)
         self.input_data *= masks
 
@@ -294,7 +288,7 @@ class Model:
             wordchr_embeddings = tf.reshape(h_pool_flat, [-1, self.sentence_length, num_filters_total])
             return tf.nn.dropout(wordchr_embeddings, keep_prob)
 
-    def __elmo_embedding(self, inputs, masks, keep_prob=0.5):
+    def __elmo_embedding(self, inputs, masks, keep_prob=0.8):
         """Compute ELMo embeddings
         """
         from bilm import weight_layers
@@ -305,7 +299,7 @@ class Model:
         elmo_embeddings *= masks
         return tf.nn.dropout(elmo_embeddings, keep_prob)
 
-    def __bert_embedding(self, token_ids, token_masks, segment_ids, token2word_indices, masks, keep_prob=0.5):
+    def __bert_embedding(self, token_ids, token_masks, segment_ids, token2word_indices, masks, keep_prob=0.8):
         """Compute BERT embeddings 
         """
         from bert import modeling
