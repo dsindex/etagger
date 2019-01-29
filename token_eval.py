@@ -55,12 +55,12 @@ class TokenEval:
 
         # in_class vs out_class
         in_class  = 'I'
-        out_class = 'O'
+        out_classes = ['O', 'X']
         self.tp[in_class] = 0
         self.fp[in_class] = 0
         self.fn[in_class] = 0
         for c, _ in self.cls.items():
-            if c != out_class:
+            if c not in out_classes:
                 self.tp[in_class] += self.tp[c]
                 self.fp[in_class] += self.fp[c]
                 self.fn[in_class] += self.fn[c]
@@ -116,9 +116,9 @@ class TokenEval:
                 else:
                     fp[prediction[i, j]] += 1
                     fn[target[i, j]] += 1
-        out_of_class = 0 # SEE EmbVec.oot_tid
+        out_of_classes = [0, 1] # SEE embvec.oot_tid, embvec.xot_tid
         for i in range(class_size):
-            if i != out_of_class:
+            if i not in out_of_classes:
                 tp[class_size] += tp[i]
                 fp[class_size] += fp[i]
                 fn[class_size] += fn[i]
