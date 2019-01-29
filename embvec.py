@@ -27,6 +27,8 @@ class EmbVec:
         self.pos_vocab[self.unk] = self.unk_pid
         self.oot_tid = 0         # out of tag id
         self.oot_tag = 'O'       # out of tag, this is fixed for convenience
+        self.xot_tid = 1         # 'X' tag id
+        self.xot_tag = 'X'       # 'X' tag, fixed for convenience
         self.tag_vocab = {}      # tag vocab (tag -> id)
         self.itag_vocab = {}     # inverse tag vocab (id -> tag)
         self.tag_vocab[self.oot_tag] = self.oot_tid
