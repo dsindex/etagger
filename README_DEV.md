@@ -17,10 +17,10 @@ rnn_used : True
 rnn_type : fused
 rnn_size : 200
 rnn_num_layers : 2
-learning_rate : exponential_decay(), 0.001 / 12000 / 0.9 -> 0.0003 / 5000 / 0.9
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9 -> 2e-5 / 5000 / 0.9
 gradient clipping : 10 -> 1.5
 epoch : 70
-batch_size : 20
+batch_size : 20 -> 16
 +
 tf_used : False
 tf_keep_prob : 0.8
@@ -51,10 +51,10 @@ rnn_used : True
 rnn_type : fused
 rnn_size : 200
 rnn_num_layers : 2
-learning_rate : exponential_decay(), 0.001 / 12000 / 0.9 -> 0.0003 / 5000 / 0.9
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9 -> 2e-5 / 5000 / 0.9
 gradient clipping : 10 -> 1.5
 epoch : 70
-batch_size : 20
+batch_size : 20 -> 16
 +
 tf_used : False
 tf_keep_prob : 0.8

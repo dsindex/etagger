@@ -28,9 +28,10 @@ def train_step(sess, model, config, data, summary_op, summary_writer):
     nbatches = (len(data.sentence_tags) + config.batch_size - 1) // config.batch_size
     prog = Progbar(target=nbatches)
     for ptr in range(0, len(data.sentence_tags), config.batch_size):
+        config.is_training = True
         feed_dict={model.input_data_pos_ids: data.sentence_pos_ids[ptr:ptr + config.batch_size],
                    model.output_data: data.sentence_tags[ptr:ptr + config.batch_size],
-                   model.is_train: True,
+                   model.is_train: config.is_training,
                    model.sentence_length: data.max_sentence_length}
         feed_dict[model.input_data_word_ids] = data.sentence_word_ids[ptr:ptr + config.batch_size]
         feed_dict[model.input_data_wordchr_ids] = data.sentence_wordchr_ids[ptr:ptr + config.batch_size]
@@ -80,9 +81,10 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
     global_step = 0
     # evaluate on dev data sliced by dev_batch_size to prevent OOM
     for ptr in range(0, len(data.sentence_tags), config.dev_batch_size):
+        config.is_training = False
         feed_dict={model.input_data_pos_ids: data.sentence_pos_ids[ptr:ptr + config.dev_batch_size],
                    model.output_data: data.sentence_tags[ptr:ptr + config.dev_batch_size],
-                   model.is_train: False,
+                   model.is_train: config.is_training,
                    model.sentence_length: data.max_sentence_length}
         feed_dict[model.input_data_word_ids] = data.sentence_word_ids[ptr:ptr + config.dev_batch_size]
         feed_dict[model.input_data_wordchr_ids] = data.sentence_wordchr_ids[ptr:ptr + config.dev_batch_size]
@@ -117,7 +119,7 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
     sum_output_data_indices = np.argmax(data.sentence_tags, 2)
     tag_corrects = data.logits_indices_to_tags_seq(sum_output_data_indices, sum_sentence_lengths)
     prec, rec, f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
-    print('dev precision, recall, f1(chunk): ', prec, rec, f1, ', this is not meaningful for emb_class=bert')
+    print('dev precision, recall, f1(chunk): ', prec, rec, f1, ', this is no meaningful for emb_class=bert')
     chunk_f1 = f1
     m = chunk_f1
     # create summaries manually
@@ -143,21 +145,6 @@ def do_train(model, config, train_data, dev_data):
     if config.restore is not None:
         saver.restore(sess, config.restore)
         print('model restored')
-
-    '''
-    # initialize pre-trained bert
-    if config.emb_class == 'bert' and config.bert_init_checkpoint:
-        from bert import modeling
-        tvars = tf.trainable_variables()
-        (assignment_map, initialized_variable_names) = modeling.get_assignment_map_from_checkpoint(tvars, config.bert_init_checkpoint)
-        tf.train.init_from_checkpoint(config.bert_init_checkpoint, assignment_map)
-        tf.logging.info("**** Trainable Variables ****")
-        for var in tvars:
-            init_string = ""
-            if var.name in initialized_variable_names:
-                init_string = ", *INIT_FROM_CKPT*"
-            tf.logging.info("  name = %s, shape = %s%s", var.name, var.shape, init_string)
-    '''
 
     # summary setting
     loss_summary = tf.summary.scalar('loss', model.loss)
@@ -214,5 +201,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
     tf.logging.set_verbosity(tf.logging.INFO)
 
-    config = Config(args, arg_train=True, emb_class='bert', use_crf=True)
+    config = Config(args, is_training=True, emb_class='bert', use_crf=True)
     train(config)

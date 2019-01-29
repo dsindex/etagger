@@ -295,11 +295,6 @@ $ python train.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --ba
 $ rm -rf runs; tensorboard --logdir runs/summaries/ --port 6008
 ```
     
-- inference(bulk)
-```
-$ python inference.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --restore checkpoint/ner_model
-```
-
 - inference(bucket)
 ```
 $ python inference.py --mode bucket --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --restore checkpoint/ner_model < data/test.txt > pred.txt
@@ -451,14 +446,14 @@ in IN O O O
   ```
   $ cd inference
   * let's assume that we have a saved model :
-  *   1) BiLSTM, LSTMCell(), without ELMo
-  *   2) BiLSTM, LSTMBlockFusedCell(), withoug ELMo
+  *   1) BiLSTM, LSTMCell(), without ELMo, BERT
+  *   2) BiLSTM, LSTMBlockFusedCell(), withoug ELMo, BERT
   *     : can't find `BlockLSTM` when using import_meta_graph()
   *     : similar issue => https://stackoverflow.com/questions/50298058/restore-trained-tensorflow-model-keyerror-blocklstm
         : how to fix? => https://github.com/tensorflow/tensorflow/issues/23369
         : what about C++? => https://stackoverflow.com/questions/50475320/executing-frozen-tensorflow-graph-that-uses-tensorflow-contrib-resampler-using-c
           we can load '_lstm_ops.so' for LSTMBlockFusedCell().
-  *   3) Transformer, without ELMo
+  *   3) Transformer, without ELMo, BERT
 
   * restore the model to check list of operations, placeholders and tensors for mapping. and export it another place.
   $ python export.py --restore ../checkpoint/ner_model --export exported/ner_model --export-pb exported

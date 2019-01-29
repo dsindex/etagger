@@ -12,56 +12,6 @@ from chunk_eval  import ChunkEval
 from viterbi import viterbi_decode
 from input import Input
 
-def inference_bulk(config):
-    """Inference for test file
-    """
-
-    # Build input data
-    test_file = 'data/test.txt'
-    test_data = Input(test_file, config, build_output=True)
-    print('loading input data ... done')
-
-    # Create model
-    model = Model(config)
-
-    session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
-    sess = tf.Session(config=session_conf)
-    # Restore model
-    feed_dict = {model.wrd_embeddings_init: config.embvec.wrd_embeddings}
-    sess.run(tf.global_variables_initializer(), feed_dict=feed_dict)
-    saver = tf.train.Saver()
-    saver.restore(sess, config.restore)
-    print('model restored')
-    feed_dict = {model.input_data_pos_ids: test_data.sentence_pos_ids,
-                 model.output_data: test_data.sentence_tags,
-                 model.is_train: False,
-                 model.sentence_length: test_data.max_sentence_length}
-    feed_dict[model.input_data_word_ids] = test_data.sentence_word_ids
-    feed_dict[model.input_data_wordchr_ids] = test_data.sentence_wordchr_ids
-    if config.emb_class == 'elmo':
-        feed_dict[model.elmo_input_data_wordchr_ids] = test_data.sentence_elmo_wordchr_ids
-    if config.emb_class == 'bert':
-        feed_dict[model.bert_input_data_token_ids] = test_data.sentence_bert_token_ids
-        feed_dict[model.bert_input_data_token_masks] = test_data.sentence_bert_token_masks
-        feed_dict[model.bert_input_data_segment_ids] = test_data.sentence_bert_segment_ids
-    logits, trans_params, sentence_lengths = \
-                 sess.run([model.logits, model.trans_params, model.sentence_lengths], \
-                           feed_dict=feed_dict)
-    print('test precision, recall, f1(token): ')
-    TokenEval.compute_f1(config.class_size, logits, test_data.sentence_tags, sentence_lengths)
-    if config.use_crf:
-        viterbi_sequences = viterbi_decode(logits, trans_params, sentence_lengths)
-        tag_preds = test_data.logits_indices_to_tags_seq(viterbi_sequences, sentence_lengths)
-    else:
-        logits_indices = np.argmax(logits, 2)
-        tag_preds = test_data.logits_indices_to_tags_seq(logits_indices, sentence_lengths)
-    output_data_indices = np.argmax(test_data.sentence_tags, 2)
-    tag_corrects = test_data.logits_indices_to_tags_seq(output_data_indices, sentence_lengths)
-    test_prec, test_rec, test_f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
-    print('test precision, recall, f1(chunk): ', test_prec, test_rec, test_f1)
-
-    sess.close()
-
 def inference_bucket(config):
     """Inference for bucket
     """
@@ -275,7 +225,6 @@ if __name__ == '__main__':
     parser.add_argument('--mode', type=str, default='bulk', help='bulk, bucket, line')
 
     args = parser.parse_args()
-    config = Config(args, arg_train=False, emb_class='bert', use_crf=True)
-    if args.mode == 'bulk':   inference_bulk(config)
+    config = Config(args, is_training=False, emb_class='bert', use_crf=True)
     if args.mode == 'bucket': inference_bucket(config)
     if args.mode == 'line':   inference_line(config)

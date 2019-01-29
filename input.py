@@ -156,7 +156,7 @@ class Input:
                 bert_pos_ids.append(pos_ids[i])
                 if j == 0:
                     bert_tag.append(tag[i])
-                    bert_wordidx2tokenidx[i] = ntoken_last
+                    bert_wordidx2tokenidx[i] = ntokens_last
                 else:
                     bert_tag.append(self.__tag_vec(self.config.embvec.xot_tag, self.config.class_size)) # 'X' tag
             if len(ntokens) == bert_max_seq_length - 1:

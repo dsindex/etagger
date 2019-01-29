@@ -164,5 +164,5 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     args.restore = None
-    config = Config(args, arg_train=False, emb_class='glove', use_crf=True)
+    config = Config(args, is_training=False, emb_class='glove', use_crf=True)
     inference(config, args.frozen_path)

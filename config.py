@@ -3,7 +3,7 @@ import numpy as np
 import pickle as pkl
 
 class Config:
-    def __init__(self, args, arg_train=True, emb_class='glove', use_crf=True):
+    def __init__(self, args, is_training=True, emb_class='glove', use_crf=True):
         self.emb_path = args.emb_path
         self.embvec = pkl.load(open(self.emb_path, 'rb')) # resources(glove, vocab, path, etc)
         self.wrd_dim = args.wrd_dim         # size of word embedding(glove)
@@ -36,8 +36,8 @@ class Config:
         self.tf_ffn_kernel_size = 3         # conv1d kernel size for feed forward net
         self.tf_ffn_keep_prob = 0.8         # keep probability for feed forward net
 
-        self.arg_train = arg_train
-        if self.arg_train:
+        self.is_training = is_training
+        if self.is_training:
             self.epoch = args.epoch
             self.batch_size = args.batch_size
             self.dev_batch_size = 2*self.batch_size
@@ -65,5 +65,5 @@ class Config:
             self.decay_steps = 5000
             self.decay_rate = 0.9
             self.clip_norm = 1.5
-            if self.arg_train:
+            if self.is_training:
                 self.dev_batch_size = self.batch_size # set batch_size == dev_batch_size

@@ -21,7 +21,8 @@ class Model:
         self.class_size = config.class_size
         self.use_crf = config.use_crf
         self.emb_class = config.emb_class
-        self.set_cuda_visible_devices(config.arg_train)
+        self.is_training = config.is_training
+        self.set_cuda_visible_devices(self.is_training)
 
         """
         Input layer
@@ -303,7 +304,7 @@ class Model:
         from bert import modeling
         bert_model = modeling.BertModel(
             config=self.bert_config,
-            is_training=True,
+            is_training=self.is_training,
             input_ids=token_ids,
             input_mask=token_masks,
             token_type_ids=segment_ids,
@@ -372,14 +373,13 @@ class Model:
             if not model_dim: model_dim = inputs.get_shape().as_list()[-1]
             queries = inputs
             keys = inputs
-            is_training = tf.cond(self.is_train, lambda: True, lambda: False)
             attended_queries = multihead_attention(queries,
                                                    keys,
                                                    num_units=self.config.tf_mh_num_units,
                                                    num_heads=self.config.tf_mh_num_heads,
                                                    model_dim=model_dim,
                                                    dropout_rate=1.0 - keep_prob,
-                                                   is_training=is_training,
+                                                   is_training=self.is_training,
                                                    causality=False, # no future masking
                                                    scope='multihead-attention',
                                                    reuse=None)
@@ -463,10 +463,10 @@ class Model:
         return word_masks
 
     @staticmethod
-    def set_cuda_visible_devices(arg_train):
+    def set_cuda_visible_devices(is_training):
         import os
         os.environ['CUDA_VISIBLE_DEVICES']='1'
-        if arg_train:
+        if is_training:
             from tensorflow.python.client import device_lib
             print(device_lib.list_local_devices())
         return True
