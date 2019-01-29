@@ -44,7 +44,6 @@ def inference_bulk(config):
         feed_dict[model.bert_input_data_token_ids] = test_data.sentence_bert_token_ids
         feed_dict[model.bert_input_data_token_masks] = test_data.sentence_bert_token_masks
         feed_dict[model.bert_input_data_segment_ids] = test_data.sentence_bert_segment_ids
-        feed_dict[model.bert_input_data_token2word_indices] = test_data.sentence_bert_token2word_indices
     logits, trans_params, sentence_lengths = \
                  sess.run([model.logits, model.trans_params, model.sentence_lengths], \
                            feed_dict=feed_dict)
@@ -111,7 +110,6 @@ def inference_bucket(config):
                 feed_dict[model.bert_input_data_token_ids] = inp.sentence_bert_token_ids
                 feed_dict[model.bert_input_data_token_masks] = inp.sentence_bert_token_masks
                 feed_dict[model.bert_input_data_segment_ids] = inp.sentence_bert_segment_ids
-                feed_dict[model.bert_input_data_token2word_indices] = inp.sentence_bert_token2word_indices
             logits, trans_params, sentence_lengths = sess.run([model.logits, model.trans_params, \
                                                                model.sentence_lengths], \
                                                               feed_dict=feed_dict)
@@ -121,7 +119,11 @@ def inference_bucket(config):
             else:
                 tags = inp.logit_to_tags(logits[0], sentence_lengths[0])
             for i in range(len(bucket)):
-                out = bucket[i] + ' ' + tags[i]
+                if config.emb_class == 'bert':
+                    j = inp.sentence_bert_wordidx2tokenidx[i]
+                    out = bucket[i] + ' ' + tags[j]
+                else:
+                    out = bucket[i] + ' ' + tags[i]
                 sys.stdout.write(out + '\n')
             sys.stdout.write('\n')
             bucket = []
@@ -146,7 +148,6 @@ def inference_bucket(config):
             feed_dict[model.bert_input_data_token_ids] = inp.sentence_bert_token_ids
             feed_dict[model.bert_input_data_token_masks] = inp.sentence_bert_token_masks
             feed_dict[model.bert_input_data_segment_ids] = inp.sentence_bert_segment_ids
-            feed_dict[model.bert_input_data_token2word_indices] = inp.sentence_bert_token2word_indices
         logits, trans_params, sentence_lengths = sess.run([model.logits, model.trans_params, \
                                                            model.sentence_lengths], \
                                                           feed_dict=feed_dict)
@@ -156,7 +157,11 @@ def inference_bucket(config):
         else:
             tags = inp.logit_to_tags(logits[0], sentence_lengths[0])
         for i in range(len(bucket)):
-            out = bucket[i] + ' ' + tags[i]
+            if config.emb_class == 'bert':
+                j = inp.sentence_bert_wordidx2tokenidx[i]
+                out = bucket[i] + ' ' + tags[j]
+            else:
+                out = bucket[i] + ' ' + tags[i]
             sys.stdout.write(out + '\n')
         sys.stdout.write('\n')
         duration_time = time.time() - start_time
@@ -242,7 +247,6 @@ def inference_line(config):
             feed_dict[model.bert_input_data_token_ids] = inp.sentence_bert_token_ids
             feed_dict[model.bert_input_data_token_masks] = inp.sentence_bert_token_masks
             feed_dict[model.bert_input_data_segment_ids] = inp.sentence_bert_segment_ids
-            feed_dict[model.bert_input_data_token2word_indices] = inp.sentence_bert_token2word_indices
         logits, trans_params, sentence_lengths = sess.run([model.logits, model.trans_params, \
                                                            model.sentence_lengths], \
                                                           feed_dict=feed_dict)
@@ -252,7 +256,11 @@ def inference_line(config):
         else:
             tags = inp.logit_to_tags(logits[0], sentence_lengths[0])
         for i in range(len(bucket)):
-            out = bucket[i] + ' ' + tags[i]
+            if config.emb_class == 'bert':
+                j = inp.sentence_bert_wordidx2tokenidx[i]
+                out = bucket[i] + ' ' + tags[j]
+            else:
+                out = bucket[i] + ' ' + tags[i]
             sys.stdout.write(out + '\n')
         sys.stdout.write('\n')
 

@@ -33,6 +33,8 @@ class EmbVec:
         self.itag_vocab = {}     # inverse tag vocab (id -> tag)
         self.tag_vocab[self.oot_tag] = self.oot_tid
         self.itag_vocab[0] = self.oot_tag
+        self.tag_vocab[self.xot_tag] = self.xot_tid
+        self.itag_vocab[1] = self.xot_tag
     
         self.wrd_vocab_tmp = {}  # word vocab for train/dev/test
 
@@ -53,7 +55,7 @@ class EmbVec:
         # build character/pos/tag/elmo vocab
         cid = self.unk_cid + 1
         pid = self.unk_pid + 1
-        tid = self.oot_tid + 1
+        tid = self.xot_tid + 1
         for line in open(args.total_path):
             line = line.strip()
             if not line: continue

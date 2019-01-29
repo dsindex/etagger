@@ -107,7 +107,6 @@ def inference(config, frozen_pb_path):
                 feed_dict[p_bert_input_data_token_ids] = inp.sentence_bert_token_ids
                 feed_dict[p_bert_input_data_token_masks] = inp.sentence_bert_token_masks
                 feed_dict[p_bert_input_data_segment_ids] = inp.sentence_bert_segment_ids
-                feed_dict[p_bert_input_data_token2word_indices] = inp.sentence_bert_token2word_indices
             logits, trans_params, sentence_lengths = sess.run([t_logits, t_trans_params, t_sentence_lengths], \
                                                               feed_dict=feed_dict)
             if config.use_crf:
@@ -116,7 +115,11 @@ def inference(config, frozen_pb_path):
             else:
                 tags = inp.logit_to_tags(logits[0], sentence_lengths[0])
             for i in range(len(bucket)):
-                out = bucket[i] + ' ' + tags[i]
+                if config.emb_class == 'bert':
+                    j = inp.sentence_bert_wordidx2tokenidx[i]
+                    out = bucket[i] + ' ' + tags[j]
+                else:
+                    out = bucket[i] + ' ' + tags[i]
                 sys.stdout.write(out + '\n')
             sys.stdout.write('\n')
             bucket = []
@@ -141,7 +144,6 @@ def inference(config, frozen_pb_path):
             feed_dict[p_bert_input_data_token_ids] = inp.sentence_bert_token_ids
             feed_dict[p_bert_input_data_token_masks] = inp.sentence_bert_token_masks
             feed_dict[p_bert_input_data_segment_ids] = inp.sentence_bert_segment_ids
-            feed_dict[p_bert_input_data_token2word_indices] = inp.sentence_bert_token2word_indices
         logits, trans_params, sentence_lengths = sess.run([t_logits, t_trans_params, t_sentence_lengths], \
                                                           feed_dict=feed_dict)
         if config.use_crf:
@@ -150,7 +152,11 @@ def inference(config, frozen_pb_path):
         else:
             tags = inp.logit_to_tags(logits[0], sentence_lengths[0])
         for i in range(len(bucket)):
-            out = bucket[i] + ' ' + tags[i]
+            if config.emb_class == 'bert':
+                j = inp.sentence_bert_wordidx2tokenidx[i]
+                out = bucket[i] + ' ' + tags[j]
+            else:
+                out = bucket[i] + ' ' + tags[i]
             sys.stdout.write(out + '\n')
         sys.stdout.write('\n')
         duration_time = time.time() - start_time

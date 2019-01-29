@@ -70,16 +70,13 @@ class Model:
             # bert embeddings
             self.bert_config = config.bert_config
             self.bert_init_checkpoint = config.bert_init_checkpoint
-            self.bert_max_seq_length = config.bert_max_seq_length
             bert_keep_prob = tf.cond(self.is_train, lambda: config.bert_keep_prob, lambda: 1.0)
-            self.bert_input_data_token_ids   = tf.placeholder(tf.int32, shape=[None, self.bert_max_seq_length], name='bert_input_data_token_ids')
-            self.bert_input_data_token_masks = tf.placeholder(tf.int32, shape=[None, self.bert_max_seq_length], name='bert_input_data_token_masks') 
-            self.bert_input_data_segment_ids = tf.placeholder(tf.int32, shape=[None, self.bert_max_seq_length], name='bert_input_data_segment_ids') 
-            self.bert_input_data_token2word_indices = tf.placeholder(tf.int32, shape=[None, None, 2], name='bert_input_data_token2word_indices') # (batch_size, sentence_length, 2)
+            self.bert_input_data_token_ids   = tf.placeholder(tf.int32, shape=[None, config.bert_max_seq_length], name='bert_input_data_token_ids')
+            self.bert_input_data_token_masks = tf.placeholder(tf.int32, shape=[None, config.bert_max_seq_length], name='bert_input_data_token_masks') 
+            self.bert_input_data_segment_ids = tf.placeholder(tf.int32, shape=[None, config.bert_max_seq_length], name='bert_input_data_segment_ids') 
             self.bert_embeddings = self.__bert_embedding(self.bert_input_data_token_ids,
                                                          self.bert_input_data_token_masks,
                                                          self.bert_input_data_segment_ids,
-                                                         self.bert_input_data_token2word_indices,
                                                          masks,
                                                          keep_prob=bert_keep_prob)
 
@@ -87,7 +84,8 @@ class Model:
         if self.emb_class == 'elmo':
             concat_in = [self.word_embeddings, self.wordchr_embeddings, self.elmo_embeddings, self.pos_embeddings]
         if self.emb_class == 'bert':
-            concat_in = [self.word_embeddings, self.wordchr_embeddings, self.bert_embeddings, self.pos_embeddings]
+            #concat_in = [self.word_embeddings, self.wordchr_embeddings, self.bert_embeddings, self.pos_embeddings]
+            concat_in = [self.bert_embeddings]
         self.input_data = tf.concat(concat_in, axis=-1, name='input_data') # (batch_size, sentence_length, input_dim)
         # masking (for confirmation)
         self.input_data *= masks
@@ -299,20 +297,21 @@ class Model:
         elmo_embeddings *= masks
         return tf.nn.dropout(elmo_embeddings, keep_prob)
 
-    def __bert_embedding(self, token_ids, token_masks, segment_ids, token2word_indices, masks, keep_prob=0.8):
+    def __bert_embedding(self, token_ids, token_masks, segment_ids, masks, keep_prob=0.8):
         """Compute BERT embeddings 
         """
         from bert import modeling
         bert_model = modeling.BertModel(
             config=self.bert_config,
-            is_training=False, # feature extraction(for fine-tuning, set True)
+            is_training=True,
             input_ids=token_ids,
             input_mask=token_masks,
             token_type_ids=segment_ids,
             use_one_hot_embeddings=False)
-        bert_embeddings = bert_model.get_sequence_output() # (batch_size, bert_max_seq_length, bert_embedding_size)
-        tvars = tf.trainable_variables()
+        bert_embeddings = bert_model.get_sequence_output()  # (batch_size, bert_max_seq_length, bert_embedding_size)
+        # initialize pre-trained bert
         if self.bert_init_checkpoint:
+            tvars = tf.trainable_variables()
             (assignment_map, initialized_variable_names) = modeling.get_assignment_map_from_checkpoint(tvars, self.bert_init_checkpoint)
             tf.train.init_from_checkpoint(self.bert_init_checkpoint, assignment_map)
             tf.logging.info("**** Trainable Variables ****")
@@ -321,11 +320,8 @@ class Model:
                 if var.name in initialized_variable_names:
                     init_string = ", *INIT_FROM_CKPT*"
                 tf.logging.info("  name = %s, shape = %s%s", var.name, var.shape, init_string)
-        # we need to align bert_embeddings for word-based via tf.gather_nd() 
-        bert_embeddings = tf.gather_nd(bert_embeddings, token2word_indices)
-        # masking(remove noise due to padding)
-        bert_embeddings *= masks
-        return tf.nn.dropout(bert_embeddings, keep_prob)
+        return bert_embeddings
+        #return tf.nn.dropout(bert_embeddings, keep_prob)
 
     def __pos_embedding(self, inputs, keep_prob=0.5, scope='pos-embedding'):
         """Computing pos embeddings
@@ -404,8 +400,10 @@ class Model:
         """
         with tf.variable_scope('projection'):
             in_dim = inputs.get_shape().as_list()[-1]
-            weight = tf.Variable(tf.truncated_normal([in_dim, out_dim], stddev=0.01), name='W')
-            bias = tf.Variable(tf.constant(0.1, shape=[out_dim]), name='b')
+            weight = tf.get_variable('W', shape=[in_dim, out_dim],
+                                     dtype=tf.float32, initializer=initializers.xavier_initializer())
+            bias = tf.get_variable('b', shape=[out_dim], dtype=tf.float32,
+                                   initializer=tf.zeros_initializer())
             t_output = tf.reshape(inputs, [-1, in_dim])                      # (batch_size*sentence_length, in_dim)
             output = tf.matmul(t_output, weight) + bias                      # (batch_size*sentence_length, out_dim)
             output = tf.reshape(output, [-1, self.sentence_length, out_dim]) # (batch_size, sentence_length, out_dim)

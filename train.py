@@ -40,10 +40,23 @@ def train_step(sess, model, config, data, summary_op, summary_writer):
             feed_dict[model.bert_input_data_token_ids] = data.sentence_bert_token_ids[ptr:ptr + config.batch_size]
             feed_dict[model.bert_input_data_token_masks] = data.sentence_bert_token_masks[ptr:ptr + config.batch_size]
             feed_dict[model.bert_input_data_segment_ids] = data.sentence_bert_segment_ids[ptr:ptr + config.batch_size]
-            feed_dict[model.bert_input_data_token2word_indices] = data.sentence_bert_token2word_indices[ptr:ptr + config.batch_size]
-        step, summaries, _, loss, accuracy, learning_rate = \
+        step, summaries, _, loss, accuracy, learning_rate, bert_embeddings = \
                sess.run([model.global_step, summary_op, model.train_op, \
-                         model.loss, model.accuracy, model.learning_rate], feed_dict=feed_dict, options=runopts)
+                         model.loss, model.accuracy, model.learning_rate, model.bert_embeddings], feed_dict=feed_dict, options=runopts)
+        if config.emb_class == 'bert' and idx == 0:
+            print("# bert_token_ids")
+            t = data.sentence_bert_token_ids[:3]
+            print(np.shape(t))
+            print(t)
+            print("# bert_token_masks")
+            t = data.sentence_bert_token_masks[:3]
+            print(np.shape(t))
+            print(t)
+            print("# bert_embedding")
+            t = bert_embeddings[:3]
+            print(np.shape(t))
+            print(t)
+
         summary_writer.add_summary(summaries, step)
         prog.update(idx + 1,
                     [('step', step),
@@ -79,7 +92,6 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
             feed_dict[model.bert_input_data_token_ids] = data.sentence_bert_token_ids[ptr:ptr + config.batch_size]
             feed_dict[model.bert_input_data_token_masks] = data.sentence_bert_token_masks[ptr:ptr + config.batch_size]
             feed_dict[model.bert_input_data_segment_ids] = data.sentence_bert_segment_ids[ptr:ptr + config.batch_size]
-            feed_dict[model.bert_input_data_token2word_indices] = data.sentence_bert_token2word_indices[ptr:ptr + config.batch_size]
         global_step, logits, trans_params, sentence_lengths, loss, accuracy = \
                  sess.run([model.global_step, model.logits, model.trans_params, model.sentence_lengths, \
                            model.loss, model.accuracy], feed_dict=feed_dict)
@@ -105,7 +117,7 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
     sum_output_data_indices = np.argmax(data.sentence_tags, 2)
     tag_corrects = data.logits_indices_to_tags_seq(sum_output_data_indices, sum_sentence_lengths)
     prec, rec, f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
-    print('dev precision, recall, f1(chunk): ', prec, rec, f1)
+    print('dev precision, recall, f1(chunk): ', prec, rec, f1, ', this is not meaningful for emb_class=bert')
     chunk_f1 = f1
     m = chunk_f1
     # create summaries manually
@@ -131,6 +143,22 @@ def do_train(model, config, train_data, dev_data):
     if config.restore is not None:
         saver.restore(sess, config.restore)
         print('model restored')
+
+    '''
+    # initialize pre-trained bert
+    if config.emb_class == 'bert' and config.bert_init_checkpoint:
+        from bert import modeling
+        tvars = tf.trainable_variables()
+        (assignment_map, initialized_variable_names) = modeling.get_assignment_map_from_checkpoint(tvars, config.bert_init_checkpoint)
+        tf.train.init_from_checkpoint(config.bert_init_checkpoint, assignment_map)
+        tf.logging.info("**** Trainable Variables ****")
+        for var in tvars:
+            init_string = ""
+            if var.name in initialized_variable_names:
+                init_string = ", *INIT_FROM_CKPT*"
+            tf.logging.info("  name = %s, shape = %s%s", var.name, var.shape, init_string)
+    '''
+
     # summary setting
     loss_summary = tf.summary.scalar('loss', model.loss)
     acc_summary = tf.summary.scalar('accuracy', model.accuracy)
