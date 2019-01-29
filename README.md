@@ -72,7 +72,6 @@
       - Glove
         - setting
           - `experiments 7, test 9`
-          - rnn_type : fused, rnn_used : False, tf_used : True, tf_num_layers : 4
         - per-token(partial) f1 : 0.9083215796897038
         - per-chunk(exact)   f1 : **0.904078014184397**
         - average processing time per bucket
@@ -90,7 +89,6 @@
       - Glove
         - setting
           - `experiments 9, test 1`
-          - rnn_type : fused, rnn_used : True, rnn_num_layers : 2, tf_used : False
         - per-token(partial) f1 : 0.9152852267186738
         - per-chunk(exact)   f1 : **0.9094911075893644**
         - average processing time per bucket
@@ -127,7 +125,6 @@
       - ELMo
         - setting
           - `experiments 8, test 2`
-          - rnn_type : fused, rnn_used : True, rnn_num_layers : 2, tf_used : False
         - per-token(partial) f1 : 0.9322728663199756
         - per-chunk(exact)   f1 : **0.9253625751680227**
         ```
@@ -147,7 +144,6 @@
       - ELMo + Glove
         - setting
           - `experiments 10, test 5`
-          - rnn_type : fused, rnn_used : True, rnn_num_layers : 2, tf_used : False
         - per-token(partial) f1 : 0.92896509491733
         - per-chunk(exact)   f1 : 0.9235392910810573
         ```
@@ -164,11 +160,13 @@
         - setting(on-going)
       - BERT + Glove
         - setting(on-going)
+          - `experiments 11, test 1`
+        - average processing time per bucket
+          - 1 GPU(Tesla V100)  :
     - BiLSTM + Transformer
       - Glove
         - setting
           - `experiments 7, test 10`
-          - rnn_type : fused, rnn_used : True, rnn_num_layers : 2, tf_used : True, tf_num_layers : 1
         - per-token(partial) f1 : 0.910979409787988
         - per-chunk(exact)   f1 : **0.9047451049567825**
     - BiLSTM + multi-head attention
@@ -250,10 +248,10 @@ $ python -m pip install tensorflow-gpu
 
 - bert
   - clone [bert](https://github.com/google-research/bert)
-  - download `cased_L-12_H-768_A-12`
+  - download `cased_L-12_H-768_A-12`, `cased_L-24_H-1024_A-16` 
   ```
   $ ls embeddings
-  cased_L-12_H-768_A-12
+  cased_L-12_H-768_A-12  cased_L-24_H-1024_A-16
   ```
 
 - spacy [optional]
@@ -281,13 +279,18 @@ $ python embvec.py --emb_path embeddings/glove.840B.300d.txt --wrd_dim 300 --tra
 
 * for BERT
 $ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --bert_config_path embeddings/cased_L-12_H-768_A-12/bert_config.json --bert_vocab_path embeddings/cased_L-12_H-768_A-12/vocab.txt --bert_do_lower_case 0 --bert_init_checkpoint embeddings/cased_L-12_H-768_A-12/bert_model.ckpt --bert_max_seq_length 180 > embeddings/vocab.txt
+$ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --bert_config_path embeddings/cased_L-24_H-1024_A-16/bert_config.json --bert_vocab_path embeddings/cased_L-24_H-1024_A-16/vocab.txt --bert_do_lower_case 0 --bert_init_checkpoint embeddings/cased_L-24_H-1024_A-16/bert_model.ckpt --bert_max_seq_length 180 > embeddings/vocab.txt
 ```
 
 - train
 ```
+* for Glove, ELMo
 $ python train.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --batch_size 20 --epoch 70
 $ python train.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --batch_size 20 --epoch 70
 $ python train.py --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --batch_size 20 --epoch 70
+
+* for BERT
+$ python train.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --batch_size 16 --epoch 70
 
 $ rm -rf runs; tensorboard --logdir runs/summaries/ --port 6008
 ```
