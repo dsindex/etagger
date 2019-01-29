@@ -59,7 +59,9 @@ class Config:
             self.bert_init_checkpoint = self.embvec.bert_init_checkpoint
             self.bert_max_seq_length = self.embvec.bert_max_seq_length
             self.bert_keep_prob = 0.8
-            self.starter_learning_rate = 0.0003
+            # modified for bert
+            self.rnn_size = 256
+            self.starter_learning_rate = 2e-5
             self.decay_steps = 5000
             self.decay_rate = 0.9
             self.clip_norm = 1.5
