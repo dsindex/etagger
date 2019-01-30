@@ -311,7 +311,7 @@ class Model:
             use_one_hot_embeddings=False)
         bert_embeddings = bert_model.get_sequence_output()  # (batch_size, bert_max_seq_length, bert_embedding_size)
         # initialize pre-trained bert
-        if self.bert_init_checkpoint:
+        if self.is_training and self.bert_init_checkpoint:
             tvars = tf.trainable_variables()
             (assignment_map, initialized_variable_names) = modeling.get_assignment_map_from_checkpoint(tvars, self.bert_init_checkpoint)
             tf.train.init_from_checkpoint(self.bert_init_checkpoint, assignment_map)

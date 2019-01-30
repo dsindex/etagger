@@ -70,7 +70,7 @@ def inference_bucket(config):
                 tags = inp.logit_to_tags(logits[0], sentence_lengths[0])
             for i in range(len(bucket)):
                 if config.emb_class == 'bert':
-                    j = inp.sentence_bert_wordidx2tokenidx[i]
+                    j = inp.sentence_bert_wordidx2tokenidx[0][i]
                     out = bucket[i] + ' ' + tags[j]
                 else:
                     out = bucket[i] + ' ' + tags[i]
@@ -108,7 +108,7 @@ def inference_bucket(config):
             tags = inp.logit_to_tags(logits[0], sentence_lengths[0])
         for i in range(len(bucket)):
             if config.emb_class == 'bert':
-                j = inp.sentence_bert_wordidx2tokenidx[i]
+                j = inp.sentence_bert_wordidx2tokenidx[0][i]
                 out = bucket[i] + ' ' + tags[j]
             else:
                 out = bucket[i] + ' ' + tags[i]
@@ -207,7 +207,7 @@ def inference_line(config):
             tags = inp.logit_to_tags(logits[0], sentence_lengths[0])
         for i in range(len(bucket)):
             if config.emb_class == 'bert':
-                j = inp.sentence_bert_wordidx2tokenidx[i]
+                j = inp.sentence_bert_wordidx2tokenidx[0][i]
                 out = bucket[i] + ' ' + tags[j]
             else:
                 out = bucket[i] + ' ' + tags[i]

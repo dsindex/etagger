@@ -158,9 +158,12 @@
           - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.036233977567360014 sec
       - BERT
         - setting(on-going)
+          - `experiments 11, test 1`
+        - average processing time per bucket
+          - 1 GPU(Tesla V100)  : 0.026964144585057526 sec
       - BERT + Glove
         - setting(on-going)
-          - `experiments 11, test 1`
+          - `experiments 11, test 2`
         - average processing time per bucket
           - 1 GPU(Tesla V100)  :
     - BiLSTM + Transformer
