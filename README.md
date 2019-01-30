@@ -156,16 +156,32 @@
         ```
         - average processing time per bucket
           - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.036233977567360014 sec
-      - BERT
+      - BERT(base)
         - setting(on-going)
           - `experiments 11, test 1`
         - per-token(partial) f1 : 0.9234725113260683
         - per-chunk(exact)   f1 : 0.9131509267431598
         - average processing time per bucket
           - 1 GPU(Tesla V100)  : 0.026964144585057526 sec
-      - BERT + Glove
+      - BERT(base) + Glove
         - setting(on-going)
           - `experiments 11, test 2`
+        - per-token(partial) f1 : 0.921535076998289
+        - per-chunk(exact)   f1 : 0.9123210182075304
+        - average processing time per bucket
+          - 1 GPU(Tesla V100)  : 0.029030597688838533 sec
+      - BERT(large)
+        - setting(on-going)
+          - `experiments 11, test 4`
+        - per-token(partial) f1 :
+        - per-chunk(exact)   f1 :
+        - average processing time per bucket
+          - 1 GPU(Tesla V100)  :
+      - BERT(large) + Glove
+        - setting(on-going)
+          - `experiments 11, test 3`
+        - per-token(partial) f1 :
+        - per-chunk(exact)   f1 :
         - average processing time per bucket
           - 1 GPU(Tesla V100)  :
     - BiLSTM + Transformer

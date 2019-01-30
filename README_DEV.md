@@ -69,6 +69,9 @@ save model by f1(token)
 +
 CRF
 
+token : 0.921535076998289
+chunk : 0.9123210182075304
+
 * test 1
 #word embedding size : 300(glove6B)
 bert embedding : cased_L-12_H-768_A-12
