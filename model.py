@@ -85,8 +85,7 @@ class Model:
         if self.emb_class == 'elmo':
             concat_in = [self.word_embeddings, self.wordchr_embeddings, self.elmo_embeddings, self.pos_embeddings]
         if self.emb_class == 'bert':
-            #concat_in = [self.word_embeddings, self.wordchr_embeddings, self.bert_embeddings, self.pos_embeddings]
-            concat_in = [self.bert_embeddings]
+            concat_in = [self.word_embeddings, self.wordchr_embeddings, self.bert_embeddings, self.pos_embeddings]
         self.input_data = tf.concat(concat_in, axis=-1, name='input_data') # (batch_size, sentence_length, input_dim)
         # masking (for confirmation)
         self.input_data *= masks
@@ -321,8 +320,7 @@ class Model:
                 if var.name in initialized_variable_names:
                     init_string = ", *INIT_FROM_CKPT*"
                 tf.logging.info("  name = %s, shape = %s%s", var.name, var.shape, init_string)
-        return bert_embeddings
-        #return tf.nn.dropout(bert_embeddings, keep_prob)
+        return tf.nn.dropout(bert_embeddings, keep_prob)
 
     def __pos_embedding(self, inputs, keep_prob=0.5, scope='pos-embedding'):
         """Computing pos embeddings

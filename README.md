@@ -159,6 +159,8 @@
       - BERT
         - setting(on-going)
           - `experiments 11, test 1`
+        - per-token(partial) f1 : 0.9234725113260683
+        - per-chunk(exact)   f1 : 0.9131509267431598
         - average processing time per bucket
           - 1 GPU(Tesla V100)  : 0.026964144585057526 sec
       - BERT + Glove
