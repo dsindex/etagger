@@ -137,7 +137,7 @@ class Input:
         for _ in range(self.config.word_length):
             pad_chr_ids.append(self.config.embvec.pad_cid) # 0
         bert_wordchr_ids.append(pad_chr_ids)
-        bert_pos_ids.append(self.config.embvec.unk_pid) # 1, not used pad_pid
+        bert_pos_ids.append(self.config.embvec.unk_pid) # 1, do not use pad_pid
         bert_tag.append(self.__tag_vec(self.config.embvec.oot_tag, self.config.class_size)) # 'O' tag
 
         for i, line in enumerate(bucket):
@@ -167,11 +167,8 @@ class Input:
         ntokens_last += 1
         bert_segment_ids.append(0)
         bert_word_ids.append(self.config.embvec.pad_wid) # 0
-        pad_chr_ids = []
-        for _ in range(self.config.word_length):
-            pad_chr_ids.append(self.config.embvec.pad_cid) # 0
         bert_wordchr_ids.append(pad_chr_ids)
-        bert_pos_ids.append(self.config.embvec.unk_pid) # 1, not used pad_pid
+        bert_pos_ids.append(self.config.embvec.unk_pid) # 1, do not use pad_pid
         bert_tag.append(self.__tag_vec(self.config.embvec.oot_tag, self.config.class_size)) # 'O' tag
 
         bert_token_ids = bert_tokenizer.convert_tokens_to_ids(ntokens)
