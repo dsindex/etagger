@@ -1,6 +1,41 @@
 
 - experiments 11
 ```
+
+* test 4
+#word embedding size : 300(glove6B)
+bert embedding : cased_L-24_H-1024_A-16
+bert_keep_prob : 0.8
+keep_prob : 0.7
+#chr_conv_type : conv1d
+#chracter embedding size : 50
+#chracter embedding random init : -1.0 ~ 1.0
+#filter_sizes : [3]
+#num_filters : 25
+#pos embedding size : 7
+#pos embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 2e-5 / 5000 / 0.9
+gradient clipping : 1.5
+epoch : 70
+batch_size : 16
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
+
 * test 3
 word embedding size : 300(glove6B)
 bert embedding : cased_L-24_H-1024_A-16
@@ -17,10 +52,10 @@ rnn_used : True
 rnn_type : fused
 rnn_size : 200
 rnn_num_layers : 2
-learning_rate : exponential_decay(), 0.001 / 12000 / 0.9 -> 2e-5 / 5000 / 0.9
-gradient clipping : 10 -> 1.5
+learning_rate : exponential_decay(), 2e-5 / 5000 / 0.9
+gradient clipping : 1.5
 epoch : 70
-batch_size : 20 -> 16
+batch_size : 16
 +
 tf_used : False
 tf_keep_prob : 0.8
@@ -34,6 +69,9 @@ tf_ffn_kernel_size : 3
 save model by f1(token)
 +
 CRF
+
+token : 0.9278869778869779
+chunk : 0.918813634351483
 
 * test 2
 word embedding size : 300(glove6B)
@@ -51,10 +89,10 @@ rnn_used : True
 rnn_type : fused
 rnn_size : 200
 rnn_num_layers : 2
-learning_rate : exponential_decay(), 0.001 / 12000 / 0.9 -> 2e-5 / 5000 / 0.9
-gradient clipping : 10 -> 1.5
+learning_rate : exponential_decay(), 2e-5 / 5000 / 0.9
+gradient clipping : 1.5
 epoch : 70
-batch_size : 20 -> 16
+batch_size : 16
 +
 tf_used : False
 tf_keep_prob : 0.8
@@ -88,10 +126,10 @@ rnn_used : True
 rnn_type : fused
 rnn_size : 200
 rnn_num_layers : 2
-learning_rate : exponential_decay(), 0.001 / 12000 / 0.9 -> 2e-5 / 5000 / 0.9
-gradient clipping : 10 -> 1.5
+learning_rate : exponential_decay(), 2e-5 / 5000 / 0.9
+gradient clipping : 1.5
 epoch : 70
-batch_size : 20 -> 16
+batch_size : 16
 +
 tf_used : False
 tf_keep_prob : 0.8

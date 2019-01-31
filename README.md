@@ -180,10 +180,10 @@
       - BERT(large) + Glove
         - setting(on-going)
           - `experiments 11, test 3`
-        - per-token(partial) f1 :
-        - per-chunk(exact)   f1 :
+        - per-token(partial) f1 : 0.9278869778869779
+        - per-chunk(exact)   f1 : 0.918813634351483
         - average processing time per bucket
-          - 1 GPU(Tesla V100)  :
+          - 1 GPU(Tesla V100)  : 0.040225753178425645 sec
     - BiLSTM + Transformer
       - Glove
         - setting
