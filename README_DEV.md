@@ -36,6 +36,9 @@ save model by f1(token)
 +
 CRF
 
+token : 0.9270596895895958
+chunk : 0.9180153886972672
+
 * test 3
 word embedding size : 300(glove6B)
 bert embedding : cased_L-24_H-1024_A-16
