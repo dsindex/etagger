@@ -14,7 +14,7 @@ class Config:
         self.restore = args.restore         # checkpoint path if available
         self.use_crf = use_crf              # use crf decoder or not
         self.emb_class = emb_class          # class of embedding(glove, elmo, bert)
-        self.starter_learning_rate = 0.001  # 0.001(default), 0.0003(transformer)
+        self.starter_learning_rate = 0.001  # default learning rate
         self.decay_steps = 12000
         self.decay_rate = 0.9
         self.clip_norm = 10
@@ -28,6 +28,7 @@ class Config:
         self.rnn_type = 'fused'             # normal | fused
         self.rnn_size = 200                 # size of RNN hidden unit
         self.tf_used = False                # use transformer encoder layer or not
+        if self.tf_used: self.starter_learning_rate = 0.0003 # for transformer
         self.tf_num_layers = 4              # number of layers for transformer encoder
         self.tf_keep_prob = 0.8             # keep probability for transformer encoder
         self.tf_mh_num_heads = 4            # number of head for multi head attention
