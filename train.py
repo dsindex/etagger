@@ -41,22 +41,27 @@ def train_step(sess, model, config, data, summary_op, summary_writer):
             feed_dict[model.bert_input_data_token_ids] = data.sentence_bert_token_ids[ptr:ptr + config.batch_size]
             feed_dict[model.bert_input_data_token_masks] = data.sentence_bert_token_masks[ptr:ptr + config.batch_size]
             feed_dict[model.bert_input_data_segment_ids] = data.sentence_bert_segment_ids[ptr:ptr + config.batch_size]
-        step, summaries, _, loss, accuracy, learning_rate, bert_embeddings = \
-               sess.run([model.global_step, summary_op, model.train_op, \
-                         model.loss, model.accuracy, model.learning_rate, model.bert_embeddings], feed_dict=feed_dict, options=runopts)
-        if config.emb_class == 'bert' and idx == 0:
-            print("# bert_token_ids")
-            t = data.sentence_bert_token_ids[:3]
-            print(np.shape(t))
-            print(t)
-            print("# bert_token_masks")
-            t = data.sentence_bert_token_masks[:3]
-            print(np.shape(t))
-            print(t)
-            print("# bert_embedding")
-            t = bert_embeddings[:3]
-            print(np.shape(t))
-            print(t)
+        if config.emb_class == 'bert':
+            step, summaries, _, loss, accuracy, learning_rate, bert_embeddings = \
+                   sess.run([model.global_step, summary_op, model.train_op, \
+                             model.loss, model.accuracy, model.learning_rate, model.bert_embeddings], feed_dict=feed_dict, options=runopts)
+            if idx == 0:
+                print("# bert_token_ids")
+                t = data.sentence_bert_token_ids[:3]
+                print(np.shape(t))
+                print(t)
+                print("# bert_token_masks")
+                t = data.sentence_bert_token_masks[:3]
+                print(np.shape(t))
+                print(t)
+                print("# bert_embedding")
+                t = bert_embeddings[:3]
+                print(np.shape(t))
+                print(t)
+        else:
+            step, summaries, _, loss, accuracy, learning_rate = \
+                   sess.run([model.global_step, summary_op, model.train_op, \
+                             model.loss, model.accuracy, model.learning_rate], feed_dict=feed_dict, options=runopts)
 
         summary_writer.add_summary(summaries, step)
         prog.update(idx + 1,
