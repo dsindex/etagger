@@ -1,4 +1,45 @@
 
+- experiments 12
+```
+* test 1
+word embedding size : 300(glove840B)
+#bert embedding : cased_L-24_H-1024_A-16
+#bert_keep_prob : 0.8
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 50
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 25
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+rnn_used : True -> False
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 2e-5 / 5000 / 0.9 -> 0.0003 / 12000 / 0.9
+gradient clipping : 1.5 -> 10
+epoch : 70
+batch_size : 16 -> 20
++
+tf_used : False -> True
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
+
+token : 0.9066190944881889
+chunk : 0.8989818503762727
+
+```
+
 - experiments 11
 ```
 
