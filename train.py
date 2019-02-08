@@ -206,5 +206,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
     tf.logging.set_verbosity(tf.logging.INFO)
 
-    config = Config(args, is_training=True, emb_class='bert', use_crf=True)
+    config = Config(args, is_training=True, emb_class='glove', use_crf=True)
     train(config)
