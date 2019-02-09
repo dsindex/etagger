@@ -42,6 +42,42 @@ chunk : 0.8989818503762727
 
 - experiments 11
 ```
+* test 7
+word embedding size : 300(glove6B)
+bert embedding : cased_L-24_H-1024_A-16
+bert_keep_prob : 0.8
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 50
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 25
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+rnn_used : True -> False
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 2e-5 / 5000 / 0.9
+gradient clipping : 1.5
+epoch : 70
+batch_size : 16
++
+tf_used : False -> True
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
+
+token :
+chunk :
 
 * test 6
 word embedding size : 300(glove6B) -> 300(glove840B)
@@ -116,7 +152,7 @@ save model by f1(token)
 
 # BERT only(no glove, no cnn, no lstm, no crf)
 token : 0.9275558564658091
-chunk : 0.9169470515317868 -> BERT large only + Softmax best
+chunk : 0.9169470515317868 -> BERT large + Softmax best
 
 * test 4
 #word embedding size : 300(glove6B)
@@ -153,7 +189,7 @@ save model by f1(token)
 CRF
 
 token : 0.9270596895895958
-chunk : 0.9180153886972672  -> BERT large only + LSTM best
+chunk : 0.9180153886972672  -> BERT large + LSTM + CRF best
 
 * test 3
 word embedding size : 300(glove6B)
@@ -190,7 +226,7 @@ save model by f1(token)
 CRF
 
 token : 0.9278869778869779
-chunk : 0.918813634351483 -> BERT large + Glove + LSTM best
+chunk : 0.918813634351483 -> Glove + BERT large + CNN + LSTM + CRF best
 
 * test 2
 word embedding size : 300(glove6B)
@@ -227,7 +263,7 @@ save model by f1(token)
 CRF
 
 token : 0.921535076998289
-chunk : 0.9123210182075304 -> BERT base + Glove + LSTM best
+chunk : 0.9123210182075304 -> Glove + BERT base + CNN + LSTM + CRF best
 
 * test 1
 #word embedding size : 300(glove6B)
@@ -264,50 +300,12 @@ save model by f1(token)
 CRF
 
 token : 0.9234725113260683
-chunk : 0.9131509267431598 -> BERT base only + LSTM best
+chunk : 0.9131509267431598 -> BERT base + LSTM + CRF best
 
 ```
 
 - experiments 10
 ```
-
-* test 11
-word embedding size : 300(glove6B) -> 300(glove840B)
-elmo embedding params : elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json
-elmo embedding size : 1024
-elmo_keep_prob : 0.7 -> 0.8
-keep_prob : 0.7
-chr_conv_type : conv1d
-chracter embedding size : 50
-chracter embedding random init : -1.0 ~ 1.0
-filter_sizes : [3]
-num_filters : 25
-pos embedding size : 7
-pos embedding random init : -0.5 ~ 0.5
-rnn_used : True
-rnn_type : fused
-rnn_size : 200
-rnn_num_layers : 2
-learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
-gradient clipping : 10
-epoch : 70
-batch_size : 20
-+
-tf_used : False
-tf_keep_prob : 0.8
-tf_mh_num_layers : 4
-tf_mh_num_heads : 4
-tf_mh_num_units : 64
-tf_mh_keep_prob : 0.8
-tf_ffn_keep_prob : 0.8
-tf_ffn_kernel_size : 3
-+
-save model by f1(token)
-+
-CRF
-
-token :
-chunk :
 
 * test 9
 word embedding size : 300(glove6B) -> 300(glove840B)
@@ -383,7 +381,7 @@ save model by f1(token)
 CRF
 
 token : 0.9272257111193203
-chunk : 0.9184724689165186
+chunk : 0.9184724689165186 -> Glove + ELMo + CNN + Transformer + CRF best
 
 * test 7
 word embedding size : 300(glove6B)
@@ -505,8 +503,8 @@ token : 0.9270737820160156
 chunk : 0.9221662691050446
 
 # trial 3
-token : 0.92896509491733   -> BiLSTM + ELMo + Glove best
-chunk : 0.9235392910810573 -> BiLSTM + ELMo + Glove best
+token : 0.92896509491733   -> Glove + ELMo + CNN + LSTM + CRF best
+chunk : 0.9235392910810573 -> Glove + ELMo + CNN + LSTM + CRF best
 
 # trial 4
 token : 0.9258261933904528
@@ -924,8 +922,8 @@ save model by f1(token)
 +
 CRF
 
-token : 0.9152852267186738 -> BiLSTM best
-chunk : 0.9094911075893644 -> BiLSTM best
+token : 0.9152852267186738 -> Glove + CNN + LSTM + CRF best
+chunk : 0.9094911075893644 -> Glove + CNN + LSTM + CRF best
 
 ```
 
@@ -1031,8 +1029,8 @@ save model by f1(token)
 CRF
 
 # train 1
-token : 0.9322728663199756 -> BiLSTM + ELMo best
-chunk : 0.9253625751680227 -> BiLSTM + ELMo best
+token : 0.9322728663199756 -> ELMo + CNN + etc feature + LSTM + CRF best
+chunk : 0.9253625751680227 -> ELMo + CNN + etc feature + LSTM + CRF best
 
 # trial 2
 token : 0.9282793139229689
@@ -1155,8 +1153,8 @@ save model by f1(token)
 +
 CRF
 
-token : 0.910979409787988  -> BiLSTM + Transformer best
-chunk : 0.9047451049567825 -> BiLSTM + Transformer best
+token : 0.910979409787988  -> Glove + CNN + etc feature + LSTM + Transformer + CRF best
+chunk : 0.9047451049567825 -> Glove + CNN + etc feature + LSTM + Transformer + CRF best
 
 * test 9
 word embedding size : 300(glove840B)
@@ -1192,8 +1190,8 @@ save model by f1(token)
 +
 CRF
 
-token : 0.9083215796897038 -> Transformer best
-chunk : 0.904078014184397  -> Transformer best
+token : 0.9083215796897038 -> Glove + CNN + etc feature + Transformer + CRF best
+chunk : 0.904078014184397  -> Glove + CNN + etc feature + Transformer + CRF best
 
 * test 8
 word embedding size : 300(glove840B)
@@ -1740,8 +1738,8 @@ save model by f1(token)
 +
 CRF
 
-token : 0.9157317073170732 -> BiLSTM + multi-head attention best
-chunk : 0.9102156238953694 -> BiLSTM + multi-head attention best
+token : 0.9157317073170732 -> Glove + CNN + etc feature + LSTM + multi-head attention + CRF best
+chunk : 0.9102156238953694 -> Glove + CNN + etc feature + LSTM + multi-head attention + CRF best
 
 # re-run #
 token : 0.9121906507791018
