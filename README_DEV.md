@@ -1,45 +1,4 @@
 
-- experiments 12
-```
-* test 1
-word embedding size : 300(glove840B)
-#bert embedding : cased_L-24_H-1024_A-16
-#bert_keep_prob : 0.8
-keep_prob : 0.7
-chr_conv_type : conv1d
-chracter embedding size : 50
-chracter embedding random init : -1.0 ~ 1.0
-filter_sizes : [3]
-num_filters : 25
-pos embedding size : 7
-pos embedding random init : -0.5 ~ 0.5
-rnn_used : True -> False
-rnn_type : fused
-rnn_size : 200
-rnn_num_layers : 2
-learning_rate : exponential_decay(), 2e-5 / 5000 / 0.9 -> 0.0003 / 12000 / 0.9
-gradient clipping : 1.5 -> 10
-epoch : 70
-batch_size : 16 -> 20
-+
-tf_used : False -> True
-tf_keep_prob : 0.8
-tf_mh_num_layers : 4
-tf_mh_num_heads : 4
-tf_mh_num_units : 64
-tf_mh_keep_prob : 0.8
-tf_ffn_keep_prob : 0.8
-tf_ffn_kernel_size : 3
-+
-save model by f1(token)
-+
-CRF
-
-token : 0.9066190944881889
-chunk : 0.8989818503762727
-
-```
-
 - experiments 11
 ```
 * test 7
@@ -76,8 +35,8 @@ save model by f1(token)
 +
 CRF
 
-token :
-chunk :
+token :  
+chunk :  -> Glove + BERT large + CNN + Transformer + CRF best
 
 * test 6
 word embedding size : 300(glove6B) -> 300(glove840B)
@@ -503,7 +462,7 @@ token : 0.9270737820160156
 chunk : 0.9221662691050446
 
 # trial 3
-token : 0.92896509491733   -> Glove + ELMo + CNN + LSTM + CRF best
+token : 0.92896509491733
 chunk : 0.9235392910810573 -> Glove + ELMo + CNN + LSTM + CRF best
 
 # trial 4
@@ -922,7 +881,7 @@ save model by f1(token)
 +
 CRF
 
-token : 0.9152852267186738 -> Glove + CNN + LSTM + CRF best
+token : 0.9152852267186738
 chunk : 0.9094911075893644 -> Glove + CNN + LSTM + CRF best
 
 ```
@@ -1029,7 +988,7 @@ save model by f1(token)
 CRF
 
 # train 1
-token : 0.9322728663199756 -> ELMo + CNN + etc feature + LSTM + CRF best
+token : 0.9322728663199756
 chunk : 0.9253625751680227 -> ELMo + CNN + etc feature + LSTM + CRF best
 
 # trial 2
@@ -1153,7 +1112,7 @@ save model by f1(token)
 +
 CRF
 
-token : 0.910979409787988  -> Glove + CNN + etc feature + LSTM + Transformer + CRF best
+token : 0.910979409787988
 chunk : 0.9047451049567825 -> Glove + CNN + etc feature + LSTM + Transformer + CRF best
 
 * test 9
@@ -1190,7 +1149,7 @@ save model by f1(token)
 +
 CRF
 
-token : 0.9083215796897038 -> Glove + CNN + etc feature + Transformer + CRF best
+token : 0.9083215796897038
 chunk : 0.904078014184397  -> Glove + CNN + etc feature + Transformer + CRF best
 
 * test 8
@@ -1738,7 +1697,7 @@ save model by f1(token)
 +
 CRF
 
-token : 0.9157317073170732 -> Glove + CNN + etc feature + LSTM + multi-head attention + CRF best
+token : 0.9157317073170732
 chunk : 0.9102156238953694 -> Glove + CNN + etc feature + LSTM + multi-head attention + CRF best
 
 # re-run #
