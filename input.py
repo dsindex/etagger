@@ -162,7 +162,7 @@ class Input:
             if len(ntokens) == bert_max_seq_length - 1:
                 tf.logging.info("len(ntokens): %s" % str(len(ntokens)))
                 break
-
+        '''
         ntokens.append("[SEP]")
         ntokens_last += 1
         bert_segment_ids.append(0)
@@ -170,6 +170,7 @@ class Input:
         bert_wordchr_ids.append(pad_chr_ids)
         bert_pos_ids.append(self.config.embvec.unk_pid) # 1, do not use pad_pid
         bert_tag.append(self.__tag_vec(self.config.embvec.oot_tag, self.config.class_size)) # 'O' tag
+        '''
 
         bert_token_ids = bert_tokenizer.convert_tokens_to_ids(ntokens)
         bert_token_masks = [1] * len(bert_token_ids)
