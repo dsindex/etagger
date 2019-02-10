@@ -256,9 +256,6 @@ $ python -m pip install tensorflow-gpu
 
 - numpy
 
-- data
-  - merge train.txt, dev.txt, test.txt to total.txt in data dir
-
 - glove embedding
   - [download Glove6B](http://nlp.stanford.edu/data/glove.6B.zip)
   - [download Glove840B](http://nlp.stanford.edu/data/glove.840B.300d.zip)
