@@ -23,6 +23,7 @@ class Config:
         self.chr_conv_type = 'conv1d'       # conv1d | conv2d
         self.filter_sizes = [3]             # filter sizes
         self.num_filters = 25               # number of filters
+        self.highway_used = False           # use highway network on the concatenated input
         self.rnn_used = True                # use rnn layer or not
         self.rnn_num_layers = 2             # number of RNN layers
         self.rnn_type = 'fused'             # normal | fused
@@ -61,6 +62,7 @@ class Config:
             self.bert_max_seq_length = self.embvec.bert_max_seq_length
             self.bert_keep_prob = 0.8
             # modified for bert
+            self.highway_used = False
             self.rnn_size = 256
             self.starter_learning_rate = 2e-5
             self.decay_steps = 5000
