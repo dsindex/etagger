@@ -5,6 +5,7 @@ import numpy as np
 from embvec import EmbVec
 from transformer import multihead_attention, feedforward, normalize, positional_encoding
 from masked_conv import masked_conv1d_and_max
+from highway import highway
 
 class Model:
 
@@ -87,6 +88,14 @@ class Model:
         if self.emb_class == 'bert':
             concat_in = [self.word_embeddings, self.wordchr_embeddings, self.bert_embeddings, self.pos_embeddings]
         self.input_data = tf.concat(concat_in, axis=-1, name='input_data') # (batch_size, sentence_length, input_dim)
+        
+        # highway network
+        if config.highway_used:
+            input_dim = self.input_data.get_shape()[-1]
+            self.input_data = tf.reshape(self.input_data, [-1, input_dim]) 
+            self.input_data = highway(self.input_data, input_dim, num_layers=2, scope='highway')
+            self.input_data = tf.reshape(self.input_data, [-1, self.sentence_length, input_dim])
+
         # masking (for confirmation)
         self.input_data *= masks
 
