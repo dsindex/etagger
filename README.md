@@ -5,11 +5,13 @@
 - personally, i'm interested in NER tasks. so, i decided to implement a sequence tagging model which consists of 
   - encoding
     - basic embedding
-      - [x] 1) word embedding(glove) and character convolutional embedding
-      - [x] 2) ELMo embedding
-      - [x] 3) BERT embedding
+      - [x] 1) word embedding(glove), character convolutional embedding
+      - [x] 2) ELMo embedding, character convolutional embedding
+      - [x] 3) BERT embedding, character convolutional embedding
     - etc embedding
       - [x] pos embedding
+    - highway network
+      - [x] applied on the concatenated input(ex, Glove + CNN(char) + BERT + POS)
   - contextual encoding
     - [x] 1) multi-layer BiLSTM
     - [x] 2) Transformer(encoder)
