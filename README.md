@@ -184,6 +184,13 @@
         - per-chunk(exact)   f1 : 0.918813634351483
         - average processing time per bucket
           - 1 GPU(Tesla V100)  : 0.040225753178425645 sec
+      - BERT(large) + Glove + Transformer
+        - setting(on-going)
+          - `experiments 11, test 7`
+        - per-token(partial) f1 : 0.9244949032533724
+        - per-chunk(exact)   f1 : 0.9170714474962465
+        - average processing time per bucket
+          - 1 GPU(Tesla V100)  : 0.05737522856032033 sec
     - BiLSTM + Transformer
       - Glove
         - setting

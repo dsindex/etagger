@@ -35,8 +35,8 @@ save model by f1(token)
 +
 CRF
 
-token :  
-chunk :  -> Glove + BERT large + CNN + Transformer + CRF best
+token : 0.9244949032533724
+chunk : 0.9170714474962465 -> Glove + BERT large + CNN + Transformer + CRF best
 
 * test 6
 word embedding size : 300(glove6B) -> 300(glove840B)
