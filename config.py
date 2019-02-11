@@ -56,7 +56,7 @@ class Config:
             self.chr_dim = 25
             self.num_filters = 53
             self.highway_used = False
-            self.rnn_size = 200
+            self.rnn_size = 256
         if self.emb_class == 'bert':
             from bert import modeling
             from bert import tokenization
