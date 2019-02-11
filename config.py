@@ -23,7 +23,7 @@ class Config:
         self.chr_conv_type = 'conv1d'       # conv1d | conv2d
         self.filter_sizes = [3]             # filter sizes
         self.num_filters = 25               # number of filters
-        self.highway_used = False           # use highway network on the concatenated input
+        self.highway_used = False            # use highway network on the concatenated input
         self.rnn_used = True                # use rnn layer or not
         self.rnn_num_layers = 2             # number of RNN layers
         self.rnn_type = 'fused'             # normal | fused
@@ -51,7 +51,12 @@ class Config:
             self.word_length = 50 # replace to fixed word length for the pre-trained elmo : 'max_characters_per_token'
             self.elmo_batcher = Batcher(self.embvec.elmo_vocab_path, self.word_length) # map text to character ids
             self.elmo_bilm = BidirectionalLanguageModel(self.embvec.elmo_options_path, self.embvec.elmo_weight_path) # biLM graph
-            self.elmo_keep_prob = 0.8
+            self.elmo_keep_prob = 0.7
+            # modified for elmo
+            self.chr_dim = 25
+            self.num_filters = 53
+            self.highway_used = False
+            self.rnn_size = 200
         if self.emb_class == 'bert':
             from bert import modeling
             from bert import tokenization

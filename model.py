@@ -95,6 +95,7 @@ class Model:
             self.input_data = tf.reshape(self.input_data, [-1, input_dim]) 
             self.input_data = highway(self.input_data, input_dim, num_layers=2, scope='highway')
             self.input_data = tf.reshape(self.input_data, [-1, self.sentence_length, input_dim])
+            self.input_data = tf.nn.dropout(self.input_data, keep_prob=keep_prob)
 
         # masking (for confirmation)
         self.input_data *= masks

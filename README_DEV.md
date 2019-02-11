@@ -35,8 +35,8 @@ save model by f1(token)
 +
 CRF
 
-token :
-chunk :
+token : 0.9237002025658338
+chunk : 0.91440205364256
 
 * test 7
 word embedding size : 300(glove6B)
@@ -302,6 +302,124 @@ chunk : 0.9131509267431598 -> BERT base + LSTM + CRF best
 
 - experiments 10
 ```
+* test 12
+word embedding size : 300(glove6B)
+elmo embedding params : elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json
+elmo embedding size : 1024
+elmo_keep_prob : 0.7
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 50 -> 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 25 -> 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+highway : False -> True
+highway dropout : keep_prob
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
+
+token : 0.9254662182818709
+chunk : 0.9184397163120568
+
+* test 11
+word embedding size : 300(glove6B)
+elmo embedding params : elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json
+elmo embedding size : 1024
+elmo_keep_prob : 0.7
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 50 -> 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 25 -> 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+highway : False
+highway dropout : keep_prob
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
+
+token : 0.9277366456586918
+chunk : 0.9221376747478321
+
+* test 10
+word embedding size : 300(glove6B)
+elmo embedding params : elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json
+elmo embedding size : 1024
+elmo_keep_prob : 0.7
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 50 -> 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 25 -> 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+highway : False -> True
+rnn_used : True
+rnn_type : fused
+rnn_size : 200 -> 400
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
+
+token : 0.9247654669201054
+chunk : 0.9190915542938254
 
 * test 9
 word embedding size : 300(glove6B) -> 300(glove840B)
