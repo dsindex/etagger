@@ -30,7 +30,7 @@
   - [medium-tffreeze-1.py](https://gist.github.com/morgangiraud/249505f540a5e53a48b0c1a869d370bf#file-medium-tffreeze-1-py)
   - [medium-tffreeze-2.py](https://gist.github.com/morgangiraud/5ef49adc3c608bf639164b1dd5ed3dab#file-medium-tffreeze-2-py)
   - [bert_lstm_ner.py](https://github.com/dsindex/BERT-BiLSTM-CRF-NER/blob/master/bert_lstm_ner.py)
-  - [model.py](https://github.com/mkroutikov/tf-lstm-char-cnn/blob/master/model.py))
+  - [model.py](https://github.com/mkroutikov/tf-lstm-char-cnn/blob/master/model.py)
 
 - my main questions are :
   - can this module perform at the level of state of the art?

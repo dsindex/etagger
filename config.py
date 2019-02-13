@@ -7,7 +7,7 @@ class Config:
         self.emb_path = args.emb_path
         self.embvec = pkl.load(open(self.emb_path, 'rb')) # resources(glove, vocab, path, etc)
         self.wrd_dim = args.wrd_dim         # size of word embedding(glove)
-        self.chr_dim = 50                   # size of character embedding
+        self.chr_dim = 25                   # size of character embedding
         self.pos_dim = 7                    # size of part of speech embedding
         self.class_size = len(self.embvec.tag_vocab) # number of class(tags)
         self.word_length = args.word_length # maximum character size of word for convolution
@@ -19,17 +19,22 @@ class Config:
         self.decay_rate = 0.9
         self.clip_norm = 10
 
-        self.keep_prob = 0.7                # keep probability for dropout
+        self.keep_prob = 0.32               # keep probability for dropout
         self.chr_conv_type = 'conv1d'       # conv1d | conv2d
         self.filter_sizes = [3]             # filter sizes
-        self.num_filters = 25               # number of filters
+        self.num_filters = 53               # number of filters
         self.highway_used = False            # use highway network on the concatenated input
-        self.rnn_used = True                # use rnn layer or not
+        #self.rnn_used = True                # use rnn layer or not
+        self.rnn_used = False                # use rnn layer or not
         self.rnn_num_layers = 2             # number of RNN layers
         self.rnn_type = 'fused'             # normal | fused
-        self.rnn_size = 200                 # size of RNN hidden unit
-        self.tf_used = False                # use transformer encoder layer or not
-        if self.tf_used: self.starter_learning_rate = 0.0003 # for transformer
+        self.rnn_size = 276                 # size of RNN hidden unit
+        #self.tf_used = False                # use transformer encoder layer or not
+        self.tf_used = True                # use transformer encoder layer or not
+        if self.tf_used:
+            # modified for transformer
+            self.starter_learning_rate = 0.0003
+            self.keep_prob = 0.7
         self.tf_num_layers = 4              # number of layers for transformer encoder
         self.tf_keep_prob = 0.8             # keep probability for transformer encoder
         self.tf_mh_num_heads = 4            # number of head for multi head attention
@@ -53,10 +58,7 @@ class Config:
             self.elmo_bilm = BidirectionalLanguageModel(self.embvec.elmo_options_path, self.embvec.elmo_weight_path) # biLM graph
             self.elmo_keep_prob = 0.7
             # modified for elmo
-            self.chr_dim = 25
-            self.num_filters = 53
             self.highway_used = False
-            self.rnn_size = 256
         if self.emb_class == 'bert':
             from bert import modeling
             from bert import tokenization
@@ -73,5 +75,6 @@ class Config:
             self.decay_steps = 5000
             self.decay_rate = 0.9
             self.clip_norm = 1.5
+            self.keep_prob = 0.7
             if self.is_training:
                 self.dev_batch_size = self.batch_size # set batch_size == dev_batch_size
