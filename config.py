@@ -24,13 +24,11 @@ class Config:
         self.filter_sizes = [3]             # filter sizes
         self.num_filters = 53               # number of filters
         self.highway_used = False            # use highway network on the concatenated input
-        #self.rnn_used = True                # use rnn layer or not
-        self.rnn_used = False                # use rnn layer or not
+        self.rnn_used = True                # use rnn layer or not
         self.rnn_num_layers = 2             # number of RNN layers
         self.rnn_type = 'fused'             # normal | fused
         self.rnn_size = 276                 # size of RNN hidden unit
-        #self.tf_used = False                # use transformer encoder layer or not
-        self.tf_used = True                # use transformer encoder layer or not
+        self.tf_used = False                # use transformer encoder layer or not
         if self.tf_used:
             # modified for transformer
             self.starter_learning_rate = 0.0003
