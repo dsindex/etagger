@@ -138,7 +138,7 @@ save model by f1(token)
 CRF
 
 token : 0.9059735188236012
-chunk : 0.9027189265536724
+chunk : 0.9027189265536724 -> Glove(6B) + CNN + LSTM + CRF best
 
 ```
 
@@ -253,7 +253,7 @@ save model by f1(token)
 CRF
 
 token : 0.9244949032533724
-chunk : 0.9170714474962465 -> Glove + BERT large + CNN + Transformer + CRF best
+chunk : 0.9170714474962465 -> Glove(6B) + BERT large + CNN + Transformer + CRF best
 
 * test 6
 word embedding size : 300(glove6B) -> 300(glove840B)
@@ -402,7 +402,7 @@ save model by f1(token)
 CRF
 
 token : 0.9278869778869779
-chunk : 0.918813634351483 -> Glove + BERT large + CNN + LSTM + CRF best
+chunk : 0.918813634351483 -> Glove(6B) + BERT large + CNN + LSTM + CRF best
 
 * test 2
 word embedding size : 300(glove6B)
@@ -439,7 +439,7 @@ save model by f1(token)
 CRF
 
 token : 0.921535076998289
-chunk : 0.9123210182075304 -> Glove + BERT base + CNN + LSTM + CRF best
+chunk : 0.9123210182075304 -> Glove(6B) + BERT base + CNN + LSTM + CRF best
 
 * test 1
 #word embedding size : 300(glove6B)
@@ -755,7 +755,7 @@ save model by f1(token)
 CRF
 
 token : 0.9272257111193203
-chunk : 0.9184724689165186 -> Glove + ELMo + CNN + Transformer + CRF best
+chunk : 0.9184724689165186 -> Glove(6B) + ELMo + CNN + Transformer + CRF best
 
 * test 7
 word embedding size : 300(glove6B)
@@ -878,7 +878,7 @@ chunk : 0.9221662691050446
 
 # trial 3
 token : 0.92896509491733
-chunk : 0.9235392910810573 -> Glove + ELMo + CNN + LSTM + CRF best
+chunk : 0.9235392910810573 -> Glove(6B) + ELMo + CNN + LSTM + CRF best
 
 # trial 4
 token : 0.9258261933904528
@@ -1297,7 +1297,7 @@ save model by f1(token)
 CRF
 
 token : 0.9152852267186738
-chunk : 0.9094911075893644 -> Glove + CNN + LSTM + CRF best
+chunk : 0.9094911075893644 -> Glove(840B) + CNN + LSTM + CRF best
 
 ```
 
@@ -1528,7 +1528,7 @@ save model by f1(token)
 CRF
 
 token : 0.910979409787988
-chunk : 0.9047451049567825 -> Glove + CNN + etc feature + LSTM + Transformer + CRF best
+chunk : 0.9047451049567825 -> Glove(840B) + CNN + etc feature + LSTM + Transformer + CRF best
 
 * test 9
 word embedding size : 300(glove840B)
@@ -1565,7 +1565,7 @@ save model by f1(token)
 CRF
 
 token : 0.9083215796897038
-chunk : 0.904078014184397  -> Glove + CNN + etc feature + Transformer + CRF best
+chunk : 0.904078014184397  -> Glove(840B) + CNN + etc feature + Transformer + CRF best
 
 * test 8
 word embedding size : 300(glove840B)
@@ -2113,7 +2113,7 @@ save model by f1(token)
 CRF
 
 token : 0.9157317073170732
-chunk : 0.9102156238953694 -> Glove + CNN + etc feature + LSTM + multi-head attention + CRF best
+chunk : 0.9102156238953694 -> Glove(840B) + CNN + etc feature + LSTM + multi-head attention + CRF best
 
 # re-run #
 token : 0.9121906507791018

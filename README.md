@@ -641,6 +641,8 @@ in IN O O O
     - [how to invoke tf.initialize_all_variables in c tensorflow](https://www.queryoverflow.gdn/query/how-to-invoke-tf-initialize-all-variables-in-c-tensorflow-27_34975884.html)
     - [TensorFlow: How to freeze a model and serve it with a python API](https://blog.metaflow.fr/tensorflow-how-to-freeze-a-model-and-serve-it-with-a-python-api-d4f3596b3adc)
     - [how to read freezed graph from C++](https://stackoverrun.com/ko/q/12408779)
+    - [reducing model loading time and/or memory footprint](https://www.tensorflow.org/lite/tfmobile/optimizing#reducing_model_loading_time_andor_memory_footprint)
+      - convert_graphdef_memmapped_format
   - inference speed up
     - GPU
       - tensorRT
