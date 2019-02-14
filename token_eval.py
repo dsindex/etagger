@@ -14,9 +14,13 @@ class TokenEval:
         self.fscore = {}
 
     def __eval_bucket(self, bucket):
+        line_num = 0
         for line in bucket:
             tokens = line.split()
             size = len(tokens)
+            if line_num == 0 and size == 3: # skip 'USING SKIP CONNECTIONS'
+                line_num += 1
+                continue
             assert(size == 5)
             w = tokens[0]
             pos = tokens[1]
@@ -36,6 +40,7 @@ class TokenEval:
                 self.fn[tag] += 1
             self.cls[pred] = None
             self.cls[tag] = None
+            line_num += 1
 
     def eval(self):
         """Compute micro precision, recall, fscore given file

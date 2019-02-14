@@ -19,7 +19,7 @@ class Config:
         self.decay_rate = 0.9
         self.clip_norm = 10
 
-        self.keep_prob = 0.32               # keep probability for dropout
+        self.keep_prob = 0.7                # keep probability for dropout
         self.chr_conv_type = 'conv1d'       # conv1d | conv2d
         self.filter_sizes = [3]             # filter sizes
         self.num_filters = 53               # number of filters
@@ -27,12 +27,11 @@ class Config:
         self.rnn_used = True                # use rnn layer or not
         self.rnn_num_layers = 2             # number of RNN layers
         self.rnn_type = 'fused'             # normal | fused
-        self.rnn_size = 276                 # size of RNN hidden unit
+        self.rnn_size = 200                 # size of RNN hidden unit
         self.tf_used = False                # use transformer encoder layer or not
         if self.tf_used:
             # modified for transformer
             self.starter_learning_rate = 0.0003
-            self.keep_prob = 0.7
         self.tf_num_layers = 4              # number of layers for transformer encoder
         self.tf_keep_prob = 0.8             # keep probability for transformer encoder
         self.tf_mh_num_heads = 4            # number of head for multi head attention
@@ -48,6 +47,12 @@ class Config:
             self.dev_batch_size = 2*self.batch_size
             self.checkpoint_dir = args.checkpoint_dir
             self.summary_dir = args.summary_dir
+
+        '''
+        modified for glove(300, 6B), self.tf_used == False
+        self.rnn_size = 276
+        self.keep_prob = 0.32
+        '''
 
         if self.emb_class == 'elmo':
             from bilm import Batcher, BidirectionalLanguageModel
@@ -73,6 +78,5 @@ class Config:
             self.decay_steps = 5000
             self.decay_rate = 0.9
             self.clip_norm = 1.5
-            self.keep_prob = 0.7
             if self.is_training:
                 self.dev_batch_size = self.batch_size # set batch_size == dev_batch_size

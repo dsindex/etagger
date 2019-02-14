@@ -10,9 +10,13 @@ class ChunkEval:
     def __eval_bucket(self, bucket):
         tag_sent = []
         pred_sent = []
+        line_num = 0
         for line in bucket:
             tokens = line.split()
             size = len(tokens)
+            if line_num == 0 and size == 3: # skip 'USING SKIP CONNECTIONS'
+                line_num += 1
+                continue
             assert(size == 5)
             w = tokens[0]
             pos = tokens[1]
@@ -21,6 +25,7 @@ class ChunkEval:
             pred = tokens[4]
             tag_sent.append(tag)
             pred_sent.append(pred)
+            line_num += 1
         self.tag_sents.append(tag_sent)
         self.pred_sents.append(pred_sent)
 
