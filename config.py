@@ -14,10 +14,6 @@ class Config:
         self.restore = args.restore         # checkpoint path if available
         self.use_crf = use_crf              # use crf decoder or not
         self.emb_class = emb_class          # class of embedding(glove, elmo, bert)
-        self.starter_learning_rate = 0.001  # default learning rate
-        self.decay_steps = 12000
-        self.decay_rate = 0.9
-        self.clip_norm = 10
 
         self.keep_prob = 0.7                # keep probability for dropout
         self.chr_conv_type = 'conv1d'       # conv1d | conv2d
@@ -39,6 +35,11 @@ class Config:
         self.tf_mh_keep_prob = 0.8          # keep probability for multi head attention
         self.tf_ffn_kernel_size = 3         # conv1d kernel size for feed forward net
         self.tf_ffn_keep_prob = 0.8         # keep probability for feed forward net
+
+        self.starter_learning_rate = 0.001  # default learning rate
+        self.decay_steps = 12000
+        self.decay_rate = 0.9
+        self.clip_norm = 10
 
         self.is_training = is_training
         if self.is_training:
@@ -78,5 +79,9 @@ class Config:
             self.decay_steps = 5000
             self.decay_rate = 0.9
             self.clip_norm = 1.5
+            self.use_bert_optimization = False
+            self.num_train_steps = 0            # number of total training steps
+            self.num_warmup_steps = 0           # number of warmup steps
+            self.warmup_proportion = 0.1        # proportion of training to perform linear learning rate warmup for
             if self.is_training:
                 self.dev_batch_size = self.batch_size # set batch_size == dev_batch_size

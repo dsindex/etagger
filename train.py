@@ -68,7 +68,7 @@ def train_step(sess, model, config, data, summary_op, summary_writer):
                     [('step', step),
                      ('train loss', loss),
                      ('train accuracy', accuracy),
-                     ('lr', learning_rate)])
+                     ('lr(no meaningful for bert)', learning_rate)])
         idx += 1
     duration_time = time.time() - start_time
     out = 'duration_time : ' + str(duration_time) + ' sec for this epoch'
@@ -124,7 +124,7 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
     sum_output_data_indices = np.argmax(data.sentence_tags, 2)
     tag_corrects = data.logits_indices_to_tags_seq(sum_output_data_indices, sum_sentence_lengths)
     prec, rec, f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
-    print('dev precision, recall, f1(chunk): ', prec, rec, f1, ', this is no meaningful for emb_class=bert')
+    print('dev precision, recall, f1(chunk): ', prec, rec, f1, '(no meaningful for bert)')
     chunk_f1 = f1
     m = chunk_f1
     # create summaries manually
@@ -185,6 +185,11 @@ def train(config):
     train_data = Input(train_file, config, build_output=True)
     dev_data = Input(dev_file, config, build_output=True)
     print('loading input data ... done')
+
+    # set for bert optimization
+    if config.emb_class == 'bert' and config.use_bert_optimization:
+        config.num_train_steps = int((len(train_data.sentence_tags) / config.batch_size) * config.epoch)
+        config.num_warmup_steps = int(config.num_train_steps * config.warmup_proportion)
 
     # create model
     model = Model(config)

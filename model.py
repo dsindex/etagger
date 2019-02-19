@@ -197,19 +197,25 @@ class Model:
             self.accuracy = self.__compute_accuracy()
 
         with tf.variable_scope('optimization'):
-            self.global_step = tf.Variable(0, name='global_step', trainable=False)
-            self.learning_rate = tf.train.exponential_decay(config.starter_learning_rate, 
-                                                            self.global_step, 
-                                                            config.decay_steps, 
-                                                            config.decay_rate, 
-                                                            staircase=True)
-            optimizer = tf.train.AdamOptimizer(self.learning_rate)
-            tvars = tf.trainable_variables()
-            grads, _ = tf.clip_by_global_norm(tf.gradients(self.loss, tvars), config.clip_norm)
-            self.train_op = optimizer.apply_gradients(zip(grads, tvars), global_step=self.global_step)
-            '''
-            self.train_op = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss, global_step=self.global_step)
-            '''
+            self.global_step = tf.train.get_or_create_global_step()
+            if config.emb_class == 'bert' and config.use_bert_optimization:
+                from bert import optimization
+                self.learning_rate = tf.constant(value=config.starter_learning_rate, shape=[], dtype=tf.float32)
+                self.train_op = optimization.create_optimizer(self.loss,
+                                                              config.starter_learning_rate,
+                                                              config.num_train_steps,
+                                                              config.num_warmup_steps,
+                                                              False)
+            else:
+                self.learning_rate = tf.train.exponential_decay(config.starter_learning_rate,
+                                                                self.global_step,
+                                                                config.decay_steps,
+                                                                config.decay_rate,
+                                                                staircase=True)
+                optimizer = tf.train.AdamOptimizer(self.learning_rate)
+                tvars = tf.trainable_variables()
+                grads, _ = tf.clip_by_global_norm(tf.gradients(self.loss, tvars), config.clip_norm)
+                self.train_op = optimizer.apply_gradients(zip(grads, tvars), global_step=self.global_step)
     
     def __word_embedding(self, inputs, keep_prob=0.5, scope='word-embedding'):
         """Look up word embeddings
