@@ -56,9 +56,9 @@
       - the BiLSTM is 3 ~ 4 times faster than the Transformer version on 1 CPU(single-thread)
       - during inference time, 1 layer BiLSTM on 1 CPU takes just **5.1 msec** per sentence on average.
   - how to use a trained model from C++? is it much faster?
-    - [x] save the meta graph and trained parameters. and restore it via tensorflow C++ API.
-      - 1 layer BiLSTM on multi CPU takes **2.7 msec** per sentence on average.
-      - 1 layer BiLSTM on single CPU takes **3.9 msec** per sentence on average.
+    - [x] freeze model, convert to memory mapped format and load it via tensorflow C++ API.
+      - 1 layer BiLSTM on multi CPU takes **2.04 msec** per sentence on average.
+      - 1 layer BiLSTM on single CPU takes **2.68 msec** per sentence on average.
 
 ## Models and Evaluation
 
