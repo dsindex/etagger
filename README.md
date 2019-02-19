@@ -407,7 +407,7 @@ in IN O O O
   $ bazel build -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.2 //tensorflow:libtensorflow_cc.so
   $ bazel build -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.2 //tensorflow/contrib/util:convert_graphdef_memmapped_format
 
-  * copy libraries and headers to dist directory.
+  * copy libraries to dist directory, export includes directory.
   $ export TENSORFLOW_SOURCE_DIR='/home/tensorflow-src-cpu'
   $ export TENSORFLOW_BUILD_DIR='/home/tensorflow-dist-cpu'
   $ cp -rf ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/*.so ${TENSORFLOW_BUILD_DIR}/
