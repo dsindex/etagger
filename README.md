@@ -402,10 +402,12 @@ in IN O O O
   * install pip package
   $ python -m pip install /tmp/tensorflow_pkg/tensorflow-1.11.0-cp36-cp36m-linux_x86_64.whl
 
-  * build libraries we need.
+  * build libraries and binaries we need.
   $ bazel build -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.2 //tensorflow:libtensorflow.so
   $ bazel build -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.2 //tensorflow:libtensorflow_cc.so
   $ bazel build -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.2 //tensorflow/contrib/util:convert_graphdef_memmapped_format
+  $ bazel build -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.2 //tensorflow/python/tools:optimize_for_inference
+  $ bazel build -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.2 //tensorflow/tools/quantization:quantize_graph
 
   * copy libraries to dist directory, export dist and includes directory.
   $ export TENSORFLOW_SOURCE_DIR='/home/tensorflow-src-cpu'
@@ -507,14 +509,25 @@ in IN O O O
   * inspect `pred.txt` whether the predictions are same.
   $ python ../token_eval.py < pred.txt
   ```
-  - convert frozen graph to memory mapped format and inference by C++
+  - optimize graph for inference, quantize graph, convert frozen graph to memory mapped format and inference by C++
   ```
   $ cd inference
-  $ cp -rf ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/contrib/util/convert_graphdef_memmapped_format .
+  $ cp -rf ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/tools/quantization/quantize_graph .
+  
+  * optimize graph for inference
+  $ ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/python/tools/optimize_for_inference --input=exported/ner_frozen.pb --output=exported/ner_frozen.pb.optimized --input_names=is_train,sentence_length,input_data_pos_ids,input_data_word_ids,input_data_wordchr_ids --output_names=logits,loss/trans_params,sentence_lengths 
+  # working, but, we can't load the optimized graph due to `Input 0 of node cond/Switch was passed float from is_train:0 incompatible with expected bool`
+  # need to debug
+
+  * quantize graph
+  $ ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/tools/quantization/quantize_graph --input=exported/ner_frozen.pb.optimized --output=exported/ner_frozen.pb.rounded --output_node_names=logits,loss/trans_params,sentence_lengths --mode=weights_rounded
+  # not working, similar error `Input 0 of node cond/Switch was passed float from is_train:0 incompatible with expected bool`
+  # need to debug
+
   * convert to memory mapped format
-  $ ./convert_graphdef_memmapped_format --in_graph=exported/ner_frozen.pb --out_graph=exported/ner_frozen.pbmm
+  $ ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/contrib/util/convert_graphdef_memmapped_format --in_graph=exported/ner_frozen.pb --out_graph=exported/ner_frozen.pb.memmapped
   * inference using C++
-  $ ./cc/build/inference_mm exported/ner_frozen.pbmm ../embeddings/vocab.txt < ../data/test.txt > pred.txt
+  $ ./cc/build/inference_mm exported/ner_frozen.pb.memmapped ../embeddings/vocab.txt < ../data/test.txt > pred.txt
   * inspect `pred.txt` whether the predictions are same.
   $ python ../token_eval.py < pred.txt
   ```
@@ -664,12 +677,15 @@ in IN O O O
           - [x] no meaningful difference. is it not effective for batch size 1 ?
     - CPU
       - quantizing graph
-        - [tf.contrib.quantize](https://www.tensorflow.org/api_docs/python/tf/contrib/quantize)
-        - [Quantizing neural network to 8-bit using Tensorflow(pdf)](https://armkeil.blob.core.windows.net/developer/developer/technologies/Machine%20learning%20on%20Arm/Tutorials/Quantizing%20neural%20networks%20to%208-it%20using%20Tensorflow/Quantizing%20neural%20networks%20to%208-bit%20using%20TensorFlow.pdf)
-        - [Quantizing deep convolutional networks for efficient inference: A whitepaper](https://arxiv.org/pdf/1806.08342.pdf)
-        - experiments
-          - [x] tf.import_graph_def() error after training with tf.contrib.quantize.create_training_graph(), freezing, exporting. 
-            - hmm... something messy.
+        - tf.contrib.quantize
+          - [tf.contrib.quantize](https://www.tensorflow.org/api_docs/python/tf/contrib/quantize)
+          - [Quantizing neural network to 8-bit using Tensorflow(pdf)](https://armkeil.blob.core.windows.net/developer/developer/technologies/Machine%20learning%20on%20Arm/Tutorials/Quantizing%20neural%20networks%20to%208-it%20using%20Tensorflow/Quantizing%20neural%20networks%20to%208-bit%20using%20TensorFlow.pdf)
+          - [Quantizing deep convolutional networks for efficient inference: A whitepaper](https://arxiv.org/pdf/1806.08342.pdf)
+          - experiments
+            - [x] tf.import_graph_def() error after training with tf.contrib.quantize.create_training_graph(), freezing, exporting. 
+              - hmm... something messy.
+        - optimize_for_inference, quantize_graph
+          - [tensorflow-for-mobile-poets](https://petewarden.com/2016/09/27/tensorflow-for-mobile-poets/)
       - tensorflow MKL
         - [optimizing tensorflow for cpu](https://www.tensorflow.org/performance/performance_guide#optimizing_for_cpu)
         - conda tensorflow distribution
