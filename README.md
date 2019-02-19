@@ -112,6 +112,7 @@
                 - 0.002976 sec (`experiments 9, test 6`), 0.8782
                 - 0.002855 sec (`experiments 9, test 7`), 0.8906
                   - 0.002697 sec with optimizations for FMA, AVX and SSE. no meaningful difference.
+                - 0.002040 sec (`experiments 12, test 5`), 0.9047
           - 1 CPU(single-thread)
             - rnn_num_layers 2 : 0.008001159379070668 sec 
             - rnn_num_layers 1
@@ -125,6 +126,7 @@
                 - 0.004133 sec (`experiments 9, test 6`)
                 - 0.003334 sec (`experiments 9, test 7`)
                   - 0.003078 sec with optimizations for FMA, AVX and SSE. no meaningful difference.
+                - 0.002683 sec (`experiments 12, test 5`)
       - ELMo
         - setting
           - `experiments 8, test 2`
@@ -510,7 +512,7 @@ in IN O O O
   * inspect `pred.txt` whether the predictions are same.
   $ python ../token_eval.py < pred.txt
   ```
-  - optimize graph for inference, quantize graph, convert frozen graph to memory mapped format and inference by C++
+  - optimizing graph for inference, convert it to memory mapped format and inference by C++
   ```
   $ cd inference
   
