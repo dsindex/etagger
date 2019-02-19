@@ -21,6 +21,30 @@ tensorflow::Session* TFUtil::CreateSession(int num_threads = 0)
   return sess;
 }
 
+tensorflow::MemmappedEnv* TFUtil::CreateMemmappedEnv(string graph_fn)
+{
+  tensorflow::MemmappedEnv* memmapped_env = new tensorflow::MemmappedEnv(tensorflow::Env::Default());
+  TF_CHECK_OK(memmapped_env->InitializeFromFile(graph_fn));
+  return memmapped_env;
+}
+
+tensorflow::Session* TFUtil::CreateMemmappedEnvSession(tensorflow::MemmappedEnv* memmapped_env, int num_threads = 0)
+{
+  tensorflow::Session* sess;
+  tensorflow::SessionOptions options;
+
+  options.config.mutable_graph_options()->mutable_optimizer_options()->set_opt_level(::tensorflow::OptimizerOptions::L0);
+  options.env = memmapped_env;
+
+  tensorflow::ConfigProto& conf = options.config;
+  if( num_threads > 0 ) {
+    conf.set_inter_op_parallelism_threads(num_threads);
+    conf.set_intra_op_parallelism_threads(num_threads);
+  }
+  TF_CHECK_OK(tensorflow::NewSession(options, &sess));
+  return sess;
+}
+
 void TFUtil::DestroySession(tensorflow::Session* sess)
 {
   if( sess ) sess->Close();
@@ -32,7 +56,7 @@ tensorflow::Status TFUtil::LoadFrozenModel(tensorflow::Session* sess, string gra
 
   load_lstm_lib();
 
-  // Read in the protobuf graph we freezed
+  // Read in the protobuf graph freezed
   tensorflow::GraphDef graph_def;
   status = ReadBinaryProto(tensorflow::Env::Default(), graph_fn, &graph_def);
   if( status != tensorflow::Status::OK() ) return status;
@@ -41,6 +65,23 @@ tensorflow::Status TFUtil::LoadFrozenModel(tensorflow::Session* sess, string gra
   status = sess->Create(graph_def);
   if( status != tensorflow::Status::OK() ) return status;
 
+  return tensorflow::Status::OK();
+}
+
+tensorflow::Status TFUtil::LoadFrozenMemmappedModel(tensorflow::MemmappedEnv* memmapped_env, tensorflow::Session* sess, string graph_fn)
+{
+  tensorflow::Status status;
+
+  load_lstm_lib();
+
+  // Read the memmory-mapped graph
+  tensorflow::GraphDef graph_def;
+  status = ReadBinaryProto(memmapped_env, tensorflow::MemmappedFileSystem::kMemmappedPackageDefaultGraphDef, &graph_def);
+
+  // Create the graph in the current session
+  status = sess->Create(graph_def);
+  if( status != tensorflow::Status::OK() ) return status;
+   
   return tensorflow::Status::OK();
 }
 

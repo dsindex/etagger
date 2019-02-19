@@ -405,13 +405,12 @@ in IN O O O
   * build libraries we need.
   $ bazel build -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.2 //tensorflow:libtensorflow.so
   $ bazel build -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.2 //tensorflow:libtensorflow_cc.so
+  $ bazel build -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.2 //tensorflow/contrib/util:convert_graphdef_memmapped_format
 
   * copy libraries and headers to dist directory.
   $ export TENSORFLOW_SOURCE_DIR='/home/tensorflow-src-cpu'
   $ export TENSORFLOW_BUILD_DIR='/home/tensorflow-dist-cpu'
-  $ mkdir -p ${TENSORFLOW_BUILD_DIR}/includes/tensorflow/cc/ops
   $ cp -rf ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/*.so ${TENSORFLOW_BUILD_DIR}/
-  $ cp -rf ${TENSORFLOW_SOURCE_DIR}/bazel-genfiles/tensorflow/cc/ops/*.h ${TENSORFLOW_BUILD_DIR}/includes/tensorflow/cc/ops/
 
   * for LSTMBlockFusedCell()
   $ rnn_path=`python -c "import tensorflow; print(tensorflow.contrib.rnn.__path__[0])"`
@@ -505,6 +504,17 @@ in IN O O O
 
   * inference using C++
   $ ./cc/build/inference exported/ner_frozen.pb ../embeddings/vocab.txt < ../data/test.txt > pred.txt
+  * inspect `pred.txt` whether the predictions are same.
+  $ python ../token_eval.py < pred.txt
+  ```
+  - convert frozen graph to memory mapped format and inference by C++
+  ```
+  $ cd inference
+  $ cp -rf ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/contrib/util/convert_graphdef_memmapped_format .
+  * convert to memory mapped format
+  $ ./convert_graphdef_memmapped_format --in_graph=exported/ner_frozen.pb --out_graph=exported/ner_frozen.pbmm
+  * inference using C++
+  $ ./cc/build/inference_mm exported/ner_frozen.pbmm ../embeddings/vocab.txt < ../data/test.txt > pred.txt
   * inspect `pred.txt` whether the predictions are same.
   $ python ../token_eval.py < pred.txt
   ```

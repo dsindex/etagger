@@ -7,17 +7,18 @@
 int main(int argc, char const *argv[])
 {
   if( argc < 3 ) {
-    cerr << argv[0] << " <frozen_graph_fn> <vocab_fn>" << endl;
+    cerr << argv[0] << " <frozen_memmapped_graph_fn> <vocab_fn>" << endl;
     return 1;
   } 
 
   const string frozen_graph_fn = argv[1];
   const string vocab_fn = argv[2];
 
-  TFUtil util = TFUtil();
-  tensorflow::Session* sess = util.CreateSession(0); // num_threads = 0(all cores), 1(1 core)
-  TF_CHECK_OK(util.LoadFrozenModel(sess, frozen_graph_fn));
- 
+  TFUtil util = TFUtil(); 
+  tensorflow::MemmappedEnv* memmapped_env = util.CreateMemmappedEnv(frozen_graph_fn); 
+  tensorflow::Session* sess = util.CreateMemmappedEnvSession(memmapped_env, 0); // num_threads = 0(all cores), 1(1 core)
+  TF_CHECK_OK(util.LoadFrozenMemmappedModel(memmapped_env, sess, frozen_graph_fn));
+
   Config config = Config(15, true); // word_length=15, use_crf=true
   Vocab vocab = Vocab(vocab_fn, true);  // lowercase=true
   config.SetClassSize(vocab.GetTagVocabSize());
