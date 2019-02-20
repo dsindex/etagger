@@ -153,15 +153,15 @@
       - ELMo + Glove
         - setting
           - `experiments 10, test 15`
-        - per-token(partial) f1 : 0.9289991445680068
-        - per-chunk(exact)   f1 : 0.924080768891632
+        - per-token(partial) f1 : 0.9319326698611623
+        - per-chunk(exact)   f1 : **0.9258044499601098**
         ```
-        processed 46666 tokens with 5648 phrases; found: 5694 phrases; correct: 5241.
-        accuracy:  98.36%; precision:  92.04%; recall:  92.79%; FB1:  92.42
-              LOC: precision:  93.48%; recall:  93.76%; FB1:  93.62  1673
-             MISC: precision:  83.17%; recall:  82.34%; FB1:  82.75  695
-              ORG: precision:  89.11%; recall:  92.11%; FB1:  90.59  1717
-              PER: precision:  97.51%; recall:  97.03%; FB1:  97.27  1609 
+        processed 46666 tokens with 5648 phrases; found: 5640 phrases; correct: 5224.
+        accuracy:  98.44%; precision:  92.62%; recall:  92.49%; FB1:  92.56
+              LOC: precision:  93.38%; recall:  93.94%; FB1:  93.66  1678
+             MISC: precision:  83.88%; recall:  83.05%; FB1:  83.46  695
+              ORG: precision:  90.96%; recall:  90.91%; FB1:  90.94  1660
+              PER: precision:  97.32%; recall:  96.72%; FB1:  97.02  1607 
         ```
         - average processing time per bucket
           - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.036233977567360014 sec

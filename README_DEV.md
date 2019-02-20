@@ -649,8 +649,13 @@ save model by f1(token)
 +
 CRF
 
+# trial 1
 token : 0.9289991445680068
-chunk : 0.924080768891632  -> Glove(6B) + ELMo + CNN + LSTM + CRF best
+chunk : 0.924080768891632
+
+# trial 2
+token : 0.9319326698611623
+chunk : 0.9258044499601098 -> Glove(6B) + ELMo + CNN + LSTM + CRF best
 
 * test 14
 word embedding size : 300(glove6B)
