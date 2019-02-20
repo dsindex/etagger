@@ -19,9 +19,8 @@ class TFUtil {
   
   public:
     TFUtil();
-    tensorflow::Session* CreateSession(int num_threads);
     tensorflow::MemmappedEnv* CreateMemmappedEnv(string graph_fn);
-    tensorflow::Session* CreateMemmappedEnvSession(tensorflow::MemmappedEnv* memmapped_env, int num_threads);
+    tensorflow::Session* CreateSession(tensorflow::MemmappedEnv* memmapped_env, int num_threads);
     void DestroySession(tensorflow::Session* sess);
     tensorflow::Status LoadFrozenModel(tensorflow::Session *sess, string graph_fn);
     tensorflow::Status LoadFrozenMemmappedModel(tensorflow::MemmappedEnv* memmapped_env, tensorflow::Session *sess, string graph_fn);

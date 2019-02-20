@@ -8,19 +8,6 @@ TFUtil::TFUtil()
 {
 }
 
-tensorflow::Session* TFUtil::CreateSession(int num_threads = 0)
-{
-  tensorflow::Session* sess;
-  tensorflow::SessionOptions options;
-  tensorflow::ConfigProto& conf = options.config;
-  if( num_threads > 0 ) {
-    conf.set_inter_op_parallelism_threads(num_threads);
-    conf.set_intra_op_parallelism_threads(num_threads);
-  }
-  TF_CHECK_OK(tensorflow::NewSession(options, &sess));
-  return sess;
-}
-
 tensorflow::MemmappedEnv* TFUtil::CreateMemmappedEnv(string graph_fn)
 {
   tensorflow::MemmappedEnv* memmapped_env = new tensorflow::MemmappedEnv(tensorflow::Env::Default());
@@ -28,13 +15,15 @@ tensorflow::MemmappedEnv* TFUtil::CreateMemmappedEnv(string graph_fn)
   return memmapped_env;
 }
 
-tensorflow::Session* TFUtil::CreateMemmappedEnvSession(tensorflow::MemmappedEnv* memmapped_env, int num_threads = 0)
+tensorflow::Session* TFUtil::CreateSession(tensorflow::MemmappedEnv* memmapped_env, int num_threads = 0)
 {
   tensorflow::Session* sess;
   tensorflow::SessionOptions options;
 
-  options.config.mutable_graph_options()->mutable_optimizer_options()->set_opt_level(::tensorflow::OptimizerOptions::L0);
-  options.env = memmapped_env;
+  if( memmapped_env ) {
+    options.config.mutable_graph_options()->mutable_optimizer_options()->set_opt_level(::tensorflow::OptimizerOptions::L0);
+    options.env = memmapped_env;
+  }
 
   tensorflow::ConfigProto& conf = options.config;
   if( num_threads > 0 ) {

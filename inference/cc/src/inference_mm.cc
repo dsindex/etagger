@@ -16,7 +16,7 @@ int main(int argc, char const *argv[])
 
   TFUtil util = TFUtil(); 
   tensorflow::MemmappedEnv* memmapped_env = util.CreateMemmappedEnv(frozen_graph_fn); 
-  tensorflow::Session* sess = util.CreateMemmappedEnvSession(memmapped_env, 0); // num_threads = 0(all cores), 1(1 core)
+  tensorflow::Session* sess = util.CreateSession(memmapped_env, 0); // memmapped_env, num_threads = 0(all cores) | n(n core)
   TF_CHECK_OK(util.LoadFrozenMemmappedModel(memmapped_env, sess, frozen_graph_fn));
 
   Config config = Config(15, true); // word_length=15, use_crf=true
