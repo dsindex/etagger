@@ -249,7 +249,8 @@ add_library(TensorFlow_DEP INTERFACE)
 TARGET_INCLUDE_DIRECTORIES(TensorFlow_DEP INTERFACE ${TensorFlow_SOURCE_DIR})
 TARGET_INCLUDE_DIRECTORIES(TensorFlow_DEP INTERFACE ${TensorFlow_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(TensorFlow_DEP INTERFACE -Wl,--allow-multiple-definition -Wl,--whole-archive ${TensorFlow_C_LIBRARY} -Wl,--no-whole-archive)
-TARGET_LINK_LIBRARIES(TensorFlow_DEP INTERFACE -Wl,--allow-multiple-definition -Wl,--whole-archive ${TensorFlow_LIBRARY} -Wl,--no-whole-archive)
+# comment out for linking libtensorflow_framework.so in the ${TENSORFLOW_BUILD_DIR}
+# TARGET_LINK_LIBRARIES(TensorFlow_DEP INTERFACE -Wl,--allow-multiple-definition -Wl,--whole-archive ${TensorFlow_LIBRARY} -Wl,--no-whole-archive)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
