@@ -54,7 +54,7 @@
         - LSTMBlockFusedCell() is well optimized for multi-core CPU via multi-threading.
         - i guess there might be an overhead when copying b/w GPU memory and main memory.
       - the BiLSTM is 3 ~ 4 times faster than the Transformer version on 1 CPU(single-thread)
-      - during inference time, 1 layer BiLSTM on 1 CPU takes just **5.1 msec** per sentence on average.
+      - during inference time, 1 layer BiLSTM on 1 CPU takes just **4.2 msec** per sentence on average.
   - how to use a trained model from C++? is it much faster?
     - [x] freeze model, convert to memory mapped format and load it via tensorflow C++ API.
       - 1 layer BiLSTM on multi CPU takes **2.04 msec** per sentence on average.
@@ -102,7 +102,9 @@
           - 32 core CPU(multi-threading)
             - rnn_num_layers 2 : 0.006132203450549827 sec
             - rnn_num_layers 1
-              - python : 0.0041805055967241884 sec
+              - python
+                - 0.0041805055967241884 sec
+                - 0.003053264560968687  sec (`experiments 12, test 5`)
               - C++
                 - 0.002735 sec
                 - 0.002175 sec (`experiments 9, test 2`), 0.8800
@@ -116,7 +118,9 @@
           - 1 CPU(single-thread)
             - rnn_num_layers 2 : 0.008001159379070668 sec 
             - rnn_num_layers 1
-              - python : 0.0051817628640952506 sec
+              - python
+                - 0.0051817628640952506 sec
+                - 0.0042755354628630235 sec (`experiments 12, test 5`)
               - C++
                 - 0.003998 sec
                 - 0.002853 sec (`experiments 9, test 2`)
