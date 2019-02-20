@@ -657,6 +657,14 @@ chunk : 0.924080768891632
 token : 0.9319326698611623
 chunk : 0.9258044499601098 -> Glove(6B) + ELMo + CNN + LSTM + CRF best
 
+# trial 3
+token : 0.9295585177938118
+chunk : 0.9231721333215455
+
+# trial 4
+token :
+chunk :
+
 * test 14
 word embedding size : 300(glove6B)
 elmo embedding params : elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json
