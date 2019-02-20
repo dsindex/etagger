@@ -53,7 +53,6 @@ chunk : 0.9047450424929179  -> Glove(6B) + CNN + LSTM + CRF best
 # c++, frozen -> transformed -> memmapped, 32 core CPU : 0.002189
 # c++, frozen -> transformed -> memmapped, 1 core CPU : 0.002709
 
-
 * test 4
 word embedding size : 300(glove6B)
 keep_prob : 0.7
@@ -612,6 +611,47 @@ chunk : 0.9131509267431598 -> BERT base + LSTM + CRF best
 
 - experiments 10
 ```
+
+* test 15
+word embedding size : 300(glove6B) -> 100(glove6B)
+elmo embedding params : elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json
+elmo embedding size : 1024
+elmo_keep_prob : 0.7
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+highway : False
+highway dropout : keep_prob
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
+
+token : 0.9289991445680068
+chunk : 0.924080768891632  -> Glove(6B) + ELMo + CNN + LSTM + CRF best
+
 * test 14
 word embedding size : 300(glove6B)
 elmo embedding params : elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json
@@ -1008,7 +1048,7 @@ chunk : 0.9221662691050446
 
 # trial 3
 token : 0.92896509491733
-chunk : 0.9235392910810573 -> Glove(6B) + ELMo + CNN + LSTM + CRF best
+chunk : 0.9235392910810573
 
 # trial 4
 token : 0.9258261933904528

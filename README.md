@@ -152,16 +152,16 @@
           - 1 CPU(single-thread)              : 0.7398052649182165 sec
       - ELMo + Glove
         - setting
-          - `experiments 10, test 5`
-        - per-token(partial) f1 : 0.92896509491733
-        - per-chunk(exact)   f1 : 0.9235392910810573
+          - `experiments 10, test 15`
+        - per-token(partial) f1 : 0.9289991445680068
+        - per-chunk(exact)   f1 : 0.924080768891632
         ```
-        processed 46666 tokens with 5648 phrases; found: 5669 phrases; correct: 5224.
-        accuracy:  98.37%; precision:  92.15%; recall:  92.49%; FB1:  92.32
-                      LOC: precision:  93.47%; recall:  93.59%; FB1:  93.53  1670
-                     MISC: precision:  84.06%; recall:  81.91%; FB1:  82.97  684
-                      ORG: precision:  89.22%; recall:  91.21%; FB1:  90.21  1698
-                      PER: precision:  97.28%; recall:  97.28%; FB1:  97.28  1617
+        processed 46666 tokens with 5648 phrases; found: 5694 phrases; correct: 5241.
+        accuracy:  98.36%; precision:  92.04%; recall:  92.79%; FB1:  92.42
+              LOC: precision:  93.48%; recall:  93.76%; FB1:  93.62  1673
+             MISC: precision:  83.17%; recall:  82.34%; FB1:  82.75  695
+              ORG: precision:  89.11%; recall:  92.11%; FB1:  90.59  1717
+              PER: precision:  97.51%; recall:  97.03%; FB1:  97.27  1609 
         ```
         - average processing time per bucket
           - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.036233977567360014 sec
@@ -397,6 +397,9 @@ in IN O O O
   $ cd tensorflow-src-cpu
   * you should checkout the same version of pip used for training.
   $ git checkout r1.11
+  * modify a source file for memory mapped graph(convert_graphdef_memmapped_format)
+    ./tensorflow/core/platform/posix/posix_file_system.cc:  mmap(nullptr, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0); in 'NewReadOnlyMemoryRegionFromFile'
+    MAP_PRIVATE -> MAP_SHARED
   * configure without CUDA
   $ ./configure
 
@@ -539,6 +542,11 @@ in IN O O O
   $ ./cc/build/inference_mm exported/ner_frozen.pb.memmapped ../embeddings/vocab.txt < ../data/test.txt > pred.txt
   * inspect `pred.txt` whether the predictions are same.
   $ python ../token_eval.py < pred.txt
+
+  * inspect the memory mapped graph is opened with MAP_SHARED
+  $ cat /proc/pid/maps
+  7fae40522000-7fae4a000000 r--s 00000000 08:11 749936602                  /root/etagger/inference/exported/ner_frozen.pb.memmapped
+  ...
   ```
 
 ## Development note
