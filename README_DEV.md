@@ -666,8 +666,12 @@ token : 0.931816792025928
 chunk : 0.9268680445151033 -> Glove(6B) + ELMo + CNN + LSTM + CRF best
 
 # trial 5
-token :
-chunk :
+token : 0.9280303030303031
+chunk : 0.9223438051535474
+
+# average 1,..,5
+token : 0.930067485455842
+chunk : 0.924453840368388 
 
 * test 14
 word embedding size : 300(glove6B)

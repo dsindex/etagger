@@ -35,7 +35,7 @@
 - my main questions are :
   - can this module perform at the level of state of the art?
     - [x] the f1 score is near SOTA.
-      - 92.65%
+      - 92.65% (best), 92.44%(average, 5 runs)
   - how to make it faster when it comes to using the BiLSTM?
     - [x] the solution is LSTMBlockFusedCell().
       - 3.13 times faster than LSTMCell() during training time.

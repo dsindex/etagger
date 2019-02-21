@@ -168,14 +168,14 @@ def do_train(model, config, train_data, dev_data):
         if token_f1 > max_token_f1 or (max_token_f1 - token_f1 < 0.0005 and chunk_f1 > max_chunk_f1):
             print('new best f1 score! : %s' % token_f1)
             max_token_f1 = token_f1
+            max_chunk_f1 = chunk_f1
             # save best model
             save_path = saver.save(sess, config.checkpoint_dir + '/' + 'ner_model')
             print('max model saved in file: %s' % save_path)
             tf.train.write_graph(sess.graph, '.', config.checkpoint_dir + '/' + 'graph.pb', as_text=False)
             tf.train.write_graph(sess.graph, '.', config.checkpoint_dir + '/' + 'graph.pb_txt', as_text=True)
             early_stopping.reset(max_token_f1)
-        if chunk_f1 > max_chunk_f1:
-            max_chunk_f1 = chunk_f1
+        early_stopping.status()
     sess.close()
 
 def train(config):
