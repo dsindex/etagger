@@ -655,13 +655,17 @@ chunk : 0.924080768891632
 
 # trial 2
 token : 0.9319326698611623
-chunk : 0.9258044499601098 -> Glove(6B) + ELMo + CNN + LSTM + CRF best
+chunk : 0.9258044499601098
 
 # trial 3
 token : 0.9295585177938118
 chunk : 0.9231721333215455
 
 # trial 4
+token : 0.931816792025928
+chunk : 0.9268680445151033 -> Glove(6B) + ELMo + CNN + LSTM + CRF best
+
+# trial 5
 token :
 chunk :
 

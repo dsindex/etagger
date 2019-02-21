@@ -35,7 +35,7 @@
 - my main questions are :
   - can this module perform at the level of state of the art?
     - [x] the f1 score is near SOTA.
-      - 0.92536
+      - 92.65%
   - how to make it faster when it comes to using the BiLSTM?
     - [x] the solution is LSTMBlockFusedCell().
       - 3.13 times faster than LSTMCell() during training time.
@@ -153,18 +153,19 @@
       - ELMo + Glove
         - setting
           - `experiments 10, test 15`
-        - per-token(partial) f1 : 0.9319326698611623
-        - per-chunk(exact)   f1 : **0.9258044499601098**
+        - per-token(partial) f1 : 0.931816792025928
+        - per-chunk(exact)   f1 : **0.9268680445151033**
         ```
-        processed 46666 tokens with 5648 phrases; found: 5640 phrases; correct: 5224.
-        accuracy:  98.44%; precision:  92.62%; recall:  92.49%; FB1:  92.56
-              LOC: precision:  93.38%; recall:  93.94%; FB1:  93.66  1678
-             MISC: precision:  83.88%; recall:  83.05%; FB1:  83.46  695
-              ORG: precision:  90.96%; recall:  90.91%; FB1:  90.94  1660
-              PER: precision:  97.32%; recall:  96.72%; FB1:  97.02  1607 
+        processed 46666 tokens with 5648 phrases; found: 5681 phrases; correct: 5248.
+        accuracy:  98.42%; precision:  92.38%; recall:  92.92%; FB1:  92.65
+              LOC: precision:  93.11%; recall:  94.00%; FB1:  93.56  1684
+             MISC: precision:  83.12%; recall:  82.76%; FB1:  82.94  699
+              ORG: precision:  90.31%; recall:  91.99%; FB1:  91.14  1692
+              PER: precision:  97.82%; recall:  97.16%; FB1:  97.49  1606
         ```
         - average processing time per bucket
           - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.036233977567360014 sec
+          - 1 GPU(Tesla V100, 32510MiB) : 0.031166194639816864 sec
       - BERT(base)
         - setting(on-going)
           - `experiments 11, test 1`

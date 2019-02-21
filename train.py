@@ -126,7 +126,7 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
     prec, rec, f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
     print('dev precision, recall, f1(chunk): ', prec, rec, f1, '(no meaningful for bert)')
     chunk_f1 = f1
-    m = chunk_f1
+
     # create summaries manually
     summary_value = [tf.Summary.Value(tag='loss_1', simple_value=sum_loss),
                      tf.Summary.Value(tag='accuracy_1', simple_value=sum_accuracy),
@@ -135,12 +135,9 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
     summaries = tf.Summary(value=summary_value)
     summary_writer.add_summary(summaries, global_step)
     
-    m = token_f1
-    return m
+    return token_f1, chunk_f1
 
 def do_train(model, config, train_data, dev_data):
-    early_stopping = EarlyStopping(patience=10, measure='f1', verbose=1)
-    maximum = 0
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     session_conf.gpu_options.allow_growth = True
     sess = tf.Session(config=session_conf)
@@ -159,19 +156,26 @@ def do_train(model, config, train_data, dev_data):
     train_summary_writer = tf.summary.FileWriter(train_summary_dir, sess.graph)
     dev_summary_dir = os.path.join(config.summary_dir, 'summaries', 'dev')
     dev_summary_writer = tf.summary.FileWriter(dev_summary_dir, sess.graph)
+
+    early_stopping = EarlyStopping(patience=10, measure='f1', verbose=1)
+    max_token_f1 = 0
+    max_chunk_f1 = 0
     for e in range(config.epoch):
         train_step(sess, model, config, train_data, train_summary_op, train_summary_writer)
-        m = dev_step(sess, model, config, dev_data, dev_summary_writer, e)
+        token_f1, chunk_f1  = dev_step(sess, model, config, dev_data, dev_summary_writer, e)
         # early stopping
-        if early_stopping.validate(m, measure='f1'): break
-        if m > maximum:
-            print('new best f1 score! : %s' % m)
-            maximum = m
+        if early_stopping.validate(token_f1, measure='f1'): break
+        if token_f1 > max_token_f1 or (max_token_f1 - token_f1 < 0.0005 and chunk_f1 > max_chunk_f1):
+            print('new best f1 score! : %s' % token_f1)
+            max_token_f1 = token_f1
             # save best model
             save_path = saver.save(sess, config.checkpoint_dir + '/' + 'ner_model')
             print('max model saved in file: %s' % save_path)
             tf.train.write_graph(sess.graph, '.', config.checkpoint_dir + '/' + 'graph.pb', as_text=False)
             tf.train.write_graph(sess.graph, '.', config.checkpoint_dir + '/' + 'graph.pb_txt', as_text=True)
+            early_stopping.reset(max_token_f1)
+        if chunk_f1 > max_chunk_f1:
+            max_chunk_f1 = chunk_f1
     sess.close()
 
 def train(config):

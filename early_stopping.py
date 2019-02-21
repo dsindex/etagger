@@ -13,6 +13,10 @@ class EarlyStopping():
             self._value = 0
         self.patience  = patience
         self.verbose = verbose
+
+    def reset(self, value):
+        self._step = 0
+        self._value = value
  
     def validate(self, value, measure='loss'):
         going_worse = False
@@ -26,8 +30,6 @@ class EarlyStopping():
                 if self.verbose:
                     print('Training process is stopped early!')
                 return True
-        else:
-            self._step = 0
-            self._value = value
- 
+        self.reset(value)
         return False
+
