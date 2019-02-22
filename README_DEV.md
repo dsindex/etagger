@@ -673,6 +673,10 @@ chunk : 0.9223438051535474
 token : 0.930067485455842
 chunk : 0.924453840368388 
 
+# trial 6
+token : 0.9298031062736946
+chunk : 0.9242330474759083
+
 * test 14
 word embedding size : 300(glove6B)
 elmo embedding params : elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json
