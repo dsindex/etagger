@@ -690,8 +690,12 @@ token : 0.9304884758818854
 chunk : 0.92371534522338
 
 # trial 10
-token :
-chunk :
+token : 0.9318654434250764
+chunk : 0.9253942938153464
+
+# averge 1,...,10
+token : 0.93044691
+chunk : 0.9245217835
 
 * test 14
 word embedding size : 300(glove6B)
