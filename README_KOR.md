@@ -134,6 +134,10 @@ save model by f1(token) -> f1(chunk)
 +
 CRF
 
+token : 0.9141382082857263
+chunk : 0.9221816596741677
+conlleval : 92.22          -> best
+
 * test 9
 word embedding size : 100
 keep_prob : 0.7
@@ -244,7 +248,7 @@ CRF
 
 token : 0.9137324987506671
 chunk : 0.9220215504078872
-conlleval : 92.20          -> best
+conlleval : 92.20
 
 * test 6
 word embedding size : 300
