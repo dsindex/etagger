@@ -65,9 +65,9 @@ save model by f1(token) -> f1(chunk)
 +
 CRF
 
-token : 0.8336974003216593
-chunk : 0.828596112311015
-conlleval : 82.78
+token : 0.8336974003216593, 0.8950232838811782(including 'O')
+chunk : 0.828596112311015 , 0.9093912290825158(including 'O')
+conlleval : 82.78         , 90.93(including 'O')
 average processing time per bucket(sentence)
   - GPU : 0.01303002712777439 sec
   - 32 CPU : 0.011279379889660678 sec
