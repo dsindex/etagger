@@ -65,6 +65,11 @@ save model by f1(token) -> f1(chunk)
 +
 CRF
 
+token : 0.8336974003216593
+chunk : 0.828596112311015
+conlleval : 82.78
+average processing time per bucket(sentence) : 0.011349351824705551 sec sec
+
 ```
 
 - experiments 1 data
