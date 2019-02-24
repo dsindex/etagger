@@ -68,8 +68,10 @@ CRF
 token : 0.8336974003216593
 chunk : 0.828596112311015
 conlleval : 82.78
-average processing time per bucket(sentence) : 0.011349351824705551 sec sec
-
+average processing time per bucket(sentence)
+  - GPU : 0.01303002712777439 sec
+  - 32 CPU : 0.011279379889660678 sec
+  - 1 CPU : 0.010049216377432151 sec
 ```
 
 - experiments 1 data
