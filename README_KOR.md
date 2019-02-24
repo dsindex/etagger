@@ -47,8 +47,8 @@ rnn_used : True
 rnn_type : fused
 rnn_size : 200
 rnn_num_layers : 2
-learning_rate : exponential_decay(), 2e-5 / 5000 / 0.9
-gradient clipping : 1.5
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
 epoch : 70
 batch_size : 20
 +
@@ -123,8 +123,8 @@ rnn_used : True
 rnn_type : fused
 rnn_size : 200
 rnn_num_layers : 2
-learning_rate : exponential_decay(), 2e-5 / 5000 / 0.9
-gradient clipping : 1.5
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
 epoch : 70
 batch_size : 20
 +
@@ -159,8 +159,8 @@ rnn_used : True
 rnn_type : fused
 rnn_size : 200
 rnn_num_layers : 2
-learning_rate : exponential_decay(), 2e-5 / 5000 / 0.9
-gradient clipping : 1.5
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
 epoch : 70
 batch_size : 20
 +
