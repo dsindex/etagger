@@ -9,7 +9,7 @@ class Config:
         self.wrd_dim = args.wrd_dim         # size of word embedding(glove)
         self.chr_dim = 25                   # size of character embedding
         self.pos_dim = 7                    # size of part of speech embedding
-        self.chk_dim = 9                    # size of chunk embedding
+        self.chk_dim = 10                   # size of chunk embedding
         self.class_size = len(self.embvec.tag_vocab) # number of class(tags)
         self.word_length = args.word_length # maximum character size of word for convolution
         self.restore = args.restore         # checkpoint path if available
