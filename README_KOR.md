@@ -2,7 +2,7 @@
 - experiments 2 data
 ```
 1. number of labels
-
+485
 
 2. data
 15M  data/cruise.train.txt.in
@@ -14,9 +14,10 @@
 525470 embeddings/vocab.txt
 
 4. evaluation by CRF(wapiti)
-token :
-chunk :
-conlleval :
+token : 0.820348045768
+chunk : 0.8155083158938209
+conlleval : 81.46
+average processing time per bucket(sentence) : 235.691333 / 13692 = 0.017213798787613 sec
 ```
 
 - how to run
