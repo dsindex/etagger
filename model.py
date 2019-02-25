@@ -19,6 +19,8 @@ class Model:
         self.chr_dim = config.chr_dim
         self.pos_vocab_size = len(self.embvec.pos_vocab)
         self.pos_dim = config.pos_dim
+        self.chk_vocab_size = len(self.embvec.chk_vocab)
+        self.chk_dim = config.chk_dim
         self.class_size = config.class_size
         self.use_crf = config.use_crf
         self.emb_class = config.emb_class
@@ -39,6 +41,10 @@ class Model:
         self.sentence_lengths = tf.identity(sentence_lengths, name='sentence_lengths')
         masks = tf.to_float(tf.expand_dims(self.sentence_masks, -1))
         self.pos_embeddings = self.__pos_embedding(self.input_data_pos_ids, keep_prob=keep_prob, scope='pos-embedding')
+
+        # chk embedding
+        self.input_data_chk_ids = tf.placeholder(tf.int32, shape=[None, None], name='input_data_chk_ids') # (batch_size, sentence_length)
+        self.chk_embeddings = self.__chk_embedding(self.input_data_chk_ids, keep_prob=keep_prob, scope='chk-embedding')
 
         # (large) word embedding data
         self.wrd_embeddings_init = tf.placeholder(tf.float32, shape=[self.wrd_vocab_size, self.wrd_dim], name='wrd_embeddings_init')
@@ -82,7 +88,7 @@ class Model:
                                                          masks,
                                                          keep_prob=bert_keep_prob)
 
-        concat_in = [self.word_embeddings, self.wordchr_embeddings, self.pos_embeddings]
+        concat_in = [self.word_embeddings, self.wordchr_embeddings, self.pos_embeddings, self.chk_embeddings]
         if self.emb_class == 'elmo':
             concat_in = [self.word_embeddings, self.wordchr_embeddings, self.elmo_embeddings, self.pos_embeddings]
         if self.emb_class == 'bert':
@@ -350,6 +356,19 @@ class Model:
             masks = tf.expand_dims(self.sentence_masks, -1)                   # (batch_size, sentence_length, 1)
             pos_embeddings *= tf.to_float(masks)                              # broadcasting
             return tf.nn.dropout(pos_embeddings, keep_prob)
+
+    def __chk_embedding(self, inputs, keep_prob=0.5, scope='chk-embedding'):
+        """Computing chk embeddings
+        """
+        with tf.variable_scope(scope):
+            with tf.device('/cpu:0'):
+                k_embeddings = tf.Variable(tf.random_uniform([self.chk_vocab_size, self.chk_dim], -0.5, 0.5),
+                                           name='k_embeddings')
+                chk_embeddings = tf.nn.embedding_lookup(k_embeddings, inputs) # (batch_size, sentence_length, chk_dim)
+            # masking
+            masks = tf.expand_dims(self.sentence_masks, -1)                   # (batch_size, sentence_length, 1)
+            chk_embeddings *= tf.to_float(masks)                              # broadcasting
+            return tf.nn.dropout(chk_embeddings, keep_prob)
 
     def __bi_lstm(self, inputs, lengths, rnn_size, keep_prob=0.5, scope='bi-lstm'):
         """Apply bi-directional LSTM

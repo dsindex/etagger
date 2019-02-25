@@ -10,21 +10,31 @@ class EmbVec:
         self.pad = '#PAD#'
         self.unk = '#UNK#'
         self.lowercase = args.lowercase
+
         self.wrd_vocab = {}      # word vocab
         self.pad_wid = 0         # for padding word embedding
         self.unk_wid = 1         # for unknown word
         self.wrd_vocab[self.pad] = self.pad_wid
         self.wrd_vocab[self.unk] = self.unk_wid
+
         self.chr_vocab = {}      # character vocab
         self.pad_cid = 0         # for padding char embedding
         self.unk_cid = 1         # for unknown char
         self.chr_vocab[self.pad] = self.pad_cid
         self.chr_vocab[self.unk] = self.unk_cid
+
         self.pos_vocab = {}      # pos vocab
         self.pad_pid = 0         # for padding pos embedding
         self.unk_pid = 1         # for unknown pos
         self.pos_vocab[self.pad] = self.pad_pid
         self.pos_vocab[self.unk] = self.unk_pid
+
+        self.chk_vocab = {}      # chunk vocab
+        self.pad_kid = 0         # for padding chunk embedding
+        self.unk_kid = 1         # for unknown chunk
+        self.chk_vocab[self.pad] = self.pad_kid
+        self.chk_vocab[self.unk] = self.unk_kid
+
         self.oot_tid = 0         # out of tag id
         self.oot_tag = 'O'       # out of tag, this is fixed for convenience
         self.xot_tid = 1         # 'X' tag id
@@ -52,9 +62,10 @@ class EmbVec:
         self.bert_init_checkpoint = args.bert_init_checkpoint
         self.bert_max_seq_length = args.bert_max_seq_length
 
-        # build character/pos/tag/elmo vocab
+        # build character/pos/chunk/tag/elmo vocab
         cid = self.unk_cid + 1
         pid = self.unk_pid + 1
+        kid = self.unk_kid + 1
         tid = self.xot_tid + 1
         for line in open(args.total_path):
             line = line.strip()
@@ -63,6 +74,7 @@ class EmbVec:
             assert(len(tokens) == 4)
             word = tokens[0]
             pos  = tokens[1]
+            chk = tokens[2]
             tag  = tokens[3]
             # character vocab
             for ch in word:
@@ -76,6 +88,10 @@ class EmbVec:
             if pos not in self.pos_vocab:
                 self.pos_vocab[pos] = pid
                 pid += 1
+            # chunk vocab
+            if chk not in self.chk_vocab:
+                self.chk_vocab[chk] = kid
+                kid += 1
             # tag, itag vocab
             if tag not in self.tag_vocab:
                 self.tag_vocab[tag] = tid
@@ -146,6 +162,11 @@ class EmbVec:
             return self.pos_vocab[pos]
         return self.unk_pid
 
+    def get_kid(self, chk):
+        if chk in self.chk_vocab:
+            return self.chk_vocab[chk]
+        return self.unk_kid
+
     def get_tid(self, tag):
         if tag in self.tag_vocab:
             return self.tag_vocab[tag]
@@ -188,7 +209,11 @@ if __name__ == '__main__':
     print('# pos_vocab', len(embvec.pos_vocab))
     for pos, pid in embvec.pos_vocab.items():
         print(pos, pid)
-    # 4. tag_vocab
+    # 4. chk_vocab
+    print('# chk_vocab', len(embvec.chk_vocab))
+    for chk, kid in embvec.chk_vocab.items():
+        print(chk, kid)
+    # 5. tag_vocab
     print('# tag_vocab', len(embvec.tag_vocab))
     for tag, tid, in embvec.tag_vocab.items():
         print(tag, tid)

@@ -23,6 +23,7 @@ class Vocab {
     int GetCid(string ch);
     int GetPadCid() { return pad_cid; }
     int GetPid(string pos);
+    int GetKid(string chk);
     string GetTag(int tid);
     ~Vocab();
   
@@ -35,11 +36,16 @@ class Vocab {
     int unk_cid = 1;
     int pad_pid = 0;
     int unk_pid = 1;
+    int pad_kid = 0;
+    int unk_kid = 1;
     int oot_tid = 0;
-    string oot_tag = "O"; 
+    int xot_tid = 1;
+    string oot_tag = "O";
+    string xot_tag = "X";
     map<string, int> wrd_vocab;
     map<string, int> chr_vocab;
     map<string, int> pos_vocab;
+    map<string, int> chk_vocab;
     map<string, int> tag_vocab;
     map<int, string> itag_vocab;
 

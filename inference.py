@@ -50,6 +50,7 @@ def inference_bucket(config):
             # Build input data
             inp = Input(bucket, config, build_output=False)
             feed_dict = {model.input_data_pos_ids: inp.sentence_pos_ids,
+                         model.input_data_chk_ids: inp.sentence_chk_ids,
                          model.is_train: False,
                          model.sentence_length: inp.max_sentence_length}
             feed_dict[model.input_data_word_ids] = inp.sentence_word_ids
@@ -88,6 +89,7 @@ def inference_bucket(config):
         # Build input data
         inp = Input(bucket, config)
         feed_dict = {model.input_data_pos_ids: inp.sentence_pos_ids,
+                     model.input_data_chk_ids: inp.sentence_chk_ids,
                      model.is_train: False,
                      model.sentence_length: inp.max_sentence_length}
         feed_dict[model.input_data_word_ids] = inp.sentence_word_ids
@@ -187,6 +189,7 @@ def inference_line(config):
         # Build input data
         inp = Input(bucket, config, build_output=False)
         feed_dict = {model.input_data_pos_ids: inp.sentence_pos_ids,
+                     model.input_data_chk_ids: inp.sentence_chk_ids,
                      model.is_train: False,
                      model.sentence_length: inp.max_sentence_length}
         feed_dict[model.input_data_word_ids] = inp.sentence_word_ids

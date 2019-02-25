@@ -47,6 +47,14 @@ int Vocab::GetPid(string pos)
   return this->unk_pid;
 }
 
+int Vocab::GetKid(string chk)
+{
+  if( this->chk_vocab.find(chk) != this->chk_vocab.end() ) {
+    return this->chk_vocab[chk];
+  }
+  return this->unk_kid;
+}
+
 string Vocab::GetTag(int tid)
 {
   if( this->itag_vocab.find(tid) != this->itag_vocab.end() ) {
@@ -79,7 +87,8 @@ bool Vocab::load_vocab(string vocab_fn)
     if( line.find("# wrd_vocab") != string::npos ) mode = 1; // wrd_vocab
     if( line.find("# chr_vocab") != string::npos ) mode = 2; // chr_vocab
     if( line.find("# pos_vocab") != string::npos ) mode = 3; // pos_vocab
-    if( line.find("# tag_vocab") != string::npos ) mode = 4; // tag_vocab
+    if( line.find("# chk_vocab") != string::npos ) mode = 4; // chk_vocab
+    if( line.find("# tag_vocab") != string::npos ) mode = 5; // tag_vocab
     vector<string> tokens;
     Split(line, tokens);
     if( tokens.size() != 2 ) continue;
@@ -95,6 +104,9 @@ bool Vocab::load_vocab(string vocab_fn)
       this->pos_vocab.insert(make_pair(key, id));
     }
     if( mode == 4 ) {
+      this->chk_vocab.insert(make_pair(key, id));
+    }
+    if( mode == 5 ) {
       this->tag_vocab.insert(make_pair(key, id));
       this->itag_vocab.insert(make_pair(id, key));
     }

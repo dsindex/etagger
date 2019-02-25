@@ -10,6 +10,7 @@
       - [x] 3) BERT embedding, character convolutional embedding
     - etc embedding
       - [x] pos embedding
+      - [x] chunk embedding
     - highway network
       - [x] applied on the concatenated input(ex, Glove + CNN(char) + BERT + POS)
   - contextual encoding
@@ -341,14 +342,14 @@ in IN O O O
   
   * optimize graph for inference
   # not working properly
-  $ ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/python/tools/optimize_for_inference --input=exported/ner_frozen.pb --output=exported/ner_frozen.pb.optimized --input_names=is_train,sentence_length,input_data_pos_ids,input_data_word_ids,input_data_wordchr_ids --output_names=logits,loss/trans_params,sentence_lengths 
+  $ ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/python/tools/optimize_for_inference --input=exported/ner_frozen.pb --output=exported/ner_frozen.pb.optimized --input_names=is_train,sentence_length,input_data_pos_ids,input_data_chk_ids,input_data_word_ids,input_data_wordchr_ids --output_names=logits,loss/trans_params,sentence_lengths 
 
   * quantize graph
   # not working properly
   $ ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/tools/quantization/quantize_graph --input=exported/ner_frozen.pb --output=exported/ner_frozen.pb.rounded --output_node_names=logits,loss/trans_params,sentence_lengths --mode=weights_rounded
 
   * transform graph
-  $ ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/tools/graph_transforms/transform_graph --in_graph=exported/ner_frozen.pb --out_graph=exported/ner_frozen.pb.transformed --inputs=is_train,sentence_length,input_data_pos_ids,input_data_word_ids,input_data_wordchr_ids --outputs=logits,loss/trans_params,sentence_lengths --transforms='strip_unused_nodes merge_duplicate_nodes round_weights(num_steps=256) sort_by_execution_order'
+  $ ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/tools/graph_transforms/transform_graph --in_graph=exported/ner_frozen.pb --out_graph=exported/ner_frozen.pb.transformed --inputs=is_train,sentence_length,input_data_pos_ids,input_data_chk_ids,input_data_word_ids,input_data_wordchr_ids --outputs=logits,loss/trans_params,sentence_lengths --transforms='strip_unused_nodes merge_duplicate_nodes round_weights(num_steps=256) sort_by_execution_order'
 
   * convert to memory mapped format
   $ ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/contrib/util/convert_graphdef_memmapped_format --in_graph=exported/ner_frozen.pb --out_graph=exported/ner_frozen.pb.memmapped

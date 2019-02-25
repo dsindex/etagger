@@ -30,6 +30,7 @@ def train_step(sess, model, config, data, summary_op, summary_writer):
     for ptr in range(0, len(data.sentence_tags), config.batch_size):
         config.is_training = True
         feed_dict={model.input_data_pos_ids: data.sentence_pos_ids[ptr:ptr + config.batch_size],
+                   model.input_data_chk_ids: data.sentence_chk_ids[ptr:ptr + config.batch_size],
                    model.output_data: data.sentence_tags[ptr:ptr + config.batch_size],
                    model.is_train: config.is_training,
                    model.sentence_length: data.max_sentence_length}
@@ -88,6 +89,7 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
     for ptr in range(0, len(data.sentence_tags), config.dev_batch_size):
         config.is_training = False
         feed_dict={model.input_data_pos_ids: data.sentence_pos_ids[ptr:ptr + config.dev_batch_size],
+                   model.input_data_chk_ids: data.sentence_chk_ids[ptr:ptr + config.dev_batch_size],
                    model.output_data: data.sentence_tags[ptr:ptr + config.dev_batch_size],
                    model.is_train: config.is_training,
                    model.sentence_length: data.max_sentence_length}

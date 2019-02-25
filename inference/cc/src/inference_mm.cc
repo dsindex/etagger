@@ -7,7 +7,7 @@
 int main(int argc, char const *argv[])
 {
   if( argc < 3 ) {
-    cerr << argv[0] << " <frozen_memmapped_graph_fn> <vocab_fn>" << endl;
+    cerr << argv[0] << " <frozen_graph_fn> <vocab_fn>" << endl;
     return 1;
   } 
 
@@ -18,7 +18,7 @@ int main(int argc, char const *argv[])
   tensorflow::MemmappedEnv* memmapped_env = util.CreateMemmappedEnv(frozen_graph_fn); 
   tensorflow::Session* sess = util.CreateSession(memmapped_env, 0); // memmapped_env, num_threads = 0(all cores) | n(n core)
   TF_CHECK_OK(util.LoadFrozenMemmappedModel(memmapped_env, sess, frozen_graph_fn));
-
+ 
   Config config = Config(15, true); // word_length=15, use_crf=true
   Vocab vocab = Vocab(vocab_fn, true);  // lowercase=true
   config.SetClassSize(vocab.GetTagVocabSize());
@@ -39,6 +39,7 @@ int main(int argc, char const *argv[])
        tensorflow::Tensor* sentence_word_ids = input.GetSentenceWordIds();
        tensorflow::Tensor* sentence_wordchr_ids = input.GetSentenceWordChrIds();
        tensorflow::Tensor* sentence_pos_ids = input.GetSentencePosIds();
+       tensorflow::Tensor* sentence_chk_ids = input.GetSentenceChkIds();
        tensorflow::Tensor* sentence_length = input.GetSentenceLength();
        tensorflow::Tensor* is_train = input.GetIsTrain();
 #ifdef DEBUG
@@ -63,6 +64,12 @@ int main(int argc, char const *argv[])
          cout << data_pos_ids[i] << " ";
        }
        cout << endl;
+       cout << "[chk ids]" << endl;
+       auto data_chk_ids = sentence_chk_ids->flat<int>().data();
+       for( int i = 0; i < max_sentence_length; i++ ) {
+         cout << data_chk_ids[i] << " ";
+       }
+       cout << endl;
        cout << "[sentence length]" << endl;
        auto data_sentence_length = sentence_length->flat<int>().data();
        cout << *data_sentence_length << endl;
@@ -76,6 +83,7 @@ int main(int argc, char const *argv[])
          {"input_data_word_ids", *sentence_word_ids},
          {"input_data_wordchr_ids", *sentence_wordchr_ids},
          {"input_data_pos_ids", *sentence_pos_ids},
+         {"input_data_chk_ids", *sentence_chk_ids},
          {"sentence_length", *sentence_length},
          {"is_train", *is_train},
        };
