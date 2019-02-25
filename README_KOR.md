@@ -1,4 +1,86 @@
 
+- experiments 3 data
+```
+1. number of labels
+485
+
+2. data
+25M, 109120 sentences, data/cruise.train.txt
+3.1M, 13640 sentences, data/cruise.dev.txt
+3.1M, 13642 sentences, data/cruise.test.txt
+
+3. glove
+2.5G   kor.glove.300d.txt
+525470 embeddings/vocab.txt
+
+4. evaluation by CRF(wapiti)
+token :
+chunk :
+conlleval :
+average processing time per bucket(sentence) :
+```
+
+- how to run
+```
+$ cd data
+$ python conv.py < cruise.train.txt > cruise.train.txt.in
+$ python conv.py < cruise.dev.txt > cruise.dev.txt.in
+$ python conv.py < cruise.test.txt > cruise.test.txt.in
+
+$ python embvec.py --emb_path embeddings/kor.glove.100d.txt --wrd_dim 100 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in > embeddings/vocab.txt
+$ python embvec.py --emb_path embeddings/kor.glove.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in > embeddings/vocab.txt
+
+$ python train.py --emb_path embeddings/kor.glove.100d.txt.pkl --wrd_dim 100 --batch_size 20 --epoch 70
+$ python train.py --emb_path embeddings/kor.glove.300d.txt.pkl --wrd_dim 300 --batch_size 20 --epoch 70
+
+$ python inference.py --mode bucket --emb_path embeddings/kor.glove.100d.txt.pkl --wrd_dim 100 --restore checkpoint/ner_model < data/cruise.test.txt.in > pred.txt
+$ python inference.py --mode bucket --emb_path embeddings/kor.glove.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/cruise.test.txt.in > pred.txt
+```
+
+- experiments 3
+```
+* test 1
+word embedding size : 300
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token) -> f1(chunk)
++
+CRF
+
+token :
+chunk :
+conlleval :
+average processing time per bucket(sentence)
+  - 1 GPU :
+  - 32 CPU :
+  - 1 CPU :
+```
+
+
 - experiments 2 data
 ```
 1. number of labels
@@ -12,6 +94,7 @@
 3. glove
 2.5G   kor.glove.300d.txt
 525470 embeddings/vocab.txt
+
 
 4. evaluation by CRF(wapiti)
 token : 0.820348045768
