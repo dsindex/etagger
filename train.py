@@ -123,8 +123,8 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
     chunk_f1 = f1
 
     # create summaries manually
-    summary_value = [tf.Summary.Value(tag='loss_1', simple_value=sum_loss),
-                     tf.Summary.Value(tag='accuracy_1', simple_value=sum_accuracy),
+    summary_value = [tf.Summary.Value(tag='loss', simple_value=sum_loss),
+                     tf.Summary.Value(tag='accuracy', simple_value=sum_accuracy),
                      tf.Summary.Value(tag='token_f1', simple_value=token_f1),
                      tf.Summary.Value(tag='chunk_f1', simple_value=chunk_f1)]
     summaries = tf.Summary(value=summary_value)
