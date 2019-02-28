@@ -60,7 +60,7 @@ class Config:
         self.chk_dim = 64
         self.keep_prob = 0.7
         self.rnn_size = 200
-        self.starter_learning_rate = 0.0003
+        self.starter_learning_rate = 0.001
         self.decay_steps = 3000
         self.decay_rate = 0.9
         self.clip_norm = 1.5

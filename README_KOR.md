@@ -31,8 +31,8 @@ $ cat cruise.train.txt.in cruise.dev.txt.in cruise.test.txt.in > cruise.total.tx
 $ python embvec.py --emb_path embeddings/kor.glove.100d.txt --wrd_dim 100 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in > embeddings/vocab.txt
 $ python embvec.py --emb_path embeddings/kor.glove.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in > embeddings/vocab.txt
 
-$ python train.py --emb_path embeddings/kor.glove.100d.txt.pkl --wrd_dim 100 --batch_size 20 --epoch 70
-$ python train.py --emb_path embeddings/kor.glove.300d.txt.pkl --wrd_dim 300 --batch_size 20 --epoch 70
+$ python train.py --emb_path embeddings/kor.glove.100d.txt.pkl --wrd_dim 100 --batch_size 40 --epoch 140
+$ python train.py --emb_path embeddings/kor.glove.300d.txt.pkl --wrd_dim 300 --batch_size 40 --epoch 140
 
 $ python inference.py --mode bucket --emb_path embeddings/kor.glove.100d.txt.pkl --wrd_dim 100 --restore checkpoint/ner_model < data/cruise.test.txt.in > pred.txt
 $ python inference.py --mode bucket --emb_path embeddings/kor.glove.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/cruise.test.txt.in > pred.txt
@@ -40,6 +40,132 @@ $ python inference.py --mode bucket --emb_path embeddings/kor.glove.300d.txt.pkl
 
 - experiments 3-1
 ```
+
+* test 12
+word embedding size : 300
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+chk embedding size : 10 -> 64
+chk embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9 -> 0.001 / 3000 / 0.9
+gradient clipping : 10 -> 1.5
+epoch : 70 -> 140
+batch_size : 20 -> 100
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token) -> f1(chunk)
++
+#CRF
+
+token : 0.859288847501654
+chunk : 0.8433297297297296
+conlleval : 83.67
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) : 0.005661899070728561 sec
+  - 32 CPU : skip
+  - 1 CPU : skip
+
+* test 11
+word embedding size : 300
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+chk embedding size : 10 -> 64
+chk embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9 -> 0.001 / 3000 / 0.9
+gradient clipping : 10 -> 1.5
+epoch : 70 -> 140
+batch_size : 20 -> 100
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token) -> f1(chunk)
++
+CRF
+
+token : 0.8603671970624236
+chunk : 0.8519950744237292
+conlleval : 85.20
+average processing time per bucket(sentence)
+  - 1 GPU(V100 TESLA) : 0.011507198006993881 sec
+  - 8 CPU : skip
+  - 1 CPU : skip
+
+* test 10
+word embedding size : 300
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+chk embedding size : 10 -> 64
+chk embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9 -> 0.001 / 3000 / 0.9
+gradient clipping : 10 -> 1.5
+epoch : 70 -> 140
+batch_size : 20 -> 40
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token) -> f1(chunk)
++
+#CRF
+
+token : 0.859759461546949
+chunk : 0.8433318200488574
+conlleval : 83.72
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) : 0.005789112020597974 sec
+  - 32 CPU : skip
+  - 1 CPU : skip
 
 * test 9
 word embedding size : 300
@@ -75,11 +201,11 @@ save model by f1(token) -> f1(chunk)
 +
 CRF
 
-token :
-chunk :
-conlleval :
+token : 0.8584552485099256
+chunk : 0.8484334203655352
+conlleval : 84.84
 average processing time per bucket(sentence)
-  - 1 GPU(V100 TESLA) :
+  - 1 GPU(V100 TESLA) : 0.01205325771542068 sec
   - 8 CPU : skip
   - 1 CPU : skip
 
@@ -123,7 +249,7 @@ chunk : 0.8540854345377351
 conlleval :  85.40 -> best
 average processing time per bucket(sentence)
   - 1 GPU(TITAN X PASCAL) :  0.013347263088710076 sec
-  - 8 CPU : skip
+  - 32 CPU : skip
   - 1 CPU : skip
 
 # dev data
