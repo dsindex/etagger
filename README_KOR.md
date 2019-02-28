@@ -41,7 +41,7 @@ $ python inference.py --mode bucket --emb_path embeddings/kor.glove.300d.txt.pkl
 - experiments 3-1
 ```
 
-* test 8
+* test 9
 word embedding size : 300
 keep_prob : 0.7
 chr_conv_type : conv1d
@@ -57,7 +57,7 @@ rnn_used : True
 rnn_type : fused
 rnn_size : 200
 rnn_num_layers : 2
-learning_rate : exponential_decay(), 0.001 / 12000 / 0.9 -> 0.0003 / 1000 / 0.9
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9 -> 0.0003 / 3000 / 0.9
 gradient clipping : 10 -> 1.5
 epoch : 70 -> 140
 batch_size : 20 -> 40
@@ -79,9 +79,57 @@ token :
 chunk :
 conlleval :
 average processing time per bucket(sentence)
-  - 1 GPU(TITAN X PASCAL) :
+  - 1 GPU(V100 TESLA) :
   - 8 CPU : skip
   - 1 CPU : skip
+
+* test 8
+word embedding size : 300
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+chk embedding size : 10 -> 64
+chk embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9 -> 0.001 / 3000 / 0.9
+gradient clipping : 10 -> 1.5
+epoch : 70 -> 140
+batch_size : 20 -> 40
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token) -> f1(chunk)
++
+CRF
+
+# test data
+token : 0.8632774180890719
+chunk : 0.8540854345377351
+conlleval :  85.40 -> best
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) :  0.013347263088710076 sec
+  - 8 CPU : skip
+  - 1 CPU : skip
+
+# dev data
+token : 0.8616541715883616
+chunk : 0.8557254183877699
+conlleval : 85.57
 
 * test 7
 word embedding size : 300
@@ -288,7 +336,7 @@ CRF
 
 token : 0.8618139449316244, 0.9153326218427605(including 'O')
 chunk : 0.8528806807110225, 0.9259648466178184(including 'O')
-conlleval : 85.28         , 92.60(including 'O') -> best
+conlleval : 85.28         , 92.60(including 'O')
 average processing time per bucket(sentence)
   - 1 GPU(V100 TESLA) : 0.011372548012313317 sec
   - 8 CPU : 0.010189664309682987 sec
