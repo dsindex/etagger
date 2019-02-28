@@ -118,7 +118,7 @@ class Model:
                                                       self.sentence_lengths,
                                                       rnn_size=config.rnn_size,
                                                       keep_prob=keep_prob,
-                                                      scope=scope)                # (batch_size, sentence_length, 2*rnn_size)
+                                                      scope=scope) # (batch_size, sentence_length, 2*rnn_size)
                 else:
                     scope = 'bi-lstm-%s' % i
                     rnn_output = self.__bi_lstm(rnn_output,
@@ -178,12 +178,9 @@ class Model:
         """
         Projection layer
         """
-        logits = self.__projection(self.transformed_output,
-                                   self.class_size,
-                                   scope='projection')                     # (batch_size, sentence_length, class_size)
-        self.logits = tf.identity(logits, name='logits')
-        logits_indices = tf.cast(tf.argmax(logits, 2), tf.int32)           # (batch_size, sentence_length)
-        self.logits_indices = tf.identity(logits_indices, name='logits_indices')
+        self.logits = self.__projection(self.transformed_output,
+                                        self.class_size,
+                                        scope='projection') # (batch_size, sentence_length, class_size)
 
         """
         Output answer
@@ -194,13 +191,12 @@ class Model:
         self.output_data_indices = tf.cast(tf.argmax(self.output_data, 2), tf.int32)  # (batch_size, sentence_length)
 
         """
-        Loss, Accuracy, Optimization
+        Loss, Prediction, Accuracy, Optimization
         """
-        with tf.variable_scope('loss'):
-            self.loss = self.__compute_loss()
-
-        with tf.variable_scope('accuracy'):
-            self.accuracy = self.__compute_accuracy()
+        self.loss = self.__compute_loss()
+        self.prediction = self.__compute_prediction()
+        self.logits_indices = tf.identity(self.prediction, name='logits_indices')
+        self.accuracy = self.__compute_accuracy()
 
         with tf.variable_scope('optimization'):
             self.global_step = tf.train.get_or_create_global_step()
@@ -466,10 +462,22 @@ class Model:
             trans_params = tf.constant(0.0, shape=[self.class_size, self.class_size])
             return tf.reduce_mean(cross_entropy)
 
-    def __compute_accuracy(self):
-        """Compute accuracy(self.output_data, self.logits)
+    def __compute_prediction(self):
+        """Compute prediction(self.logits, self.trans_params)
         """
-        correct_prediction = tf.cast(tf.equal(self.logits_indices, self.output_data_indices),
+        if self.use_crf:
+            prediction, _ = tf.contrib.crf.crf_decode(potentials=self.logits,
+                                                      transition_params=self.trans_params,
+                                                      sequence_length=self.sentence_lengths)
+        else:
+            probabilities = tf.nn.softmax(self.logits, axis=-1)  # (batch_size, sentence_length, class_size)
+            prediction = tf.argmax(probabilities,axis=-1)        # (batch_size, sentence_length)
+        return prediction
+
+    def __compute_accuracy(self):
+        """Compute accuracy(self.prediction, self.output_data_indices)
+        """
+        correct_prediction = tf.cast(tf.equal(self.prediction, self.output_data_indices),
                                      tf.float32)                                     # (batch_size, sentence_length)
         # masking
         masks = self.sentence_masks

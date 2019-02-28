@@ -14,7 +14,6 @@ from embvec import EmbVec
 from config import Config
 from token_eval  import TokenEval
 from chunk_eval  import ChunkEval
-from viterbi import viterbi_decode
 from input import Input
 
 def load_frozen_graph(frozen_graph_filename, prefix='prefix'):
@@ -65,8 +64,7 @@ def inference(config, frozen_pb_path):
     p_input_data_chk_ids = graph.get_tensor_by_name('prefix/input_data_chk_ids:0')
     p_input_data_word_ids = graph.get_tensor_by_name('prefix/input_data_word_ids:0')
     p_input_data_wordchr_ids = graph.get_tensor_by_name('prefix/input_data_wordchr_ids:0')
-    t_logits = graph.get_tensor_by_name('prefix/logits:0')
-    t_trans_params = graph.get_tensor_by_name('prefix/loss/trans_params:0')
+    t_logits_indices = graph.get_tensor_by_name('prefix/logits_indices:0')
     t_sentence_lengths = graph.get_tensor_by_name('prefix/sentence_lengths:0')
 
     num_buckets = 0
@@ -93,13 +91,8 @@ def inference(config, frozen_pb_path):
                 feed_dict[p_bert_input_data_token_ids] = inp.sentence_bert_token_ids
                 feed_dict[p_bert_input_data_token_masks] = inp.sentence_bert_token_masks
                 feed_dict[p_bert_input_data_segment_ids] = inp.sentence_bert_segment_ids
-            logits, trans_params, sentence_lengths = sess.run([t_logits, t_trans_params, t_sentence_lengths], \
-                                                              feed_dict=feed_dict)
-            if config.use_crf:
-                viterbi_sequences = viterbi_decode(logits, trans_params, sentence_lengths)
-                tags = inp.logit_indices_to_tags(viterbi_sequences[0], sentence_lengths[0])
-            else:
-                tags = inp.logit_to_tags(logits[0], sentence_lengths[0])
+            logits_indices, sentence_lengths = sess.run([t_logits_indices, t_sentence_lengths], feed_dict=feed_dict)
+            tags = inp.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
             for i in range(len(bucket)):
                 if config.emb_class == 'bert':
                     j = inp.sentence_bert_wordidx2tokenidx[0][i]
@@ -131,13 +124,8 @@ def inference(config, frozen_pb_path):
             feed_dict[p_bert_input_data_token_ids] = inp.sentence_bert_token_ids
             feed_dict[p_bert_input_data_token_masks] = inp.sentence_bert_token_masks
             feed_dict[p_bert_input_data_segment_ids] = inp.sentence_bert_segment_ids
-        logits, trans_params, sentence_lengths = sess.run([t_logits, t_trans_params, t_sentence_lengths], \
-                                                          feed_dict=feed_dict)
-        if config.use_crf:
-            viterbi_sequences = viterbi_decode(logits, trans_params, sentence_lengths)
-            tags = inp.logit_indices_to_tags(viterbi_sequences[0], sentence_lengths[0])
-        else:
-            tags = inp.logit_to_tags(logits[0], sentence_lengths[0])
+        logits_indices, sentence_lengths = sess.run([t_logits_indices, t_sentence_lengths], feed_dict=feed_dict)
+        tags = inp.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
         for i in range(len(bucket)):
             if config.emb_class == 'bert':
                 j = inp.sentence_bert_wordidx2tokenidx[0][i]

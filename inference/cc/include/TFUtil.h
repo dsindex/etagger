@@ -25,11 +25,6 @@ class TFUtil {
     tensorflow::Status LoadFrozenModel(tensorflow::Session *sess, string graph_fn);
     tensorflow::Status LoadFrozenMemmappedModel(tensorflow::MemmappedEnv* memmapped_env, tensorflow::Session *sess, string graph_fn);
     tensorflow::Status LoadModel(tensorflow::Session *sess, string graph_fn, string checkpoint_fn);
-    void ViterbiDecode(tensorflow::TTypes<float>::Flat logits_flat,
-                       tensorflow::TTypes<float>::Flat trans_params_flat,
-                       int max_sentence_length,
-                       int class_size,
-                       vector<int>& viterbi);
     ~TFUtil();
   
   private:

@@ -14,7 +14,6 @@ from token_eval  import TokenEval
 from chunk_eval  import ChunkEval
 from progbar import Progbar
 from early_stopping import EarlyStopping
-from viterbi import viterbi_decode
 
 def np_concat(sum_var, var):
     if sum_var is not None: sum_var = np.concatenate((sum_var, var), axis=0)
@@ -81,7 +80,7 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
     prog = Progbar(target=nbatches)
     sum_loss = 0.0
     sum_accuracy = 0.0
-    sum_logits = None
+    sum_logits_indices = None
     sum_sentence_lengths = None
     trans_params = None
     global_step = 0
@@ -101,30 +100,24 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
             feed_dict[model.bert_input_data_token_ids] = data.sentence_bert_token_ids[ptr:ptr + config.batch_size]
             feed_dict[model.bert_input_data_token_masks] = data.sentence_bert_token_masks[ptr:ptr + config.batch_size]
             feed_dict[model.bert_input_data_segment_ids] = data.sentence_bert_segment_ids[ptr:ptr + config.batch_size]
-        global_step, logits, trans_params, sentence_lengths, loss, accuracy = \
-                 sess.run([model.global_step, model.logits, model.trans_params, model.sentence_lengths, \
+        global_step, logits_indices, sentence_lengths, loss, accuracy = \
+                 sess.run([model.global_step, model.logits_indices, model.sentence_lengths, \
                            model.loss, model.accuracy], feed_dict=feed_dict)
         prog.update(idx + 1,
                     [('dev loss', loss),
                      ('dev accuracy', accuracy)])
         sum_loss += loss
         sum_accuracy += accuracy
-        sum_logits = np_concat(sum_logits, logits)
+        sum_logits_indices = np_concat(sum_logits_indices, logits_indices)
         sum_sentence_lengths = np_concat(sum_sentence_lengths, sentence_lengths)
         idx += 1
     sum_loss = sum_loss / nbatches
     sum_accuracy = sum_accuracy / nbatches
-    print('[epoch %s/%s] dev precision, recall, f1(token): ' % (epoch, config.epoch))
-    token_f1 = TokenEval.compute_f1(config.class_size, sum_logits, data.sentence_tags, sum_sentence_lengths)
-    
-    if config.use_crf:
-        viterbi_sequences = viterbi_decode(sum_logits, trans_params, sum_sentence_lengths)
-        tag_preds = data.logits_indices_to_tags_seq(viterbi_sequences, sum_sentence_lengths)
-    else:
-        sum_logits_indices = np.argmax(sum_logits, 2)
-        tag_preds = data.logits_indices_to_tags_seq(sum_logits_indices, sum_sentence_lengths)
     sum_output_data_indices = np.argmax(data.sentence_tags, 2)
+    tag_preds = data.logits_indices_to_tags_seq(sum_logits_indices, sum_sentence_lengths)
     tag_corrects = data.logits_indices_to_tags_seq(sum_output_data_indices, sum_sentence_lengths)
+    print('[epoch %s/%s] dev precision, recall, f1(token): ' % (epoch, config.epoch))
+    token_f1 = TokenEval.compute_f1(config.class_size, sum_logits_indices, sum_output_data_indices, sum_sentence_lengths)
     prec, rec, f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
     print('dev precision, recall, f1(chunk): ', prec, rec, f1, '(invalid for bert due to X tag)')
     chunk_f1 = f1

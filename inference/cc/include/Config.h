@@ -5,17 +5,15 @@ class Config {
   
   public:
     Config();
-    Config(int word_length, bool use_crf);
+    Config(int word_length);
     void SetClassSize(int class_size) { this->class_size = class_size; }
     int  GetClassSize()  { return class_size; }
     int  GetWordLength() { return word_length; }
-    bool GetUseCRF() { return use_crf; }
     ~Config();
   
   private:
     int class_size;     // assigned after loading vocab
     int word_length;
-    bool use_crf;
 };
 
 #endif

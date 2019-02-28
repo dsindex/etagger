@@ -317,7 +317,7 @@ in IN O O O
   $ python export.py --restore ../checkpoint/ner_model --export exported/ner_model --export-pb exported
 
   * freeze graph
-  $ python freeze.py --model_dir exported --output_node_names logits,loss/trans_params,sentence_lengths --frozen_model_name ner_frozen.pb
+  $ python freeze.py --model_dir exported --output_node_names logits_indices,sentence_lengths --frozen_model_name ner_frozen.pb
 
   * inference using python
   $ python python/inference.py --emb_path ../embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
@@ -342,14 +342,14 @@ in IN O O O
   
   * optimize graph for inference
   # not working properly
-  $ ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/python/tools/optimize_for_inference --input=exported/ner_frozen.pb --output=exported/ner_frozen.pb.optimized --input_names=is_train,sentence_length,input_data_pos_ids,input_data_chk_ids,input_data_word_ids,input_data_wordchr_ids --output_names=logits,loss/trans_params,sentence_lengths 
+  $ ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/python/tools/optimize_for_inference --input=exported/ner_frozen.pb --output=exported/ner_frozen.pb.optimized --input_names=is_train,sentence_length,input_data_pos_ids,input_data_chk_ids,input_data_word_ids,input_data_wordchr_ids --output_names=logits_indices,sentence_lengths 
 
   * quantize graph
   # not working properly
-  $ ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/tools/quantization/quantize_graph --input=exported/ner_frozen.pb --output=exported/ner_frozen.pb.rounded --output_node_names=logits,loss/trans_params,sentence_lengths --mode=weights_rounded
+  $ ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/tools/quantization/quantize_graph --input=exported/ner_frozen.pb --output=exported/ner_frozen.pb.rounded --output_node_names=logits_indices,sentence_lengths --mode=weights_rounded
 
   * transform graph
-  $ ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/tools/graph_transforms/transform_graph --in_graph=exported/ner_frozen.pb --out_graph=exported/ner_frozen.pb.transformed --inputs=is_train,sentence_length,input_data_pos_ids,input_data_chk_ids,input_data_word_ids,input_data_wordchr_ids --outputs=logits,loss/trans_params,sentence_lengths --transforms='strip_unused_nodes merge_duplicate_nodes round_weights(num_steps=256) sort_by_execution_order'
+  $ ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/tools/graph_transforms/transform_graph --in_graph=exported/ner_frozen.pb --out_graph=exported/ner_frozen.pb.transformed --inputs=is_train,sentence_length,input_data_pos_ids,input_data_chk_ids,input_data_word_ids,input_data_wordchr_ids --outputs=logits_indices,sentence_lengths --transforms='strip_unused_nodes merge_duplicate_nodes round_weights(num_steps=256) sort_by_execution_order'
 
   * convert to memory mapped format
   $ ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/contrib/util/convert_graphdef_memmapped_format --in_graph=exported/ner_frozen.pb --out_graph=exported/ner_frozen.pb.memmapped

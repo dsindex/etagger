@@ -9,7 +9,6 @@ from config import Config
 from model import Model
 from token_eval  import TokenEval
 from chunk_eval  import ChunkEval
-from viterbi import viterbi_decode
 from input import Input
 
 def inference_bucket(config):
@@ -61,14 +60,8 @@ def inference_bucket(config):
                 feed_dict[model.bert_input_data_token_ids] = inp.sentence_bert_token_ids
                 feed_dict[model.bert_input_data_token_masks] = inp.sentence_bert_token_masks
                 feed_dict[model.bert_input_data_segment_ids] = inp.sentence_bert_segment_ids
-            logits, trans_params, sentence_lengths = sess.run([model.logits, model.trans_params, \
-                                                               model.sentence_lengths], \
-                                                              feed_dict=feed_dict)
-            if config.use_crf:
-                viterbi_sequences = viterbi_decode(logits, trans_params, sentence_lengths)
-                tags = inp.logit_indices_to_tags(viterbi_sequences[0], sentence_lengths[0])
-            else:
-                tags = inp.logit_to_tags(logits[0], sentence_lengths[0])
+            logits_indices, sentence_lengths = sess.run([model.logits_indices, model.sentence_lengths], feed_dict=feed_dict)
+            tags = inp.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
             for i in range(len(bucket)):
                 if config.emb_class == 'bert':
                     j = inp.sentence_bert_wordidx2tokenidx[0][i]
@@ -100,14 +93,8 @@ def inference_bucket(config):
             feed_dict[model.bert_input_data_token_ids] = inp.sentence_bert_token_ids
             feed_dict[model.bert_input_data_token_masks] = inp.sentence_bert_token_masks
             feed_dict[model.bert_input_data_segment_ids] = inp.sentence_bert_segment_ids
-        logits, trans_params, sentence_lengths = sess.run([model.logits, model.trans_params, \
-                                                           model.sentence_lengths], \
-                                                          feed_dict=feed_dict)
-        if config.use_crf:
-            viterbi_sequences = viterbi_decode(logits, trans_params, sentence_lengths)
-            tags = inp.logit_indices_to_tags(viterbi_sequences[0], sentence_lengths[0])
-        else:
-            tags = inp.logit_to_tags(logits[0], sentence_lengths[0])
+        logits_indices, sentence_lengths = sess.run([model.logits_indices, model.sentence_lengths], feed_dict=feed_dict)
+        tags = inp.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
         for i in range(len(bucket)):
             if config.emb_class == 'bert':
                 j = inp.sentence_bert_wordidx2tokenidx[0][i]
@@ -200,14 +187,8 @@ def inference_line(config):
             feed_dict[model.bert_input_data_token_ids] = inp.sentence_bert_token_ids
             feed_dict[model.bert_input_data_token_masks] = inp.sentence_bert_token_masks
             feed_dict[model.bert_input_data_segment_ids] = inp.sentence_bert_segment_ids
-        logits, trans_params, sentence_lengths = sess.run([model.logits, model.trans_params, \
-                                                           model.sentence_lengths], \
-                                                          feed_dict=feed_dict)
-        if config.use_crf:
-            viterbi_sequences = viterbi_decode(logits, trans_params, sentence_lengths)
-            tags = inp.logit_indices_to_tags(viterbi_sequences[0], sentence_lengths[0])
-        else:
-            tags = inp.logit_to_tags(logits[0], sentence_lengths[0])
+        logits_indices, sentence_lengths = sess.run([model.logits_indices, model.sentence_lengths], feed_dict=feed_dict)
+        tags = inp.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
         for i in range(len(bucket)):
             if config.emb_class == 'bert':
                 j = inp.sentence_bert_wordidx2tokenidx[0][i]

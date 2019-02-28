@@ -112,8 +112,6 @@ class TokenEval:
         tp = np.array([0] * (class_size + 1))
         fp = np.array([0] * (class_size + 1))
         fn = np.array([0] * (class_size + 1))
-        target = np.argmax(target, 2)
-        prediction = np.argmax(prediction, 2)
         for i in range(len(target)):
             for j in range(length[i]):
                 if target[i, j] == prediction[i, j]:

@@ -18,7 +18,7 @@ int main(int argc, char const *argv[])
   tensorflow::Session* sess = util.CreateSession(NULL, 0); //memmapped_env = NULL,  num_threads = 0(all cores) | n(n core)
   TF_CHECK_OK(util.LoadFrozenModel(sess, frozen_graph_fn));
  
-  Config config = Config(15, true); // word_length=15, use_crf=true
+  Config config = Config(15); // word_length=15
   Vocab vocab = Vocab(vocab_fn, true);  // lowercase=true
   config.SetClassSize(vocab.GetTagVocabSize());
   cerr << "class size = " << config.GetClassSize() << endl;
@@ -87,40 +87,18 @@ int main(int argc, char const *argv[])
          {"is_train", *is_train},
        };
        std::vector<tensorflow::Tensor> outputs;
-       TF_CHECK_OK(sess->Run(feed_dict, {"logits", "loss/trans_params"},
-                        {}, &outputs));
+       TF_CHECK_OK(sess->Run(feed_dict, {"logits_indices"}, {}, &outputs));
        /*
-       cout << "logits           " << outputs[0].DebugString() << endl;
-       cout << "trans_params     " << outputs[1].DebugString() << endl;
+       cout << "logits_indices   " << outputs[0].DebugString() << endl;
        */
        int class_size = config.GetClassSize();
-       tensorflow::TTypes<float>::Flat logits_flat = outputs[0].flat<float>();
-       tensorflow::TTypes<float>::Flat trans_params_flat = outputs[1].flat<float>();
-       if( config.GetUseCRF() ) {
-         vector<int> viterbi(max_sentence_length);
-         util.ViterbiDecode(logits_flat, trans_params_flat, max_sentence_length, class_size, viterbi);
-         for( int i = 0; i < max_sentence_length; i++ ) {
-           int max_j = viterbi[i];
-           string tag = vocab.GetTag(max_j);
-           cout << bucket[i] + " " + tag << endl;
-         }
-         cout << endl;
-       } else {
-         for( int i = 0; i < max_sentence_length; i++ ) {
-           int max_j = 0;
-           float max_logit = numeric_limits<float>::min();
-           for( int j = 0; j < class_size; j++ ) {
-             const float logit = logits_flat(i*class_size + j);
-             if( logit > max_logit ) {
-               max_logit = logit;
-               max_j = j;
-             }
-           }
-           string tag = vocab.GetTag(max_j);
-           cout << bucket[i] + " " + tag << endl;
-         }
-         cout << endl;
+       tensorflow::TTypes<int>::Flat logits_indices_flat = outputs[0].flat<int>();
+       for( int i = 0; i < max_sentence_length; i++ ) {
+         int max_idx = logits_indices_flat(i);
+         string tag = vocab.GetTag(max_idx);
+         cout << bucket[i] + " " + tag << endl;
        }
+       cout << endl;
 
        num_buckets += 1;
        bucket.clear();
