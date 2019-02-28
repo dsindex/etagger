@@ -26,9 +26,6 @@ class Config:
         self.rnn_type = 'fused'             # normal | fused
         self.rnn_size = 200                 # size of RNN hidden unit
         self.tf_used = False                # use transformer encoder layer or not
-        if self.tf_used:
-            # modified for transformer
-            self.starter_learning_rate = 0.0003
         self.tf_num_layers = 4              # number of layers for transformer encoder
         self.tf_keep_prob = 0.8             # keep probability for transformer encoder
         self.tf_mh_num_heads = 4            # number of head for multi head attention
@@ -41,6 +38,9 @@ class Config:
         self.decay_steps = 12000
         self.decay_rate = 0.9
         self.clip_norm = 10
+        if self.tf_used:
+            # modified for transformer
+            self.starter_learning_rate = 0.0003
 
         self.is_training = is_training
         if self.is_training:
@@ -51,11 +51,21 @@ class Config:
             self.summary_dir = args.summary_dir
 
         '''
-        modified for glove(300, 6B), self.tf_used == False
+        # modified for glove(300, 6B), self.tf_used == False
         self.rnn_size = 276
         self.keep_prob = 0.32
         '''
-
+        '''
+        # modified for cruise
+        self.chk_dim = 64
+        self.keep_prob = 0.7
+        self.rnn_size = 200
+        self.starter_learning_rate = 0.0003
+        self.decay_steps = 3000
+        self.decay_rate = 0.9
+        self.clip_norm = 1.5
+        '''
+        
         if self.emb_class == 'elmo':
             from bilm import Batcher, BidirectionalLanguageModel
             self.word_length = 50 # replace to fixed word length for the pre-trained elmo : 'max_characters_per_token'
