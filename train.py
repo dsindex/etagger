@@ -69,7 +69,7 @@ def train_step(sess, model, config, data, summary_op, summary_writer):
                     [('step', step),
                      ('train loss', loss),
                      ('train accuracy', accuracy),
-                     ('lr(no meaningful for bert)', learning_rate)])
+                     ('lr(invalid if use_bert_optimization)', learning_rate)])
         idx += 1
     duration_time = time.time() - start_time
     out = 'duration_time : ' + str(duration_time) + ' sec for this epoch'
@@ -126,7 +126,7 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
     sum_output_data_indices = np.argmax(data.sentence_tags, 2)
     tag_corrects = data.logits_indices_to_tags_seq(sum_output_data_indices, sum_sentence_lengths)
     prec, rec, f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
-    print('dev precision, recall, f1(chunk): ', prec, rec, f1, '(no meaningful for bert)')
+    print('dev precision, recall, f1(chunk): ', prec, rec, f1, '(invalid for bert due to X tag)')
     chunk_f1 = f1
 
     # create summaries manually
@@ -153,7 +153,8 @@ def do_train(model, config, train_data, dev_data):
     # summary setting
     loss_summary = tf.summary.scalar('loss', model.loss)
     acc_summary = tf.summary.scalar('accuracy', model.accuracy)
-    train_summary_op = tf.summary.merge([loss_summary, acc_summary])
+    lr_summary = tf.summary.scalar('learning_rate', model.learning_rate)
+    train_summary_op = tf.summary.merge([loss_summary, acc_summary, lr_summary])
     train_summary_dir = os.path.join(config.summary_dir, 'summaries', 'train')
     train_summary_writer = tf.summary.FileWriter(train_summary_dir, sess.graph)
     dev_summary_dir = os.path.join(config.summary_dir, 'summaries', 'dev')
