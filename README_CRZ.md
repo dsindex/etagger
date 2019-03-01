@@ -41,7 +41,7 @@ $ python inference.py --mode bucket --emb_path embeddings/kor.glove.300d.txt.pkl
 - experiments 2-1
 ```
 
-* test 14
+* test 15
 word embedding size : 300
 keep_prob : 0.7
 chr_conv_type : conv1d
@@ -56,8 +56,8 @@ chk embedding random init : -0.5 ~ 0.5
 rnn_used : True
 rnn_type : fused
 rnn_size : 200
-rnn_num_layers : 2
-learning_rate : exponential_decay(), 0.001 / 12000 / 0.9 -> 0.001 / 5000 / 0.9
+rnn_num_layers : 2 -> 1
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9 -> 0.001 / 3000 / 0.9
 gradient clipping : 10 -> 1.5
 epoch : 70 -> 140
 batch_size : 20 -> 40
@@ -75,11 +75,53 @@ save model by f1(token) -> f1(chunk)
 +
 CRF
 
-token :
-chunk :
-conlleval :
+token : 0.8613488783943329
+chunk : 0.8521689993914632
+conlleval : 85.21
 average processing time per bucket(sentence)
-  - 1 GPU(V100 TESLA) :
+  - 1 GPU(TITAN X PASCAL) : 0.010911516509890085 sec
+  - 32 CPU : skip
+  - 1 CPU : skip
+
+* test 14
+word embedding size : 300
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+chk embedding size : 10 -> 64
+chk embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9 -> 0.001 / 3000 / 0.9
+gradient clipping : 10 -> 1.5
+epoch : 70 -> 140
+batch_size : 20 -> 40
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token) -> f1(chunk)
++
+CRF
+
+token : 0.8612126714597698
+chunk : 0.8534114329102941
+conlleval : 85.34
+average processing time per bucket(sentence)
+  - 1 GPU(V100 TESLA) : 0.009480409023786567 sec
   - 8 CPU : skip
   - 1 CPU : skip
 
