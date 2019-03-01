@@ -9,7 +9,7 @@ class EmbVec:
     def __init__(self, args):
         self.pad = '#PAD#'
         self.unk = '#UNK#'
-        self.lowercase = args.lowercase
+        self.lowercase = True if args.lowercase == 'True' else False
 
         self.wrd_vocab = {}      # word vocab
         self.pad_wid = 0         # for padding word embedding
@@ -57,8 +57,7 @@ class EmbVec:
         # bert
         self.bert_config_path = args.bert_config_path
         self.bert_vocab_path  = args.bert_vocab_path
-        self.bert_do_lower_case = False
-        if args.bert_do_lower_case: self.bert_do_lower_case = True
+        self.bert_do_lower_case = True if args.bert_do_lower_case == 'True' else False
         self.bert_init_checkpoint = args.bert_init_checkpoint
         self.bert_max_seq_length = args.bert_max_seq_length
 
@@ -183,13 +182,13 @@ if __name__ == '__main__':
     parser.add_argument('--wrd_dim', type=int, help='embedding vector dimension', required=True)
     parser.add_argument('--train_path', type=str, help='path to a train file', required=True)
     parser.add_argument('--total_path', type=str, help='path to a train+dev+test file', required=True)
-    parser.add_argument('--lowercase', type=int, help='apply lower case for word embedding', default=1)
+    parser.add_argument('--lowercase', type=str, help='apply lower case for word embedding', default=True)
     parser.add_argument('--elmo_vocab_path', type=str, help='path to elmo vocab file(write)', default='')
     parser.add_argument('--elmo_options_path', type=str, help='path to elmo options file', default='')
     parser.add_argument('--elmo_weight_path', type=str, help='path to elmo weight file', default='')
     parser.add_argument('--bert_config_path', type=str, help='path to bert config file', default='')
     parser.add_argument('--bert_vocab_path', type=str, help='path to bert vocab file', default='')
-    parser.add_argument('--bert_do_lower_case', type=int, help='apply lower case for bert', default=0)
+    parser.add_argument('--bert_do_lower_case', type=str, help='apply lower case for bert', default=False)
     parser.add_argument('--bert_init_checkpoint', type=str, help='path to bert init checkpoint', default='')
     parser.add_argument('--bert_max_seq_length', type=int, help='maximum total input sequence length after WordPiece tokenization.', default=180)
     args = parser.parse_args()
