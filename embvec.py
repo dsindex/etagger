@@ -9,7 +9,8 @@ class EmbVec:
     def __init__(self, args):
         self.pad = '#PAD#'
         self.unk = '#UNK#'
-        self.lowercase = True if args.lowercase == 'True' else False
+        self.lowercase = True
+        if args.lowercase == 'False': self.lowercase = False
 
         self.wrd_vocab = {}      # word vocab
         self.pad_wid = 0         # for padding word embedding
@@ -57,7 +58,8 @@ class EmbVec:
         # bert
         self.bert_config_path = args.bert_config_path
         self.bert_vocab_path  = args.bert_vocab_path
-        self.bert_do_lower_case = True if args.bert_do_lower_case == 'True' else False
+        self.bert_do_lower_case = False
+        if args.bert_do_lower_case == 'True': self.bert_do_lower_case = True 
         self.bert_init_checkpoint = args.bert_init_checkpoint
         self.bert_max_seq_length = args.bert_max_seq_length
 

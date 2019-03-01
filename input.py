@@ -218,10 +218,12 @@ class Input:
             tf.logging.info("bert_token_masks: %s" % " ".join([str(x) for x in bert_token_masks]))
             tf.logging.info("bert_segment_ids: %s" % " ".join([str(x) for x in bert_segment_ids]))
             tf.logging.info("bert_word_ids: %s" % " ".join([str(x) for x in bert_word_ids]))
+            '''
             tf.logging.info("bert_wordchr_ids: %s" % " ".join([str(x) for x in bert_wordchr_ids]))
             tf.logging.info("bert_pos_ids: %s" % " ".join([str(x) for x in bert_pos_ids]))
             tf.logging.info("bert_chk_ids: %s" % " ".join([str(x) for x in bert_chk_ids]))
             tf.logging.info("bert_tag: %s" % " ".join([str(x) for x in bert_tag]))
+            '''
 
         return bert_token_ids, bert_token_masks, bert_segment_ids, bert_word_ids, bert_wordchr_ids, bert_pos_ids, bert_chk_ids, bert_tag, bert_wordidx2tokenidx
 

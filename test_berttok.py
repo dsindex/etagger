@@ -8,8 +8,10 @@ class Tok:
     def __init__(self, tokenizer):
         self.task = 'tok'
         self.tokenizer = tokenizer
+        self.max_seq_length = 0
 
     def __proc_bucket(self, bucket):
+        seq_length = 0
         for line in bucket:
             tokens = line.split()
             word = tokens[0]
@@ -29,8 +31,9 @@ class Tok:
                     print(word_exts[m], pos, chunk, tag)
                 else:
                     print(word_exts[m], pos, chunk, 'X')
-
+                seq_length += 1
         print('')
+        if seq_length > self.max_seq_length: self.max_seq_length = seq_length
         return None
 
     def proc(self):
@@ -59,3 +62,4 @@ if __name__ == '__main__':
 
     tok = Tok(tokenizer)
     tok.proc()
+    sys.stderr.write('max_seq_length = %s\n' % (tok.max_seq_length))
