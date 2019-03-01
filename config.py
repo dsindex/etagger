@@ -51,11 +51,6 @@ class Config:
             self.summary_dir = args.summary_dir
 
         '''
-        # modified for glove(300, 6B), self.tf_used == False
-        self.rnn_size = 276
-        self.keep_prob = 0.32
-        '''
-        '''
         # modified for cruise
         self.chk_dim = 64
         self.keep_prob = 0.7
