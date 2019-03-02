@@ -27,6 +27,12 @@
   682M   bert_model.ckpt
   96     bert_max_seq_length
 
+3) all.200k.out.1m-step.reduced
+  768    hidden_size
+  100795 vocab_size
+  627M   bert_model.ckpt
+  96     bert_max_seq_length
+
 5. evaluation by CRF(wapiti)
 token : 0.852890598904
 chunk : 0.844539652006645
@@ -54,6 +60,9 @@ $ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 -
 
 * for BERT(multi_cased_L-12_H-768_A-12)
 $ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in --bert_config_path embeddings/multi_cased_L-12_H-768_A-12/bert_config.json --bert_vocab_path embeddings/multi_cased_L-12_H-768_A-12/vocab.txt --bert_do_lower_case False --bert_init_checkpoint embeddings/multi_cased_L-12_H-768_A-12/bert_model.ckpt --bert_max_seq_length 96 > embeddings/vocab.txt
+
+* for BERT(all.200k.out.1m-step.reduced)
+$ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in --bert_config_path embeddings/all.200k.out.1m-step.reduced/bert_config.json --bert_vocab_path embeddings/all.200k.out.1m-step.reduced/vocab.txt --bert_do_lower_case False --bert_init_checkpoint embeddings/all.200k.out.1m-step.reduced/bert_model.ckpt --bert_max_seq_length 96 > embeddings/vocab.txt
 
 - train
 $ python train.py --emb_path embeddings/kor.glove.100d.txt.pkl --wrd_dim 100 --batch_size 20 --epoch 70
