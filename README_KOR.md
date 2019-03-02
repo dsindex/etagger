@@ -154,7 +154,7 @@ CRF
 
 token : 0.9178154959148055
 chunk : 0.9258471818457934
-conlleval : 92.59          -> Glove(300k) + BERT(all.dha.2.5m_step) + CNN + LSTM + CRF best
+conlleval : 92.59          -> Glove + BERT + CNN + LSTM + CRF best
 average processing time per bucket(sentence)
   - 1 GPU(V100 TESLA) :  0.02537741956687146 sec
 
@@ -197,7 +197,7 @@ CRF
 
 token : 0.9195406172849909
 chunk : 0.9275132677092717
-conlleval : 92.75          -> Glove(300k) + CNN + LSTM + CRF best
+conlleval : 92.75          -> Glove + CNN + LSTM + CRF best
 average processing time per bucket(sentence)
   - 1 GPU(TITAN X PASCAL) : 0.014556412826012726 sec
 
@@ -282,7 +282,7 @@ CRF
 
 token : 0.9141382082857263
 chunk : 0.9221816596741677
-conlleval : 92.22          -> Glove(500k) + CNN + LSTM + CRF best
+conlleval : 92.22
 
 * test 9
 word embedding size : 100

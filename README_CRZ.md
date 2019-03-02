@@ -159,7 +159,7 @@ CRF
 
 token : 0.863193851409052
 chunk : 0.8553803679658347
-conlleval : 85.54          -> Glove(300k) + CNN + CHK + LSTM + CRF best
+conlleval : 85.54          -> Glove + CNN + CHK + LSTM + CRF best
 average processing time per bucket(sentence)
   - 1 GPU(TITAN X PASCAL) : 0.013301651632658217 sec
   - 32 CPU : skip
@@ -501,7 +501,7 @@ CRF
 # test data
 token : 0.8632774180890719
 chunk : 0.8540854345377351
-conlleval :  85.40         -> Glove(500k) + CNN + CHK + LSTM + CRF best
+conlleval :  85.40
 average processing time per bucket(sentence)
   - 1 GPU(TITAN X PASCAL) :  0.013347263088710076 sec
   - 32 CPU : skip
@@ -877,7 +877,7 @@ CRF
 
 token : 0.8336974003216593, 0.8950232838811782(including 'O')
 chunk : 0.828596112311015 , 0.9093912290825158(including 'O')
-conlleval : 82.78         , 90.93(including 'O')              -> Glove(500k) + CNN + LSTM + CRF best
+conlleval : 82.78         , 90.93(including 'O')              -> Glove + CNN + LSTM + CRF best
 average processing time per bucket(sentence)
   - 1 GPU(TITAN X PASCAL) : 0.01303002712777439 sec
   - 32 CPU : 0.011279379889660678 sec
