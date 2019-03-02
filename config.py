@@ -53,12 +53,6 @@ class Config:
         '''
         # modified for cruise
         self.chk_dim = 64
-        self.keep_prob = 0.7
-        self.rnn_size = 200
-        self.starter_learning_rate = 0.001
-        self.decay_steps = 3000
-        self.decay_rate = 0.9
-        self.clip_norm = 1.5
         '''
         
         if self.emb_class == 'elmo':
@@ -85,6 +79,13 @@ class Config:
             self.decay_steps = 5000
             self.decay_rate = 0.9
             self.clip_norm = 1.5
+            '''
+            # for KOR, CRZ
+            self.starter_learning_rate = 0.001
+            self.decay_steps = 12000
+            self.decay_rate = 0.9
+            self.clip_norm = 10
+            '''
             self.use_bert_optimization = False
             self.num_train_steps = 0            # number of total training steps
             self.num_warmup_steps = 0           # number of warmup steps
