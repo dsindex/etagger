@@ -43,7 +43,7 @@ chunk : 0.9047450424929179  -> Glove(6B) + CNN + LSTM + CRF best
 # memory RES : 450M
 
 # c++, frozen -> transformed, 32 core CPU : 0.002561
-  - token : 0.9116763714373276
+# :: token : 0.9116763714373276
 # c++, frozen -> transformed, 1 core CPU : 0.003224
 
 # c++, frozen -> memmapped, 32 core CPU : 0.002040
