@@ -24,7 +24,7 @@
   768    hidden_size
   119547 vocab_size
   682M   bert_model.ckpt
-  64     bert_max_seq_length
+  96     bert_max_seq_length
 
 5. evaluation by CRF(wapiti)
 token : 0.900468066343
@@ -46,7 +46,7 @@ $ python embvec.py --emb_path embeddings/kor.glove.300d.txt --wrd_dim 300 --trai
 $ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/kor.train.txt --total_path data/kor.total.txt --bert_config_path embeddings/all.dha.2.5m_step/bert_config.json --bert_vocab_path embeddings/all.dha.2.5m_step/vocab.txt --bert_do_lower_case False --bert_init_checkpoint embeddings/all.dha.2.5m_step/bert_model.ckpt --bert_max_seq_length 64 > embeddings/vocab.txt
 
 * for BERT(multi_cased_L-12_H-768_A-12)
-$ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/kor.train.txt --total_path data/kor.total.txt --bert_config_path embeddings/multi_cased_L-12_H-768_A-12/bert_config.json --bert_vocab_path embeddings/multi_cased_L-12_H-768_A-12/vocab.txt --bert_do_lower_case False --bert_init_checkpoint embeddings/multi_cased_L-12_H-768_A-12/bert_model.ckpt --bert_max_seq_length 64 > embeddings/vocab.txt
+$ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/kor.train.txt --total_path data/kor.total.txt --bert_config_path embeddings/multi_cased_L-12_H-768_A-12/bert_config.json --bert_vocab_path embeddings/multi_cased_L-12_H-768_A-12/vocab.txt --bert_do_lower_case False --bert_init_checkpoint embeddings/multi_cased_L-12_H-768_A-12/bert_model.ckpt --bert_max_seq_length 96 > embeddings/vocab.txt
 
 - train
 $ python train.py --emb_path embeddings/kor.glove.100d.txt.pkl --wrd_dim 100 --batch_size 20 --epoch 70
@@ -61,6 +61,49 @@ $ python inference.py --mode bucket --emb_path embeddings/kor.glove.300k.300d.tx
 
 - experiments 2
 ```
+
+* test 4
+word embedding size : 300 ->300(kor.glove.300k.300d.txt)
+bert embedding : multi_cased_L-12_H-768_A-12
+bert_keep_prob : 0.8
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+chk embedding size : 10
+chk embedding random init : -0.5 ~ 0.5
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused
+rnn_size : 256
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 2e-5 / 5000 / 0.9 -> 0.001 / 12000 / 0.9
+gradient clipping : 1.5 -> 10
+#learning_rate : use optimization.py from bert, 2e-5 / warmup proportion 0.1
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
+
+token :
+chunk :
+conlleval :
+average processing time per bucket(sentence)
+  - 1 GPU(V100 TESLA) :
 
 * test 3
 word embedding size : 300 ->300(kor.glove.300k.300d.txt)
