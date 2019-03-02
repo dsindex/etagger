@@ -90,9 +90,9 @@ class Model:
 
         concat_in = [self.word_embeddings, self.wordchr_embeddings, self.pos_embeddings, self.chk_embeddings]
         if self.emb_class == 'elmo':
-            concat_in = [self.word_embeddings, self.wordchr_embeddings, self.elmo_embeddings, self.pos_embeddings]
+            concat_in = [self.word_embeddings, self.wordchr_embeddings, self.elmo_embeddings, self.pos_embeddings, self.chk_embeddings]
         if self.emb_class == 'bert':
-            concat_in = [self.word_embeddings, self.wordchr_embeddings, self.bert_embeddings, self.pos_embeddings]
+            concat_in = [self.word_embeddings, self.wordchr_embeddings, self.bert_embeddings, self.pos_embeddings, self.chk_embeddings]
         self.input_data = tf.concat(concat_in, axis=-1, name='input_data') # (batch_size, sentence_length, input_dim)
         
         # highway network
