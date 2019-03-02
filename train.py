@@ -178,9 +178,13 @@ def train(config):
     # build input data
     train_file = 'data/train.txt'
     dev_file = 'data/dev.txt'
-    '''KOR
+    '''for KOR
     train_file = 'data/kor.train.txt'
     dev_file = 'data/kor.dev.txt'
+    '''
+    '''for CRZ
+    train_file = 'data/cruise.train.txt.in'
+    dev_file = 'data/cruise.dev.txt.in'
     '''
     train_data = Input(train_file, config, build_output=True)
     dev_data = Input(dev_file, config, build_output=True)
@@ -211,5 +215,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     tf.logging.set_verbosity(tf.logging.INFO)
 
-    config = Config(args, is_training=True, emb_class='glove', use_crf=True)
+    #config = Config(args, is_training=True, emb_class='glove', use_crf=True)
+    config = Config(args, is_training=True, emb_class='bert', use_crf=True)
     train(config)

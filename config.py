@@ -50,8 +50,7 @@ class Config:
             self.checkpoint_dir = args.checkpoint_dir
             self.summary_dir = args.summary_dir
 
-        '''
-        # modified for cruise
+        '''for CRZ
         self.chk_dim = 64
         '''
         
@@ -61,7 +60,6 @@ class Config:
             self.elmo_batcher = Batcher(self.embvec.elmo_vocab_path, self.word_length) # map text to character ids
             self.elmo_bilm = BidirectionalLanguageModel(self.embvec.elmo_options_path, self.embvec.elmo_weight_path) # biLM graph
             self.elmo_keep_prob = 0.7
-            # modified for elmo
             self.highway_used = False
         if self.emb_class == 'bert':
             from bert import modeling
@@ -72,20 +70,20 @@ class Config:
             self.bert_init_checkpoint = self.embvec.bert_init_checkpoint
             self.bert_max_seq_length = self.embvec.bert_max_seq_length
             self.bert_keep_prob = 0.8
-            # modified for bert
             self.highway_used = False
             self.rnn_size = 256
+
             self.starter_learning_rate = 2e-5
             self.decay_steps = 5000
             self.decay_rate = 0.9
             self.clip_norm = 1.5
-            '''
-            # for KOR, CRZ
+            '''for KOR, CRZ
             self.starter_learning_rate = 0.001
             self.decay_steps = 12000
             self.decay_rate = 0.9
             self.clip_norm = 10
             '''
+
             self.use_bert_optimization = False
             self.num_train_steps = 0            # number of total training steps
             self.num_warmup_steps = 0           # number of warmup steps
