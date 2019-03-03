@@ -73,7 +73,7 @@ def inference_bucket(config):
             bucket = []
             duration_time = time.time() - start_time
             out = 'duration_time : ' + str(duration_time) + ' sec'
-            sys.stderr.write(out + '\n')
+            tf.logging.debug(out)
             num_buckets += 1
             total_duration_time += duration_time
         if line : bucket.append(line)
@@ -105,13 +105,13 @@ def inference_bucket(config):
         sys.stdout.write('\n')
         duration_time = time.time() - start_time
         out = 'duration_time : ' + str(duration_time) + ' sec'
-        sys.stderr.write(out + '\n')
+        tf.logging.debug(out)
         num_buckets += 1
         total_duration_time += duration_time
 
     out = 'total_duration_time : ' + str(total_duration_time) + ' sec' + '\n'
     out += 'average processing time / bucket : ' + str(total_duration_time / num_buckets) + ' sec'
-    sys.stderr.write(out + '\n')
+    tf.logging.debug(out)
 
     sess.close()
 
@@ -160,7 +160,7 @@ def inference_line(config):
     sess.run(tf.global_variables_initializer(), feed_dict=feed_dict)
     saver = tf.train.Saver()
     saver.restore(sess, config.restore)
-    sys.stderr.write('model restored' +'\n')
+    tf.logging.debug('model restored' +'\n')
 
     while 1:
         try: line = sys.stdin.readline()
@@ -209,6 +209,8 @@ if __name__ == '__main__':
     parser.add_argument('--mode', type=str, default='bulk', help='bulk, bucket, line')
 
     args = parser.parse_args()
+    tf.logging.set_verbosity(tf.logging.DEBUG)
+
     config = Config(args, is_training=False, emb_class='glove', use_crf=True)
     if args.mode == 'bucket': inference_bucket(config)
     if args.mode == 'line':   inference_line(config)
