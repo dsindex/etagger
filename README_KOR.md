@@ -72,9 +72,9 @@ $ python inference.py --mode bucket --emb_path embeddings/kor.glove.300k.300d.tx
 - experiments 2
 ```
 
-* test 4
+* test 5
 word embedding size : 300 ->300(kor.glove.300k.300d.txt)
-bert embedding : multi_cased_L-12_H-768_A-12
+bert embedding : all.200k.out.1m-step.reduced
 bert_keep_prob : 0.8
 keep_prob : 0.7
 chr_conv_type : conv1d
@@ -88,7 +88,7 @@ pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 rnn_used : True
 rnn_type : fused
-rnn_size : 256
+rnn_size : 200 -> 256
 rnn_num_layers : 2
 learning_rate : exponential_decay(), 2e-5 / 5000 / 0.9 -> 0.001 / 12000 / 0.9
 gradient clipping : 1.5 -> 10
@@ -113,7 +113,50 @@ token :
 chunk :
 conlleval :
 average processing time per bucket(sentence)
-  - 1 GPU(V100 TESLA) :
+  - 1 GPU(TITAN X PASCAL) :
+
+* test 4
+word embedding size : 300 ->300(kor.glove.300k.300d.txt)
+bert embedding : multi_cased_L-12_H-768_A-12
+bert_keep_prob : 0.8
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+chk embedding size : 10
+chk embedding random init : -0.5 ~ 0.5
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused
+rnn_size : 200 -> 256
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 2e-5 / 5000 / 0.9 -> 0.001 / 12000 / 0.9
+gradient clipping : 1.5 -> 10
+#learning_rate : use optimization.py from bert, 2e-5 / warmup proportion 0.1
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
+
+token : 0.9156731999730585
+chunk : 0.919030048584135
+conlleval : 91.66
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) : 0.048045960526195176 sec
 
 * test 3
 word embedding size : 300 ->300(kor.glove.300k.300d.txt)
@@ -131,7 +174,7 @@ pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 rnn_used : True
 rnn_type : fused
-rnn_size : 256
+rnn_size : 200 -> 256
 rnn_num_layers : 2
 learning_rate : exponential_decay(), 2e-5 / 5000 / 0.9 -> 0.001 / 12000 / 0.9
 gradient clipping : 1.5 -> 10
@@ -174,7 +217,7 @@ pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 rnn_used : True
 rnn_type : fused
-rnn_size : 256
+rnn_size : 200
 rnn_num_layers : 2
 learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
 gradient clipping : 10
