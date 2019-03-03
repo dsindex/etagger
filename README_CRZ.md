@@ -1,3 +1,5 @@
+- summary
+  - https://docs.google.com/spreadsheets/d/1Sy7YREtqsIaaesNM1LAdsstomB7nrQV483XPzwH5JBM/edit?usp=sharing
 
 - experiments 2 data
 ```
@@ -8,6 +10,11 @@
 25M, 109120 sentences, data/cruise.train.txt
 3.1M, 13640 sentences, data/cruise.dev.txt
 3.1M, 13642 sentences, data/cruise.test.txt
+
+* estimated pre-processing time
+morpological analysis : 7 sec / 137272 =  0.000050993647648 sec
+dependency parsing    : 20.954375 sec / 137272 = 0.000152648573635 sec
+base entity tagging   : 230.612970 sec / 137272 = 0.001679970933621 sec
 
 3. glove
 2.5G(500k, 525470) kor.glove.300d.txt
@@ -116,11 +123,11 @@ save model by f1(token)
 +
 CRF
 
-token :
-chunk :
-conlleval :
+token : 0.8629193131891667
+chunk : 0.8560444070066309
+conlleval : 85.60          -> Glove + CNN + CHK + HIGHWAY + LSTM + CRF best
 average processing time per bucket(sentence)
-  - 1 GPU(TITAN X PASCAL) :
+  - 1 GPU(TITAN X PASCAL) : 0.013156061647155387 sec
   - 32 CPU : skip
   - 1 CPU : skip
 
