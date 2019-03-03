@@ -375,7 +375,7 @@ in IN O O O
   ![Transformer](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1-2.png)
 
 - evaluation
-  - [experiment logs](https://github.com/dsindex/etagger/blob/master/README_DEV.md)
+  - [experiment logs](https://github.com/dsindex/etagger/blob/master/README_ENG.md)
   - results
     - Transformer
       - Glove
