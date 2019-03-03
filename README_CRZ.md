@@ -168,11 +168,11 @@ save model by f1(token)
 +
 CRF
 
-token :
-chunk :
-conlleval :
+token : 0.8634652061225488
+chunk : 0.856661773594681
+conlleval : 85.66          -> Glove + BERT + CNN + CHK + LSTM + CRF best
 average processing time per bucket(sentence)
-  - 1 GPU(V100 TESLA) :
+  - 1 GPU(V100 TESLA) : 0.024302998467845102 sec
   - 8 CPU : skip
   - 1 CPU : skip
 
@@ -260,7 +260,7 @@ CRF
 
 token : 0.8618997374426423
 chunk : 0.8556839326669262
-conlleval : 85.56          -> Glove + BERT + CNN + CHK + LSTM + CRF best
+conlleval : 85.56
 average processing time per bucket(sentence)
   - 1 GPU(V100 TESLA) : 0.021882983845116683 sec
   - 8 CPU : skip
