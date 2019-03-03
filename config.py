@@ -52,6 +52,7 @@ class Config:
 
         '''for CRZ
         self.chk_dim = 64
+        self.highway_used = True
         '''
         
         if self.emb_class == 'elmo':
