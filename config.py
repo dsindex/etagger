@@ -50,6 +50,9 @@ class Config:
             self.checkpoint_dir = args.checkpoint_dir
             self.summary_dir = args.summary_dir
 
+        '''for KOR
+        self.highway_used = True
+        '''
         '''for CRZ
         self.chk_dim = 64
         self.highway_used = True
