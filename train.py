@@ -46,18 +46,18 @@ def train_step(sess, model, config, data, summary_op, summary_writer):
                    sess.run([model.global_step, summary_op, model.train_op, \
                              model.loss, model.accuracy, model.learning_rate, model.bert_embeddings], feed_dict=feed_dict, options=runopts)
             if idx == 0:
-                tf.logging.info("# bert_token_ids")
+                tf.logging.info('# bert_token_ids')
                 t = data.sentence_bert_token_ids[:3]
-                tf.logging.info(np.shape(t))
-                tf.logging.info(t)
-                tf.logging.info("# bert_token_masks")
+                tf.logging.info(' '.join([str(x) for x in np.shape(t)]))
+                tf.logging.info(' '.join([str(x) for x in t]))
+                tf.logging.info('# bert_token_masks')
                 t = data.sentence_bert_token_masks[:3]
-                tf.logging.info(np.shape(t))
-                tf.logging.info(t)
-                tf.logging.info("# bert_embedding")
+                tf.logging.info(' '.join([str(x) for x in np.shape(t)]))
+                tf.logging.info(' '.join([str(x) for x in t]))
+                tf.logging.info('# bert_embedding')
                 t = bert_embeddings[:3]
-                tf.logging.info(np.shape(t))
-                tf.logging.info(t)
+                tf.logging.info(' '.join([str(x) for x in np.shape(t)]))
+                tf.logging.info(' '.join([str(x) for x in t]))
         else:
             step, summaries, _, loss, accuracy, learning_rate = \
                    sess.run([model.global_step, summary_op, model.train_op, \
@@ -119,7 +119,7 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
     tf.logging.info('[epoch %s/%s] dev precision, recall, f1(token): ' % (epoch, config.epoch))
     token_f1 = TokenEval.compute_f1(config.class_size, sum_logits_indices, sum_output_data_indices, sum_sentence_lengths)
     prec, rec, f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
-    tf.logging.info('dev precision, recall, f1(chunk): ', prec, rec, f1, '(invalid for bert due to X tag)')
+    tf.logging.info('dev precision, recall, f1(chunk): %s, %s, %s' % (prec, rec, f1) + '(invalid for bert due to X tag)')
     chunk_f1 = f1
 
     # create summaries manually

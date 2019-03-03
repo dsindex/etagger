@@ -140,7 +140,7 @@ class Input:
         bert_segment_ids = []
         bert_wordidx2tokenidx = {}
 
-        ntokens.append("[CLS]")
+        ntokens.append('[CLS]')
         ntokens_last = 0
         bert_segment_ids.append(0)
         bert_word_ids.append(self.config.embvec.pad_wid) # 0
@@ -173,10 +173,10 @@ class Input:
                 else:
                     bert_tag.append(self.__tag_vec(self.config.embvec.xot_tag, self.config.class_size)) # 'X' tag
             if len(ntokens) == bert_max_seq_length - 1:
-                tf.logging.info("len(ntokens): %s" % str(len(ntokens)))
+                tf.logging.info('len(ntokens): %s' % str(len(ntokens)))
                 break
         '''
-        ntokens.append("[SEP]")
+        ntokens.append('[SEP]')
         ntokens_last += 1
         bert_segment_ids.append(0)
         bert_word_ids.append(self.config.embvec.pad_wid) # 0
@@ -212,17 +212,17 @@ class Input:
 
         if ex_index < 5:
             from bert import tokenization  
-            tf.logging.info("*** Example ***")
-            tf.logging.info("ntokens: %s" % " ".join([tokenization.printable_text(x) for x in ntokens]))
-            tf.logging.info("bert_token_ids: %s" % " ".join([str(x) for x in bert_token_ids]))
-            tf.logging.info("bert_token_masks: %s" % " ".join([str(x) for x in bert_token_masks]))
-            tf.logging.info("bert_segment_ids: %s" % " ".join([str(x) for x in bert_segment_ids]))
-            tf.logging.info("bert_word_ids: %s" % " ".join([str(x) for x in bert_word_ids]))
+            tf.logging.info('*** Example ***')
+            tf.logging.info('ntokens: %s' % ' '.join([tokenization.printable_text(x) for x in ntokens]))
+            tf.logging.info('bert_token_ids: %s' % ' '.join([str(x) for x in bert_token_ids]))
+            tf.logging.info('bert_token_masks: %s' % ' '.join([str(x) for x in bert_token_masks]))
+            tf.logging.info('bert_segment_ids: %s' % ' '.join([str(x) for x in bert_segment_ids]))
+            tf.logging.info('bert_word_ids: %s' % ' '.join([str(x) for x in bert_word_ids]))
             '''
-            tf.logging.info("bert_wordchr_ids: %s" % " ".join([str(x) for x in bert_wordchr_ids]))
-            tf.logging.info("bert_pos_ids: %s" % " ".join([str(x) for x in bert_pos_ids]))
-            tf.logging.info("bert_chk_ids: %s" % " ".join([str(x) for x in bert_chk_ids]))
-            tf.logging.info("bert_tag: %s" % " ".join([str(x) for x in bert_tag]))
+            tf.logging.info('bert_wordchr_ids: %s' % ' '.join([str(x) for x in bert_wordchr_ids]))
+            tf.logging.info('bert_pos_ids: %s' % ' '.join([str(x) for x in bert_pos_ids]))
+            tf.logging.info('bert_chk_ids: %s' % ' '.join([str(x) for x in bert_chk_ids]))
+            tf.logging.info('bert_tag: %s' % ' '.join([str(x) for x in bert_tag]))
             '''
 
         return bert_token_ids, bert_token_masks, bert_segment_ids, bert_word_ids, bert_wordchr_ids, bert_pos_ids, bert_chk_ids, bert_tag, bert_wordidx2tokenidx
