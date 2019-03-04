@@ -390,7 +390,7 @@ in IN O O O
             - restore version        : 0.013825567226844812 sec
             - frozen version         : 0.015376264122228799 sec
             - tensorRT(FP16) version : no meaningful difference
-          - 32 core CPU(multi-threading)
+          - 32 processor CPU(multi-threading)
             - python : 0.017238136546748987 sec
             - C++ : 0.013 sec
           - 1 CPU(single-thread)
@@ -407,7 +407,7 @@ in IN O O O
             - restore version        : 0.010454932072004718 sec
             - frozen version         : 0.011339560587942018 sec
             - tensorRT(FP16) version : no meaningful difference
-          - 32 core CPU(multi-threading)
+          - 32 processor CPU(multi-threading)
             - rnn_num_layers 2 : 0.006132203450549827 sec
             - rnn_num_layers 1
               - python
@@ -456,7 +456,7 @@ in IN O O O
         - average processing time per bucket
           - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.06133532517637155 sec -> need to recompute
           - 1 GPU(Tesla V100)                 : 0.029950057644797457 sec
-          - 32 core CPU(multi-threading)      : 0.40098162731570347 sec
+          - 32 processor CPU(multi-threading)      : 0.40098162731570347 sec
           - 1 CPU(single-thread)              : 0.7398052649182165 sec
       - ELMo + Glove
         - setting

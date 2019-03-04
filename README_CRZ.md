@@ -173,7 +173,7 @@ chunk : 0.856661773594681
 conlleval : 85.66          -> Glove + BERT + CNN + CHK + LSTM + CRF best
 average processing time per bucket(sentence)
   - 1 GPU(V100 TESLA) : 0.024302998467845102 sec
-  - 8 CPU : skip
+  - 56 CPU : skip
   - 1 CPU : skip
 
 * test 3
@@ -218,7 +218,7 @@ chunk : 0.8465366977461912
 conlleval : 83.89
 average processing time per bucket(sentence)
   - 1 GPU(V100 TESLA) : 0.027959363024669247 sec
-  - 8 CPU : skip
+  - 56 CPU : skip
   - 1 CPU : skip
 
 * test 2
@@ -263,7 +263,7 @@ chunk : 0.8556839326669262
 conlleval : 85.56
 average processing time per bucket(sentence)
   - 1 GPU(V100 TESLA) : 0.021882983845116683 sec
-  - 8 CPU : skip
+  - 56 CPU : skip
   - 1 CPU : skip
 
 * test 1
@@ -394,7 +394,7 @@ chunk : 0.8534114329102941
 conlleval : 85.34
 average processing time per bucket(sentence)
   - 1 GPU(V100 TESLA) : 0.009480409023786567 sec
-  - 8 CPU : skip
+  - 56 CPU : skip
   - 1 CPU : skip
 
 * test 13
@@ -436,7 +436,7 @@ chunk : 0.8521701482844464
 conlleval : 85.21
 average processing time per bucket(sentence)
   - 1 GPU(V100 TESLA) : 0.009061403191346538 sec
-  - 8 CPU : skip
+  - 56 CPU : skip
   - 1 CPU : skip
 
 * test 12
@@ -520,7 +520,7 @@ chunk : 0.8519950744237292
 conlleval : 85.20
 average processing time per bucket(sentence)
   - 1 GPU(V100 TESLA) : 0.011507198006993881 sec
-  - 8 CPU : skip
+  - 56 CPU : skip
   - 1 CPU : skip
 
 * test 10
@@ -604,7 +604,7 @@ chunk : 0.8484334203655352
 conlleval : 84.84
 average processing time per bucket(sentence)
   - 1 GPU(V100 TESLA) : 0.01205325771542068 sec
-  - 8 CPU : skip
+  - 56 CPU : skip
   - 1 CPU : skip
 
 * test 8
@@ -694,7 +694,7 @@ chunk : 0.8389521291703992
 conlleval : 83.89
 average processing time per bucket(sentence)
   - 1 GPU(V100 TESLA) : 0.011398896009162485 sec
-  - 8 CPU : skip
+  - 56 CPU : skip
   - 1 CPU : skip
 
 * test 6
@@ -779,7 +779,7 @@ chunk : 0.8399615837953464
 conlleval : 83.99
 average processing time per bucket(sentence)
   - 1 GPU(V100 TESLA) : 0.011336098369519534 sec
-  - 8 CPU : skip
+  - 56 CPU : skip
   - 1 CPU : skip
 
 * test 4
@@ -821,7 +821,7 @@ chunk : 0.852711157455683
 conlleval : 85.26
 average processing time per bucket(sentence)
   - 1 GPU(V100 TESLA) : 0.010170429774593212 sec
-  - 8 CPU : skip
+  - 56 CPU : skip
   - 1 CPU : skip
 
 * test 3
@@ -863,7 +863,7 @@ chunk : 0.8528806807110225, 0.9259648466178184(including 'O')
 conlleval : 85.28         , 92.60(including 'O')
 average processing time per bucket(sentence)
   - 1 GPU(V100 TESLA) : 0.011372548012313317 sec
-  - 8 CPU : 0.010189664309682987 sec
+  - 56 CPU : 0.010189664309682987 sec
   - 1 CPU : 0.011781872515978307 sec
 
 * test 2
@@ -905,7 +905,7 @@ chunk : 0.7995750237942408
 conlleval : 79.96
 average processing time per bucket(sentence)
   - 1 GPU(V100 TESLA) : 0.010178041622411853 sec
-  - 8 CPU : skip
+  - 56 CPU : skip
   - 1 CPU : skip
 
 * test 1
@@ -947,7 +947,7 @@ chunk : 0.8521355316110607
 conlleval : 85.21
 average processing time per bucket(sentence)
   - 1 GPU(V100 TESLA) : 0.011398719440997651 sec
-  - 8 CPU : 0.010089373766825427 sec
+  - 56 CPU : 0.010089373766825427 sec
   - 1 CPU : 0.011839326342745028 sec
 ```
 

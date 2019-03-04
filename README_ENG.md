@@ -38,23 +38,23 @@ CRF
 token : 0.9116655428186109
 chunk : 0.9047450424929179  -> Glove(6B) + CNN + LSTM + CRF best
 
-# python, 32 core CPU : 0.003053264560968687
-# python, frozen, 1 core CPU : 0.0042755354628630235
+# python, 32 processor CPU : 0.003053264560968687
+# python, frozen, 1 processor CPU : 0.0042755354628630235
 
-# c++, frozen, 32 core CPU : 0.002789
-# c++, frozen, 1 core CPU : 0.003340
+# c++, frozen, 32 processor CPU : 0.002789
+# c++, frozen, 1 processor CPU : 0.003340
 # memory RES : 450M
 
-# c++, frozen -> transformed, 32 core CPU : 0.002561
+# c++, frozen -> transformed, 32 processor CPU : 0.002561
 # :: token : 0.9116763714373276
-# c++, frozen -> transformed, 1 core CPU : 0.003224
+# c++, frozen -> transformed, 1 processor CPU : 0.003224
 
-# c++, frozen -> memmapped, 32 core CPU : 0.002040
-# c++, frozen -> memmapped, 1 core CPU : 0.002683
+# c++, frozen -> memmapped, 32 processor CPU : 0.002040
+# c++, frozen -> memmapped, 1 processor CPU : 0.002683
 # memory RES : ~ 160M
 
-# c++, frozen -> transformed -> memmapped, 32 core CPU : 0.002189
-# c++, frozen -> transformed -> memmapped, 1 core CPU : 0.002709
+# c++, frozen -> transformed -> memmapped, 32 processor CPU : 0.002189
+# c++, frozen -> transformed -> memmapped, 1 processor CPU : 0.002709
 
 * test 4
 word embedding size : 300(glove6B)
