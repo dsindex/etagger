@@ -71,6 +71,7 @@ def train_step(sess, model, config, data, summary_op, summary_writer):
                      ('lr(invalid if use_bert_optimization)', learning_rate)])
         idx += 1
     duration_time = time.time() - start_time
+    time.sleep(0.1)
     out = 'duration_time : ' + str(duration_time) + ' sec for this epoch'
     tf.logging.debug(out)
 
