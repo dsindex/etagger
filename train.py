@@ -46,18 +46,18 @@ def train_step(sess, model, config, data, summary_op, summary_writer):
                    sess.run([model.global_step, summary_op, model.train_op, \
                              model.loss, model.accuracy, model.learning_rate, model.bert_embeddings], feed_dict=feed_dict, options=runopts)
             if idx == 0:
-                tf.logging.info('# bert_token_ids')
+                tf.logging.debug('# bert_token_ids')
                 t = data.sentence_bert_token_ids[:3]
-                tf.logging.info(' '.join([str(x) for x in np.shape(t)]))
-                tf.logging.info(' '.join([str(x) for x in t]))
-                tf.logging.info('# bert_token_masks')
+                tf.logging.debug(' '.join([str(x) for x in np.shape(t)]))
+                tf.logging.debug(' '.join([str(x) for x in t]))
+                tf.logging.debug('# bert_token_masks')
                 t = data.sentence_bert_token_masks[:3]
-                tf.logging.info(' '.join([str(x) for x in np.shape(t)]))
-                tf.logging.info(' '.join([str(x) for x in t]))
-                tf.logging.info('# bert_embedding')
+                tf.logging.debug(' '.join([str(x) for x in np.shape(t)]))
+                tf.logging.debug(' '.join([str(x) for x in t]))
+                tf.logging.debug('# bert_embedding')
                 t = bert_embeddings[:3]
-                tf.logging.info(' '.join([str(x) for x in np.shape(t)]))
-                tf.logging.info(' '.join([str(x) for x in t]))
+                tf.logging.debug(' '.join([str(x) for x in np.shape(t)]))
+                tf.logging.debug(' '.join([str(x) for x in t]))
         else:
             step, summaries, _, loss, accuracy, learning_rate = \
                    sess.run([model.global_step, summary_op, model.train_op, \
@@ -72,7 +72,7 @@ def train_step(sess, model, config, data, summary_op, summary_writer):
         idx += 1
     duration_time = time.time() - start_time
     out = 'duration_time : ' + str(duration_time) + ' sec for this epoch'
-    tf.logging.info(out)
+    tf.logging.debug(out)
 
 def dev_step(sess, model, config, data, summary_writer, epoch):
     idx = 0
@@ -116,10 +116,10 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
     sum_output_data_indices = np.argmax(data.sentence_tags, 2)
     tag_preds = data.logits_indices_to_tags_seq(sum_logits_indices, sum_sentence_lengths)
     tag_corrects = data.logits_indices_to_tags_seq(sum_output_data_indices, sum_sentence_lengths)
-    tf.logging.info('[epoch %s/%s] dev precision, recall, f1(token): ' % (epoch, config.epoch))
+    tf.logging.debug('[epoch %s/%s] dev precision, recall, f1(token): ' % (epoch, config.epoch))
     token_f1 = TokenEval.compute_f1(config.class_size, sum_logits_indices, sum_output_data_indices, sum_sentence_lengths)
     prec, rec, f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
-    tf.logging.info('dev precision, recall, f1(chunk): %s, %s, %s' % (prec, rec, f1) + '(invalid for bert due to X tag)')
+    tf.logging.debug('dev precision, recall, f1(chunk): %s, %s, %s' % (prec, rec, f1) + '(invalid for bert due to X tag)')
     chunk_f1 = f1
 
     # create summaries manually
@@ -141,7 +141,7 @@ def do_train(model, config, train_data, dev_data):
     saver = tf.train.Saver()
     if config.restore is not None:
         saver.restore(sess, config.restore)
-        tf.logging.info('model restored')
+        tf.logging.debug('model restored')
 
     # summary setting
     loss_summary = tf.summary.scalar('loss', model.loss)
@@ -162,12 +162,12 @@ def do_train(model, config, train_data, dev_data):
         # early stopping
         if early_stopping.validate(token_f1, measure='f1'): break
         if token_f1 > max_token_f1 or (max_token_f1 - token_f1 < 0.0005 and chunk_f1 > max_chunk_f1):
-            tf.logging.info('new best f1 score! : %s' % token_f1)
+            tf.logging.debug('new best f1 score! : %s' % token_f1)
             max_token_f1 = token_f1
             max_chunk_f1 = chunk_f1
             # save best model
             save_path = saver.save(sess, config.checkpoint_dir + '/' + 'ner_model')
-            tf.logging.info('max model saved in file: %s' % save_path)
+            tf.logging.debug('max model saved in file: %s' % save_path)
             tf.train.write_graph(sess.graph, '.', config.checkpoint_dir + '/' + 'graph.pb', as_text=False)
             tf.train.write_graph(sess.graph, '.', config.checkpoint_dir + '/' + 'graph.pb_txt', as_text=True)
             early_stopping.reset(max_token_f1)
@@ -188,7 +188,7 @@ def train(config):
     '''
     train_data = Input(train_file, config, build_output=True)
     dev_data = Input(dev_file, config, build_output=True)
-    tf.logging.info('loading input data ... done')
+    tf.logging.debug('loading input data ... done')
 
     # set for bert optimization
     if config.emb_class == 'bert' and config.use_bert_optimization:
@@ -213,7 +213,7 @@ if __name__ == '__main__':
     parser.add_argument('--summary_dir', type=str, default='./runs', help='path to save summary(ex, ./runs)')
 
     args = parser.parse_args()
-    tf.logging.set_verbosity(tf.logging.INFO)
+    tf.logging.set_verbosity(tf.logging.DEBUG)
 
     config = Config(args, is_training=True, emb_class='glove', use_crf=True)
     train(config)

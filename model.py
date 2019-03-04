@@ -332,12 +332,12 @@ class Model:
             tvars = tf.trainable_variables()
             (assignment_map, initialized_variable_names) = modeling.get_assignment_map_from_checkpoint(tvars, self.bert_init_checkpoint)
             tf.train.init_from_checkpoint(self.bert_init_checkpoint, assignment_map)
-            tf.logging.info("**** Trainable Variables ****")
+            tf.logging.debug("**** Trainable Variables ****")
             for var in tvars:
                 init_string = ""
                 if var.name in initialized_variable_names:
                     init_string = ", *INIT_FROM_CKPT*"
-                tf.logging.info("  name = %s, shape = %s%s", var.name, var.shape, init_string)
+                tf.logging.debug("  name = %s, shape = %s%s", var.name, var.shape, init_string)
         return tf.nn.dropout(bert_embeddings, keep_prob)
 
     def __pos_embedding(self, inputs, keep_prob=0.5, scope='pos-embedding'):
