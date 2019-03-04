@@ -136,13 +136,13 @@ def inference(config, frozen_pb_path):
         sys.stdout.write('\n')
         duration_time = time.time() - start_time
         out = 'duration_time : ' + str(duration_time) + ' sec'
-        tf.logging.debug(out)
+        tf.logging.info(out)
         num_buckets += 1
         total_duration_time += duration_time
 
     out = 'total_duration_time : ' + str(total_duration_time) + ' sec' + '\n'
     out += 'average processing time / bucket : ' + str(total_duration_time / num_buckets) + ' sec'
-    tf.logging.debug(out)
+    tf.logging.info(out)
 
     sess.close()
 
@@ -154,7 +154,7 @@ if __name__ == '__main__':
     parser.add_argument('--frozen_path', type=str, help='path to frozen model(ex, ./exported/ner_frozen.pb)', required=True)
 
     args = parser.parse_args()
-    tf.logging.set_verbosity(tf.logging.DEBUG)
+    tf.logging.set_verbosity(tf.logging.INFO)
 
     args.restore = None
     config = Config(args, is_training=False, emb_class='glove', use_crf=True)
