@@ -741,6 +741,13 @@ chunk : 0.9253942938153464
 token : 0.93044691
 chunk : 0.9245217835
 
+# extra trial 1
+token : 0.930668791761172
+chunk : 0.9239341942331505
+conlleval : 92.34
+average processing time per bucket(sentence)
+  - 1 GPU(V100 TELSA) :0.0385546259719567 sec
+
 * test 14
 word embedding size : 300(glove6B)
 elmo embedding params : elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json
