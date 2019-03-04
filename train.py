@@ -117,7 +117,10 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
     tag_preds = data.logits_indices_to_tags_seq(sum_logits_indices, sum_sentence_lengths)
     tag_corrects = data.logits_indices_to_tags_seq(sum_output_data_indices, sum_sentence_lengths)
     tf.logging.debug('[epoch %s/%s] dev precision, recall, f1(token): ' % (epoch, config.epoch))
-    token_f1 = TokenEval.compute_f1(config.class_size, sum_logits_indices, sum_output_data_indices, sum_sentence_lengths)
+    token_f1, l_token_prec, l_token_rec, l_token_f1  = TokenEval.compute_f1(config.class_size, sum_logits_indices, sum_output_data_indices, sum_sentence_lengths)
+    tf.logging.debug('[' + ' '.join([str(x) for x in l_token_prec]) + ']')
+    tf.logging.debug('[' + ' '.join([str(x) for x in l_token_rec]) + ']')
+    tf.logging.debug('[' + ' '.join([str(x) for x in l_token_f1]) + ']')
     prec, rec, f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
     tf.logging.debug('dev precision, recall, f1(chunk): %s, %s, %s' % (prec, rec, f1) + '(invalid for bert due to X tag)')
     chunk_f1 = f1
