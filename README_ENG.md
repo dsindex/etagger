@@ -216,7 +216,7 @@ rnn_used : True
 rnn_type : fused
 rnn_size : 256
 rnn_num_layers : 2
-learning_rate : exponential_decay(), 2e-5 / 5000 / 0.9 -> 0.001 / 12000 / 0.9
+learning_rate : exponential_decay(), 2e-5 / 5000 / 0.9
 gradient clipping : 1.5 -> 10
 #learning_rate : use optimization.py from bert, 2e-5 / warmup proportion 0.1
 epoch : 70
@@ -234,6 +234,12 @@ tf_ffn_kernel_size : 3
 save model by f1(token)
 +
 CRF
+
+token : 0.9243863327988158
+chunk : 0.9169861792242533
+conlleval : 91.44
+average processing time per bucket(sentence)
+  - 1 GPU(V100) :  0.040497000132010894 sec
 
 * test 11
 word embedding size : 300(glove6B)
