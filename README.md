@@ -376,6 +376,8 @@ in IN O O O
 ## Evaluation
 
 - [experiment logs](https://github.com/dsindex/etagger/blob/master/README_ENG.md)
+![](/etc/experiment_eng.png)
+
 - results
   - Transformer
     - Glove
@@ -519,6 +521,7 @@ in IN O O O
         - `experiments 6, test 7`
       - per-token(partial) f1 : 0.9157317073170732
       - per-chunk(exact)   f1 : **0.9102156238953694**
+
 - comparision to previous research
   - implementations
     - [Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
@@ -554,10 +557,10 @@ in IN O O O
 ## Development note
 
 - accuracy and loss
-![graph-2](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-2.png)
+![](/etc/graph-2.png)
 
 - abnormal case when using multi-head
-![graph-3](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-3.png)
+![](/etc/graph-3.png)
   - why? 
   ```
   i guess that the softmax(applied in multi-head attention functions) was corrupted by paddings.
@@ -571,10 +574,10 @@ in IN O O O
        this code perfectly matches to my intention.
   ```
   - after replacing layer_norm() to normalize() and applying the dropout of word embeddings
-  ![graph-4](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-4.png)
+  ![](/etc/graph-4.png)
 
 - train, dev accuracy after applying LSTMBlockFusedCell
-![graph-5](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-5.png)
+![](/etc/graph-5.png)
 
 - tips for training speed up
   - filter out words(which are not in train/dev/test data) from glove840B word embeddings. but not for service.
@@ -604,7 +607,7 @@ in IN O O O
       - conv1d with kernel size 1 -> 3
       - this is the key to sequence taggging problems.
     - after applying kernel_size 3
-    ![graph-6](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-6.png)
+    ![](/etc/graph-6.png)
 
 - tips in general
   - save best model by using token-based f1. token-based f1 is slightly better than chunk-based f1
