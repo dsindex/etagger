@@ -134,7 +134,7 @@ class Input:
                bert chk id,
                bert tag
                bert wordidx to tokenidx,
-               bert to elmo indices
+               bert for elmo indices
         """
         word_ids = self.__create_word_ids(bucket)
         wordchr_ids = self.__create_wordchr_ids(bucket)
