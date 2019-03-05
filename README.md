@@ -373,13 +373,7 @@ in IN O O O
   ...
   ```
 
-## Models and Evaluation
-
-- models
-  - BiLSTM
-  ![BiLSTM](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1-1.png)
-  - Transformer
-  ![Transformer](https://raw.githubusercontent.com/dsindex/etagger/master/etc/graph-1-2.png)
+## Evaluation
 
 - evaluation
   - [experiment logs](https://github.com/dsindex/etagger/blob/master/README_ENG.md)
