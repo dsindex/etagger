@@ -375,182 +375,181 @@ in IN O O O
 
 ## Evaluation
 
-- evaluation
-  - [experiment logs](https://github.com/dsindex/etagger/blob/master/README_ENG.md)
-  - results
-    - Transformer
-      - Glove
-        - setting
-          - `experiments 7, test 9`
-        - per-token(partial) f1 : 0.9083215796897038
-        - per-chunk(exact)   f1 : **0.904078014184397**
-        - average processing time per bucket
-          - 1 GPU(TITAN X (Pascal), 12196MiB)
-            - restore version        : 0.013825567226844812 sec
-            - frozen version         : 0.015376264122228799 sec
-            - tensorRT(FP16) version : no meaningful difference
-          - 32 processor CPU(multi-threading)
-            - python : 0.017238136546748987 sec
-            - C++ : 0.013 sec
-          - 1 CPU(single-thread)
-            - python : 0.03358284470571628 sec
-            - C++ : 0.021510 sec
-    - BiLSTM
-      - Glove
-        - setting
-          - `experiments 9, test 1`
-        - per-token(partial) f1 : 0.9152852267186738
-        - per-chunk(exact)   f1 : **0.9094911075893644**
-        - average processing time per bucket
-          - 1 GPU(TITAN X (Pascal), 12196MiB)
-            - restore version        : 0.010454932072004718 sec
-            - frozen version         : 0.011339560587942018 sec
-            - tensorRT(FP16) version : no meaningful difference
-          - 32 processor CPU(multi-threading)
-            - rnn_num_layers 2 : 0.006132203450549827 sec
-            - rnn_num_layers 1
-              - python
-                - 0.0041805055967241884 sec
-                - 0.003053264560968687  sec (`experiments 12, test 5`)
-              - C++
-                - 0.002735 sec
-                - 0.002175 sec (`experiments 9, test 2`), 0.8800
-                - 0.002783 sec (`experiments 9, test 3`), 0.8858
-                - 0.004407 sec (`experiments 9, test 4`), 0.8887
-                - 0.003687 sec (`experiments 9, test 5`), 0.8835
-                - 0.002976 sec (`experiments 9, test 6`), 0.8782
-                - 0.002855 sec (`experiments 9, test 7`), 0.8906
-                  - 0.002697 sec with optimizations for FMA, AVX and SSE. no meaningful difference.
-                - 0.002040 sec (`experiments 12, test 5`), 0.9047
-          - 1 CPU(single-thread)
-            - rnn_num_layers 2 : 0.008001159379070668 sec 
-            - rnn_num_layers 1
-              - python
-                - 0.0051817628640952506 sec
-                - 0.0042755354628630235 sec (`experiments 12, test 5`)
-              - C++
-                - 0.003998 sec
-                - 0.002853 sec (`experiments 9, test 2`)
-                - 0.003474 sec (`experiments 9, test 3`)
-                - 0.005118 sec (`experiments 9, test 4`)
-                - 0.004139 sec (`experiments 9, test 5`)
-                - 0.004133 sec (`experiments 9, test 6`)
-                - 0.003334 sec (`experiments 9, test 7`)
-                  - 0.003078 sec with optimizations for FMA, AVX and SSE. no meaningful difference.
-                - 0.002683 sec (`experiments 12, test 5`)
-      - ELMo
-        - setting
-          - `experiments 8, test 2`
-        - per-token(partial) f1 : 0.9322728663199756
-        - per-chunk(exact)   f1 : **0.9253625751680227**
-        ```
-        $ etc/conlleval < pred.txt
-        processed 46666 tokens with 5648 phrases; found: 5662 phrases; correct: 5234.
-        accuracy:  98.44%; precision:  92.44%; recall:  92.67%; FB1:  92.56
-                      LOC: precision:  94.29%; recall:  92.99%; FB1:  93.63  1645
-                     MISC: precision:  84.38%; recall:  84.62%; FB1:  84.50  704
-                      ORG: precision:  89.43%; recall:  91.69%; FB1:  90.55  1703
-                      PER: precision:  97.27%; recall:  96.85%; FB1:  97.06  1610
-        ```
-        - average processing time per bucket
-          - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.06133532517637155 sec -> need to recompute
-          - 1 GPU(Tesla V100)                 : 0.029950057644797457 sec
-          - 32 processor CPU(multi-threading)      : 0.40098162731570347 sec
-          - 1 CPU(single-thread)              : 0.7398052649182165 sec
-      - ELMo + Glove
-        - setting
-          - `experiments 10, test 15`
-        - per-token(partial) f1 : 0.931816792025928
-        - per-chunk(exact)   f1 : **0.9268680445151033**
-        ```
-        processed 46666 tokens with 5648 phrases; found: 5681 phrases; correct: 5248.
-        accuracy:  98.42%; precision:  92.38%; recall:  92.92%; FB1:  92.65
-              LOC: precision:  93.11%; recall:  94.00%; FB1:  93.56  1684
-             MISC: precision:  83.12%; recall:  82.76%; FB1:  82.94  699
-              ORG: precision:  90.31%; recall:  91.99%; FB1:  91.14  1692
-              PER: precision:  97.82%; recall:  97.16%; FB1:  97.49  1606
-        ```
-        - average processing time per bucket
-          - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.036233977567360014 sec
-          - 1 GPU(Tesla V100, 32510MiB) : 0.031166194639816864 sec
-      - BERT(base)
-        - setting(on-going)
-          - `experiments 11, test 1`
-        - per-token(partial) f1 : 0.9234725113260683
-        - per-chunk(exact)   f1 : 0.9131509267431598
-        - average processing time per bucket
-          - 1 GPU(Tesla V100)  : 0.026964144585057526 sec
-      - BERT(base) + Glove
-        - setting(on-going)
-          - `experiments 11, test 2`
-        - per-token(partial) f1 : 0.921535076998289
-        - per-chunk(exact)   f1 : 0.9123210182075304
-        - average processing time per bucket
-          - 1 GPU(Tesla V100)  : 0.029030597688838533 sec
-      - BERT(large)
-        - setting(on-going)
-          - `experiments 11, test 4`
-        - per-token(partial) f1 : 0.9270596895895958
-        - per-chunk(exact)   f1 : 0.9180153886972672
-        - average processing time per bucket
-          - 1 GPU(Tesla V100)  : 0.03831603427404431 sec
-      - BERT(large) + Glove
-        - setting(on-going)
-          - `experiments 11, test 3`
-        - per-token(partial) f1 : 0.9278869778869779
-        - per-chunk(exact)   f1 : **0.918813634351483**
-        - average processing time per bucket
-          - 1 GPU(Tesla V100)  : 0.040225753178425645 sec
-      - BERT(large) + Glove + Transformer
-        - setting(on-going)
-          - `experiments 11, test 7`
-        - per-token(partial) f1 : 0.9244949032533724
-        - per-chunk(exact)   f1 : 0.9170714474962465
-        - average processing time per bucket
-          - 1 GPU(Tesla V100)  : 0.05737522856032033 sec
-    - BiLSTM + Transformer
-      - Glove
-        - setting
-          - `experiments 7, test 10`
-        - per-token(partial) f1 : 0.910979409787988
-        - per-chunk(exact)   f1 : **0.9047451049567825**
-    - BiLSTM + multi-head attention
-      - Glove
-        - setting
-          - `experiments 6, test 7`
-        - per-token(partial) f1 : 0.9157317073170732
-        - per-chunk(exact)   f1 : **0.9102156238953694**
-  - comparision to previous research
-    - implementations
-      - [Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
-        - tested
-        - Glove6B.100
-        - Prec: 0.887, Rec: 0.902, F1: 0.894
-      - [sequence_tagging](https://github.com/guillaumegenthial/sequence_tagging)
-        - tested
-        - Glove6B.100
-        - F1: 0.8998
-      - [tf_ner](https://github.com/guillaumegenthial/tf_ner)
-        - tested
-        - Glove840B.300
-        - F1 : 0.905 ~ 0.907 (chars_conv_lstm_crf)
-          - reported F1 : 0.9118
-      - [torchnlp](https://github.com/kolloldas/torchnlp)
-        - tested
-        - Glove6B.200
-        - F1 : 0.8845
-          - just 1 block of Transformer encoder
-    - SOTA
-      - [Contextual String Embeddings for Sequence Labeling](https://drive.google.com/file/d/17yVpFA7MmXaQFTe-HDpZuqw9fJlmzg56/view)
-        - reported F1 : 0.9309
-      - [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/pdf/1810.04805.pdf)
-        - reported F1 : 0.928
-      - [Semi-Supervised Sequence Modeling with Cross-View Training](https://arxiv.org/pdf/1809.08370.pdf)
-        - reported F1 : 0.926
-      - [Deep contextualized word representations](https://arxiv.org/pdf/1802.05365.pdf)
-        - reported F1 : 0.9222
-      - [Semi-supervised sequence tagging with bidirectional language models](https://arxiv.org/pdf/1705.00108.pdf)
-        - reported F1 : 0.9193
+- [experiment logs](https://github.com/dsindex/etagger/blob/master/README_ENG.md)
+- results
+  - Transformer
+    - Glove
+      - setting
+        - `experiments 7, test 9`
+      - per-token(partial) f1 : 0.9083215796897038
+      - per-chunk(exact)   f1 : **0.904078014184397**
+      - average processing time per bucket
+        - 1 GPU(TITAN X (Pascal), 12196MiB)
+          - restore version        : 0.013825567226844812 sec
+          - frozen version         : 0.015376264122228799 sec
+          - tensorRT(FP16) version : no meaningful difference
+        - 32 processor CPU(multi-threading)
+          - python : 0.017238136546748987 sec
+          - C++ : 0.013 sec
+        - 1 CPU(single-thread)
+          - python : 0.03358284470571628 sec
+          - C++ : 0.021510 sec
+  - BiLSTM
+    - Glove
+      - setting
+        - `experiments 9, test 1`
+      - per-token(partial) f1 : 0.9152852267186738
+      - per-chunk(exact)   f1 : **0.9094911075893644**
+      - average processing time per bucket
+        - 1 GPU(TITAN X (Pascal), 12196MiB)
+          - restore version        : 0.010454932072004718 sec
+          - frozen version         : 0.011339560587942018 sec
+          - tensorRT(FP16) version : no meaningful difference
+        - 32 processor CPU(multi-threading)
+          - rnn_num_layers 2 : 0.006132203450549827 sec
+          - rnn_num_layers 1
+            - python
+              - 0.0041805055967241884 sec
+              - 0.003053264560968687  sec (`experiments 12, test 5`)
+            - C++
+              - 0.002735 sec
+              - 0.002175 sec (`experiments 9, test 2`), 0.8800
+              - 0.002783 sec (`experiments 9, test 3`), 0.8858
+              - 0.004407 sec (`experiments 9, test 4`), 0.8887
+              - 0.003687 sec (`experiments 9, test 5`), 0.8835
+              - 0.002976 sec (`experiments 9, test 6`), 0.8782
+              - 0.002855 sec (`experiments 9, test 7`), 0.8906
+                - 0.002697 sec with optimizations for FMA, AVX and SSE. no meaningful difference.
+              - 0.002040 sec (`experiments 12, test 5`), 0.9047
+        - 1 CPU(single-thread)
+          - rnn_num_layers 2 : 0.008001159379070668 sec 
+          - rnn_num_layers 1
+            - python
+              - 0.0051817628640952506 sec
+              - 0.0042755354628630235 sec (`experiments 12, test 5`)
+            - C++
+              - 0.003998 sec
+              - 0.002853 sec (`experiments 9, test 2`)
+              - 0.003474 sec (`experiments 9, test 3`)
+              - 0.005118 sec (`experiments 9, test 4`)
+              - 0.004139 sec (`experiments 9, test 5`)
+              - 0.004133 sec (`experiments 9, test 6`)
+              - 0.003334 sec (`experiments 9, test 7`)
+                - 0.003078 sec with optimizations for FMA, AVX and SSE. no meaningful difference.
+              - 0.002683 sec (`experiments 12, test 5`)
+    - ELMo
+      - setting
+        - `experiments 8, test 2`
+      - per-token(partial) f1 : 0.9322728663199756
+      - per-chunk(exact)   f1 : **0.9253625751680227**
+      ```
+      $ etc/conlleval < pred.txt
+      processed 46666 tokens with 5648 phrases; found: 5662 phrases; correct: 5234.
+      accuracy:  98.44%; precision:  92.44%; recall:  92.67%; FB1:  92.56
+                    LOC: precision:  94.29%; recall:  92.99%; FB1:  93.63  1645
+                   MISC: precision:  84.38%; recall:  84.62%; FB1:  84.50  704
+                    ORG: precision:  89.43%; recall:  91.69%; FB1:  90.55  1703
+                    PER: precision:  97.27%; recall:  96.85%; FB1:  97.06  1610
+      ```
+      - average processing time per bucket
+        - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.06133532517637155 sec -> need to recompute
+        - 1 GPU(Tesla V100)                 : 0.029950057644797457 sec
+        - 32 processor CPU(multi-threading)      : 0.40098162731570347 sec
+        - 1 CPU(single-thread)              : 0.7398052649182165 sec
+    - ELMo + Glove
+      - setting
+        - `experiments 10, test 15`
+      - per-token(partial) f1 : 0.931816792025928
+      - per-chunk(exact)   f1 : **0.9268680445151033**
+      ```
+      processed 46666 tokens with 5648 phrases; found: 5681 phrases; correct: 5248.
+      accuracy:  98.42%; precision:  92.38%; recall:  92.92%; FB1:  92.65
+            LOC: precision:  93.11%; recall:  94.00%; FB1:  93.56  1684
+           MISC: precision:  83.12%; recall:  82.76%; FB1:  82.94  699
+            ORG: precision:  90.31%; recall:  91.99%; FB1:  91.14  1692
+            PER: precision:  97.82%; recall:  97.16%; FB1:  97.49  1606
+      ```
+      - average processing time per bucket
+        - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.036233977567360014 sec
+        - 1 GPU(Tesla V100, 32510MiB) : 0.031166194639816864 sec
+    - BERT(base)
+      - setting(on-going)
+        - `experiments 11, test 1`
+      - per-token(partial) f1 : 0.9234725113260683
+      - per-chunk(exact)   f1 : 0.9131509267431598
+      - average processing time per bucket
+        - 1 GPU(Tesla V100)  : 0.026964144585057526 sec
+    - BERT(base) + Glove
+      - setting(on-going)
+        - `experiments 11, test 2`
+      - per-token(partial) f1 : 0.921535076998289
+      - per-chunk(exact)   f1 : 0.9123210182075304
+      - average processing time per bucket
+        - 1 GPU(Tesla V100)  : 0.029030597688838533 sec
+    - BERT(large)
+      - setting(on-going)
+        - `experiments 11, test 4`
+      - per-token(partial) f1 : 0.9270596895895958
+      - per-chunk(exact)   f1 : 0.9180153886972672
+      - average processing time per bucket
+        - 1 GPU(Tesla V100)  : 0.03831603427404431 sec
+    - BERT(large) + Glove
+      - setting(on-going)
+        - `experiments 11, test 3`
+      - per-token(partial) f1 : 0.9278869778869779
+      - per-chunk(exact)   f1 : **0.918813634351483**
+      - average processing time per bucket
+        - 1 GPU(Tesla V100)  : 0.040225753178425645 sec
+    - BERT(large) + Glove + Transformer
+      - setting(on-going)
+        - `experiments 11, test 7`
+      - per-token(partial) f1 : 0.9244949032533724
+      - per-chunk(exact)   f1 : 0.9170714474962465
+      - average processing time per bucket
+        - 1 GPU(Tesla V100)  : 0.05737522856032033 sec
+  - BiLSTM + Transformer
+    - Glove
+      - setting
+        - `experiments 7, test 10`
+      - per-token(partial) f1 : 0.910979409787988
+      - per-chunk(exact)   f1 : **0.9047451049567825**
+  - BiLSTM + multi-head attention
+    - Glove
+      - setting
+        - `experiments 6, test 7`
+      - per-token(partial) f1 : 0.9157317073170732
+      - per-chunk(exact)   f1 : **0.9102156238953694**
+- comparision to previous research
+  - implementations
+    - [Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
+      - tested
+      - Glove6B.100
+      - Prec: 0.887, Rec: 0.902, F1: 0.894
+    - [sequence_tagging](https://github.com/guillaumegenthial/sequence_tagging)
+      - tested
+      - Glove6B.100
+      - F1: 0.8998
+    - [tf_ner](https://github.com/guillaumegenthial/tf_ner)
+      - tested
+      - Glove840B.300
+      - F1 : 0.905 ~ 0.907 (chars_conv_lstm_crf)
+        - reported F1 : 0.9118
+    - [torchnlp](https://github.com/kolloldas/torchnlp)
+      - tested
+      - Glove6B.200
+      - F1 : 0.8845
+        - just 1 block of Transformer encoder
+  - SOTA
+    - [Contextual String Embeddings for Sequence Labeling](https://drive.google.com/file/d/17yVpFA7MmXaQFTe-HDpZuqw9fJlmzg56/view)
+      - reported F1 : 0.9309
+    - [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/pdf/1810.04805.pdf)
+      - reported F1 : 0.928
+    - [Semi-Supervised Sequence Modeling with Cross-View Training](https://arxiv.org/pdf/1809.08370.pdf)
+      - reported F1 : 0.926
+    - [Deep contextualized word representations](https://arxiv.org/pdf/1802.05365.pdf)
+      - reported F1 : 0.9222
+    - [Semi-supervised sequence tagging with bidirectional language models](https://arxiv.org/pdf/1705.00108.pdf)
+      - reported F1 : 0.9193
 
 ## Development note
 
