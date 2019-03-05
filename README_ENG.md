@@ -1,6 +1,53 @@
 - summary
   - https://docs.google.com/spreadsheets/d/1Zj9MF0LK2IE4XHiKTRkRpd8EajEnfqLGvI-IqUMC7A0/edit?usp=sharing
 
+- experiment 13
+```
+word embedding size : 100(glove6b)
+bert embedding : cased_L-24_H-1024_A-16
+bert_keep_prob : 0.8
+elmo embedding params : elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json
+elmo embedding size : 1024
+elmo_keep_prob : 0.7
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 50
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused
+rnn_size : 256
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 2e-5 / 5000 / 0.9
+gradient clipping : 1.5
+#learning_rate : use optimization.py from bert, 2e-5 / warmup proportion 0.1
+epoch : 70
+batch_size : 16
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
+
+token :
+chunk :
+conlleval :
+average processing time per bucket(sentence)
+ - 1 GPU(V100 TESLA) :
+
+```
+
 - experiments 12
 ```
 * test 5
