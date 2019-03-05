@@ -89,6 +89,7 @@ filter_sizes : [3]
 num_filters : 53
 pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
+highway_used : False -> True
 rnn_used : True
 rnn_type : fused
 rnn_size : 200 -> 256
@@ -112,11 +113,11 @@ save model by f1(token)
 +
 CRF
 
-token :
-chunk :
-conlleval :
+token : 0.9194924561136736
+chunk : 0.9274476759989128
+conlleval : 92.74          -> Glove + BERT + CNN + LSTM + CRF best
 average processing time per bucket(sentence)
-  - 1 GPU(TITAN X PASCAL) :
+  - 1 GPU(TITAN X PASCAL) : 0.04104578713463737 sec
 
 * test 5
 word embedding size : 300 ->300(kor.glove.300k.300d.txt)
@@ -243,7 +244,7 @@ CRF
 
 token : 0.9178154959148055
 chunk : 0.9258471818457934
-conlleval : 92.59          -> Glove + BERT + CNN + LSTM + CRF best
+conlleval : 92.59
 average processing time per bucket(sentence)
   - 1 GPU(V100 TESLA) :  0.02537741956687146 sec
 

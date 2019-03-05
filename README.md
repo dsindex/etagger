@@ -158,6 +158,7 @@ $ python inference.py --mode bucket --emb_path embeddings/glove.840B.300d.txt.pk
 
 $ python token_eval.py < pred.txt
 $ python chunk_eval.py < pred.txt
+$ perl   etc/conlleval < pred.txt
 ```
 
 - inference(line)
