@@ -66,7 +66,7 @@ class Model:
                                                                       keep_prob=keep_prob,
                                                                       scope='wordchr-embedding-conv2d')
 
-        if self.emb_class == 'elmo':
+        if 'elmo' in self.emb_class:
             # elmo embeddings
             self.elmo_bilm = config.elmo_bilm
             elmo_keep_prob = tf.cond(self.is_train, lambda: config.elmo_keep_prob, lambda: 1.0)
@@ -74,7 +74,7 @@ class Model:
                                                               shape=[None, None, self.word_length], # (batch_size, sentence_length+2, word_length)
                                                               name='elmo_input_data_wordchr_ids')   # '+2' stands for '<S>', '</S>'
             self.elmo_embeddings = self.__elmo_embedding(self.elmo_input_data_wordchr_ids, masks, keep_prob=elmo_keep_prob)
-        if self.emb_class == 'bert':
+        if 'bert' in self.emb_class:
             # bert embeddings
             self.bert_config = config.bert_config
             self.bert_init_checkpoint = config.bert_init_checkpoint
@@ -93,6 +93,11 @@ class Model:
             concat_in = [self.word_embeddings, self.wordchr_embeddings, self.elmo_embeddings, self.pos_embeddings, self.chk_embeddings]
         if self.emb_class == 'bert':
             concat_in = [self.word_embeddings, self.wordchr_embeddings, self.bert_embeddings, self.pos_embeddings, self.chk_embeddings]
+        if self.emb_class == 'bert+elmo':
+            # we need to align elmo_embeddings for bert token based via tf.gather_nd()
+            self.bert_input_data_elmo_indices = tf.placeholder(tf.int32, shape=[None, None, 2], name='bert_input_data_elmo_indices') # (batch_size, bert_max_seq_length, 2)
+            self.elmo_embeddings = tf.gather_nd(self.elmo_embeddings, self.bert_input_data_elmo_indices)
+            concat_in = [self.word_embeddings, self.wordchr_embeddings, self.bert_embeddings, self.elmo_embeddings, self.pos_embeddings, self.chk_embeddings]
         self.input_data = tf.concat(concat_in, axis=-1, name='input_data') # (batch_size, sentence_length, input_dim)
         
         # highway network
@@ -200,7 +205,7 @@ class Model:
 
         with tf.variable_scope('optimization'):
             self.global_step = tf.train.get_or_create_global_step()
-            if config.emb_class == 'bert' and config.use_bert_optimization:
+            if 'bert' in config.emb_class and config.use_bert_optimization:
                 from bert import optimization
                 self.learning_rate = tf.constant(value=config.starter_learning_rate, shape=[], dtype=tf.float32)
                 self.train_op = optimization.create_optimizer(self.loss,

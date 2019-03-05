@@ -14,16 +14,19 @@ class Input:
         else: # treat as file path
             self.max_sentence_length = self.find_max_length(data)
 
-        if config.emb_class == 'bert':
+        if 'bert' in config.emb_class:
             self.max_sentence_length = config.bert_max_seq_length # NOTE trick for reusing codes.
             self.sentence_word_ids = []                    # [batch_size, bert_max_seq_length]
             self.sentence_wordchr_ids = []                 # [batch_size, bert_max_seq_length, word_length]
+            if 'elmo' in config.emb_class:
+                self.sentence_elmo_wordchr_ids = []        # [batch_size, bert_max_seq_length+2, word_length]
             self.sentence_pos_ids = []                     # [batch_size, bert_max_seq_length]
-            self.sentence_chk_ids = []                   # [batch_size, bert_max_seq_length]
+            self.sentence_chk_ids = []                     # [batch_size, bert_max_seq_length]
             self.sentence_bert_token_ids = []              # [batch_size, bert_max_seq_length]
             self.sentence_bert_token_masks = []            # [batch_size, bert_max_seq_length]
             self.sentence_bert_segment_ids = []            # [batch_size, bert_max_seq_length]
             self.sentence_bert_wordidx2tokenidx = []       # [batch_size]
+            self.sentence_bert_elmo_indices = []           # [batch_size, bert_max_seq_length, 2]
             if build_output:
                 self.sentence_tags = []                    # [batch_size, bert_max_seq_length, class_size] 
         else:
@@ -41,18 +44,23 @@ class Input:
         if type(data) is list: # treat data as bucket
             bucket = data
             ex_index = 0
-            if config.emb_class == 'bert':
+            if 'bert' in config.emb_class:
                 bert_token_ids, bert_token_masks, bert_segment_ids, \
-                bert_word_ids, bert_wordchr_ids, bert_pos_ids, bert_chk_ids, bert_tag, bert_wordidx2tokenidx = \
+                bert_word_ids, bert_wordchr_ids, bert_pos_ids, bert_chk_ids, \
+                bert_tag, bert_wordidx2tokenidx, bert_elmo_indices = \
                     self.__create_bert_input(bucket, ex_index)
                 self.sentence_word_ids.append(bert_word_ids)
                 self.sentence_wordchr_ids.append(bert_wordchr_ids)
+                if 'elmo' in config.emb_class:
+                    elmo_wordchr_ids = self.__create_elmo_wordchr_ids(bucket)
+                    self.sentence_elmo_wordchr_ids.append(elmo_wordchr_ids)
                 self.sentence_pos_ids.append(bert_pos_ids)
                 self.sentence_chk_ids.append(bert_chk_ids)
                 self.sentence_bert_token_ids.append(bert_token_ids)
                 self.sentence_bert_token_masks.append(bert_token_masks)
                 self.sentence_bert_segment_ids.append(bert_segment_ids)
                 self.sentence_bert_wordidx2tokenidx.append(bert_wordidx2tokenidx)
+                self.sentence_bert_elmo_indices.append(bert_elmo_indices)
                 if build_output:
                     self.sentence_tags.append(bert_tag)
             else:
@@ -76,18 +84,23 @@ class Input:
             ex_index = 0
             for line in open(path):
                 if line in ['\n', '\r\n']:
-                    if config.emb_class == 'bert':
+                    if 'bert' in config.emb_class:
                         bert_token_ids, bert_token_masks, bert_segment_ids, \
-                        bert_word_ids, bert_wordchr_ids, bert_pos_ids, bert_chk_ids, bert_tag, bert_wordidx2tokenidx = \
+                        bert_word_ids, bert_wordchr_ids, bert_pos_ids, bert_chk_ids, \
+                        bert_tag, bert_wordidx2tokenidx, bert_elmo_indices = \
                             self.__create_bert_input(bucket, ex_index)
                         self.sentence_word_ids.append(bert_word_ids)
                         self.sentence_wordchr_ids.append(bert_wordchr_ids)
+                        if 'elmo' in config.emb_class:
+                            elmo_wordchr_ids = self.__create_elmo_wordchr_ids(bucket)
+                            self.sentence_elmo_wordchr_ids.append(elmo_wordchr_ids)
                         self.sentence_pos_ids.append(bert_pos_ids)
                         self.sentence_chk_ids.append(bert_chk_ids)
                         self.sentence_bert_token_ids.append(bert_token_ids)
                         self.sentence_bert_token_masks.append(bert_token_masks)
                         self.sentence_bert_segment_ids.append(bert_segment_ids)
                         self.sentence_bert_wordidx2tokenidx.append(bert_wordidx2tokenidx)
+                        self.sentence_bert_elmo_indices.append(bert_elmo_indices)
                         if build_output:
                             self.sentence_tags.append(bert_tag)
                     else:
@@ -120,7 +133,8 @@ class Input:
                bert pos id,
                bert chk id,
                bert tag
-               bert wordidx 2 tokenidx,
+               bert wordidx to tokenidx,
+               bert to elmo indices
         """
         word_ids = self.__create_word_ids(bucket)
         wordchr_ids = self.__create_wordchr_ids(bucket)
@@ -139,10 +153,12 @@ class Input:
         ntokens = []
         bert_segment_ids = []
         bert_wordidx2tokenidx = {}
+        bert_elmo_indices = []
 
         ntokens.append('[CLS]')
         ntokens_last = 0
         bert_segment_ids.append(0)
+        bert_elmo_indices.append([0,0])
         bert_word_ids.append(self.config.embvec.pad_wid) # 0
         pad_chr_ids = []
         for _ in range(self.config.word_length):
@@ -172,6 +188,7 @@ class Input:
                     bert_wordidx2tokenidx[i] = ntokens_last
                 else:
                     bert_tag.append(self.__tag_vec(self.config.embvec.xot_tag, self.config.class_size)) # 'X' tag
+                bert_elmo_indices.append([ex_index, i])
             if len(ntokens) == bert_max_seq_length - 1:
                 tf.logging.debug('len(ntokens): %s' % str(len(ntokens)))
                 break
@@ -197,6 +214,10 @@ class Input:
         assert len(bert_token_ids) == bert_max_seq_length
         assert len(bert_token_masks) == bert_max_seq_length
         assert len(bert_segment_ids) == bert_max_seq_length
+        # padding for bert_elmo_indices
+        while len(bert_elmo_indices) < bert_max_seq_length:
+            bert_elmo_indices.append([0,0])
+        assert len(bert_elmo_indices) == bert_max_seq_length
         # padding for bert_word_ids, bert_wordchr_ids, bert_pos_ids, bert_chk_ids, bert_tag
         while len(bert_word_ids) < bert_max_seq_length:
             bert_word_ids.append(self.config.embvec.pad_wid)
@@ -217,6 +238,7 @@ class Input:
             tf.logging.debug('bert_token_ids: %s' % ' '.join([str(x) for x in bert_token_ids]))
             tf.logging.debug('bert_token_masks: %s' % ' '.join([str(x) for x in bert_token_masks]))
             tf.logging.debug('bert_segment_ids: %s' % ' '.join([str(x) for x in bert_segment_ids]))
+            tf.logging.debug('bert_elmo_indices: %s' % ' '.join([str(x) for x in bert_elmo_indices]))
             tf.logging.debug('bert_word_ids: %s' % ' '.join([str(x) for x in bert_word_ids]))
             '''
             tf.logging.debug('bert_wordchr_ids: %s' % ' '.join([str(x) for x in bert_wordchr_ids]))
@@ -225,7 +247,9 @@ class Input:
             tf.logging.debug('bert_tag: %s' % ' '.join([str(x) for x in bert_tag]))
             '''
 
-        return bert_token_ids, bert_token_masks, bert_segment_ids, bert_word_ids, bert_wordchr_ids, bert_pos_ids, bert_chk_ids, bert_tag, bert_wordidx2tokenidx
+        return bert_token_ids, bert_token_masks, bert_segment_ids, \
+               bert_word_ids, bert_wordchr_ids, bert_pos_ids, bert_chk_ids, \
+               bert_tag, bert_wordidx2tokenidx, bert_elmo_indices
 
     def __create_word_ids(self, bucket):
         """Create an word id vector

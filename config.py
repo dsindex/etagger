@@ -14,7 +14,7 @@ class Config:
         self.word_length = args.word_length # maximum character size of word for convolution
         self.restore = args.restore         # checkpoint path if available
         self.use_crf = use_crf              # use crf decoder or not
-        self.emb_class = emb_class          # class of embedding(glove, elmo, bert)
+        self.emb_class = emb_class          # class of embedding(glove, elmo, bert, bert+elmo)
 
         self.keep_prob = 0.7                # keep probability for dropout
         self.chr_conv_type = 'conv1d'       # conv1d | conv2d
@@ -58,14 +58,14 @@ class Config:
         self.highway_used = True
         '''
         
-        if self.emb_class == 'elmo':
+        if 'elmo' in self.emb_class:
             from bilm import Batcher, BidirectionalLanguageModel
             self.word_length = 50 # replace to fixed word length for the pre-trained elmo : 'max_characters_per_token'
             self.elmo_batcher = Batcher(self.embvec.elmo_vocab_path, self.word_length) # map text to character ids
             self.elmo_bilm = BidirectionalLanguageModel(self.embvec.elmo_options_path, self.embvec.elmo_weight_path) # biLM graph
             self.elmo_keep_prob = 0.7
             self.highway_used = False
-        if self.emb_class == 'bert':
+        if 'bert' in self.emb_class:
             from bert import modeling
             from bert import tokenization
             self.bert_config = modeling.BertConfig.from_json_file(self.embvec.bert_config_path)
