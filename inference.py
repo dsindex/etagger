@@ -54,16 +54,17 @@ def inference_bucket(config):
                          model.sentence_length: inp.max_sentence_length}
             feed_dict[model.input_data_word_ids] = inp.sentence_word_ids
             feed_dict[model.input_data_wordchr_ids] = inp.sentence_wordchr_ids
-            if config.emb_class == 'elmo':
+            if 'elmo' in config.emb_class:
                 feed_dict[model.elmo_input_data_wordchr_ids] = inp.sentence_elmo_wordchr_ids
-            if config.emb_class == 'bert':
+            if 'bert' in config.emb_class:
                 feed_dict[model.bert_input_data_token_ids] = inp.sentence_bert_token_ids
                 feed_dict[model.bert_input_data_token_masks] = inp.sentence_bert_token_masks
                 feed_dict[model.bert_input_data_segment_ids] = inp.sentence_bert_segment_ids
+                feed_dict[model.bert_input_data_elmo_indices] = inp.sentence_bert_elmo_indices
             logits_indices, sentence_lengths = sess.run([model.logits_indices, model.sentence_lengths], feed_dict=feed_dict)
             tags = inp.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
             for i in range(len(bucket)):
-                if config.emb_class == 'bert':
+                if 'bert' in config.emb_class:
                     j = inp.sentence_bert_wordidx2tokenidx[0][i]
                     out = bucket[i] + ' ' + tags[j]
                 else:
@@ -87,16 +88,17 @@ def inference_bucket(config):
                      model.sentence_length: inp.max_sentence_length}
         feed_dict[model.input_data_word_ids] = inp.sentence_word_ids
         feed_dict[model.input_data_wordchr_ids] = inp.sentence_wordchr_ids
-        if config.emb_class == 'elmo':
+        if 'elmo' in config.emb_class:
             feed_dict[model.elmo_input_data_wordchr_ids] = inp.sentence_elmo_wordchr_ids
-        if config.emb_class == 'bert':
+        if 'bert' in config.emb_class:
             feed_dict[model.bert_input_data_token_ids] = inp.sentence_bert_token_ids
             feed_dict[model.bert_input_data_token_masks] = inp.sentence_bert_token_masks
             feed_dict[model.bert_input_data_segment_ids] = inp.sentence_bert_segment_ids
+            feed_dict[model.bert_input_data_elmo_indices] = inp.sentence_bert_elmo_indices
         logits_indices, sentence_lengths = sess.run([model.logits_indices, model.sentence_lengths], feed_dict=feed_dict)
         tags = inp.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
         for i in range(len(bucket)):
-            if config.emb_class == 'bert':
+            if 'bert' in config.emb_class:
                 j = inp.sentence_bert_wordidx2tokenidx[0][i]
                 out = bucket[i] + ' ' + tags[j]
             else:
@@ -181,16 +183,17 @@ def inference_line(config):
                      model.sentence_length: inp.max_sentence_length}
         feed_dict[model.input_data_word_ids] = inp.sentence_word_ids
         feed_dict[model.input_data_wordchr_ids] = inp.sentence_wordchr_ids
-        if config.emb_class == 'elmo':
+        if 'elmo' in config.emb_class:
             feed_dict[model.elmo_input_data_wordchr_ids] = inp.sentence_elmo_wordchr_ids
-        if config.emb_class == 'bert':
+        if 'bert' in config.emb_class:
             feed_dict[model.bert_input_data_token_ids] = inp.sentence_bert_token_ids
             feed_dict[model.bert_input_data_token_masks] = inp.sentence_bert_token_masks
             feed_dict[model.bert_input_data_segment_ids] = inp.sentence_bert_segment_ids
+            feed_dict[model.bert_input_data_elmo_indices] = inp.sentence_bert_elmo_indices
         logits_indices, sentence_lengths = sess.run([model.logits_indices, model.sentence_lengths], feed_dict=feed_dict)
         tags = inp.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
         for i in range(len(bucket)):
-            if config.emb_class == 'bert':
+            if 'bert' in config.emb_class:
                 j = inp.sentence_bert_wordidx2tokenidx[0][i]
                 out = bucket[i] + ' ' + tags[j]
             else:
@@ -211,6 +214,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     tf.logging.set_verbosity(tf.logging.INFO)
 
-    config = Config(args, is_training=False, emb_class='glove', use_crf=True)
+    config = Config(args, is_training=False, emb_class='bert+elmo', use_crf=True)
     if args.mode == 'bucket': inference_bucket(config)
     if args.mode == 'line':   inference_line(config)

@@ -35,13 +35,14 @@ def train_step(sess, model, config, data, summary_op, summary_writer):
                    model.sentence_length: data.max_sentence_length}
         feed_dict[model.input_data_word_ids] = data.sentence_word_ids[ptr:ptr + config.batch_size]
         feed_dict[model.input_data_wordchr_ids] = data.sentence_wordchr_ids[ptr:ptr + config.batch_size]
-        if config.emb_class == 'elmo':
+        if 'elmo' in config.emb_class:
             feed_dict[model.elmo_input_data_wordchr_ids] = data.sentence_elmo_wordchr_ids[ptr:ptr + config.batch_size]
-        if config.emb_class == 'bert':
+        if 'bert' in config.emb_class:
             feed_dict[model.bert_input_data_token_ids] = data.sentence_bert_token_ids[ptr:ptr + config.batch_size]
             feed_dict[model.bert_input_data_token_masks] = data.sentence_bert_token_masks[ptr:ptr + config.batch_size]
             feed_dict[model.bert_input_data_segment_ids] = data.sentence_bert_segment_ids[ptr:ptr + config.batch_size]
-        if config.emb_class == 'bert':
+            feed_dict[model.bert_input_data_elmo_indices] = data.sentence_bert_elmo_indices[ptr:ptr + config.batch_size]
+        if 'bert' in config.emb_class:
             step, summaries, _, loss, accuracy, learning_rate, bert_embeddings = \
                    sess.run([model.global_step, summary_op, model.train_op, \
                              model.loss, model.accuracy, model.learning_rate, model.bert_embeddings], feed_dict=feed_dict, options=runopts)
@@ -95,12 +96,13 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
                    model.sentence_length: data.max_sentence_length}
         feed_dict[model.input_data_word_ids] = data.sentence_word_ids[ptr:ptr + config.dev_batch_size]
         feed_dict[model.input_data_wordchr_ids] = data.sentence_wordchr_ids[ptr:ptr + config.dev_batch_size]
-        if config.emb_class == 'elmo':
+        if 'elmo' in config.emb_class:
             feed_dict[model.elmo_input_data_wordchr_ids] = data.sentence_elmo_wordchr_ids[ptr:ptr + config.dev_batch_size]
-        if config.emb_class == 'bert':
+        if 'bert' in config.emb_class:
             feed_dict[model.bert_input_data_token_ids] = data.sentence_bert_token_ids[ptr:ptr + config.batch_size]
             feed_dict[model.bert_input_data_token_masks] = data.sentence_bert_token_masks[ptr:ptr + config.batch_size]
             feed_dict[model.bert_input_data_segment_ids] = data.sentence_bert_segment_ids[ptr:ptr + config.batch_size]
+            feed_dict[model.bert_input_data_elmo_indices] = data.sentence_bert_elmo_indices[ptr:ptr + config.batch_size]
         global_step, logits_indices, sentence_lengths, loss, accuracy = \
                  sess.run([model.global_step, model.logits_indices, model.sentence_lengths, \
                            model.loss, model.accuracy], feed_dict=feed_dict)
@@ -195,7 +197,7 @@ def train(config):
     tf.logging.debug('loading input data ... done')
 
     # set for bert optimization
-    if config.emb_class == 'bert' and config.use_bert_optimization:
+    if 'bert' in config.emb_class and config.use_bert_optimization:
         config.num_train_steps = int((len(train_data.sentence_tags) / config.batch_size) * config.epoch)
         config.num_warmup_steps = int(config.num_train_steps * config.warmup_proportion)
 
@@ -219,5 +221,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
     tf.logging.set_verbosity(tf.logging.DEBUG)
 
-    config = Config(args, is_training=True, emb_class='glove', use_crf=True)
+    config = Config(args, is_training=True, emb_class='bert+elmo', use_crf=True)
     train(config)
