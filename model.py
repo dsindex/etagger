@@ -94,7 +94,7 @@ class Model:
         if self.emb_class == 'bert':
             concat_in = [self.word_embeddings, self.wordchr_embeddings, self.bert_embeddings, self.pos_embeddings, self.chk_embeddings]
         if self.emb_class == 'bert+elmo':
-            # we need to align elmo_embeddings for bert token based via tf.gather_nd()
+            # we need to extend elmo_embeddings for bert(token based) via tf.gather_nd()
             self.bert_input_data_elmo_indices = tf.placeholder(tf.int32, shape=[None, None, 2], name='bert_input_data_elmo_indices') # (batch_size, bert_max_seq_length, 2)
             self.elmo_embeddings = tf.gather_nd(self.elmo_embeddings, self.bert_input_data_elmo_indices)
             concat_in = [self.word_embeddings, self.wordchr_embeddings, self.bert_embeddings, self.elmo_embeddings, self.pos_embeddings, self.chk_embeddings]
