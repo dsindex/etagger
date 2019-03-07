@@ -4,6 +4,33 @@ import tensorflow as tf
 import numpy as np
 from embvec import EmbVec
 
+class InputFeatures:
+    """A single set of features of data."""
+    def __init__(self, params, emb_class='glove', build_output=True):
+        if 'bert' in emb_class:
+            self.word_ids = params['word_ids']
+            self.wordchr_ids = params['wordchr_ids']
+            if 'elmo' in emb_class:
+                self.elmo_wordchr_ids = params['elmo_wordchr_ids']
+            self.pos_ids = params['pos_ids']
+            self.chk_ids = params['chk_ids']
+            self.bert_token_ids = params['bert_token_ids']
+            self.bert_token_masks = params['bert_token_masks']
+            self.bert_segment_ids = params['bert_segment_ids']
+            self.bert_wordidx2tokenidx = params['bert_wordidx2tokenidx']
+            self.bert_elmo_indices = params['bert_elmo_indices']
+            if build_output:
+                self.tags = params['tags']
+        else:
+            self.word_ids = params['word_ids']
+            self.wordchr_ids = params['wordchr_ids']
+            if emb_class == 'elmo':
+                self.elmo_wordchr_ids = params['elmo_wordchr_ids']
+            self.pos_ids = params['pos_ids']
+            self.chk_ids = params['chk_ids']
+            if build_output:
+                self.tags = params['tags']
+
 class Input:
     def __init__(self, data, config, build_output=True):
         # compute max sentence length
@@ -17,9 +44,9 @@ class Input:
         self.__setup_examples()
         self.__create_examples(data)
         
-    def __setup_examples(self): 
-        '''Setup input examples
-        '''
+    def __setup_examples(self):
+        """Setup input examples
+        """
         if 'bert' in self.config.emb_class:
             self.max_sentence_length = self.config.bert_max_seq_length # NOTE trick for reusing codes.
             self.sentence_word_ids = []                    # [batch_size, bert_max_seq_length]
@@ -46,8 +73,8 @@ class Input:
                 self.sentence_tags = []                    # [batch_size, max_sentence_length, class_size] 
 
     def __create_examples(self, data):
-        '''Create input examples
-        '''
+        """Create input examples
+        """
         if type(data) is list: # treat data as bucket
             bucket = data
             ex_index = 0
@@ -65,8 +92,8 @@ class Input:
                     bucket.append(line)
 
     def __create_single_example(self, bucket, ex_index):
-        '''Create a single example
-        '''
+        """Create a single example
+        """
         if 'bert' in self.config.emb_class:
             bert_token_ids, bert_token_masks, bert_segment_ids, \
             bert_word_ids, bert_wordchr_ids, bert_pos_ids, bert_chk_ids, \
@@ -368,6 +395,7 @@ class Input:
 
     def logit_to_tags(self, logit, length):
         """Convert logit to tags
+
         Args:
           logit: [sentence_length, class_size]
           length: int
@@ -385,6 +413,7 @@ class Input:
 
     def logit_indices_to_tags(self, logit_indices, length):
         """Convert logit_indices to tags
+
         Args:
           logit_indices: [sentence_length]
           length: int
@@ -400,6 +429,7 @@ class Input:
 
     def logits_indices_to_tags_seq(self, logits_indices, lengths):
         """Convert logits_indices to sequence of tags
+
         Args:
           logits_indices: [batch_size, sentence_length]
           lengths: [batch_size]

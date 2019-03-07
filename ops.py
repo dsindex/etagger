@@ -11,18 +11,18 @@ input_cnn = highway(input_cnn, input_cnn.get_shape()[-1], num_layers=num_highway
 '''
 
 def linear(input_, output_size, scope=None):
-    '''
-    Linear map: output[k] = sum_i(Matrix[k, i] * args[i] ) + Bias[k]
+    """Linear map: output[k] = sum_i(Matrix[k, i] * args[i] ) + Bias[k]
+
     Args:
         args: a tensor or a list of 2D, batch x n, Tensors.
     output_size: int, second dimension of W[i].
     scope: VariableScope for the created subgraph; defaults to "Linear".
-  Returns:
-    A 2D Tensor with shape [batch x output_size] equal to
-    sum_i(args[i] * W[i]), where W[i]s are newly created matrices.
-  Raises:
-    ValueError: if some of the arguments has unspecified or wrong shape.
-  '''
+    Returns:
+      A 2D Tensor with shape [batch x output_size] equal to
+      sum_i(args[i] * W[i]), where W[i]s are newly created matrices.
+    Raises:
+      ValueError: if some of the arguments has unspecified or wrong shape.
+    """
 
     shape = input_.get_shape().as_list()
     if len(shape) != 2:
@@ -41,6 +41,7 @@ def linear(input_, output_size, scope=None):
 
 def highway(input_, size, num_layers=1, bias=-2.0, f=tf.nn.relu, scope='Highway'):
     """Highway Network (cf. http://arxiv.org/abs/1505.00387).
+
     t = sigmoid(Wy + b)
     z = t * g(Wy + b) + (1 - t) * y
     where g is nonlinearity, t is transform gate, and (1 - t) is carry gate.
@@ -213,7 +214,7 @@ def feedforward(inputs,
                 kernel_size=1,
                 scope="feed-forward", 
                 reuse=None):
-    '''Point-wise feed forward net.
+    """Point-wise feed forward net.
     
     Args:
       inputs: A 3d tensor with shape of [N, T, C].
@@ -226,7 +227,7 @@ def feedforward(inputs,
         
     Returns:
       A 3d tensor with the same shape and dtype as inputs
-    '''
+    """
     with tf.variable_scope(scope, reuse=reuse):
         # Inner layer
         inputs *= masks
@@ -279,7 +280,7 @@ def positional_encoding(lengths,
                         scale=True,
                         scope="positional_encoding",
                         reuse=None):
-    '''Sinusoidal Positional_Encoding.
+    """Sinusoidal Positional_Encoding.
 
     Args:
       lengths: The lengths of the inputs to create position embeddings for.
@@ -296,7 +297,7 @@ def positional_encoding(lengths,
     Returns:
       A tensor of shape `[batch_size, maxlen, num_units]` that contains
       embeddings for each position. All elements past `lengths` are zero.
-    '''
+    """
 
     N = tf.shape(lengths)[0]
     T = maxlen

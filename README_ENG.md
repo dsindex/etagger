@@ -102,6 +102,41 @@ average processing time per bucket(sentence)
 
 - experiments 12
 ```
+* test 6
+word embedding size : 300(glove6B) -> 100(glove6B)
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 2e-5 / 5000 / 0.9
+gradient clipping : 1.5
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
+
+token : 0.9142962011
+chunk : 0.9085608269  -> Glove(6B) + CNN + LSTM + CRF best
+
 * test 5
 word embedding size : 300(glove6B) -> 100(glove6B)
 keep_prob : 0.7
@@ -135,23 +170,18 @@ save model by f1(token)
 CRF
 
 token : 0.9116655428186109
-chunk : 0.9047450424929179  -> Glove(6B) + CNN + LSTM + CRF best
-
+chunk : 0.9047450424929179
 # python, 32 processor CPU : 0.003053264560968687
 # python, frozen, 1 processor CPU : 0.0042755354628630235
-
 # c++, frozen, 32 processor CPU : 0.002789
 # c++, frozen, 1 processor CPU : 0.003340
 # memory RES : 450M
-
 # c++, frozen -> transformed, 32 processor CPU : 0.002561
 # :: token : 0.9116763714373276
 # c++, frozen -> transformed, 1 processor CPU : 0.003224
-
 # c++, frozen -> memmapped, 32 processor CPU : 0.002040
 # c++, frozen -> memmapped, 1 processor CPU : 0.002683
 # memory RES : ~ 160M
-
 # c++, frozen -> transformed -> memmapped, 32 processor CPU : 0.002189
 # c++, frozen -> transformed -> memmapped, 1 processor CPU : 0.002709
 
