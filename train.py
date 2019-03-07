@@ -43,9 +43,9 @@ def train_step(sess, model, config, data, summary_op, summary_writer):
             feed_dict[model.bert_input_data_segment_ids] = data.sentence_bert_segment_ids[ptr:ptr + config.batch_size]
             feed_dict[model.bert_input_data_elmo_indices] = data.sentence_bert_elmo_indices[ptr:ptr + config.batch_size]
         if 'bert' in config.emb_class:
-            step, summaries, _, loss, accuracy, learning_rate, bert_embeddings = \
+            step, summaries, _, loss, accuracy, f1, learning_rate, bert_embeddings = \
                    sess.run([model.global_step, summary_op, model.train_op, \
-                             model.loss, model.accuracy, model.learning_rate, model.bert_embeddings], feed_dict=feed_dict, options=runopts)
+                             model.loss, model.accuracy, model.f1, model.learning_rate, model.bert_embeddings], feed_dict=feed_dict, options=runopts)
             if idx == 0:
                 tf.logging.debug('# bert_token_ids')
                 t = data.sentence_bert_token_ids[:3]
@@ -60,15 +60,16 @@ def train_step(sess, model, config, data, summary_op, summary_writer):
                 tf.logging.debug(' '.join([str(x) for x in np.shape(t)]))
                 tf.logging.debug(' '.join([str(x) for x in t]))
         else:
-            step, summaries, _, loss, accuracy, learning_rate = \
+            step, summaries, _, loss, accuracy, f1, learning_rate = \
                    sess.run([model.global_step, summary_op, model.train_op, \
-                             model.loss, model.accuracy, model.learning_rate], feed_dict=feed_dict, options=runopts)
+                             model.loss, model.accuracy, model.f1, model.learning_rate], feed_dict=feed_dict, options=runopts)
 
         summary_writer.add_summary(summaries, step)
         prog.update(idx + 1,
                     [('step', step),
                      ('train loss', loss),
                      ('train accuracy', accuracy),
+                     ('train f1', f1),
                      ('lr(invalid if use_bert_optimization)', learning_rate)])
         idx += 1
     duration_time = time.time() - start_time
@@ -82,6 +83,7 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
     prog = Progbar(target=nbatches)
     sum_loss = 0.0
     sum_accuracy = 0.0
+    sum_f1 = 0.0
     sum_logits_indices = None
     sum_sentence_lengths = None
     trans_params = None
@@ -103,19 +105,22 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
             feed_dict[model.bert_input_data_token_masks] = data.sentence_bert_token_masks[ptr:ptr + config.batch_size]
             feed_dict[model.bert_input_data_segment_ids] = data.sentence_bert_segment_ids[ptr:ptr + config.batch_size]
             feed_dict[model.bert_input_data_elmo_indices] = data.sentence_bert_elmo_indices[ptr:ptr + config.batch_size]
-        global_step, logits_indices, sentence_lengths, loss, accuracy = \
+        global_step, logits_indices, sentence_lengths, loss, accuracy, f1 = \
                  sess.run([model.global_step, model.logits_indices, model.sentence_lengths, \
-                           model.loss, model.accuracy], feed_dict=feed_dict)
+                           model.loss, model.accuracy, model.f1], feed_dict=feed_dict)
         prog.update(idx + 1,
                     [('dev loss', loss),
-                     ('dev accuracy', accuracy)])
+                     ('dev accuracy', accuracy),
+                     ('dev f1', f1)])
         sum_loss += loss
         sum_accuracy += accuracy
+        sum_f1 += f1
         sum_logits_indices = np_concat(sum_logits_indices, logits_indices)
         sum_sentence_lengths = np_concat(sum_sentence_lengths, sentence_lengths)
         idx += 1
     sum_loss = sum_loss / nbatches
     sum_accuracy = sum_accuracy / nbatches
+    sum_f1 = sum_f1 / nbatches
     sum_output_data_indices = np.argmax(data.sentence_tags, 2)
     tag_preds = data.logits_indices_to_tags_seq(sum_logits_indices, sum_sentence_lengths)
     tag_corrects = data.logits_indices_to_tags_seq(sum_output_data_indices, sum_sentence_lengths)
@@ -131,6 +136,7 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
     # create summaries manually
     summary_value = [tf.Summary.Value(tag='loss', simple_value=sum_loss),
                      tf.Summary.Value(tag='accuracy', simple_value=sum_accuracy),
+                     tf.Summary.Value(tag='f1', simple_value=sum_f1),
                      tf.Summary.Value(tag='token_f1', simple_value=token_f1),
                      tf.Summary.Value(tag='chunk_f1', simple_value=chunk_f1)]
     summaries = tf.Summary(value=summary_value)
@@ -144,6 +150,7 @@ def do_train(model, config, train_data, dev_data):
     sess = tf.Session(config=session_conf)
     feed_dict = {model.wrd_embeddings_init: config.embvec.wrd_embeddings}
     sess.run(tf.global_variables_initializer(), feed_dict=feed_dict) # feed large embedding data
+    sess.run(tf.local_variables_initializer()) # for tf_metrics
     saver = tf.train.Saver()
     if config.restore is not None:
         saver.restore(sess, config.restore)
@@ -152,8 +159,9 @@ def do_train(model, config, train_data, dev_data):
     # summary setting
     loss_summary = tf.summary.scalar('loss', model.loss)
     acc_summary = tf.summary.scalar('accuracy', model.accuracy)
+    f1_summary = tf.summary.scalar('f1', model.f1)
     lr_summary = tf.summary.scalar('learning_rate', model.learning_rate)
-    train_summary_op = tf.summary.merge([loss_summary, acc_summary, lr_summary])
+    train_summary_op = tf.summary.merge([loss_summary, acc_summary, f1_summary, lr_summary])
     train_summary_dir = os.path.join(config.summary_dir, 'summaries', 'train')
     train_summary_writer = tf.summary.FileWriter(train_summary_dir, sess.graph)
     dev_summary_dir = os.path.join(config.summary_dir, 'summaries', 'dev')

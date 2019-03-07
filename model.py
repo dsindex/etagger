@@ -2,6 +2,7 @@ from __future__ import print_function
 import tensorflow as tf
 from tensorflow.contrib.layers.python.layers import initializers
 import numpy as np
+import tf_metrics
 from embvec import EmbVec
 from ops import multihead_attention, feedforward, normalize, positional_encoding, masked_conv1d_and_max, highway
 
@@ -194,12 +195,12 @@ class Model:
         self.output_data_indices = tf.cast(tf.argmax(self.output_data, 2), tf.int32)  # (batch_size, sentence_length)
 
         """
-        Loss, Prediction, Accuracy, Optimization
+        Loss, Prediction, Measures, Optimization
         """
         self.loss = self.__compute_loss()
         self.prediction = self.__compute_prediction()
         self.logits_indices = tf.identity(self.prediction, name='logits_indices')
-        self.accuracy = self.__compute_accuracy()
+        self.accuracy, self.precision, self.recall, self.f1 = self.__compute_measures()
 
         with tf.variable_scope('optimization'):
             self.global_step = tf.train.get_or_create_global_step()
@@ -477,17 +478,25 @@ class Model:
             prediction = tf.argmax(probabilities,axis=-1)        # (batch_size, sentence_length)
         return prediction
 
-    def __compute_accuracy(self):
-        """Compute accuracy(self.prediction, self.output_data_indices)
+    def __compute_measures(self):
+        """Compute measures(self.prediction, self.output_data_indices)
         """
+        masks = self.sentence_masks
+
+        # compute accuracy
         correct_prediction = tf.cast(tf.equal(self.prediction, self.output_data_indices),
                                      tf.float32)                                     # (batch_size, sentence_length)
-        # masking
-        masks = self.sentence_masks
         correct_prediction *= tf.to_float(masks)
         correct_prediction = tf.reduce_sum(correct_prediction, reduction_indices=1)  # (batch_size)
         correct_prediction /= tf.cast(self.sentence_lengths, tf.float32)             # (batch_size)
-        return tf.reduce_mean(correct_prediction)
+        accuracy = tf.reduce_mean(correct_prediction)
+
+        # compute precision, recall, f1
+        indices = [i for i in range(2, self.class_size)] # ignore '0' for 'O', '1' for 'X'
+        prec, prec_op = tf_metrics.precision(self.output_data_indices, self.prediction, self.class_size, indices, masks)
+        rec, rec_op = tf_metrics.recall(self.output_data_indices, self.prediction, self.class_size, indices, masks)
+        f1, f1_op = tf_metrics.f1(self.output_data_indices, self.prediction, self.class_size, indices, masks)
+        return accuracy, prec_op, rec_op, f1_op
 
     def __compute_sentence_lengths(self, sentence_masks):
         """Compute each sentence lengths
