@@ -1,6 +1,118 @@
 from __future__ import print_function
 import tensorflow as tf
 import numpy as np
+from six.moves import reduce
+
+'''
+source from https://github.com/mkroutikov/tf-lstm-char-cnn/blob/master/model.py
+
+input_cnn : [batch_size x num_unroll_steps, cnn_size]
+input_cnn = highway(input_cnn, input_cnn.get_shape()[-1], num_layers=num_highway_layers)
+'''
+
+def linear(input_, output_size, scope=None):
+    '''
+    Linear map: output[k] = sum_i(Matrix[k, i] * args[i] ) + Bias[k]
+    Args:
+        args: a tensor or a list of 2D, batch x n, Tensors.
+    output_size: int, second dimension of W[i].
+    scope: VariableScope for the created subgraph; defaults to "Linear".
+  Returns:
+    A 2D Tensor with shape [batch x output_size] equal to
+    sum_i(args[i] * W[i]), where W[i]s are newly created matrices.
+  Raises:
+    ValueError: if some of the arguments has unspecified or wrong shape.
+  '''
+
+    shape = input_.get_shape().as_list()
+    if len(shape) != 2:
+        raise ValueError("Linear is expecting 2D arguments: %s" % str(shape))
+    if not shape[1]:
+        raise ValueError("Linear expects shape[1] of arguments: %s" % str(shape))
+    input_size = shape[1]
+
+    # Now the computation.
+    with tf.variable_scope(scope or "SimpleLinear"):
+        matrix = tf.get_variable("Matrix", [output_size, input_size], dtype=input_.dtype)
+        bias_term = tf.get_variable("Bias", [output_size], dtype=input_.dtype)
+
+    return tf.matmul(input_, tf.transpose(matrix)) + bias_term
+
+
+def highway(input_, size, num_layers=1, bias=-2.0, f=tf.nn.relu, scope='Highway'):
+    """Highway Network (cf. http://arxiv.org/abs/1505.00387).
+    t = sigmoid(Wy + b)
+    z = t * g(Wy + b) + (1 - t) * y
+    where g is nonlinearity, t is transform gate, and (1 - t) is carry gate.
+    """
+
+    with tf.variable_scope(scope):
+        for idx in range(num_layers):
+            g = f(linear(input_, size, scope='highway_lin_%d' % idx))
+
+            t = tf.sigmoid(linear(input_, size, scope='highway_gate_%d' % idx) + bias)
+
+            output = t * g + (1. - t) * input_
+            input_ = output
+
+    return output
+
+'''
+source from https://github.com/guillaumegenthial/tf_ner/blob/master/models/chars_conv_lstm_crf/masked_conv.py
+'''
+
+def masked_conv1d_and_max(t, weights, filters, kernel_size, activation=tf.nn.relu):
+    """Applies 1d convolution and a masked max-pooling
+
+    Parameters
+    ----------
+    t : tf.Tensor
+        A tensor with at least 3 dimensions [d1, d2, ..., dn-2, dn-1, dn]
+    weights : tf.Tensor of tf.bool
+        A Tensor of shape [d1, d2, dn-1]
+    filters : int
+        number of filters
+    kernel_size : int
+        kernel size for the temporal convolution
+    activation : function
+        activation function, ex) tf.nn.relu
+
+    Returns
+    -------
+    tf.Tensor
+        A tensor of shape [d1, d2, ..., dn-2, filters]
+
+    """
+    # Get shape and parameters
+    shape = tf.shape(t)
+    ndims = t.shape.ndims
+    dim1 = reduce(lambda x, y: x*y, [shape[i] for i in range(ndims - 2)])
+    dim2 = shape[-2]
+    dim3 = t.shape[-1]
+
+    # Reshape weights
+    weights = tf.reshape(weights, shape=[dim1, dim2, 1])
+    weights = tf.to_float(weights)
+
+    # Reshape input and apply weights
+    flat_shape = [dim1, dim2, dim3]
+    t = tf.reshape(t, shape=flat_shape)
+    t *= weights
+
+    # Apply convolution
+    t_conv = tf.layers.conv1d(t, filters, kernel_size, padding='same', activation=activation)  # (dim1, dim2, filters)
+    t_conv *= weights
+
+    # Reduce max -- set to zero if all padded
+    t_conv += (1. - weights) * tf.reduce_min(t_conv, axis=-2, keepdims=True)  # (dim1, dim2, filters) + (dim1, 1, filters)
+    t_max = tf.reduce_max(t_conv, axis=-2)  # (dim1, 1, filters)
+
+    # Reshape the output
+    final_shape = [shape[i] for i in range(ndims-2)] + [filters]
+    t_max = tf.reshape(t_max, shape=final_shape) # (d1, d2, .., dn-2, filters)
+
+    return t_max
+
 
 '''
 source from https://github.com/Kyubyong/transformer/blob/master/modules.py
@@ -218,4 +330,3 @@ def positional_encoding(lengths,
         outputs = outputs * tf.expand_dims(mask, 2) # broadcasting
 
         return outputs
-

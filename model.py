@@ -3,9 +3,7 @@ import tensorflow as tf
 from tensorflow.contrib.layers.python.layers import initializers
 import numpy as np
 from embvec import EmbVec
-from transformer import multihead_attention, feedforward, normalize, positional_encoding
-from masked_conv import masked_conv1d_and_max
-from highway import highway
+from ops import multihead_attention, feedforward, normalize, positional_encoding, masked_conv1d_and_max, highway
 
 class Model:
 
