@@ -7,7 +7,7 @@ import collections
 
 class Input:
 
-    def __init__(self, data, config, build_output=True, shuffle=False):
+    def __init__(self, data, config, build_output=True, do_shuffle=False):
         self.config = config
         self.build_output = build_output
 
@@ -29,7 +29,7 @@ class Input:
             self.__create_tfrecords(data)
             # create dataset
             self.keys_to_features = self.__keys_to_features()
-            self.dataset = self.__dataset_input_fn(config.batch_size, shuffle)
+            self.dataset = self.__dataset_input_fn(config.batch_size, do_shuffle)
  
     def __create_tfrecords(self, data):
         """Create input tfrecords
@@ -42,7 +42,7 @@ class Input:
         if type(data) is list: # treat data as bucket
             bucket = data
             ex_index = 0
-            tf_example, example = self.__create_single_tf_example(bucket, ex_index)
+            _, example = self.__create_single_tf_example(bucket, ex_index, is_inference=True)
             self.example = example 
         else:                  # treat data as file path
             path = data
@@ -95,7 +95,7 @@ class Input:
         return keys_to_features
 
 
-    def __dataset_input_fn(self, batch_size, shuffle):
+    def __dataset_input_fn(self, batch_size, do_shuffle):
         """Build dataset input function
         """
         filenames = [self.tfrecords_file]
@@ -130,11 +130,11 @@ class Input:
             return parsed
 
         dataset = dataset.map(parser)
-        if shuffle: dataset = dataset.shuffle(buffer_size=10000)
+        if do_shuffle: dataset = dataset.shuffle(buffer_size=10000)
         dataset = dataset.batch(batch_size)
         return dataset
 
-    def __create_single_tf_example(self, bucket, ex_index):
+    def __create_single_tf_example(self, bucket, ex_index, is_inference=False):
         """Create a single tf example
         """
         # create raw example
@@ -173,6 +173,8 @@ class Input:
             if self.build_output:
                 tags = self.__create_tags(bucket)
                 example['tags'] = tags                                      # [max_sentence_length, class_size]
+
+        if is_inference: return None, example
 
         def create_int_feature(values):
             f = tf.train.Feature(int64_list=tf.train.Int64List(value=list(values)))

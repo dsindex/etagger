@@ -210,7 +210,7 @@ def train(config):
     train_file = 'data/cruise.train.txt.in'
     dev_file = 'data/cruise.dev.txt.in'
     '''
-    train_data = Input(train_file, config, build_output=True, shuffle=True)
+    train_data = Input(train_file, config, build_output=True, do_shuffle=True)
     dev_data = Input(dev_file, config, build_output=True)
     tf.logging.debug('loading input data ... done')
 
