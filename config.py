@@ -46,7 +46,6 @@ class Config:
         if self.is_training:
             self.epoch = args.epoch
             self.batch_size = args.batch_size
-            self.dev_batch_size = 2*self.batch_size
             self.checkpoint_dir = args.checkpoint_dir
             self.summary_dir = args.summary_dir
 
@@ -92,5 +91,3 @@ class Config:
             self.num_train_steps = 0            # number of total training steps
             self.num_warmup_steps = 0           # number of warmup steps
             self.warmup_proportion = 0.1        # proportion of training to perform linear learning rate warmup for
-            if self.is_training:
-                self.dev_batch_size = self.batch_size # set batch_size == dev_batch_size

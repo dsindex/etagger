@@ -23,25 +23,30 @@ def np_concat(sum_var, var):
 def train_step(sess, model, config, data, summary_op, summary_writer):
     start_time = time.time()
     runopts = tf.RunOptions(report_tensor_allocations_upon_oom=True)
-    idx = 0
-    nbatches = (len(data.sentence_tags) + config.batch_size - 1) // config.batch_size
-    prog = Progbar(target=nbatches)
-    for ptr in range(0, len(data.sentence_tags), config.batch_size):
+    prog = Progbar(target=data.num_batches)
+    iterator = data.dataset.make_initializable_iterator()
+    next_element = iterator.get_next()
+    sess.run(iterator.initializer)
+    for idx in range(data.num_batches):
+        try:
+            dataset = sess.run(next_element)
+        except tf.errors.OutOfRangeError:
+            break
         config.is_training = True
-        feed_dict={model.input_data_pos_ids: data.sentence_pos_ids[ptr:ptr + config.batch_size],
-                   model.input_data_chk_ids: data.sentence_chk_ids[ptr:ptr + config.batch_size],
-                   model.output_data: data.sentence_tags[ptr:ptr + config.batch_size],
+        feed_dict={model.input_data_pos_ids: dataset['pos_ids'],
+                   model.input_data_chk_ids: dataset['chk_ids'],
+                   model.output_data: dataset['tags'],
                    model.is_train: config.is_training,
                    model.sentence_length: data.max_sentence_length}
-        feed_dict[model.input_data_word_ids] = data.sentence_word_ids[ptr:ptr + config.batch_size]
-        feed_dict[model.input_data_wordchr_ids] = data.sentence_wordchr_ids[ptr:ptr + config.batch_size]
+        feed_dict[model.input_data_word_ids] = dataset['word_ids']
+        feed_dict[model.input_data_wordchr_ids] = dataset['wordchr_ids']
         if 'elmo' in config.emb_class:
-            feed_dict[model.elmo_input_data_wordchr_ids] = data.sentence_elmo_wordchr_ids[ptr:ptr + config.batch_size]
+            feed_dict[model.elmo_input_data_wordchr_ids] = dataset['elmo_wordchr_ids']
         if 'bert' in config.emb_class:
-            feed_dict[model.bert_input_data_token_ids] = data.sentence_bert_token_ids[ptr:ptr + config.batch_size]
-            feed_dict[model.bert_input_data_token_masks] = data.sentence_bert_token_masks[ptr:ptr + config.batch_size]
-            feed_dict[model.bert_input_data_segment_ids] = data.sentence_bert_segment_ids[ptr:ptr + config.batch_size]
-            feed_dict[model.bert_input_data_elmo_indices] = data.sentence_bert_elmo_indices[ptr:ptr + config.batch_size]
+            feed_dict[model.bert_input_data_token_ids] = dataset['bert_token_ids']
+            feed_dict[model.bert_input_data_token_masks] = dataset['bert_token_masks']
+            feed_dict[model.bert_input_data_segment_ids] = dataset['bert_segment_ids']
+            feed_dict[model.bert_input_data_elmo_indices] = dataset['bert_elmo_indices']
         if 'bert' in config.emb_class:
             step, summaries, _, loss, accuracy, f1, learning_rate, bert_embeddings = \
                    sess.run([model.global_step, summary_op, model.train_op, \
@@ -71,16 +76,12 @@ def train_step(sess, model, config, data, summary_op, summary_writer):
                      ('train accuracy', accuracy),
                      ('train f1', f1),
                      ('lr(invalid if use_bert_optimization)', learning_rate)])
-        idx += 1
     duration_time = time.time() - start_time
     time.sleep(0.1)
     out = 'duration_time : ' + str(duration_time) + ' sec for this epoch'
     tf.logging.debug(out)
 
 def dev_step(sess, model, config, data, summary_writer, epoch):
-    idx = 0
-    nbatches = (len(data.sentence_tags) + config.dev_batch_size - 1) // config.dev_batch_size
-    prog = Progbar(target=nbatches)
     sum_loss = 0.0
     sum_accuracy = 0.0
     sum_f1 = 0.0
@@ -88,23 +89,31 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
     sum_sentence_lengths = None
     trans_params = None
     global_step = 0
-    # evaluate on dev data sliced by dev_batch_size to prevent OOM
-    for ptr in range(0, len(data.sentence_tags), config.dev_batch_size):
+    prog = Progbar(target=data.num_batches)
+    iterator = data.dataset.make_initializable_iterator()
+    next_element = iterator.get_next()
+    sess.run(iterator.initializer)
+    # evaluate on dev data sliced by batch_size to prevent OOM
+    for idx in range(data.num_batches):
+        try:
+            dataset = sess.run(next_element)
+        except tf.errors.OutOfRangeError:
+            break
         config.is_training = False
-        feed_dict={model.input_data_pos_ids: data.sentence_pos_ids[ptr:ptr + config.dev_batch_size],
-                   model.input_data_chk_ids: data.sentence_chk_ids[ptr:ptr + config.dev_batch_size],
-                   model.output_data: data.sentence_tags[ptr:ptr + config.dev_batch_size],
+        feed_dict={model.input_data_pos_ids: dataset['pos_ids'],
+                   model.input_data_chk_ids: dataset['chk_ids'],
+                   model.output_data: dataset['tags'],
                    model.is_train: config.is_training,
                    model.sentence_length: data.max_sentence_length}
-        feed_dict[model.input_data_word_ids] = data.sentence_word_ids[ptr:ptr + config.dev_batch_size]
-        feed_dict[model.input_data_wordchr_ids] = data.sentence_wordchr_ids[ptr:ptr + config.dev_batch_size]
+        feed_dict[model.input_data_word_ids] = dataset['word_ids']
+        feed_dict[model.input_data_wordchr_ids] = dataset['wordchr_ids']
         if 'elmo' in config.emb_class:
-            feed_dict[model.elmo_input_data_wordchr_ids] = data.sentence_elmo_wordchr_ids[ptr:ptr + config.dev_batch_size]
+            feed_dict[model.elmo_input_data_wordchr_ids] = dataset['elmo_wordchr_ids']
         if 'bert' in config.emb_class:
-            feed_dict[model.bert_input_data_token_ids] = data.sentence_bert_token_ids[ptr:ptr + config.batch_size]
-            feed_dict[model.bert_input_data_token_masks] = data.sentence_bert_token_masks[ptr:ptr + config.batch_size]
-            feed_dict[model.bert_input_data_segment_ids] = data.sentence_bert_segment_ids[ptr:ptr + config.batch_size]
-            feed_dict[model.bert_input_data_elmo_indices] = data.sentence_bert_elmo_indices[ptr:ptr + config.batch_size]
+            feed_dict[model.bert_input_data_token_ids] = dataset['bert_token_ids']
+            feed_dict[model.bert_input_data_token_masks] = dataset['bert_token_masks']
+            feed_dict[model.bert_input_data_segment_ids] = dataset['bert_segment_ids']
+            feed_dict[model.bert_input_data_elmo_indices] = dataset['bert_elmo_indices']
         global_step, logits_indices, sentence_lengths, loss, accuracy, f1 = \
                  sess.run([model.global_step, model.logits_indices, model.sentence_lengths, \
                            model.loss, model.accuracy, model.f1], feed_dict=feed_dict)
@@ -118,9 +127,9 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
         sum_logits_indices = np_concat(sum_logits_indices, logits_indices)
         sum_sentence_lengths = np_concat(sum_sentence_lengths, sentence_lengths)
         idx += 1
-    sum_loss = sum_loss / nbatches
-    sum_accuracy = sum_accuracy / nbatches
-    sum_f1 = sum_f1 / nbatches
+    sum_loss = sum_loss / data.num_batches
+    sum_accuracy = sum_accuracy / data.num_batches
+    sum_f1 = sum_f1 / data.num_batches
     sum_output_data_indices = np.argmax(data.sentence_tags, 2)
     tag_preds = data.logits_indices_to_tags_seq(sum_logits_indices, sum_sentence_lengths)
     tag_corrects = data.logits_indices_to_tags_seq(sum_output_data_indices, sum_sentence_lengths)
@@ -200,13 +209,13 @@ def train(config):
     train_file = 'data/cruise.train.txt.in'
     dev_file = 'data/cruise.dev.txt.in'
     '''
-    train_data = Input(train_file, config, build_output=True)
+    train_data = Input(train_file, config, build_output=True, shuffle=True)
     dev_data = Input(dev_file, config, build_output=True)
     tf.logging.debug('loading input data ... done')
 
     # set for bert optimization
     if 'bert' in config.emb_class and config.use_bert_optimization:
-        config.num_train_steps = int((len(train_data.sentence_tags) / config.batch_size) * config.epoch)
+        config.num_train_steps = int((train_data.num_examples / config.batch_size) * config.epoch)
         config.num_warmup_steps = int(config.num_train_steps * config.warmup_proportion)
 
     # create model
