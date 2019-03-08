@@ -721,6 +721,8 @@ in IN O O O
           - [x] no meaningful improvement.
   - tensorflow summary
     - [how to manually create a tf summary](https://stackoverflow.com/questions/37902705/how-to-manually-create-a-tf-summary/37915182#37915182)
+  - tfrecord, tf.data api
+    - [simple_batching](https://www.tensorflow.org/guide/datasets#simple_batching)
   - tensorflow backend
   ```
   - implementations of BLAS specification
