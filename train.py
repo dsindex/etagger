@@ -41,7 +41,8 @@ def train_step(sess, model, config, data, summary_op, summary_writer):
             feed_dict[model.bert_input_data_token_ids] = dataset['bert_token_ids']
             feed_dict[model.bert_input_data_token_masks] = dataset['bert_token_masks']
             feed_dict[model.bert_input_data_segment_ids] = dataset['bert_segment_ids']
-            feed_dict[model.bert_input_data_elmo_indices] = dataset['bert_elmo_indices']
+            if 'elmo' in config.emb_class:
+                feed_dict[model.bert_input_data_elmo_indices] = dataset['bert_elmo_indices']
         if 'bert' in config.emb_class:
             step, summaries, _, loss, accuracy, f1, learning_rate, bert_embeddings = \
                    sess.run([model.global_step, summary_op, model.train_op, \
@@ -114,7 +115,8 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
             feed_dict[model.bert_input_data_token_ids] = dataset['bert_token_ids']
             feed_dict[model.bert_input_data_token_masks] = dataset['bert_token_masks']
             feed_dict[model.bert_input_data_segment_ids] = dataset['bert_segment_ids']
-            feed_dict[model.bert_input_data_elmo_indices] = dataset['bert_elmo_indices']
+            if 'elmo' in config.emb_class:
+                feed_dict[model.bert_input_data_elmo_indices] = dataset['bert_elmo_indices']
         global_step, logits_indices, sentence_lengths, loss, accuracy, f1 = \
                  sess.run([model.global_step, model.logits_indices, model.sentence_lengths, \
                            model.loss, model.accuracy, model.f1], feed_dict=feed_dict)

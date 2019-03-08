@@ -78,8 +78,8 @@ class Input:
             keys_to_features['bert_token_masks'] = tf.FixedLenFeature([seq_length], tf.int64)
             keys_to_features['bert_segment_ids'] = tf.FixedLenFeature([seq_length], tf.int64)
             keys_to_features['bert_wordidx2tokenidx'] = tf.FixedLenFeature([seq_length], tf.int64)
-            keys_to_features['bert_elmo_indices'] = tf.FixedLenFeature([seq_length*2], tf.int64)
             if 'elmo' in self.config.emb_class:
+                keys_to_features['bert_elmo_indices'] = tf.FixedLenFeature([seq_length*2], tf.int64)
                 keys_to_features['elmo_wordchr_ids'] = tf.FixedLenFeature([(seq_length+2)*word_length], tf.int64)
             if self.build_output:
                 keys_to_features['tags'] = tf.FixedLenFeature([seq_length*class_size], tf.int64)
@@ -113,8 +113,8 @@ class Input:
                 parsed['bert_token_masks'] = tf.cast(parsed['bert_token_masks'], tf.int32)
                 parsed['bert_segment_ids'] = tf.cast(parsed['bert_segment_ids'], tf.int32)
                 parsed['bert_wordidx2tokenidx'] = tf.cast(parsed['bert_wordidx2tokenidx'], tf.int32)
-                parsed['bert_elmo_indices'] = tf.reshape(tf.cast(parsed['bert_elmo_indices'], tf.int32), [-1, 2])
                 if 'elmo' in self.config.emb_class:
+                    parsed['bert_elmo_indices'] = tf.reshape(tf.cast(parsed['bert_elmo_indices'], tf.int32), [-1, 2])
                     parsed['elmo_wordchr_ids'] = tf.reshape(tf.cast(parsed['elmo_wordchr_ids'], tf.int32), [-1, self.config.word_length])
                 if self.build_output:
                     parsed['tags'] = tf.reshape(tf.cast(parsed['tags'], tf.int32), [-1, self.config.class_size])
@@ -152,8 +152,8 @@ class Input:
             example['bert_token_masks'] = bert_token_masks                  # [bert_max_seq_length]
             example['bert_segment_ids'] = bert_segment_ids                  # [bert_max_seq_length]
             example['bert_wordidx2tokenidx'] = bert_wordidx2tokenidx        # [bert_max_seq_length]
-            example['bert_elmo_indices'] = bert_elmo_indices                # [bert_max_seq_length, 2]
             if 'elmo' in self.config.emb_class:
+                example['bert_elmo_indices'] = bert_elmo_indices            # [bert_max_seq_length, 2]
                 elmo_wordchr_ids = self.__create_elmo_wordchr_ids(bucket)
                 example['elmo_wordchr_ids'] = elmo_wordchr_ids              # [bert_max_seq_length+2, word_length]
             if self.build_output:
@@ -197,9 +197,9 @@ class Input:
             features['bert_token_masks'] = create_int_feature(example['bert_token_masks'])
             features['bert_segment_ids'] = create_int_feature(example['bert_segment_ids'])
             features['bert_wordidx2tokenidx'] = create_int_feature(example['bert_wordidx2tokenidx'])
-            t = np.reshape(example['bert_elmo_indices'], -1)
-            features['bert_elmo_indices'] = create_int_feature(t)
             if 'elmo' in self.config.emb_class:
+               t = np.reshape(example['bert_elmo_indices'], -1)
+                features['bert_elmo_indices'] = create_int_feature(t)
                 t = np.reshape(example['elmo_wordchr_ids'], -1)
                 features['elmo_wordchr_ids'] = create_int_feature(t)
             if self.build_output:

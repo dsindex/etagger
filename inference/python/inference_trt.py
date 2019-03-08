@@ -107,7 +107,8 @@ def inference(config, frozen_pb_path):
                 feed_dict[model.bert_input_data_token_ids] = inp.example['bert_token_ids']
                 feed_dict[model.bert_input_data_token_masks] = inp.example['bert_token_masks']
                 feed_dict[model.bert_input_data_segment_ids] = inp.example['bert_segment_ids']
-                feed_dict[model.bert_input_data_elmo_indices] = inp.example['bert_elmo_indices']
+                if 'elmo' in config.emb_class:
+                    feed_dict[model.bert_input_data_elmo_indices] = inp.example['bert_elmo_indices']
             logits_indices, sentence_lengths = sess.run([t_logits_indices, t_sentence_lengths], feed_dict=feed_dict)
             tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
             for i in range(len(bucket)):
@@ -141,7 +142,8 @@ def inference(config, frozen_pb_path):
             feed_dict[model.bert_input_data_token_ids] = inp.example['bert_token_ids']
             feed_dict[model.bert_input_data_token_masks] = inp.example['bert_token_masks']
             feed_dict[model.bert_input_data_segment_ids] = inp.example['bert_segment_ids']
-            feed_dict[model.bert_input_data_elmo_indices] = inp.example['bert_elmo_indices']
+            if 'elmo' in config.emb_class:
+                feed_dict[model.bert_input_data_elmo_indices] = inp.example['bert_elmo_indices']
         logits_indices, sentence_lengths = sess.run([t_logits_indices, t_sentence_lengths], feed_dict=feed_dict)
         tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
         for i in range(len(bucket)):
