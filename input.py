@@ -35,7 +35,7 @@ class Input:
         """Create input tfrecords
         """
 
-        # NOTE trick for reusing codes.
+        # trick for reusing codes.
         if 'bert' in self.config.emb_class:
             self.max_sentence_length = self.config.bert_max_seq_length
 
@@ -174,7 +174,12 @@ class Input:
                 tags = self.__create_tags(bucket)
                 example['tags'] = tags                                      # [max_sentence_length, class_size]
 
-        if is_inference: return None, example
+        if is_inference:
+            for key, val in example.items():
+                # expand dimension for batch size 1
+                example[key] = [val]
+            # no need to compute tf example for inference time
+            return None, example
 
         def create_int_feature(values):
             f = tf.train.Feature(int64_list=tf.train.Int64List(value=list(values)))
