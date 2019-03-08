@@ -6,6 +6,7 @@ import pickle as pkl
 from random import random
 
 class EmbVec:
+
     def __init__(self, args):
         self.pad = '#PAD#'
         self.unk = '#UNK#'

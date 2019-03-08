@@ -15,11 +15,6 @@ from chunk_eval  import ChunkEval
 from progbar import Progbar
 from early_stopping import EarlyStopping
 
-def np_concat(sum_var, var):
-    if sum_var is not None: sum_var = np.concatenate((sum_var, var), axis=0)
-    else: sum_var = var
-    return sum_var
-
 def train_step(sess, model, config, data, summary_op, summary_writer):
     start_time = time.time()
     runopts = tf.RunOptions(report_tensor_allocations_upon_oom=True)
@@ -53,11 +48,11 @@ def train_step(sess, model, config, data, summary_op, summary_writer):
                              model.loss, model.accuracy, model.f1, model.learning_rate, model.bert_embeddings], feed_dict=feed_dict, options=runopts)
             if idx == 0:
                 tf.logging.debug('# bert_token_ids')
-                t = data.sentence_bert_token_ids[:3]
+                t = dataset['bert_token_ids'][:3]
                 tf.logging.debug(' '.join([str(x) for x in np.shape(t)]))
                 tf.logging.debug(' '.join([str(x) for x in t]))
                 tf.logging.debug('# bert_token_masks')
-                t = data.sentence_bert_token_masks[:3]
+                t = dataset['bert_token_masks'][:3]
                 tf.logging.debug(' '.join([str(x) for x in np.shape(t)]))
                 tf.logging.debug(' '.join([str(x) for x in t]))
                 tf.logging.debug('# bert_embedding')
@@ -81,10 +76,16 @@ def train_step(sess, model, config, data, summary_op, summary_writer):
     out = 'duration_time : ' + str(duration_time) + ' sec for this epoch'
     tf.logging.debug(out)
 
+def np_concat(sum_var, var):
+    if sum_var is not None: sum_var = np.concatenate((sum_var, var), axis=0)
+    else: sum_var = var
+    return sum_var
+
 def dev_step(sess, model, config, data, summary_writer, epoch):
     sum_loss = 0.0
     sum_accuracy = 0.0
     sum_f1 = 0.0
+    sum_output_indices = None
     sum_logits_indices = None
     sum_sentence_lengths = None
     trans_params = None
@@ -124,17 +125,17 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
         sum_loss += loss
         sum_accuracy += accuracy
         sum_f1 += f1
+        sum_output_indices = np_concat(sum_output_indices, np.argmax(dataset['tags'], 2))
         sum_logits_indices = np_concat(sum_logits_indices, logits_indices)
         sum_sentence_lengths = np_concat(sum_sentence_lengths, sentence_lengths)
         idx += 1
     sum_loss = sum_loss / data.num_batches
     sum_accuracy = sum_accuracy / data.num_batches
     sum_f1 = sum_f1 / data.num_batches
-    sum_output_data_indices = np.argmax(data.sentence_tags, 2)
-    tag_preds = data.logits_indices_to_tags_seq(sum_logits_indices, sum_sentence_lengths)
-    tag_corrects = data.logits_indices_to_tags_seq(sum_output_data_indices, sum_sentence_lengths)
+    tag_preds = config.logits_indices_to_tags_seq(sum_logits_indices, sum_sentence_lengths)
+    tag_corrects = config.logits_indices_to_tags_seq(sum_output_indices, sum_sentence_lengths)
     tf.logging.debug('[epoch %s/%s] dev precision, recall, f1(token): ' % (epoch, config.epoch))
-    token_f1, l_token_prec, l_token_rec, l_token_f1  = TokenEval.compute_f1(config.class_size, sum_logits_indices, sum_output_data_indices, sum_sentence_lengths)
+    token_f1, l_token_prec, l_token_rec, l_token_f1  = TokenEval.compute_f1(config.class_size, sum_logits_indices, sum_output_indices, sum_sentence_lengths)
     tf.logging.debug('[' + ' '.join([str(x) for x in l_token_prec]) + ']')
     tf.logging.debug('[' + ' '.join([str(x) for x in l_token_rec]) + ']')
     tf.logging.debug('[' + ' '.join([str(x) for x in l_token_f1]) + ']')

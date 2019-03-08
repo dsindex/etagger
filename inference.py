@@ -62,10 +62,10 @@ def inference_bucket(config):
                 feed_dict[model.bert_input_data_segment_ids] = inp.example['bert_segment_ids']
                 feed_dict[model.bert_input_data_elmo_indices] = inp.example['bert_elmo_indices']
             logits_indices, sentence_lengths = sess.run([model.logits_indices, model.sentence_lengths], feed_dict=feed_dict)
-            tags = inp.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
+            tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
             for i in range(len(bucket)):
                 if 'bert' in config.emb_class:
-                    j = inp.sentence_bert_wordidx2tokenidx[0][i]
+                    j = inp.example['bert_wordidx2tokenidx'][0][i]
                     out = bucket[i] + ' ' + tags[j]
                 else:
                     out = bucket[i] + ' ' + tags[i]
@@ -96,10 +96,10 @@ def inference_bucket(config):
             feed_dict[model.bert_input_data_segment_ids] = inp.example['bert_segment_ids']
             feed_dict[model.bert_input_data_elmo_indices] = inp.example['bert_elmo_indices']
         logits_indices, sentence_lengths = sess.run([model.logits_indices, model.sentence_lengths], feed_dict=feed_dict)
-        tags = inp.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
+        tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
         for i in range(len(bucket)):
             if 'bert' in config.emb_class:
-                j = inp.sentence_bert_wordidx2tokenidx[0][i]
+                j = inp.example['bert_wordidx2tokenidx'][0][i]
                 out = bucket[i] + ' ' + tags[j]
             else:
                 out = bucket[i] + ' ' + tags[i]
@@ -191,10 +191,10 @@ def inference_line(config):
             feed_dict[model.bert_input_data_segment_ids] = inp.example['bert_segment_ids']
             feed_dict[model.bert_input_data_elmo_indices] = inp.example['bert_elmo_indices']
         logits_indices, sentence_lengths = sess.run([model.logits_indices, model.sentence_lengths], feed_dict=feed_dict)
-        tags = inp.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
+        tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
         for i in range(len(bucket)):
             if 'bert' in config.emb_class:
-                j = inp.sentence_bert_wordidx2tokenidx[0][i]
+                j = inp.example['bert_wordidx2tokenidx'][0][i]
                 out = bucket[i] + ' ' + tags[j]
             else:
                 out = bucket[i] + ' ' + tags[i]

@@ -4,6 +4,7 @@ import argparse
 import numpy as np
 
 class TokenEval:
+
     def __init__(self):
         self.cls = {}
         self.tp = {}

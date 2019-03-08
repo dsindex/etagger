@@ -3,6 +3,7 @@ import sys
 import argparse
 
 class ChunkEval:
+
     def __init__(self):
         self.tag_sents = []
         self.pred_sents = []

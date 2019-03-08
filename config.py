@@ -3,6 +3,7 @@ import numpy as np
 import pickle as pkl
 
 class Config:
+
     def __init__(self, args, is_training=True, emb_class='glove', use_crf=True):
         self.emb_path = args.emb_path
         self.embvec = pkl.load(open(self.emb_path, 'rb')) # resources(glove, vocab, path, etc)
@@ -91,3 +92,56 @@ class Config:
             self.num_train_steps = 0            # number of total training steps
             self.num_warmup_steps = 0           # number of warmup steps
             self.warmup_proportion = 0.1        # proportion of training to perform linear learning rate warmup for
+
+# -----------------------------------------------------------------------------
+# utility
+# -----------------------------------------------------------------------------
+            
+    def logit_to_tags(self, logit, length):
+        """Convert logit to tags
+
+        Args:
+          logit: [sentence_length, class_size]
+          length: int
+        Returns:
+          tag sequence(size length)
+        """
+        logit = logit[0:length]
+        # [length]
+        pred_list = np.argmax(logit, 1).tolist()
+        tags = []
+        for tid in pred_list:
+            tag = self.embvec.get_tag(tid)
+            tags.append(tag)
+        return tags
+
+    def logit_indices_to_tags(self, logit_indices, length):
+        """Convert logit_indices to tags
+
+        Args:
+          logit_indices: [sentence_length]
+          length: int
+        Returns:
+          tag sequence(size length)
+        """
+        pred_list = logit_indices[0:length]
+        tags = []
+        for tid in pred_list:
+            tag = self.embvec.get_tag(tid)
+            tags.append(tag)
+        return tags
+
+    def logits_indices_to_tags_seq(self, logits_indices, lengths):
+        """Convert logits_indices to sequence of tags
+
+        Args:
+          logits_indices: [batch_size, sentence_length]
+          lengths: [batch_size]
+        Returns:
+          sequence of tags
+        """
+        tags_seq = []
+        for logit_indices, length in zip(logits_indices, lengths):
+            tags = self.logit_indices_to_tags(logit_indices, length)
+            tags_seq.append(tags)
+        return tags_seq

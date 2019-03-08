@@ -95,24 +95,24 @@ def inference(config, frozen_pb_path):
             start_time = time.time()
             # Build input data
             inp = Input(bucket, config, build_output=False)
-            feed_dict = {p_input_data_pos_ids: inp.sentence_pos_ids,
-                         p_input_data_chk_ids: inp.sentence_chk_ids,
-                         p_is_train: False,
-                         p_sentence_length: inp.max_sentence_length}
-            feed_dict[p_input_data_word_ids] = inp.sentence_word_ids
-            feed_dict[p_input_data_wordchr_ids] = inp.sentence_wordchr_ids
+            feed_dict = {model.input_data_pos_ids: inp.example['pos_ids'],
+                         model.input_data_chk_ids: inp.example['chk_ids'],
+                         model.is_train: False,
+                         model.sentence_length: inp.max_sentence_length}
+            feed_dict[model.input_data_word_ids] = inp.example['word_ids']
+            feed_dict[model.input_data_wordchr_ids] = inp.example['wordchr_ids']
             if 'elmo' in config.emb_class:
-                feed_dict[p_elmo_input_data_wordchr_ids] = inp.sentence_elmo_wordchr_ids
+                feed_dict[model.elmo_input_data_wordchr_ids] = inp.example['elmo_wordchr_ids']
             if 'bert' in config.emb_class:
-                feed_dict[p_bert_input_data_token_ids] = inp.sentence_bert_token_ids
-                feed_dict[p_bert_input_data_token_masks] = inp.sentence_bert_token_masks
-                feed_dict[p_bert_input_data_segment_ids] = inp.sentence_bert_segment_ids
-                feed_dict[p_bert_input_data_elmo_indices] = inp.sentence_bert_elmo_indices
+                feed_dict[model.bert_input_data_token_ids] = inp.example['bert_token_ids']
+                feed_dict[model.bert_input_data_token_masks] = inp.example['bert_token_masks']
+                feed_dict[model.bert_input_data_segment_ids] = inp.example['bert_segment_ids']
+                feed_dict[model.bert_input_data_elmo_indices] = inp.example['bert_elmo_indices']
             logits_indices, sentence_lengths = sess.run([t_logits_indices, t_sentence_lengths], feed_dict=feed_dict)
-            tags = inp.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
+            tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
             for i in range(len(bucket)):
                 if 'bert' in config.emb_class:
-                    j = inp.sentence_bert_wordidx2tokenidx[0][i]
+                    j = inp.example['bert_wordidx2tokenidx'][0][i]
                     out = bucket[i] + ' ' + tags[j]
                 else:
                     out = bucket[i] + ' ' + tags[i]
@@ -129,24 +129,24 @@ def inference(config, frozen_pb_path):
         start_time = time.time()
         # Build input data
         inp = Input(bucket, config, build_output=False)
-        feed_dict = {p_input_data_pos_ids: inp.sentence_pos_ids,
-                     p_input_data_chk_ids: inp.sentence_chk_ids,
-                     p_is_train: False,
-                     p_sentence_length: inp.max_sentence_length}
-        feed_dict[p_input_data_word_ids] = inp.sentence_word_ids
-        feed_dict[p_input_data_wordchr_ids] = inp.sentence_wordchr_ids
+        feed_dict = {model.input_data_pos_ids: inp.example['pos_ids'],
+                     model.input_data_chk_ids: inp.example['chk_ids'],
+                     model.is_train: False,
+                     model.sentence_length: inp.max_sentence_length}
+        feed_dict[model.input_data_word_ids] = inp.example['word_ids']
+        feed_dict[model.input_data_wordchr_ids] = inp.example['wordchr_ids']
         if 'elmo' in config.emb_class:
-            feed_dict[p_elmo_input_data_wordchr_ids] = inp.sentence_elmo_wordchr_ids
+            feed_dict[model.elmo_input_data_wordchr_ids] = inp.example['elmo_wordchr_ids']
         if 'bert' in config.emb_class:
-            feed_dict[p_bert_input_data_token_ids] = inp.sentence_bert_token_ids
-            feed_dict[p_bert_input_data_token_masks] = inp.sentence_bert_token_masks
-            feed_dict[p_bert_input_data_segment_ids] = inp.sentence_bert_segment_ids
-            feed_dict[p_bert_input_data_elmo_indices] = inp.sentence_bert_elmo_indices
+            feed_dict[model.bert_input_data_token_ids] = inp.example['bert_token_ids']
+            feed_dict[model.bert_input_data_token_masks] = inp.example['bert_token_masks']
+            feed_dict[model.bert_input_data_segment_ids] = inp.example['bert_segment_ids']
+            feed_dict[model.bert_input_data_elmo_indices] = inp.example['bert_elmo_indices']
         logits_indices, sentence_lengths = sess.run([t_logits_indices, t_sentence_lengths], feed_dict=feed_dict)
-        tags = inp.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
+        tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
         for i in range(len(bucket)):
             if 'bert' in config.emb_class:
-                j = inp.sentence_bert_wordidx2tokenidx[0][i]
+                j = inp.example['bert_wordidx2tokenidx'][0][i]
                 out = bucket[i] + ' ' + tags[j]
             else:
                 out = bucket[i] + ' ' + tags[i]
