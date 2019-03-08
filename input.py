@@ -198,7 +198,7 @@ class Input:
             features['bert_segment_ids'] = create_int_feature(example['bert_segment_ids'])
             features['bert_wordidx2tokenidx'] = create_int_feature(example['bert_wordidx2tokenidx'])
             if 'elmo' in self.config.emb_class:
-               t = np.reshape(example['bert_elmo_indices'], -1)
+                t = np.reshape(example['bert_elmo_indices'], -1)
                 features['bert_elmo_indices'] = create_int_feature(t)
                 t = np.reshape(example['elmo_wordchr_ids'], -1)
                 features['elmo_wordchr_ids'] = create_int_feature(t)
