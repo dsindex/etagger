@@ -73,7 +73,7 @@ def train_step(sess, model, config, data, summary_op, summary_writer):
                      ('train f1', f1),
                      ('lr(invalid if use_bert_optimization)', learning_rate)])
     duration_time = time.time() - start_time
-    time.sleep(0.1)
+    time.sleep(0.5)
     out = 'duration_time : ' + str(duration_time) + ' sec for this epoch'
     tf.logging.debug(out)
 
@@ -136,6 +136,7 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
     sum_f1 = sum_f1 / data.num_batches
     tag_preds = config.logits_indices_to_tags_seq(sum_logits_indices, sum_sentence_lengths)
     tag_corrects = config.logits_indices_to_tags_seq(sum_output_indices, sum_sentence_lengths)
+    time.sleep(0.5)
     tf.logging.debug('[epoch %s/%s] dev precision, recall, f1(token): ' % (epoch, config.epoch))
     token_f1, l_token_prec, l_token_rec, l_token_f1  = TokenEval.compute_f1(config.class_size, sum_logits_indices, sum_output_indices, sum_sentence_lengths)
     tf.logging.debug('[' + ' '.join([str(x) for x in l_token_prec]) + ']')

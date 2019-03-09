@@ -88,6 +88,7 @@ filter_sizes : [3]
 num_filters : 53
 pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
+highway_used : False -> True
 rnn_used : True
 rnn_type : fused
 rnn_size : 200
@@ -110,12 +111,14 @@ tf_ffn_kernel_size : 3
 save model by f1(token)
 +
 CRF
++
+do_shuffle : False -> True
 
-token :
-chunk :
-conlleval :
+token : 0.9181024706188728
+chunk : 0.9272410471748143
+conlleval : 92.73
 average processing time per bucket(sentence)
-  - 1 GPU(TITAN X PASCAL) : 
+  - 1 GPU(V100 TESLA) : 0.010100270700019095 sec 
 
 * test 6
 word embedding size : 300 ->300(kor.glove.300k.300d.txt)

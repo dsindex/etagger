@@ -51,8 +51,7 @@ class Config:
             self.summary_dir = args.summary_dir
 
         '''for KOR
-        self.highway_used = True
-        self.keep_prob = 0.9
+        self.highway_used = False
         '''
         '''for CRZ
         self.chk_dim = 64
