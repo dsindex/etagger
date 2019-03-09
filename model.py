@@ -93,7 +93,7 @@ class Model:
         if self.emb_class == 'bert':
             concat_in = [self.word_embeddings, self.wordchr_embeddings, self.bert_embeddings, self.pos_embeddings, self.chk_embeddings]
         if self.emb_class == 'bert+elmo':
-            # we need to extend elmo_embeddings for bert(token based) via tf.gather_nd()
+            # we need to extend elmo_embeddings for bert(token based) via tf.gather_nd().
             self.bert_input_data_elmo_indices = tf.placeholder(tf.int32, shape=[None, None, 2], name='bert_input_data_elmo_indices') # (batch_size, bert_max_seq_length, 2)
             self.elmo_embeddings = tf.gather_nd(self.elmo_embeddings, self.bert_input_data_elmo_indices)
             concat_in = [self.word_embeddings, self.wordchr_embeddings, self.bert_embeddings, self.elmo_embeddings, self.pos_embeddings, self.chk_embeddings]
@@ -224,7 +224,7 @@ class Model:
                 self.train_op = optimizer.apply_gradients(zip(grads, tvars), global_step=self.global_step)
     
     def __word_embedding(self, inputs, keep_prob=0.5, scope='word-embedding'):
-        """Look up word embeddings
+        """Look up word embeddings.
         """
         with tf.variable_scope(scope):
             with tf.device('/cpu:0'):
@@ -232,7 +232,7 @@ class Model:
             return tf.nn.dropout(word_embeddings, keep_prob)
 
     def __wordchr_embedding_conv1d(self, inputs, keep_prob=0.5, scope='wordchr-embedding-conv1d'):
-        """Compute character embeddings by masked conv1d and max-pooling
+        """Compute character embeddings by masked conv1d and max-pooling.
         """
         with tf.variable_scope(scope):
             with tf.device('/cpu:0'):
@@ -253,7 +253,7 @@ class Model:
             return tf.nn.dropout(wordchr_embeddings, keep_prob)
 
     def __wordchr_embedding_conv2d(self, inputs, keep_prob=0.5, scope='wordchr-embedding-conv2d'):
-        """Compute character embeddings by conv2d and max-pooling
+        """Compute character embeddings by conv2d and max-pooling.
         """
         with tf.variable_scope(scope):
             with tf.device('/cpu:0'):
@@ -309,7 +309,7 @@ class Model:
             return tf.nn.dropout(wordchr_embeddings, keep_prob)
 
     def __elmo_embedding(self, inputs, masks, keep_prob=0.8):
-        """Compute ELMo embeddings
+        """Compute ELMo embeddings.
         """
         from bilm import weight_layers
         elmo_embeddings_op = self.elmo_bilm(inputs)
@@ -320,7 +320,7 @@ class Model:
         return tf.nn.dropout(elmo_embeddings, keep_prob)
 
     def __bert_embedding(self, token_ids, token_masks, segment_ids, masks, keep_prob=0.8):
-        """Compute BERT embeddings 
+        """Compute BERT embeddings.
         """
         from bert import modeling
         bert_model = modeling.BertModel(
@@ -345,7 +345,7 @@ class Model:
         return tf.nn.dropout(bert_embeddings, keep_prob)
 
     def __pos_embedding(self, inputs, keep_prob=0.5, scope='pos-embedding'):
-        """Computing pos embeddings
+        """Computing pos embeddings.
         """
         with tf.variable_scope(scope):
             with tf.device('/cpu:0'):
@@ -358,7 +358,7 @@ class Model:
             return tf.nn.dropout(pos_embeddings, keep_prob)
 
     def __chk_embedding(self, inputs, keep_prob=0.5, scope='chk-embedding'):
-        """Computing chk embeddings
+        """Computing chk embeddings.
         """
         with tf.variable_scope(scope):
             with tf.device('/cpu:0'):
@@ -371,7 +371,7 @@ class Model:
             return tf.nn.dropout(chk_embeddings, keep_prob)
 
     def __bi_lstm(self, inputs, lengths, rnn_size, keep_prob=0.5, scope='bi-lstm'):
-        """Apply bi-directional LSTM
+        """Apply bi-directional LSTM.
         """
         with tf.variable_scope(scope):
             cell_fw = tf.contrib.rnn.LSTMCell(rnn_size)
@@ -385,7 +385,7 @@ class Model:
             return tf.nn.dropout(outputs, keep_prob)
 
     def __bi_lstm_fused(self, inputs, lengths, rnn_size, keep_prob=0.5, scope='bi-lstm-fused'):
-        """Apply bi-directional LSTM block fused
+        """Apply bi-directional LSTM block fused.
         """
         with tf.variable_scope(scope):
             t = tf.transpose(inputs, perm=[1, 0, 2])  # Need time-major
@@ -399,7 +399,7 @@ class Model:
             return tf.nn.dropout(outputs, keep_prob)
 
     def __self_attention(self, inputs, masks, model_dim=None, keep_prob=0.5, scope='self-attention'):
-        """Apply self attention 
+        """Apply self attention.
         """
         with tf.variable_scope(scope):
             inputs *= masks # inputs should be masked before multihead_attention()
@@ -419,7 +419,7 @@ class Model:
             return attended_queries
 
     def __feedforward(self, inputs, masks, model_dim=None, kernel_size=1, keep_prob=0.5, scope='feed-forward'):
-        """Apply Point-wise feed forward layer
+        """Apply Point-wise feed forward layer.
         """
         with tf.variable_scope(scope):
             if not model_dim: model_dim = inputs.get_shape().as_list()[-1]
@@ -429,7 +429,7 @@ class Model:
             return outputs
 
     def __projection(self, inputs, out_dim, scope='projection'):
-        """Apply fully-connected projection layer
+        """Apply fully-connected projection layer.
         """
         with tf.variable_scope('projection'):
             in_dim = inputs.get_shape().as_list()[-1]
@@ -443,7 +443,7 @@ class Model:
             return output
 
     def __compute_loss(self):
-        """Compute loss(self.output_data, self.logits)
+        """Compute loss(self.output_data, self.logits).
         """
         trans_params = tf.get_variable('trans_params',
                                        shape=[self.class_size, self.class_size],
@@ -467,7 +467,7 @@ class Model:
             return tf.reduce_mean(cross_entropy)
 
     def __compute_prediction(self):
-        """Compute prediction(self.logits, self.trans_params)
+        """Compute prediction(self.logits, self.trans_params).
         """
         if self.use_crf:
             prediction, _ = tf.contrib.crf.crf_decode(potentials=self.logits,
@@ -479,7 +479,7 @@ class Model:
         return prediction
 
     def __compute_measures(self):
-        """Compute measures(self.prediction, self.output_data_indices)
+        """Compute measures(self.prediction, self.output_data_indices).
         """
         masks = self.sentence_masks
 
@@ -499,18 +499,18 @@ class Model:
         return accuracy, prec_op, rec_op, f1_op
 
     def __compute_sentence_lengths(self, sentence_masks):
-        """Compute each sentence lengths
+        """Compute each sentence lengths.
         """
         return tf.cast(tf.reduce_sum(sentence_masks, reduction_indices=1), tf.int32) # (batch_size)
 
     def __compute_sentence_masks(self, t):
-        """Compute each sentence masks
+        """Compute each sentence masks.
         """
         sentence_masks = tf.sign(tf.abs(t)) # (batch_size, sentence_length)
         return sentence_masks
 
     def __compute_word_masks(self, t):
-        """Compute each word masks 
+        """Compute each word masks.
         """
         word_masks = tf.sign(tf.abs(t))    # (batch_size*sentence_length, word_length)
         return word_masks
