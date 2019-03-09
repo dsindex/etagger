@@ -7,46 +7,54 @@ import collections
 
 class Input:
 
-    def __init__(self, data, config, build_output=True, do_shuffle=False):
+    def __init__(self, data, config, build_output=True, do_shuffle=False, reuse=False):
+        """Converting input data as tfrecords(and raw example).
+        Args:
+          data: a bucket or a file path.
+          config: an instance of Config.
+          build_output: if True, build output 'tags' feature.
+          do_shuffle: if True, shuffle training data(tfrecords).
+          reuse: if True, reuse the tfrecords file which was built previously.
+        """
         self.config = config
         self.build_output = build_output
 
-        if type(data) is list: # treat data as bucket
+        if type(data) is list: # treat data as bucket.
             # compute max sentence length
             self.max_sentence_length = len(data)
             self.num_examples = 1
             self.num_batches = 1
-            # for inference, we use example directly
+            # for inference, use example directly.
             self.example = None
             # create tf records
             self.__create_tfrecords(data)
-        else:                  # treat as file path
-            # compute max sentence length, number of examples, number of batches
+        else:                  # treat as file path.
+            # compute max sentence length, number of examples, number of batches.
             self.max_sentence_length, self.num_examples = self.stat(data)
             self.num_batches = (self.num_examples + config.batch_size - 1) // config.batch_size 
             # create tf records
-            self.tfrecords_file = '.tfrecords' # init as suffix
-            self.__create_tfrecords(data)
+            # if reuse is True, do not create tfrecords again.
+            self.tfrecords_file = data + '.tfrecords'
+            if not reuse: self.__create_tfrecords(data)
             # create dataset
             self.keys_to_features = self.__keys_to_features()
             self.dataset = self.__dataset_input_fn(config.batch_size, do_shuffle)
  
     def __create_tfrecords(self, data):
-        """Create input tfrecords
+        """Create input tfrecords.
         """
 
         # trick for reusing codes.
         if 'bert' in self.config.emb_class:
             self.max_sentence_length = self.config.bert_max_seq_length
 
-        if type(data) is list: # treat data as bucket
+        if type(data) is list: # treat data as bucket.
             bucket = data
             ex_index = 0
             _, example = self.__create_single_tf_example(bucket, ex_index, is_inference=True)
             self.example = example 
-        else:                  # treat data as file path
+        else:                  # treat data as file path.
             path = data
-            self.tfrecords_file = path + self.tfrecords_file
             writer = tf.python_io.TFRecordWriter(self.tfrecords_file)
             bucket = []
             ex_index = 0
@@ -63,7 +71,7 @@ class Input:
             writer.close()
 
     def __keys_to_features(self):
-        """Create keys to features map
+        """Create keys to features map.
         """
         keys_to_features = {}
         seq_length = self.max_sentence_length
@@ -96,14 +104,14 @@ class Input:
 
 
     def __dataset_input_fn(self, batch_size, do_shuffle):
-        """Build dataset input function
+        """Build dataset input function.
         """
         filenames = [self.tfrecords_file]
         dataset = tf.data.TFRecordDataset(filenames)
 
         def parser(record):
             parsed = tf.parse_single_example(record, self.keys_to_features)
-            # convert 1D back to original dimension
+            # convert 1D back to original dimension.
             if 'bert' in self.config.emb_class:
                 parsed['word_ids'] = tf.cast(parsed['word_ids'], tf.int32)
                 parsed['wordchr_ids'] = tf.reshape(tf.cast(parsed['wordchr_ids'], tf.int32), [-1, self.config.word_length])
@@ -135,7 +143,7 @@ class Input:
         return dataset
 
     def __create_single_tf_example(self, bucket, ex_index, is_inference=False):
-        """Create a single tf example
+        """Create a single tf example.
         """
         # create raw example
         example = {}
@@ -176,16 +184,16 @@ class Input:
 
         if is_inference:
             for key, val in example.items():
-                # expand dimension for batch size 1
+                # expand dimension for batch size 1.
                 example[key] = [val]
-            # no need to compute tf example for inference time
+            # no need to compute tf example for inference time.
             return None, example
 
         def create_int_feature(values):
             f = tf.train.Feature(int64_list=tf.train.Int64List(value=list(values)))
             return f
 
-        # create tf example(need to flat)
+        # create tf example(need to flat).
         features = collections.OrderedDict()
         if 'bert' in self.config.emb_class:
             features['word_ids'] = create_int_feature(example['word_ids'])
@@ -360,7 +368,7 @@ class Input:
                bert_tags, bert_wordidx2tokenidx, bert_elmo_indices
 
     def __create_word_ids(self, bucket):
-        """Create an word id vector
+        """Create an word id vector.
         """
         word_ids = []
         sentence_length = 0
@@ -379,7 +387,7 @@ class Input:
         return word_ids
 
     def __create_wordchr_ids(self, bucket):
-        """Create a vector of a character id vector
+        """Create a vector of a character id vector.
         """
         wordchr_ids = []
         sentence_length = 0
@@ -410,7 +418,7 @@ class Input:
         return wordchr_ids
 
     def __create_elmo_wordchr_ids(self, bucket):
-        """Create a vector of a character id vector for elmo
+        """Create a vector of a character id vector for elmo.
         """
         sentence = []
         sentence_length = 0
@@ -433,7 +441,7 @@ class Input:
         return elmo_wordchr_ids
 
     def __create_pos_ids(self, bucket):
-        """Create a pos id vector
+        """Create a pos id vector.
         """
         pos_ids = []
         sentence_length = 0
@@ -452,7 +460,7 @@ class Input:
         return pos_ids
 
     def __create_chk_ids(self, bucket):
-        """Create a chk id vector
+        """Create a chk id vector.
         """
         chk_ids = []
         sentence_length = 0
@@ -471,7 +479,7 @@ class Input:
         return chk_ids
 
     def __create_tags(self, bucket):
-        """Create an output tag vector
+        """Create an output tag vector.
         """
         tags  = []
         sentence_length = 0
@@ -488,7 +496,7 @@ class Input:
         return tags
 
     def __tag_vec(self, tag, class_size):
-        """Build one-hot vector for a tag
+        """Build one-hot vector for a tag.
         """
         one_hot = np.zeros(class_size, dtype=np.int32)
         tid = self.config.embvec.get_tid(tag)
