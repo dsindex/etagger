@@ -44,7 +44,7 @@ class TokenEval:
             line_num += 1
 
     def eval(self):
-        """Compute micro precision, recall, fscore given file
+        """Compute micro precision, recall, fscore given file.
         """
         bucket = []
         while 1:
@@ -108,7 +108,7 @@ class TokenEval:
 
     @staticmethod
     def compute_f1(class_size, prediction, target, length):
-        """Compute micro F1 measure given prediction and target
+        """Compute micro F1 measure given prediction and target.
         """
         tp = np.array([0] * (class_size + 1))
         fp = np.array([0] * (class_size + 1))
