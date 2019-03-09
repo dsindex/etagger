@@ -3,7 +3,6 @@
 
 - experiment 13
 ```
-
 * test 2
 word embedding size : 100(glove6b)
 bert embedding : cased_L-24_H-1024_A-16
@@ -16,7 +15,7 @@ chr_conv_type : conv1d
 chracter embedding size : 25
 chracter embedding random init : -1.0 ~ 1.0
 filter_sizes : [3]
-num_filters : 50
+num_filters : 53
 pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 chk embedding size : 10
@@ -63,7 +62,7 @@ chr_conv_type : conv1d
 chracter embedding size : 25
 chracter embedding random init : -1.0 ~ 1.0
 filter_sizes : [3]
-num_filters : 50
+num_filters : 53
 pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 chk embedding size : 10
@@ -329,6 +328,51 @@ chunk : 0.9027189265536724
 
 - experiments 11
 ```
+
+* test 13
+word embedding size : 100(glove6b)
+bert embedding : cased_L-12_H-768_A-12
+bert_keep_prob : 0.8
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused
+rnn_size : 256
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 2e-5 / 5000 / 0.9
+gradient clipping : 1.5 -> 10
+#learning_rate : use optimization.py from bert, 2e-5 / warmup proportion 0.1
+epoch : 70
+batch_size : 16
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+do_shuffle : False -> True
+
+token : 0.917588123892724
+chunk : 0.9089466725429706
+conlleval : 90.75
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) : 0.03662970762428839
+
+
 * test 12
 word embedding size : 300(glove6B) -> 100(glove6b)
 bert embedding : cased_L-24_H-1024_A-16
@@ -338,7 +382,7 @@ chr_conv_type : conv1d
 chracter embedding size : 50 -> 25
 chracter embedding random init : -1.0 ~ 1.0
 filter_sizes : [3]
-num_filters : 25 -> 50
+num_filters : 25 -> 53
 pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 rnn_used : True
@@ -379,7 +423,7 @@ chr_conv_type : conv1d
 chracter embedding size : 50 -> 25
 chracter embedding random init : -1.0 ~ 1.0
 filter_sizes : [3]
-num_filters : 25 -> 50
+num_filters : 25 -> 53
 pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 rnn_used : True
@@ -418,7 +462,7 @@ chr_conv_type : conv1d
 chracter embedding size : 50 -> 25
 chracter embedding random init : -1.0 ~ 1.0
 filter_sizes : [3]
-num_filters : 25 -> 50
+num_filters : 25 -> 53
 pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 rnn_used : True
@@ -784,6 +828,59 @@ chunk : 0.9131509267431598 -> BERT base + LSTM + CRF best
 
 - experiments 10
 ```
+* test 16
+word embedding size : 100(glove6B)
+elmo embedding params : elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json
+elmo embedding size : 1024
+elmo_keep_prob : 0.7
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+highway : False
+highway dropout : keep_prob
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+do_shuffle : False -> True
+
+# trial 1
+token : 0.9297237839159129
+chunk : 0.924091828656874
+conlleval : 92.40
+average processing time per bucket(sentence)
+  - 1 GPU(V100 TESLA) : 0.036901780694367184
+
+# trial 2
+token : 0.927712322042219
+chunk : 0.9243876464323749
+conlleval : 92.46
+average processing time per bucket(sentence)
+  - 1 GPU(V100 TESLA) : 0.038546528412387114
+
 
 * test 15
 word embedding size : 300(glove6B) -> 100(glove6B)
