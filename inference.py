@@ -12,7 +12,7 @@ from chunk_eval  import ChunkEval
 from input import Input
 
 def inference_bucket(config):
-    """Inference for bucket
+    """Inference for bucket.
     """
 
     # Create model
@@ -120,7 +120,7 @@ def inference_bucket(config):
     sess.close()
 
 def inference_line(config):
-    """Inference for raw string
+    """Inference for raw string.
     """
     def get_entity(doc, begin, end):
         for ent in doc.ents:
