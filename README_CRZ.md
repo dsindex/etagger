@@ -85,6 +85,52 @@ $ python inference.py --mode bucket --emb_path embeddings/kor.glove.300k.300d.tx
 - experiments 2-2
 ```
 
+* test 6
+word embedding size : 300(kor.glove.300k.300d.txt)
+#bert embedding : all.200k.out.1m-step.reduced
+#bert_keep_prob : 0.8
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+chk embedding size : 10 -> 64
+chk embedding random init : -0.5 ~ 0.5
+highway_used : True
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+#learning_rate : use optimization.py from bert, 2e-5 / warmup proportion 0.1
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++ 
+do_shuffle : True
+
+token : 0.8667540838960306
+chunk : 0.8581555685232012
+conlleval : 85.81
+average processing time per bucket(sentence)
+  - 1 GPU(V100 TESLA) : 0.008728952897886538
+
 * test 5
 word embedding size : 300 -> 300(kor.glove.300k.300d.txt)
 #bert embedding : all.200k.out.1m-step.reduced
@@ -963,7 +1009,8 @@ average processing time per bucket(sentence)
 1.8M data/cruise.test.txt.in
 
 3. glove
-2.5G(500k, 525470)  kor.glove.300d.txt
+2.5G(500k, 525470) kor.glove.300d.txt
+841M(300k, 308383) kor.glove.300k.300d.txt
 
 4. evaluation by CRF(wapiti)
 token : 0.820348045768
@@ -974,18 +1021,74 @@ average processing time per bucket(sentence) : 235.691333 / 13692 = 0.0172137987
 
 - how to run
 ```
+$ cd data
+$ python ../etc/conv.py < cruise.train.txt > cruise.train.txt.in
+$ python ../etc/conv.py < cruise.dev.txt > cruise.dev.txt.in
+$ python ../etc/conv.py < cruise.test.txt > cruise.test.txt.in
+$ cat cruise.train.txt.in cruise.dev.txt.in cruise.test.txt.in > cruise.total.txt.in
+
+- embedding
 $ python embvec.py --emb_path embeddings/kor.glove.100d.txt --wrd_dim 100 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in > embeddings/vocab.txt
 $ python embvec.py --emb_path embeddings/kor.glove.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in > embeddings/vocab.txt
+$ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in > embeddings/vocab.txt
 
+- train
 $ python train.py --emb_path embeddings/kor.glove.100d.txt.pkl --wrd_dim 100 --batch_size 20 --epoch 70
 $ python train.py --emb_path embeddings/kor.glove.300d.txt.pkl --wrd_dim 300 --batch_size 20 --epoch 70
+$ python train.py --emb_path embeddings/kor.glove.300k.300d.txt.pkl --wrd_dim 300 --batch_size 20 --epoch 70
 
+- inference
 $ python inference.py --mode bucket --emb_path embeddings/kor.glove.100d.txt.pkl --wrd_dim 100 --restore checkpoint/ner_model < data/cruise.test.txt.in > pred.txt
 $ python inference.py --mode bucket --emb_path embeddings/kor.glove.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/cruise.test.txt.in > pred.txt
+$ python inference.py --mode bucket --emb_path embeddings/kor.glove.300k.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/cruise.test.txt.in > pred.txt
 ```
 
 - experiments 1-1
 ```
+
+* test 2
+word embedding size : 300(kor.glove.300k.300d.txt)
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+chk embedding size : 64(meaningless)
+chk embedding random init : -0.5 ~ 0.5
+highway_used : False -> True
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++ 
+do_shuffle : False -> True
+
+token :
+chunk :
+conlleval :
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) :
+
 * test 1
 word embedding size : 300
 keep_prob : 0.7
