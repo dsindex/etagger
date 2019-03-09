@@ -52,6 +52,7 @@ class Config:
 
         '''for KOR
         self.highway_used = True
+        self.keep_prob = 0.9
         '''
         '''for CRZ
         self.chk_dim = 64
@@ -98,7 +99,7 @@ class Config:
 # -----------------------------------------------------------------------------
             
     def logit_to_tags(self, logit, length):
-        """Convert logit to tags
+        """Convert logit to tags.
 
         Args:
           logit: [sentence_length, class_size]
@@ -116,7 +117,7 @@ class Config:
         return tags
 
     def logit_indices_to_tags(self, logit_indices, length):
-        """Convert logit_indices to tags
+        """Convert logit_indices to tags.
 
         Args:
           logit_indices: [sentence_length]
@@ -132,7 +133,7 @@ class Config:
         return tags
 
     def logits_indices_to_tags_seq(self, logits_indices, lengths):
-        """Convert logits_indices to sequence of tags
+        """Convert logits_indices to sequence of tags.
 
         Args:
           logits_indices: [batch_size, sentence_length]
