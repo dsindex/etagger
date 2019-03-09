@@ -31,7 +31,7 @@ class ChunkEval:
         self.pred_sents.append(pred_sent)
 
     def eval(self):
-        """Compute micro chunk precision, recall, fscore given file
+        """Compute micro chunk precision, recall, fscore given file.
         """
         bucket = []
         while 1:
@@ -61,16 +61,18 @@ class ChunkEval:
             while idx < len(guessed):
                 if guessed[idx][0] == 'B': # A new chunk starts
                     count += 1
-                    #print('guessed, correct : ', guessed[idx], correct[idx])
+                    '''
+                    print('guessed, correct : ', guessed[idx], correct[idx])
+                    '''
                     if guessed[idx] == correct[idx]:
                         idx += 1
                         correctlyFound = True
-                        while idx < len(guessed) and guessed[idx][0] == 'I': # Scan until it no longer starts with I
+                        while idx < len(guessed) and guessed[idx][0] == 'I': # Scan until it no longer starts with I.
                             if guessed[idx] != correct[idx]:
                                 correctlyFound = False
                             idx += 1
                         if idx < len(guessed):
-                            if correct[idx][0] == 'I': # The chunk in correct was longer
+                            if correct[idx][0] == 'I': # The chunk in correct was longer.
                                 correctlyFound = False
                         if correctlyFound:
                             correctCount += 1
@@ -85,7 +87,7 @@ class ChunkEval:
 
     @staticmethod
     def compute_f1(tag_preds, tag_corrects): 
-        """Compute micro F1 measure given tag-predictions and tag-corrects
+        """Compute micro F1 measure given tag-predictions and tag-corrects.
         """
         prec = ChunkEval.compute_precision(tag_preds, tag_corrects)
         rec = ChunkEval.compute_precision(tag_corrects, tag_preds)
