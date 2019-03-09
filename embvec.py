@@ -64,7 +64,7 @@ class EmbVec:
         self.bert_init_checkpoint = args.bert_init_checkpoint
         self.bert_max_seq_length = args.bert_max_seq_length
 
-        # build character/pos/chunk/tag/elmo vocab
+        # build character/pos/chunk/tag/elmo vocab.
         cid = self.unk_cid + 1
         pid = self.unk_pid + 1
         kid = self.unk_kid + 1
@@ -103,7 +103,7 @@ class EmbVec:
             if self.lowercase: word = word.lower()
             if word not in self.wrd_vocab_tmp:
                 self.wrd_vocab_tmp[word] = 0
-        # write elmo vocab
+        # write elmo vocab.
         if self.elmo_vocab_path:
             elmo_vocab_fd = open(self.elmo_vocab_path, 'w')
             elmo_vocab_fd.write('<S>' + '\n')
@@ -114,7 +114,7 @@ class EmbVec:
             elmo_vocab_fd.close()
         del(self.elmo_vocab)
 
-        # build word embeddings and word vocab
+        # build word embeddings and word vocab.
         wrd_vocab_size = 0
         if self.lowercase: # glove 6B
             for line in open(args.emb_path): wrd_vocab_size += 1
@@ -198,7 +198,7 @@ if __name__ == '__main__':
     embvec = EmbVec(args)
     pkl.dump(embvec, open(args.emb_path + '.pkl', 'wb'))
 
-    # print all vocab for inference by C++
+    # print all vocab for inference by C++.
     # 1. wrd_vocab
     print('# wrd_vocab', len(embvec.wrd_vocab))
     for word, wid in embvec.wrd_vocab.items():
