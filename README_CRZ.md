@@ -82,13 +82,66 @@ $ python inference.py --mode bucket --emb_path embeddings/kor.glove.300d.txt.pkl
 $ python inference.py --mode bucket --emb_path embeddings/kor.glove.300k.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/cruise.test.txt.in > pred.txt
 ```
 
+- experiments 2-3
+```
+
+* test 1
+word embedding size : 300(kor.glove.300k.300d.txt)
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+#chk embedding size : 64(meaningless)
+#chk embedding random init : -0.5 ~ 0.5
+highway_used : False -> True
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++ 
+do_shuffle : False -> True
+
+# trial 1
+token : 0.8508819206271435
+chunk : 0.844810758052272
+conlleval : 84.48          -> Glove + CNN + LSTM + CRF best
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) : 0.013175966260440538
+
+# trial 2
+token :
+chunk :
+conlleval :
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) :
+```
+
 - experiments 2-2
 ```
 
-* test 6
+* test 7
 word embedding size : 300(kor.glove.300k.300d.txt)
-#bert embedding : all.200k.out.1m-step.reduced
-#bert_keep_prob : 0.8
 keep_prob : 0.7
 chr_conv_type : conv1d
 chracter embedding size : 25
@@ -105,7 +158,51 @@ rnn_type : fused
 rnn_size : 200
 rnn_num_layers : 2
 learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
-#learning_rate : use optimization.py from bert, 2e-5 / warmup proportion 0.1
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++ 
+do_shuffle : True
++
+remove 'B-','I-' from etype
+
+token : 0.8649171575170522
+chunk : 0.858236884802596
+conlleval : 85.82          -> Glove + CNN + CHK + LSTM + CRF best
+average processing time per bucket(sentence)
+  - 1 GPU(V100 TESLA) : 0.009972273717963298
+
+* test 6
+word embedding size : 300(kor.glove.300k.300d.txt)
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+chk embedding size : 10 -> 64
+chk embedding random init : -0.5 ~ 0.5
+highway_used : True
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
 gradient clipping : 10
 epoch : 70
 batch_size : 20
@@ -133,8 +230,6 @@ average processing time per bucket(sentence)
 
 * test 5
 word embedding size : 300 -> 300(kor.glove.300k.300d.txt)
-#bert embedding : all.200k.out.1m-step.reduced
-#bert_keep_prob : 0.8
 keep_prob : 0.7
 chr_conv_type : conv1d
 chracter embedding size : 25
@@ -151,7 +246,6 @@ rnn_type : fused
 rnn_size : 200
 rnn_num_layers : 2
 learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
-#learning_rate : use optimization.py from bert, 2e-5 / warmup proportion 0.1
 gradient clipping : 10
 epoch : 70
 batch_size : 20
@@ -171,7 +265,7 @@ CRF
 
 token : 0.8629193131891667
 chunk : 0.8560444070066309
-conlleval : 85.60          -> Glove + CNN + CHK + HIGHWAY + LSTM + CRF best
+conlleval : 85.60
 average processing time per bucket(sentence)
   - 1 GPU(TITAN X PASCAL) : 0.013156061647155387 sec
   - 32 CPU : skip
@@ -348,7 +442,7 @@ CRF
 
 token : 0.863193851409052
 chunk : 0.8553803679658347
-conlleval : 85.54          -> Glove + CNN + CHK + LSTM + CRF best
+conlleval : 85.54
 average processing time per bucket(sentence)
   - 1 GPU(TITAN X PASCAL) : 0.013301651632658217 sec
   - 32 CPU : skip
@@ -1004,6 +1098,8 @@ average processing time per bucket(sentence)
 485
 
 2. data
+
+* incomplete word-space information
 15M  data/cruise.train.txt.in
 1.8M ata/cruise.dev.txt.in
 1.8M data/cruise.test.txt.in
@@ -1045,51 +1141,7 @@ $ python inference.py --mode bucket --emb_path embeddings/kor.glove.300k.300d.tx
 
 - experiments 1-1
 ```
-
-* test 2
-word embedding size : 300(kor.glove.300k.300d.txt)
-keep_prob : 0.7
-chr_conv_type : conv1d
-chracter embedding size : 25
-chracter embedding random init : -1.0 ~ 1.0
-filter_sizes : [3]
-num_filters : 53
-pos embedding size : 7
-pos embedding random init : -0.5 ~ 0.5
-chk embedding size : 64(meaningless)
-chk embedding random init : -0.5 ~ 0.5
-highway_used : False -> True
-rnn_used : True
-rnn_type : fused
-rnn_size : 200
-rnn_num_layers : 2
-learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
-gradient clipping : 10
-epoch : 70
-batch_size : 20
-+
-tf_used : False
-tf_keep_prob : 0.8
-tf_mh_num_layers : 4
-tf_mh_num_heads : 4
-tf_mh_num_units : 64
-tf_mh_keep_prob : 0.8
-tf_ffn_keep_prob : 0.8
-tf_ffn_kernel_size : 3
-+
-save model by f1(token)
-+
-CRF
-+ 
-do_shuffle : False -> True
-
-token :
-chunk :
-conlleval :
-average processing time per bucket(sentence)
-  - 1 GPU(TITAN X PASCAL) :
-
-* test 1
+* test 1 (incomplete word-space information)
 word embedding size : 300
 keep_prob : 0.7
 chr_conv_type : conv1d
@@ -1123,7 +1175,7 @@ CRF
 
 token : 0.8336974003216593, 0.8950232838811782(including 'O')
 chunk : 0.828596112311015 , 0.9093912290825158(including 'O')
-conlleval : 82.78         , 90.93(including 'O')              -> Glove + CNN + LSTM + CRF best
+conlleval : 82.78         , 90.93(including 'O')
 average processing time per bucket(sentence)
   - 1 GPU(TITAN X PASCAL) : 0.01303002712777439 sec
   - 32 CPU : 0.011279379889660678 sec
