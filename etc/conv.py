@@ -17,6 +17,8 @@ class Conv:
             etype = tokens[2]
             em_etype = tokens[3]
             tag = tokens[4]
+
+            etype = etype.replace('_B', '').replace('_I', '')
             print(morph, mtag, etype, tag)
         print('')
 
