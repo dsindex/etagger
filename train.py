@@ -130,9 +130,9 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
         sum_logits_indices = np_concat(sum_logits_indices, logits_indices)
         sum_sentence_lengths = np_concat(sum_sentence_lengths, sentence_lengths)
         idx += 1
-    sum_loss = sum_loss / data.num_batches
-    sum_accuracy = sum_accuracy / data.num_batches
-    sum_f1 = sum_f1 / data.num_batches
+    avg_loss = sum_loss / data.num_batches
+    avg_accuracy = sum_accuracy / data.num_batches
+    avg_f1 = sum_f1 / data.num_batches
     tag_preds = config.logits_indices_to_tags_seq(sum_logits_indices, sum_sentence_lengths)
     tag_corrects = config.logits_indices_to_tags_seq(sum_output_indices, sum_sentence_lengths)
     tf.logging.debug('\n[epoch %s/%s] dev precision, recall, f1(token): ' % (epoch, config.epoch))
@@ -140,20 +140,19 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
     tf.logging.debug('[' + ' '.join([str(x) for x in l_token_prec]) + ']')
     tf.logging.debug('[' + ' '.join([str(x) for x in l_token_rec]) + ']')
     tf.logging.debug('[' + ' '.join([str(x) for x in l_token_f1]) + ']')
-    prec, rec, f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
-    tf.logging.debug('dev precision, recall, f1(chunk): %s, %s, %s' % (prec, rec, f1) + '(invalid for bert due to X tag)')
-    chunk_f1 = f1
+    chunk_prec, chunk_rec, chunk_f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
+    tf.logging.debug('dev precision(chunk), recall(chunk), f1(chunk): %s, %s, %s' % (chunk_prec, chunk_rec, chunk_f1) + '(invalid for bert due to X tag)')
 
     # create summaries manually.
-    summary_value = [tf.Summary.Value(tag='loss', simple_value=sum_loss),
-                     tf.Summary.Value(tag='accuracy', simple_value=sum_accuracy),
-                     tf.Summary.Value(tag='f1', simple_value=sum_f1),
+    summary_value = [tf.Summary.Value(tag='loss', simple_value=avg_loss),
+                     tf.Summary.Value(tag='accuracy', simple_value=avg_accuracy),
+                     tf.Summary.Value(tag='f1', simple_value=avg_f1),
                      tf.Summary.Value(tag='token_f1', simple_value=token_f1),
                      tf.Summary.Value(tag='chunk_f1', simple_value=chunk_f1)]
     summaries = tf.Summary(value=summary_value)
     summary_writer.add_summary(summaries, global_step)
     
-    return token_f1, chunk_f1
+    return token_f1, chunk_f1, avg_f1
 
 def do_train(model, config, train_data, dev_data):
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
@@ -183,7 +182,7 @@ def do_train(model, config, train_data, dev_data):
     max_chunk_f1 = 0
     for e in range(config.epoch):
         train_step(sess, model, config, train_data, train_summary_op, train_summary_writer)
-        token_f1, chunk_f1  = dev_step(sess, model, config, dev_data, dev_summary_writer, e)
+        token_f1, chunk_f1, avg_f1  = dev_step(sess, model, config, dev_data, dev_summary_writer, e)
         # early stopping
         if early_stopping.validate(token_f1, measure='f1'): break
         if token_f1 > max_token_f1 or (max_token_f1 - token_f1 < 0.0005 and chunk_f1 > max_chunk_f1):
