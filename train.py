@@ -180,6 +180,7 @@ def do_train(model, config, train_data, dev_data):
     early_stopping = EarlyStopping(patience=10, measure='f1', verbose=1)
     max_token_f1 = 0
     max_chunk_f1 = 0
+    max_avg_f1 = 0
     for e in range(config.epoch):
         train_step(sess, model, config, train_data, train_summary_op, train_summary_writer)
         token_f1, chunk_f1, avg_f1  = dev_step(sess, model, config, dev_data, dev_summary_writer, e)
@@ -189,6 +190,7 @@ def do_train(model, config, train_data, dev_data):
             tf.logging.debug('new best f1 score! : %s' % token_f1)
             max_token_f1 = token_f1
             max_chunk_f1 = chunk_f1
+            max_avg_f1 = avg_f1
             # save best model
             save_path = saver.save(sess, config.checkpoint_dir + '/' + 'ner_model')
             tf.logging.debug('max model saved in file: %s' % save_path)

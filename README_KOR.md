@@ -1,7 +1,9 @@
 - summary
   - https://docs.google.com/spreadsheets/d/1Sy7YREtqsIaaesNM1LAdsstomB7nrQV483XPzwH5JBM/edit?usp=sharing
 
-- experiments data
+----
+
+- experiments 2 data
 ```
 1. number of labels
 610
@@ -9,7 +11,7 @@
 2. data
 10M,  81563 sentences, data/kor.train.txt
 1.7M, 13632 sentences, data/kor.dev.txt
-2.4M, 18937 sentences, data/kor.test.txt
+,  sentences, data/kor.test.txt
 
 3. glove
 2.5G(500k, 525470) kor.glove.300d.txt
@@ -36,9 +38,9 @@
   96     bert_max_seq_length
 
 5. evaluation by CRF(wapiti)
-token : 0.900468066343
-chunk : 0.9141800490902886 
-conlleval : 91.42
+token : 0.934779192205
+chunk :
+conlleval : 94.14
 
 ```
 
@@ -72,10 +74,10 @@ $ python inference.py --mode bucket --emb_path embeddings/kor.glove.300d.txt.pkl
 $ python inference.py --mode bucket --emb_path embeddings/kor.glove.300k.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/kor.test.txt > pred.txt
 ```
 
-- experiments 2
+- experiments 2-1
 ```
 
-* test 8
+* test 1
 word embedding size : 300(kor.glove.300k.300d.txt)
 keep_prob : 0.7
 chr_conv_type : conv1d
@@ -117,6 +119,97 @@ chunk :
 conlleval :
 average processing time per bucket(sentence)
   - 1 GPU(V100 TESLA) :
+
+```
+
+----
+
+- experiments 1 data
+```
+1. number of labels
+610
+
+2. data
+10M,  81563 sentences, data/kor.train.txt
+1.7M, 13632 sentences, data/kor.dev.txt
+2.4M, 18937 sentences, data/kor.test.txt
+
+3. glove
+2.5G(500k, 525470) kor.glove.300d.txt
+841M(300k, 308383) kor.glove.300k.300d.txt
+
+4. bert
+
+1) all.dha.2.5m_step
+  768    hidden_size
+  202592 vocab_size
+  2.5G   bert_model.ckpt
+  64     bert_max_seq_length
+
+2) multi_cased_L-12_H-768_A-12
+  768    hidden_size
+  119547 vocab_size
+  682M   bert_model.ckpt
+  96     bert_max_seq_length
+
+3) all.200k.out.1m-step.reduced
+  768    hidden_size
+  100795 vocab_size
+  627M   bert_model.ckpt
+  96     bert_max_seq_length
+
+5. evaluation by CRF(wapiti)
+token : 0.900468066343
+chunk : 0.9141800490902886 
+conlleval : 91.42
+
+```
+
+- experiments 1-2
+```
+
+* test 8
+word embedding size : 300(kor.glove.300k.300d.txt)
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+chk embedding size : 10
+chk embedding random init : -0.5 ~ 0.5
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+highway_used : False -> True
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+do_shuffle : False -> True
+
+token : 0.9154425358835592
+chunk : 0.9252426449106785
+conlleval : 92.53
+average processing time per bucket(sentence)
+  - 1 GPU(V100 TESLA) : 0.011179832594569812
 
 * test 7
 word embedding size : 300 -> 300(kor.glove.300k.300d.txt)
@@ -419,7 +512,7 @@ average processing time per bucket(sentence)
 
 ```
 
-- experimements 1
+- experimements 1-1
 ```
 * test 10
 word embedding size : 100 -> 300

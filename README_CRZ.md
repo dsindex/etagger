@@ -1,6 +1,8 @@
 - summary
   - https://docs.google.com/spreadsheets/d/1Sy7YREtqsIaaesNM1LAdsstomB7nrQV483XPzwH5JBM/edit?usp=sharing
 
+----
+
 - experiments 2 data
 ```
 1. number of labels
@@ -122,23 +124,75 @@ CRF
 + 
 do_shuffle : False -> True
 
-# trial 1
+# trial 1 <- set chk feature as 'X'
 token : 0.8508819206271435
 chunk : 0.844810758052272
 conlleval : 84.48          -> Glove + CNN + LSTM + CRF best
 average processing time per bucket(sentence)
   - 1 GPU(TITAN X PASCAL) : 0.013175966260440538
 
-# trial 2
-token :
-chunk :
-conlleval :
+# trial 2 <- remove chk embedding before lstm
+token : 0.845720018105969
+chunk : 0.8388649222831625
+conlleval : 83.88
 average processing time per bucket(sentence)
-  - 1 GPU(TITAN X PASCAL) :
+  - 1 GPU(TITAN X PASCAL) : 0.013069313304058321
+
+# trial 3 <- set chk feature as 'X'
+token : 0.846926692302997
+chunk : 0.8429526715574888
+conlleval : 84.29
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) : 0.013475195855763001
 ```
 
 - experiments 2-2
 ```
+
+* test 8
+word embedding size : 300(kor.glove.300k.300d.txt)
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+chk embedding size : 10 -> 64
+chk embedding random init : -0.5 ~ 0.5
+highway_used : True
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70 -> 140
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token) -> avg f1
++
+CRF
++ 
+do_shuffle : True
++
+remove 'B-','I-' from etype
+
+token : 0.8625693398479115
+chunk : 0.8560188487560254
+conlleval : 85.60
+average processing time per bucket(sentence)
+  - 1 GPU(V100 TESLA) : 0.009868820152959416
 
 * test 7
 word embedding size : 300(kor.glove.300k.300d.txt)
@@ -1091,6 +1145,7 @@ average processing time per bucket(sentence)
   - 1 CPU : 0.011839326342745028 sec
 ```
 
+----
 
 - experiments 1 data
 ```
@@ -1099,7 +1154,7 @@ average processing time per bucket(sentence)
 
 2. data
 
-* incomplete word-space information
+* incomplete segmentation
 15M  data/cruise.train.txt.in
 1.8M ata/cruise.dev.txt.in
 1.8M data/cruise.test.txt.in
@@ -1141,7 +1196,7 @@ $ python inference.py --mode bucket --emb_path embeddings/kor.glove.300k.300d.tx
 
 - experiments 1-1
 ```
-* test 1 (incomplete word-space information)
+* test 1 (incomplete segmentation)
 word embedding size : 300
 keep_prob : 0.7
 chr_conv_type : conv1d
