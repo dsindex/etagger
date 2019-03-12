@@ -433,6 +433,20 @@ in IN O O O
 ![](/etc/experiment_eng.png)
 
 - results
+  - QRNN
+    - Glove
+      - setting
+        - `experiment 14, test 1`
+      - per-token(partial) f1 : 0.8263637498439645
+      - per-chunk(exact)   f1 : 0.8129554655870445
+      - average processing time per bucket
+        - 1 GPU(TITAN X(Pascal), 12196MiB)
+          - restore version : 0.015130160556424584 sec
+        - 32 processor CPU(multi-threading)
+          - python : 0.003301392354872017 sec
+        - 1 CPU(single-thread)
+          - python : 0.0038999207762760654 sec
+          - C++ :
   - Transformer
     - Glove
       - setting

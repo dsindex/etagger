@@ -1,6 +1,138 @@
 - summary
   - https://docs.google.com/spreadsheets/d/1Zj9MF0LK2IE4XHiKTRkRpd8EajEnfqLGvI-IqUMC7A0/edit?usp=sharing
 
+- experiment 14
+```
+* test 3
+word embedding size : 100(glove6b)
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused -> qrnn
+rnn_size : 256
+qrnn_size : 50 -> 100
+qrnn_filter_size : 3
+rnn_num_layers : 2 -> 1
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70 -> 140
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+do_shuffle : True
+
+token :
+chunk :
+conlleval :
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) :
+  - 32 CPU :
+
+* test 2
+word embedding size : 100(glove6b)
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused -> qrnn
+rnn_size : 256
+qrnn_size : 50
+qrnn_filter_size : 3
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70 -> 140
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+do_shuffle : True
+
+token :
+chunk :
+conlleval :
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) :
+  - 32 CPU :
+
+* test 1
+word embedding size : 100(glove6b)
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused -> qrnn
+rnn_size : 256
+qrnn_size : 50
+qrnn_filter_size : 3
+rnn_num_layers : 2 -> 1
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70 -> 140
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+do_shuffle : True
+
+token : 0.8263637498439645
+chunk : 0.8129554655870445
+conlleval : 81.30
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) : 0.015130160556424584 sec
+  - 32 CPU : 0.003301392354872017 sec
+```
+
 - experiment 13
 ```
 * test 2
