@@ -64,6 +64,10 @@
 ## Pre-requisites
 
 - python >= 3.6
+```
+$ python -m venv python3.6
+$ source /home/python3.6/bin/activate
+```
 
 - tensorflow >= 1.10
 ```
@@ -78,18 +82,40 @@ $ python -m pip install tensorflow-gpu
 ```
 
 - numpy
+```
+$ python -m pip install numpy
+```
 
-- [tf_metrics](https://github.com/guillaumegenthial/tf_metrics)
+- tf_metrics
+  - install [tf_metrics](https://github.com/guillaumegenthial/tf_metrics)
+  ```
+  $ git clone https://github.com/guillaumegenthial/tf_metrics.git
+  $ cd tf_metrics
+  $ python setup.py install
+  ```
 
 - glove embedding
   - [download Glove6B](http://nlp.stanford.edu/data/glove.6B.zip)
   - [download Glove840B](http://nlp.stanford.edu/data/glove.840B.300d.zip)
   - unzip to 'embeddings' dir
+  ```
+  $ cd etagger
+  $ mkdir embeddings
+  $ ls embeddings
+  glove.840B.300d.zip glove.6B.zip
+  $ unzip glove.840B.300d.zip
+  $ unzip glove.6B.zip 
+  ```
 
 - bilm
   - install [bilm-tf](https://github.com/allenai/bilm-tf)
+  ```
+  $ cd bilm-tf
+  $ python setup.py install
+  ```
   - download [ELMo weights and options](https://allennlp.org/elmo)
   ```
+  $ cd etagger
   $ ls embeddings
   embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json  embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5
   ``` 
@@ -100,9 +126,14 @@ $ python -m pip install tensorflow-gpu
   ```
 
 - bert
-  - clone [bert](https://github.com/google-research/bert)
+  - clone [bert](https://github.com/google-research/bert) in the path of `etagger/bert`
+  ```
+  $ cd etagger
+  $ git clone https://github.com/google-research/bert.git
+  ```
   - download `cased_L-12_H-768_A-12`, `cased_L-24_H-1024_A-16` 
   ```
+  $ cd etagger
   $ ls embeddings
   cased_L-12_H-768_A-12  cased_L-24_H-1024_A-16
   ```
@@ -110,7 +141,7 @@ $ python -m pip install tensorflow-gpu
 - spacy [optional]
   - if you want to analyze input string and see how it detects entities, then you need to install spacy lib.
   ```
-  $ pip install spacy
+  $ python -m pip install spacy
   $ python -m spacy download en
   ```
 
@@ -216,7 +247,7 @@ in IN O O O
   - [build tensorflow from source](https://www.tensorflow.org/install/source)
   ```
   * create virtual env `python -m venv python3.6_tfsrc` and activate it.
-  $ python -m vent python3.6_tfsrc
+  $ python -m venv python3.6_tfsrc
   $ source /home/python3.6_tfsrc/bin/activate
 
   * build tensorflow from source.
