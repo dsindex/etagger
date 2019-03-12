@@ -21,10 +21,10 @@ class Config:
         self.chr_conv_type = 'conv1d'       # conv1d | conv2d
         self.filter_sizes = [3]             # filter sizes
         self.num_filters = 53               # number of filters
-        self.highway_used = False            # use highway network on the concatenated input
+        self.highway_used = False           # use highway network on the concatenated input
         self.rnn_used = True                # use rnn layer or not
         self.rnn_num_layers = 2             # number of RNN layers
-        self.rnn_type = 'fused'             # normal | fused
+        self.rnn_type = 'fused'             # normal | fused | qrnn
         self.rnn_size = 200                 # size of RNN hidden unit
         self.tf_used = False                # use transformer encoder layer or not
         self.tf_num_layers = 4              # number of layers for transformer encoder
@@ -39,9 +39,12 @@ class Config:
         self.decay_steps = 12000
         self.decay_rate = 0.9
         self.clip_norm = 10
-        if self.tf_used:
-            # modified for transformer
+        if self.tf_used:                    # modified for transformer
             self.starter_learning_rate = 0.0003
+        if self.rnn_type == 'qrnn':         # modified for QRNN
+            self.qrnn_size = 50             # size of QRNN hidden units(number of filters)
+            self.qrnn_filter_size = 3       # size of filter for QRNN
+            self.rnn_num_layers = 1
 
         self.is_training = is_training
         if self.is_training:

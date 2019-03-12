@@ -123,6 +123,13 @@ class Model:
                                                       rnn_size=config.rnn_size,
                                                       keep_prob=keep_prob,
                                                       scope=scope) # (batch_size, sentence_length, 2*rnn_size)
+                elif config.rnn_type == 'qrnn':
+                    scope = 'bi-qrnn-%s' % i
+                    rnn_output = self.__bi_qrnn(rnn_output,
+                                                self.sentence_lengths,
+                                                rnn_size=config.qrnn_size,
+                                                keep_prob=keep_prob,
+                                                scope=scope) # (batch_size, sentence_length, 2*qrnn_size)
                 else:
                     scope = 'bi-lstm-%s' % i
                     rnn_output = self.__bi_lstm(rnn_output,
@@ -396,6 +403,19 @@ class Model:
             output_bw, _ = lstm_cell_bw(t, dtype=tf.float32, sequence_length=lengths)
             outputs = tf.concat([output_fw, output_bw], axis=-1)
             outputs = tf.transpose(outputs, perm=[1, 0, 2])
+            return tf.nn.dropout(outputs, keep_prob)
+
+    def __bi_qrnn(self, inputs, lengths, rnn_size, keep_prob=0.5, scope='bi-qrnn'):
+        """Apply bi-directional Quasi-RNN
+        """
+        import qrnn
+        with tf.variable_scope(scope):
+            inputs_fw = inputs
+            outputs_fw, _ = qrnn.qrnn(inputs_fw, num_outputs=rnn_size, window=self.config.qrnn_filter_size, scope=scope+'-fw')
+            inputs_bw = tf.reverse_sequence(inputs, lengths, batch_axis=0, seq_axis=1)
+            outputs_bw, _ = qrnn.qrnn(inputs_bw, num_outputs=rnn_size, window=self.config.qrnn_filter_size, scope=scope+'-bw')
+            outputs_bw = tf.reverse_sequence(outputs_bw, lengths, batch_axis=0, seq_axis=1)
+            outputs = tf.concat([outputs_fw, outputs_bw], axis=-1)
             return tf.nn.dropout(outputs, keep_prob)
 
     def __self_attention(self, inputs, masks, model_dim=None, keep_prob=0.5, scope='self-attention'):

@@ -214,6 +214,8 @@ def train(config):
     '''
     train_data = Input(train_file, config, build_output=True, do_shuffle=True)
     dev_data = Input(dev_file, config, build_output=True)
+    #train_data = Input(train_file, config, build_output=True, do_shuffle=True, reuse=True)
+    #dev_data = Input(dev_file, config, build_output=True, reuse=True)
     tf.logging.debug('loading input data ... done')
 
     # set for bert optimization

@@ -14,7 +14,7 @@
     - highway network
       - [x] applied on the concatenated input(ex, Glove + CNN(char) + BERT + POS)
   - contextual encoding
-    - [x] 1) multi-layer BiLSTM
+    - [x] 1) multi-layer BiLSTM(normal LSTM, LSTMBlockFusedCell), BiQRNN(under testing)
     - [x] 2) Transformer(encoder)
   - decoding
     - [x] CRF decoder
@@ -121,7 +121,7 @@ $ python -m pip install numpy
   ``` 
   - test
   ```
-  * after run embvec.py
+  * run `embvec.py` and test
   $ python test_bilm.py
   ```
 
@@ -143,6 +143,26 @@ $ python -m pip install numpy
   ```
   $ python -m pip install spacy
   $ python -m spacy download en
+  ```
+
+- tensorflow_qrnn [optional]
+  - if you want to use QRNN, install [tensorflow_qrnn](https://github.com/JonathanRaiman/tensorflow_qrnn).
+  ```
+  * before install qrnn, remove `TENSORFLOW_BUILD_DIR` path from `LD_LIBRARY_PATH`
+  $ python -m pip install qrnn
+  * test
+  cd tensorflow_qrnn/test
+  $ python test_fo_pool.py
+
+  * [in some case]
+  * this module forces to upgrade tensorflow version to 1.13.1(for example)
+  * so you need to rollback to 1.11.0(for example)
+  * for GPU
+  $ python -m pip uninstall tensorflow-gpu
+  $ python -m pip install tensorflow-gpu==1.11
+  * for CPU (see `inference(bucket) using frozen model, tensorRT, C++` section)
+  $ python -m pip uninstall tensorflow
+  $ python -m pip install /tmp/tensorflow_pkg/tensorflow-1.11.0-cp36-cp36m-linux_x86_64.whl
   ```
 
 ## How to run
@@ -755,6 +775,12 @@ in IN O O O
     - [how to manually create a tf summary](https://stackoverflow.com/questions/37902705/how-to-manually-create-a-tf-summary/37915182#37915182)
   - tfrecord, tf.data api
     - [simple_batching](https://www.tensorflow.org/guide/datasets#simple_batching)
+  - tensorflow runtime include path, library path, check if built_with_cuda enabled.
+  ```
+  $ python -c "import tensorflow as tf; print(tf.sysconfig.get_lib())"
+  $ python -c "import tensorflow as tf; print(tf.sysconfig.get_include())"
+  $ python -c "import tensorflow as tf; print(int(tf.test.is_built_with_cuda()))"
+  ```
   - tensorflow backend
   ```
   - implementations of BLAS specification
@@ -771,3 +797,11 @@ in IN O O O
       - support MKL, MKL-DNN
       - or Eigen with MKL-DNN backend
   ```
+
+- etc
+  - QRNN
+    - [QRNN](https://arxiv.org/pdf/1611.01576.pdf?fbclid=IwAR3hreOvBGmJZe54-631X49XedcbsQoDYIRu87BcCHEBf_vMKF8FDKK_7Nw)
+    - [QRNN Explained](http://mlexplained.com/2018/04/09/paper-dissected-quasi-recurrent-neural-networks-explained/?fbclid=IwAR1s0khdARsUTpvgaoqeYza4BVYPKVyAHx71OfjdCKG1qJn1nBeV3Nh9ynk)
+    - [tensorflow_qrnn](https://github.com/JonathanRaiman/tensorflow_qrnn)
+    - [tf.reverse_sequence](https://www.tensorflow.org/api_docs/python/tf/reverse_sequence)
+    - [Even sized kernels with SAME padding in Tensorflow](https://stackoverflow.com/questions/51131821/even-sized-kernels-with-same-padding-in-tensorflow)
