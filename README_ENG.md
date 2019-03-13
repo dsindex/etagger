@@ -3,6 +3,90 @@
 
 - experiment 14
 ```
+* test 6
+word embedding size : 100(glove6b)
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused -> qrnn
+rnn_size : 200
+qrnn_size : 150, project input to 2*qrnn_size, no dropout in qrnn, dropout only in residual
+qrnn_filter_size : 3
+rnn_num_layers : 2 -> 1
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70 -> 140
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+do_shuffle : True
+
+token :
+chunk :
+conlleval :
+average processing time per bucket(sentence)
+  - 1 GPU(V100 TESLA) :
+
+* test 5
+word embedding size : 100(glove6b)
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused -> qrnn
+rnn_size : 200
+qrnn_size : half of input dimension, add residual connection
+qrnn_filter_size : 3
+rnn_num_layers : 2 -> 1
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+do_shuffle : True
+
+token : 0.8446446199407699
+chunk : 0.8288918797667114
+conlleval : 82.89
+average processing time per bucket(sentence)
+  - 1 GPU(V100 TESLA) : 0.011665834989661632
+
 * test 4
 word embedding size : 100(glove6b)
 keep_prob : 0.7
@@ -15,13 +99,13 @@ pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 rnn_used : True
 rnn_type : fused -> qrnn
-rnn_size : 256
-qrnn_size : 50 -> 100
+rnn_size : 200
+qrnn_size : 50 -> 150
 qrnn_filter_size : 3
 rnn_num_layers : 2 -> 1
 learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
 gradient clipping : 10
-epoch : 70 -> 140
+epoch : 70
 batch_size : 20
 +
 tf_used : False
@@ -57,13 +141,13 @@ pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 rnn_used : True
 rnn_type : fused -> qrnn
-rnn_size : 256
+rnn_size : 200
 qrnn_size : 50 -> 100
 qrnn_filter_size : 3
 rnn_num_layers : 2 -> 1
 learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
 gradient clipping : 10
-epoch : 70 -> 140
+epoch : 70
 batch_size : 20
 +
 tf_used : False
@@ -105,13 +189,13 @@ pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 rnn_used : True
 rnn_type : fused -> qrnn
-rnn_size : 256
+rnn_size : 200
 qrnn_size : 50
 qrnn_filter_size : 3
 rnn_num_layers : 2
 learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
 gradient clipping : 10
-epoch : 70 -> 140
+epoch : 70
 batch_size : 20
 +
 tf_used : False
@@ -147,13 +231,13 @@ pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 rnn_used : True
 rnn_type : fused -> qrnn
-rnn_size : 256
+rnn_size : 200
 qrnn_size : 50
 qrnn_filter_size : 3
 rnn_num_layers : 2 -> 1
 learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
 gradient clipping : 10
-epoch : 70 -> 140
+epoch : 70
 batch_size : 20
 +
 tf_used : False
@@ -179,7 +263,7 @@ average processing time per bucket(sentence)
   - 32 CPU : 0.003301392354872017 sec
 ```
 
-- experiment 13
+- experiments 13
 ```
 * test 2
 word embedding size : 100(glove6b)

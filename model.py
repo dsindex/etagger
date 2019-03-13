@@ -125,11 +125,17 @@ class Model:
                                                       scope=scope) # (batch_size, sentence_length, 2*rnn_size)
                 elif config.rnn_type == 'qrnn':
                     scope = 'bi-qrnn-%s' % i
-                    rnn_output = self.__bi_qrnn(rnn_output,
-                                                self.sentence_lengths,
-                                                rnn_size=config.qrnn_size,
-                                                keep_prob=keep_prob,
-                                                scope=scope) # (batch_size, sentence_length, 2*qrnn_size)
+                    xp = self.__projection(rnn_output,
+                                           config.qrnn_size*2,
+                                           scope='projection-%s' % scope) # (batch_size, sentence_length, config.qrnn_size*2)
+                    x = xp
+                    y = self.__bi_qrnn(xp,
+                                       self.sentence_lengths,
+                                       rnn_size=config.qrnn_size,
+                                       keep_prob=1.0, # = keep_prob
+                                       scope=scope)   # (batch_size, sentence_length, input_dim)
+                    # residual and dropout
+                    rnn_output = tf.nn.dropout(y + x, keep_prob=keep_prob)
                 else:
                     scope = 'bi-lstm-%s' % i
                     rnn_output = self.__bi_lstm(rnn_output,
@@ -151,7 +157,7 @@ class Model:
             # sinusoidal positional signal
             signal = positional_encoding(self.sentence_lengths,
                                          self.sentence_length,
-                                         transformed_output.get_shape().as_list()[-1],
+                                         model_dim,
                                          zero_pad=False,
                                          scale=False,
                                          scope='positional-encoding',
@@ -410,8 +416,10 @@ class Model:
         """
         import qrnn
         with tf.variable_scope(scope):
+            # forward
             inputs_fw = inputs
             outputs_fw, _ = qrnn.qrnn(inputs_fw, num_outputs=rnn_size, window=self.config.qrnn_filter_size, scope=scope+'-fw')
+            # backward
             inputs_bw = tf.reverse_sequence(inputs, lengths, batch_axis=0, seq_axis=1)
             outputs_bw, _ = qrnn.qrnn(inputs_bw, num_outputs=rnn_size, window=self.config.qrnn_filter_size, scope=scope+'-bw')
             outputs_bw = tf.reverse_sequence(outputs_bw, lengths, batch_axis=0, seq_axis=1)
@@ -451,7 +459,7 @@ class Model:
     def __projection(self, inputs, out_dim, scope='projection'):
         """Apply fully-connected projection layer.
         """
-        with tf.variable_scope('projection'):
+        with tf.variable_scope(scope):
             in_dim = inputs.get_shape().as_list()[-1]
             weight = tf.get_variable('W', shape=[in_dim, out_dim],
                                      dtype=tf.float32, initializer=initializers.xavier_initializer())
