@@ -2,6 +2,8 @@ import os, argparse
 import tensorflow as tf
 # for LSTMBlockFusedCell(), https://github.com/tensorflow/tensorflow/issues/23369
 tf.contrib.rnn
+# for QRNN
+import qrnn
 
 '''
 source is from https://gist.github.com/morgangiraud/249505f540a5e53a48b0c1a869d370bf#file-medium-tffreeze-1-py
