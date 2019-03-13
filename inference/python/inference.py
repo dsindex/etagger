@@ -10,7 +10,8 @@ import numpy as np
 # for LSTMBlockFusedCell(), https://github.com/tensorflow/tensorflow/issues/23369
 tf.contrib.rnn
 # for QRNN
-import qrnn
+try: import qrnn
+except: sys.stderr.write('import qrnn, failed\n')
 
 from embvec import EmbVec
 from config import Config

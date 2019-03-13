@@ -6,7 +6,8 @@ import tensorflow as tf
 # for LSTMBlockFusedCell(), https://github.com/tensorflow/tensorflow/issues/23369
 tf.contrib.rnn
 # for QRNN
-import qrnn
+try: import qrnn
+except: sys.stderr.write('import qrnn, failed\n')
 
 def export(args):
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
