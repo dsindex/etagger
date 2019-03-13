@@ -153,16 +153,6 @@ $ python -m pip install numpy
   * test
   cd tensorflow_qrnn/test
   $ python test_fo_pool.py
-
-  * [in some case]
-  * this module forces to upgrade tensorflow version to 1.13.1(for example)
-  * so you need to rollback to 1.11.0(for example)
-  * for GPU
-  $ python -m pip uninstall tensorflow-gpu
-  $ python -m pip install tensorflow-gpu==1.11
-  * for CPU (see `inference(bucket) using frozen model, tensorRT, C++` section)
-  $ python -m pip uninstall tensorflow
-  $ python -m pip install /tmp/tensorflow_pkg/tensorflow-1.11.0-cp36-cp36m-linux_x86_64.whl
   ```
 
 ## How to run
@@ -307,13 +297,18 @@ in IN O O O
   $ rnn_ops_lib=${rnn_path}/python/ops/_lstm_ops.so
   $ cp -rf ${rnn_ops_lib} ${TENSORFLOW_BUILD_DIR}
   $ export LD_LIBRARY_PATH=${TENSORFLOW_BUILD_DIR}:$LD_LIBRARY_PATH
+
+  * for QRNN [optional]
+  $ qrnn_path=`python -c "import tensorflow as tf; print(tf.__path__[0])"`
+  $ qrnn_lib=${qrnn_path}/../qrnn_lib.cpython-36m-x86_64-linux-gnu.so
+  $ cp -rf ${qrnn_lib} ${TENSORFLOW_BUILD_DIR}
   ```
   - `.bashrc` sample
   ```
   # tensorflow so, header dist
   export TENSORFLOW_SOURCE_DIR='/home/tensorflow-src-cpu'
   export TENSORFLOW_BUILD_DIR='/home/tensorflow-dist-cpu'
-  # for loading _lstm_ops.so
+  # for loading _lstm_ops.so, qrnn_lib.cpython-36m-x86_64-linux-gnu.so
   export LD_LIBRARY_PATH=${TENSORFLOW_BUILD_DIR}:$LD_LIBRARY_PATH
   ```
   - *test* build sample model and inference by C++
@@ -373,6 +368,7 @@ in IN O O O
         : what about C++? => https://stackoverflow.com/questions/50475320/executing-frozen-tensorflow-graph-that-uses-tensorflow-contrib-resampler-using-c
           we can load '_lstm_ops.so' for LSTMBlockFusedCell().
   *   3) Transformer, without ELMo, BERT
+  *   4) BiQRNN, without ELMo, BERT
 
   * restore the model to check list of operations, placeholders and tensors for mapping. and export it another place.
   $ python export.py --restore ../checkpoint/ner_model --export exported/ner_model --export-pb exported
@@ -435,22 +431,22 @@ in IN O O O
 - results
   - QRNN
     - Glove
-      - setting
-        - `experiment 14, test 1`
-      - per-token(partial) f1 : 0.8263637498439645
-      - per-chunk(exact)   f1 : 0.8129554655870445
+      - setting : `experiments 14, test 4`
+      - per-token(partial) f1 : 0.8595364764874946
+      - per-chunk(exact)   f1 : 0.8505259436047026
       - average processing time per bucket
+        - setting : `experiments 14, test 3`
         - 1 GPU(TITAN X(Pascal), 12196MiB)
-          - restore version : 0.015130160556424584 sec
+          - restore version : 0.015160589471831513 sec
         - 32 processor CPU(multi-threading)
-          - python : 0.003301392354872017 sec
+          - python : 0.003978579556903156 sec
+          - C++ : 0.003198 sec
         - 1 CPU(single-thread)
-          - python : 0.0038999207762760654 sec
-          - C++ :
+          - python : 0.00438998971259814 sec
+          - C++ : 0.003701 sec
   - Transformer
     - Glove
-      - setting
-        - `experiments 7, test 9`
+      - setting : `experiments 7, test 9`
       - per-token(partial) f1 : 0.9083215796897038
       - per-chunk(exact)   f1 : **0.904078014184397**
       - average processing time per bucket
@@ -466,8 +462,7 @@ in IN O O O
           - C++ : 0.021510 sec
   - BiLSTM
     - Glove
-      - setting
-        - `experiments 9, test 1`
+      - setting : `experiments 9, test 1`
       - per-token(partial) f1 : 0.9152852267186738
       - per-chunk(exact)   f1 : **0.9094911075893644**
       - average processing time per bucket
@@ -508,8 +503,7 @@ in IN O O O
                 - 0.003078 sec with optimizations for FMA, AVX and SSE. no meaningful difference.
               - 0.002683 sec (`experiments 12, test 5`)
     - ELMo
-      - setting
-        - `experiments 8, test 2`
+      - setting : `experiments 8, test 2`
       - per-token(partial) f1 : 0.9322728663199756
       - per-chunk(exact)   f1 : **0.9253625751680227**
       ```
@@ -527,8 +521,7 @@ in IN O O O
         - 32 processor CPU(multi-threading)      : 0.40098162731570347 sec
         - 1 CPU(single-thread)              : 0.7398052649182165 sec
     - ELMo + Glove
-      - setting
-        - `experiments 10, test 15`
+      - setting : `experiments 10, test 15`
       - per-token(partial) f1 : 0.931816792025928
       - per-chunk(exact)   f1 : **0.9268680445151033**
       ```
@@ -543,50 +536,43 @@ in IN O O O
         - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.036233977567360014 sec
         - 1 GPU(Tesla V100, 32510MiB) : 0.031166194639816864 sec
     - BERT(base)
-      - setting(on-going)
-        - `experiments 11, test 1`
+      - setting : `experiments 11, test 1`
       - per-token(partial) f1 : 0.9234725113260683
       - per-chunk(exact)   f1 : 0.9131509267431598
       - average processing time per bucket
         - 1 GPU(Tesla V100)  : 0.026964144585057526 sec
     - BERT(base) + Glove
-      - setting(on-going)
-        - `experiments 11, test 2`
+      - setting : experiments 11, test 2`
       - per-token(partial) f1 : 0.921535076998289
       - per-chunk(exact)   f1 : 0.9123210182075304
       - average processing time per bucket
         - 1 GPU(Tesla V100)  : 0.029030597688838533 sec
     - BERT(large)
-      - setting(on-going)
-        - `experiments 11, test 4`
+      - setting : `experiments 11, test 4`
       - per-token(partial) f1 : 0.9270596895895958
       - per-chunk(exact)   f1 : 0.9180153886972672
       - average processing time per bucket
         - 1 GPU(Tesla V100)  : 0.03831603427404431 sec
     - BERT(large) + Glove
-      - setting(on-going)
-        - `experiments 11, test 3`
+      - setting : `experiments 11, test 3`
       - per-token(partial) f1 : 0.9278869778869779
       - per-chunk(exact)   f1 : **0.918813634351483**
       - average processing time per bucket
         - 1 GPU(Tesla V100)  : 0.040225753178425645 sec
     - BERT(large) + Glove + Transformer
-      - setting(on-going)
-        - `experiments 11, test 7`
+      - setting : `experiments 11, test 7`
       - per-token(partial) f1 : 0.9244949032533724
       - per-chunk(exact)   f1 : 0.9170714474962465
       - average processing time per bucket
         - 1 GPU(Tesla V100)  : 0.05737522856032033 sec
   - BiLSTM + Transformer
     - Glove
-      - setting
-        - `experiments 7, test 10`
+      - setting : `experiments 7, test 10`
       - per-token(partial) f1 : 0.910979409787988
       - per-chunk(exact)   f1 : **0.9047451049567825**
   - BiLSTM + multi-head attention
     - Glove
-      - setting
-        - `experiments 6, test 7`
+      - setting : `experiments 6, test 7`
       - per-token(partial) f1 : 0.9157317073170732
       - per-chunk(exact)   f1 : **0.9102156238953694**
 
