@@ -39,12 +39,11 @@ CRF
 +
 do_shuffle : True
 
-token :
-chunk :
-conlleval :
+token : 0.8543594739405748
+chunk : 0.841045566937478
+conlleval : 84.10
 average processing time per bucket(sentence)
-  - 1 GPU(TITAN X PASCAL) :
-  - 32 CPU :
+  - 1 GPU(TITAN X PASCAL) : 0.015160589471831513
 
 * test 2
 word embedding size : 100(glove6b)
@@ -82,12 +81,11 @@ CRF
 +
 do_shuffle : True
 
-token :
-chunk :
-conlleval :
+token : 0.7630551942018212
+chunk : 0.6628828828828829
+conlleval : 66.29
 average processing time per bucket(sentence)
-  - 1 GPU(TITAN X PASCAL) :
-  - 32 CPU :
+  - 1 GPU(V100 TESLA) : 0.012013942035608778
 
 * test 1
 word embedding size : 100(glove6b)
