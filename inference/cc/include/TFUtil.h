@@ -29,6 +29,7 @@ class TFUtil {
   
   private:
     void load_lstm_lib();
+    void load_qrnn_lib();
 };
 
 #endif

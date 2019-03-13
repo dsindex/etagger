@@ -44,6 +44,7 @@ tensorflow::Status TFUtil::LoadFrozenModel(tensorflow::Session* sess, string gra
   tensorflow::Status status;
 
   load_lstm_lib();
+  /* load_qrnn_lib(); */
 
   // Read in the protobuf graph freezed
   tensorflow::GraphDef graph_def;
@@ -62,6 +63,7 @@ tensorflow::Status TFUtil::LoadFrozenMemmappedModel(tensorflow::MemmappedEnv* me
   tensorflow::Status status;
 
   load_lstm_lib();
+  /* load_qrnn_lib(); */
 
   // Read the memmory-mapped graph
   tensorflow::GraphDef graph_def;
@@ -135,6 +137,19 @@ void TFUtil::load_lstm_lib()
   TF_LoadLibrary("_lstm_ops.so", status);
   if( TF_GetCode(status) != TF_OK ) {
     throw runtime_error("fail to load _lstm_ops.so");
+  }
+  TF_DeleteStatus(status);
+}
+
+void TFUtil::load_qrnn_lib()
+{
+  /*
+   *  Load qrnn_lib.cpython-36m-x86_64-linux-gnu.so library(from LB_LIBRARY_PATH) for QRNN
+   */
+  TF_Status* status = TF_NewStatus();
+  TF_LoadLibrary("qrnn_lib.cpython-36m-x86_64-linux-gnu.so", status);
+  if( TF_GetCode(status) != TF_OK ) {
+    throw runtime_error("fail to load qrnn_lib.cpython-36m-x86_64-linux-gnu.so");
   }
   TF_DeleteStatus(status);
 }
