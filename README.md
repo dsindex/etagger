@@ -431,19 +431,18 @@ in IN O O O
 - results
   - QRNN
     - Glove
-      - setting : `experiments 14, test 4`
-      - per-token(partial) f1 : 0.8595364764874946
-      - per-chunk(exact)   f1 : 0.8505259436047026
+      - setting : `experiments 14, test 8`
+      - per-token(partial) f1 : 0.8892680845877263
+      - per-chunk(exact)   f1 : 0.8809544851966417
       - average processing time per bucket
-        - setting : `experiments 14, test 3`
         - 1 GPU(TITAN X(Pascal), 12196MiB)
-          - restore version : 0.015160589471831513 sec
+          - restore version : 0.013028464151645457 sec
         - 32 processor CPU(multi-threading)
-          - python : 0.003978579556903156 sec
-          - C++ : 0.003198 sec
+          - python :
+          - C++ :
         - 1 CPU(single-thread)
-          - python : 0.00438998971259814 sec
-          - C++ : 0.003701 sec
+          - python :
+          - C++ :
   - Transformer
     - Glove
       - setting : `experiments 7, test 9`

@@ -3,6 +3,144 @@
 
 - experiment 14
 ```
+* test 9
+word embedding size : 100(glove6b)
+keep_prob : 0.7 -> 0.9
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused -> qrnn
+rnn_size : 200
+qrnn_size : 150 -> 200, project input to 2*qrnn_size, no dropout in qrnn, dropout only in residual
+qrnn_filter_size : 3
+rnn_num_layers : 2 -> 1
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70 -> 140
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+do_shuffle : True
+
+token : 0.8875768458214134
+chunk : 0.8807323299005368
+conlleval : 88.07
+average processing time per bucket(sentence)
+  - 1 GPU(V100 TESLA) : 0.010713322025427472
+
+* test 8
+word embedding size : 100(glove6b)
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused -> qrnn
+rnn_size : 200
+qrnn_size : 150 -> 200, project input to 2*qrnn_size, no dropout in qrnn, dropout only in residual
+qrnn_filter_size : 3
+rnn_num_layers : 2 -> 1
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70 -> 140
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+do_shuffle : True
+
+token : 0.8892680845877263
+chunk : 0.8809544851966417
+conlleval : 88.10          -> Glove(6B) + CNN + QRNN + CRF best
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) : 0.013028464151645457 sec
+  - 32 CPU :
+  - 1 CPU :
+  - 1 CPU(freezed) :
+  - C++
+    - 32 CPU :
+    - 1 CPU :
+
+* test 7
+word embedding size : 100(glove6b)
+keep_prob : 0.7 -> 0.9
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused -> qrnn
+rnn_size : 200
+qrnn_size : 150, project input to 2*qrnn_size, no dropout in qrnn, dropout only in residual
+qrnn_filter_size : 3
+rnn_num_layers : 2 -> 1
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70 -> 140
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+do_shuffle : True
+
+token : 0.8797020029311187
+chunk : 0.8713414094968608
+conlleval : 87.13
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) : 0.012709235847319894 sec
+  - 32 CPU : 0.003801368411537361 sec
+  - 1 CPU : 0.0040382987513216 sec
+  - 1 CPU(freezed) : 0.004771721414841477 sec
+  - C++
+    - 32 CPU : 0.003750 sec
+    - 1 CPU : 0.004354 sec
+
 * test 6
 word embedding size : 100(glove6b)
 keep_prob : 0.7
@@ -39,11 +177,11 @@ CRF
 +
 do_shuffle : True
 
-token :
-chunk :
-conlleval :
+token : 0.878465605213008
+chunk : 0.8706007820831853
+conlleval : 87.06
 average processing time per bucket(sentence)
-  - 1 GPU(V100 TESLA) :
+  - 1 GPU(V100 TESLA) : 0.011456906924936333
 
 * test 5
 word embedding size : 100(glove6b)
@@ -125,7 +263,7 @@ do_shuffle : True
 
 token : 0.8595364764874946
 chunk : 0.8505259436047026
-conlleval : 85.05          -> Glove(6B) + CNN + QRNN + CRF best
+conlleval : 85.05
 average processing time per bucket(sentence)
   - 1 GPU(V100 TESLA) : 0.011682364309002342
 
