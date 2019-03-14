@@ -438,11 +438,11 @@ in IN O O O
         - 1 GPU(TITAN X(Pascal), 12196MiB)
           - restore version : 0.013028464151645457 sec
         - 32 processor CPU(multi-threading)
-          - python :
-          - C++ :
+          - python : 0.004297458387741437 sec
+          - C++ : 0.004124 sec
         - 1 CPU(single-thread)
-          - python :
-          - C++ :
+          - python : 0.004832443533451109 sec
+          - C++ : 0.004734 sec
   - Transformer
     - Glove
       - setting : `experiments 7, test 9`

@@ -86,12 +86,12 @@ chunk : 0.8809544851966417
 conlleval : 88.10          -> Glove(6B) + CNN + QRNN + CRF best
 average processing time per bucket(sentence)
   - 1 GPU(TITAN X PASCAL) : 0.013028464151645457 sec
-  - 32 CPU :
-  - 1 CPU :
-  - 1 CPU(freezed) :
+  - 32 CPU : 0.004297458387741437 sec
+  - 1 CPU : 0.004832443533451109 sec
+  - 1 CPU(freezed) : 0.0056305657768870795 sec
   - C++
-    - 32 CPU :
-    - 1 CPU :
+    - 32 CPU : 0.004124 sec
+    - 1 CPU : 0.004734 sec
 
 * test 7
 word embedding size : 100(glove6b)
