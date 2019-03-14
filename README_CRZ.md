@@ -22,7 +22,11 @@ base entity tagging   : 230.612970 sec / 137272 = 0.001679970933621 sec
 2.5G(500k, 525470) kor.glove.300d.txt
 841M(300k, 308383) kor.glove.300k.300d.txt
 
-4. bert
+4. elmo
+358M kor_elmo_2x4096_512_2048cnn_2xhighway_weights.hdf5
+336  kor_elmo_2x4096_512_2048cnn_2xhighway_options.json
+
+5. bert
 
 1) all.dha.2.5m_step
   768    hidden_size
@@ -42,7 +46,7 @@ base entity tagging   : 230.612970 sec / 137272 = 0.001679970933621 sec
   627M   bert_model.ckpt
   96     bert_max_seq_length
 
-5. evaluation by CRF(wapiti)
+6. evaluation by CRF(wapiti)
 token : 0.852890598904
 chunk : 0.844539652006645
 conlleval : 84.45
@@ -63,6 +67,9 @@ $ python embvec.py --emb_path embeddings/kor.glove.100d.txt --wrd_dim 100 --trai
 $ python embvec.py --emb_path embeddings/kor.glove.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in > embeddings/vocab.txt
 $ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in > embeddings/vocab.txt
 
+* for ELMo
+$ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/kor_elmo_2x4096_512_2048cnn_2xhighway_options.json --elmo_weight_path embeddings/kor_elmo_2x4096_512_2048cnn_2xhighway_weights.hdf5 > embeddings/vocab.txt
+
 * for BERT(all.dha.2.5m_step)
 $ python embvec.py --emb_path embeddings/kor.glove.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in --bert_config_path embeddings/all.dha.2.5m_step/bert_config.json --bert_vocab_path embeddings/all.dha.2.5m_step/vocab.txt --bert_do_lower_case False --bert_init_checkpoint embeddings/all.dha.2.5m_step/bert_model.ckpt --bert_max_seq_length 64 > embeddings/vocab.txt
 $ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in --bert_config_path embeddings/all.dha.2.5m_step/bert_config.json --bert_vocab_path embeddings/all.dha.2.5m_step/vocab.txt --bert_do_lower_case False --bert_init_checkpoint embeddings/all.dha.2.5m_step/bert_model.ckpt --bert_max_seq_length 64 > embeddings/vocab.txt
@@ -82,6 +89,58 @@ $ python train.py --emb_path embeddings/kor.glove.300k.300d.txt.pkl --wrd_dim 30
 $ python inference.py --mode bucket --emb_path embeddings/kor.glove.100d.txt.pkl --wrd_dim 100 --restore checkpoint/ner_model < data/cruise.test.txt.in > pred.txt
 $ python inference.py --mode bucket --emb_path embeddings/kor.glove.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/cruise.test.txt.in > pred.txt
 $ python inference.py --mode bucket --emb_path embeddings/kor.glove.300k.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/cruise.test.txt.in > pred.txt
+```
+
+- experiments 2-4
+```
+* test 1
+word embedding size : 300(kor.glove.300k.300d.txt)
+elmo embedding params : kor_elmo_2x4096_512_2048cnn_2xhighway_options.json
+elmo embedding size : 1024
+elmo_keep_prob : 0.7
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+chk embedding size : 10 -> 64
+chk embedding random init : -0.5 ~ 0.5
+highway_used : True
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++ 
+do_shuffle : True
++
+remove 'B-','I-' from etype
+
+token :
+chunk :
+conlleval :
+average processing time per bucket(sentence)
+  - 1 GPU(V100 TESLA) :
+
 ```
 
 - experiments 2-3
