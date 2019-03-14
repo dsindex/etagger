@@ -3,6 +3,105 @@
 
 - experiment 14
 ```
+* test 11
+word embedding size : 100(glove6b)
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused -> qrnn
+rnn_size : 200
+qrnn_size : 150 -> 200, project input to 2*qrnn_size, no dropout in qrnn, dropout only in residual
+qrnn_filter_size : 3
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+do_shuffle : True
+
+# trial 1
+token : 0.8877875673029858
+chunk : 0.8809187279151944
+conlleval : 88.10
+average processing time per bucket(sentence)
+  - 1 GPU(V100 TESLA) : 0.01200345084152056 sec
+
+# trial 2
+token : 0.8837638376383764
+chunk : 0.8761163674949155
+conlleval : 87.60
+average processing time per bucket(sentence)
+  - 1 GPU(V100 TESLA) : 0.011934106823675796 sec
+
+# modified trial 1 (rnn_num_layers : 3, applied projection to first layer only)
+token : 0.8759533833668923
+chunk : 0.8673442333186036
+conlleval : 86.73
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) : 0.01733937467995477
+
+* test 10
+word embedding size : 100(glove6b)
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused -> qrnn
+rnn_size : 200
+qrnn_size : 150 -> 250, project input to 2*qrnn_size, no dropout in qrnn, dropout only in residual
+qrnn_filter_size : 3
+rnn_num_layers : 2 -> 1
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+do_shuffle : True
+
+token : 0.8769974897446886
+chunk : 0.8702669149596524
+conlleval : 87.03
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) : 0.01541237780636219 sec
+
 * test 9
 word embedding size : 100(glove6b)
 keep_prob : 0.7 -> 0.9
