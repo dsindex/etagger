@@ -42,7 +42,7 @@ class Config:
         if self.tf_used:                    # modified for transformer
             self.starter_learning_rate = 0.0003
         if self.rnn_type == 'qrnn':         # modified for QRNN
-            self.qrnn_size = 150            # size of QRNN hidden units(number of filters)
+            self.qrnn_size = 200            # size of QRNN hidden units(number of filters)
             self.qrnn_filter_size = 3       # size of filter for QRNN
             self.rnn_num_layers = 1
 
