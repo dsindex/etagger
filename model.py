@@ -132,7 +132,7 @@ class Model:
                     y = self.__bi_qrnn(xp,
                                        self.sentence_lengths,
                                        rnn_size=config.qrnn_size,
-                                       keep_prob=1.0, # = keep_prob
+                                       keep_prob=1.0,
                                        scope=scope)   # (batch_size, sentence_length, input_dim)
                     # residual and dropout
                     rnn_output = tf.nn.dropout(y + x, keep_prob=keep_prob)
