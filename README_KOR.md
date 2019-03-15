@@ -180,11 +180,19 @@ CRF
 +
 do_shuffle : False -> True
 
-token :
-chunk :
-conlleval :
+# with kor.test.txt
+token : 0.9232528418645322
+chunk : 0.9313038296950328
+conlleval : 93.13          -> Glove + ELMo + CNN + LSTM + CRF best
 average processing time per bucket(sentence)
-  - 1 GPU(V100 TESLA) :
+  - 1 GPU(V100 TESLA) : 0.02642091485044801 sec
+
+# with kor.test.confirmed.txt
+token : 0.9466062405584206
+chunk : 0.9503796095444685
+conlleval : 95.04
+average processing time per bucket(sentence)
+  - 1 GPU(V100 TESLA) : 0.027445672323625582 sec
 
 
 ```

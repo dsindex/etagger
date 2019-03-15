@@ -135,16 +135,64 @@ do_shuffle : True
 +
 remove 'B-','I-' from etype
 
-token :
-chunk :
-conlleval :
+token : 0.8674524956591915
+chunk : 0.8597267488290777
+conlleval : 85.97          -> Glove + ELMo + CNN + CHK + LSTM + CRF best
 average processing time per bucket(sentence)
-  - 1 GPU(V100 TESLA) :
+  - 1 GPU(TITAN X PASCAL) : 0.033280537076367606 sec
 
 ```
 
 - experiments 2-3
 ```
+* test 2
+word embedding size : 300(kor.glove.300k.300d.txt)
+elmo embedding params : kor_elmo_2x4096_512_2048cnn_2xhighway_options.json
+elmo embedding size : 1024
+elmo_keep_prob : 0.7
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+#chk embedding size : 10 -> 64
+#chk embedding random init : -0.5 ~ 0.5
+highway_used : True
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++ 
+do_shuffle : True
++
+remove 'B-','I-' from etype
+
+# trial 1 <- set chk feature as 'X'
+token :
+chunk :
+conlleval :
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) : 
 
 * test 1
 word embedding size : 300(kor.glove.300k.300d.txt)
