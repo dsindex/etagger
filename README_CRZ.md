@@ -188,11 +188,11 @@ do_shuffle : True
 remove 'B-','I-' from etype
 
 # trial 1 <- set chk feature as 'X'
-token :
-chunk :
-conlleval :
+token : 0.854282373574978
+chunk : 0.8488354523280162
+conlleval : 84.88          -> Glove + ELMo + CNN + LSTM + CRF best
 average processing time per bucket(sentence)
-  - 1 GPU(TITAN X PASCAL) : 
+  - 1 GPU(TITAN X PASCAL) : 0.03390626800041048 sec
 
 * test 1
 word embedding size : 300(kor.glove.300k.300d.txt)
