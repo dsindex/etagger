@@ -56,7 +56,11 @@ class Config:
         '''for KOR
         self.highway_used = True
         '''
-        '''for CRZ
+        '''for CRZ without chk
+        self.chk_dim = 10
+        self.highway_used = False
+        '''
+        '''for CRZ with chk
         self.chk_dim = 64
         self.highway_used = True
         '''
