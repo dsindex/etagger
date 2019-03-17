@@ -53,11 +53,6 @@ class Config:
             self.checkpoint_dir = args.checkpoint_dir
             self.summary_dir = args.summary_dir
 
-        '''for KOR
-        self.highway_used = False
-        if 'elmo' in self.emb_class:
-            self.rnn_size = 250
-        '''
         '''for CRZ without chk
         self.chk_dim = 10
         self.highway_used = False
@@ -74,6 +69,9 @@ class Config:
             self.elmo_bilm = BidirectionalLanguageModel(self.embvec.elmo_options_path, self.embvec.elmo_weight_path) # biLM graph
             self.elmo_keep_prob = 0.7
             self.highway_used = False
+            '''for KOR
+            self.rnn_size = 250
+            '''
         if 'bert' in self.emb_class:
             from bert import modeling
             from bert import tokenization
