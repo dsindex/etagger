@@ -54,7 +54,9 @@ class Config:
             self.summary_dir = args.summary_dir
 
         '''for KOR
-        self.highway_used = True
+        self.highway_used = False
+        if 'elmo' in self.emb_class:
+            self.rnn_size = 250
         '''
         '''for CRZ without chk
         self.chk_dim = 10

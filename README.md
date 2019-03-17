@@ -14,7 +14,7 @@
     - highway network
       - [x] applied on the concatenated input(ex, Glove + CNN(char) + BERT + POS)
   - contextual encoding
-    - [x] 1) multi-layer BiLSTM(normal LSTM, LSTMBlockFusedCell), BiQRNN(under testing)
+    - [x] 1) multi-layer BiLSTM(normal LSTM, LSTMBlockFusedCell), BiQRNN
     - [x] 2) Transformer(encoder)
   - decoding
     - [x] CRF decoder
