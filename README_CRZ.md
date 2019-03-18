@@ -23,8 +23,11 @@ base entity tagging   : 230.612970 sec / 137272 = 0.001679970933621 sec
 841M(300k, 308383) kor.glove.300k.300d.txt
 
 4. elmo
-358M kor_elmo_2x4096_512_2048cnn_2xhighway_weights.hdf5
-336  kor_elmo_2x4096_512_2048cnn_2xhighway_options.json
+358M kor_elmo_2x4096_512_2048cnn_2xhighway_622k_weights.hdf5
+336  kor_elmo_2x4096_512_2048cnn_2xhighway_622k_options.json
+
+358M kor_elmo_2x4096_512_2048cnn_2xhighway_882k_weights.hdf5
+336  kor_elmo_2x4096_512_2048cnn_2xhighway_882k_options.json
 
 5. bert
 
@@ -68,7 +71,8 @@ $ python embvec.py --emb_path embeddings/kor.glove.300d.txt --wrd_dim 300 --trai
 $ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in > embeddings/vocab.txt
 
 * for ELMo
-$ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/kor_elmo_2x4096_512_2048cnn_2xhighway_options.json --elmo_weight_path embeddings/kor_elmo_2x4096_512_2048cnn_2xhighway_weights.hdf5 > embeddings/vocab.txt
+$ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/kor_elmo_2x4096_512_2048cnn_2xhighway_622k_options.json --elmo_weight_path embeddings/kor_elmo_2x4096_512_2048cnn_2xhighway_622k_weights.hdf5 > embeddings/vocab.txt
+$ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/kor_elmo_2x4096_512_2048cnn_2xhighway_882k_options.json --elmo_weight_path embeddings/kor_elmo_2x4096_512_2048cnn_2xhighway_882k_weights.hdf5 > embeddings/vocab.txt
 
 * for BERT(all.dha.2.5m_step)
 $ python embvec.py --emb_path embeddings/kor.glove.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in --bert_config_path embeddings/all.dha.2.5m_step/bert_config.json --bert_vocab_path embeddings/all.dha.2.5m_step/vocab.txt --bert_do_lower_case False --bert_init_checkpoint embeddings/all.dha.2.5m_step/bert_model.ckpt --bert_max_seq_length 64 > embeddings/vocab.txt
@@ -95,7 +99,7 @@ $ python inference.py --mode bucket --emb_path embeddings/kor.glove.300k.300d.tx
 ```
 * test 1
 word embedding size : 300(kor.glove.300k.300d.txt)
-elmo embedding params : kor_elmo_2x4096_512_2048cnn_2xhighway_options.json
+elmo embedding params : kor_elmo_2x4096_512_2048cnn_2xhighway_622k_options.json
 elmo embedding size : 1024
 elmo_keep_prob : 0.7
 keep_prob : 0.7
@@ -147,7 +151,7 @@ average processing time per bucket(sentence)
 ```
 * test 2
 word embedding size : 300(kor.glove.300k.300d.txt)
-elmo embedding params : kor_elmo_2x4096_512_2048cnn_2xhighway_options.json
+elmo embedding params : kor_elmo_2x4096_512_2048cnn_2xhighway_622k_options.json
 elmo embedding size : 1024
 elmo_keep_prob : 0.7
 keep_prob : 0.7
