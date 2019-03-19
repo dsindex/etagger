@@ -144,6 +144,60 @@ conlleval : 94.30
 
 - experiments 1-3
 ```
+* test 3
+word embedding size : 300(kor.glove.300k.300d.txt)
+elmo embedding params : kor_elmo_2x4096_512_2048cnn_2xhighway_882k_options.json
+elmo embedding size : 1024
+elmo_keep_prob : 0.7
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+chk embedding size : 10
+chk embedding random init : -0.5 ~ 0.5
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+highway_used : False
+rnn_used : True
+rnn_type : fused
+rnn_size : 200 -> 250
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+do_shuffle : False -> True
+
+# with kor.test.txt
+token : 0.9254371577805253
+chunk : 0.9327268789257093
+conlleval : 93.27          -> Glove + ELMo + CNN + LSTM + CRF best
+average processing time per bucket(sentence)
+  - 1 GPU(V100 TESLA) : 0.028036073652058863 sec
+
+# with kor.test.confirmed.txt
+token : 0.9468634301507013
+chunk : 0.9513469498541087
+conlleval : 95.12
+average processing time per bucket(sentence)
+  - 1 GPU(V100 TESLA) : 0.027500629977857724 sec
+
 * test 2
 word embedding size : 300(kor.glove.300k.300d.txt)
 elmo embedding params : kor_elmo_2x4096_512_2048cnn_2xhighway_622k_options.json
@@ -187,7 +241,7 @@ do_shuffle : False -> True
 # with kor.test.txt
 token : 0.9245205352867547
 chunk : 0.9322457998895135
-conlleval : 93.24          -> Glove + ELMo + CNN + LSTM + CRF best
+conlleval : 93.24
 average processing time per bucket(sentence)
   - 1 GPU(V100 TESLA) : 0.02585688952741952 sec
 
