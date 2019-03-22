@@ -205,7 +205,7 @@ class Model:
         self.output_data = tf.placeholder(tf.float32,
                                           shape=[None, None, self.class_size], # (batch_size, sentence_length, class_size)
                                           name='output_data')
-        self.output_data_indices = tf.cast(tf.argmax(self.output_data, 2), tf.int32)  # (batch_size, sentence_length)
+        self.output_data_indices = tf.argmax(self.output_data, axis=-1, output_type=tf.int32) # (batch_size, sentence_length)
 
         """
         Loss, Prediction, Measures, Optimization
@@ -502,8 +502,8 @@ class Model:
                                                       transition_params=self.trans_params,
                                                       sequence_length=self.sentence_lengths)
         else:
-            probabilities = tf.nn.softmax(self.logits, axis=-1)  # (batch_size, sentence_length, class_size)
-            prediction = tf.argmax(probabilities,axis=-1)        # (batch_size, sentence_length)
+            probabilities = tf.nn.softmax(self.logits, axis=-1)                    # (batch_size, sentence_length, class_size)
+            prediction = tf.argmax(probabilities, axis=-1, output_type=tf.int32)   # (batch_size, sentence_length)
         return prediction
 
     def __compute_measures(self):
