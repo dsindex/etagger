@@ -25,6 +25,9 @@
 358M kor_elmo_2x4096_512_2048cnn_2xhighway_882k_weights.hdf5
 336  kor_elmo_2x4096_512_2048cnn_2xhighway_882k_options.json
 
+358M kor_elmo_2x4096_512_2048cnn_2xhighway_1000k_weights.hdf5
+336  kor_elmo_2x4096_512_2048cnn_2xhighway_1000k_options.json
+
 5. bert
 
 1) all.dha.2.5m_step
@@ -63,6 +66,7 @@ $ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 -
 * for ELMo
 $ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/kor.train.txt --total_path data/kor.total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/kor_elmo_2x4096_512_2048cnn_2xhighway_622k_options.json --elmo_weight_path embeddings/kor_elmo_2x4096_512_2048cnn_2xhighway_622k_weights.hdf5 > embeddings/vocab.txt
 $ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/kor.train.txt --total_path data/kor.total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/kor_elmo_2x4096_512_2048cnn_2xhighway_882k_options.json --elmo_weight_path embeddings/kor_elmo_2x4096_512_2048cnn_2xhighway_882k_weights.hdf5 > embeddings/vocab.txt
+$ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/kor.train.txt --total_path data/kor.total.txt --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/kor_elmo_2x4096_512_2048cnn_2xhighway_1000k_options.json --elmo_weight_path embeddings/kor_elmo_2x4096_512_2048cnn_2xhighway_1000k_weights.hdf5 > embeddings/vocab.txt
 
 * for BERT(all.dha.2.5m_step)
 $ python embvec.py --emb_path embeddings/kor.glove.300d.txt --wrd_dim 300 --train_path data/kor.train.txt --total_path data/kor.total.txt --bert_config_path embeddings/all.dha.2.5m_step/bert_config.json --bert_vocab_path embeddings/all.dha.2.5m_step/vocab.txt --bert_do_lower_case False --bert_init_checkpoint embeddings/all.dha.2.5m_step/bert_model.ckpt --bert_max_seq_length 64 > embeddings/vocab.txt
@@ -144,6 +148,60 @@ conlleval : 94.30
 
 - experiments 1-3
 ```
+* test 4
+word embedding size : 300(kor.glove.300k.300d.txt)
+elmo embedding params : kor_elmo_2x4096_512_2048cnn_2xhighway_1000k_options.json
+elmo embedding size : 1024
+elmo_keep_prob : 0.7
+keep_prob : 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+chk embedding size : 10
+chk embedding random init : -0.5 ~ 0.5
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+highway_used : False
+rnn_used : True
+rnn_type : fused
+rnn_size : 200 -> 250
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / 12000 / 0.9
+gradient clipping : 10
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+do_shuffle : False -> True
+
+# with kor.test.txt
+token : 0.9246887566215298
+chunk : 0.9328298457077319
+conlleval : 93.28          -> Glove + ELMo + CNN + LSTM + CRF best
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) : 0.038068484522230356 sec
+
+# with kor.test.confirmed.txt
+token : 0.9449015727528383
+chunk : 0.9505084745762712
+conlleval : 95.04
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) : 0.03945065318610187 sec
+
 * test 3
 word embedding size : 300(kor.glove.300k.300d.txt)
 elmo embedding params : kor_elmo_2x4096_512_2048cnn_2xhighway_882k_options.json
@@ -187,7 +245,7 @@ do_shuffle : False -> True
 # with kor.test.txt
 token : 0.9254371577805253
 chunk : 0.9327268789257093
-conlleval : 93.27          -> Glove + ELMo + CNN + LSTM + CRF best
+conlleval : 93.27 
 average processing time per bucket(sentence)
   - 1 GPU(V100 TESLA) : 0.028036073652058863 sec
 
