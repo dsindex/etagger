@@ -849,6 +849,92 @@ chunk : 0.9027189265536724
 
 - experiments 11
 ```
+* test 18
+#word embedding size : 100(glove6B)
+bert embedding : cased_L-24_H-1024_A-16
+bert_keep_prob : 0.9
+keep_prob : 0.9
+#chr_conv_type : conv1d
+#chracter embedding size : 25
+#chracter embedding random init : -1.0 ~ 1.0
+#filter_sizes : [3]
+#num_filters : 53
+#pos embedding size : 7
+#pos embedding random init : -0.5 ~ 0.5
+#chk embedding size : 10
+#chk embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 1
+learning_rate : exponential_decay(), 2e-5 / 10000 / 0.9 + Warmup + AdamWeightDecayOptimizer
+gradient clipping : 1.0
+#learning_rate : use optimization.py from bert, 2e-5 / warmup proportion 0.1
+epoch : 70
+batch_size : 16
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+do_shuffle : True
+
+token : 
+chunk : 
+conlleval : 
+
+* test 17
+#word embedding size : 100(glove6B)
+bert embedding : cased_L-24_H-1024_A-16
+bert_keep_prob : 0.9
+keep_prob : 0.9
+#chr_conv_type : conv1d
+#chracter embedding size : 25
+#chracter embedding random init : -1.0 ~ 1.0
+#filter_sizes : [3]
+#num_filters : 53
+#pos embedding size : 7
+#pos embedding random init : -0.5 ~ 0.5
+#chk embedding size : 10
+#chk embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused
+rnn_size : 256 -> 200
+rnn_num_layers : 2 -> 1
+learning_rate : exponential_decay(), 2e-5 / 5000 / 0.9 + AdamWeightDecayOptimizer
+gradient clipping : 1.5 -> 1.0
+#learning_rate : use optimization.py from bert, 2e-5 / warmup proportion 0.1
+epoch : 70
+batch_size : 16
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+do_shuffle : True
+
+token : 0.9255195243057684
+chunk : 0.9179514442672337
+conlleval : 91.65
+
 * test 16
 #word embedding size : 100(glove6B)
 bert embedding : cased_L-24_H-1024_A-16
@@ -894,9 +980,14 @@ chunk : 0.9220033565939405
 conlleval : 91.97          -> BERT large + LSTM + CRF best
 
 # epoch 4
-token :
-chunk :
-conlleval :
+token : 0.9273462386669934
+chunk : 0.9191677733510403
+conlleval : 91.67
+
+# epoch 10
+token : 0.9275397796817625
+chunk : 0.9186036235086168
+conlleval : 91.78
 
 * test 15
 #word embedding size : 100(glove6B)
