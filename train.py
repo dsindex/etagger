@@ -222,6 +222,8 @@ def train(config):
     if 'bert' in config.emb_class and config.use_bert_optimization:
         config.num_train_steps = int((train_data.num_examples / config.batch_size) * config.epoch)
         config.num_warmup_steps = int(config.num_train_steps * config.warmup_proportion)
+        tf.logging.debug('config.num_train_steps = %s' % config.num_train_steps)
+        tf.logging.debug('config.num_warmup_steps = %s' % config.num_warmup_steps)
 
     # create model
     model = Model(config)

@@ -80,25 +80,33 @@ class Config:
                 vocab_file=self.embvec.bert_vocab_path, do_lower_case=self.embvec.bert_do_lower_case)
             self.bert_init_checkpoint = self.embvec.bert_init_checkpoint
             self.bert_max_seq_length = self.embvec.bert_max_seq_length
-            self.bert_keep_prob = 0.8
+            self.bert_keep_prob = 0.9
             self.highway_used = False
-            self.rnn_size = 256
-
             self.starter_learning_rate = 2e-5
             self.decay_steps = 5000
             self.decay_rate = 0.9
             self.clip_norm = 1.5
-            '''for KOR, CRZ
-            self.starter_learning_rate = 0.001
-            self.decay_steps = 12000
-            self.decay_rate = 0.9
-            self.clip_norm = 10
-            '''
-
             self.use_bert_optimization = False
             self.num_train_steps = 0            # number of total training steps
             self.num_warmup_steps = 0           # number of warmup steps
             self.warmup_proportion = 0.1        # proportion of training to perform linear learning rate warmup for
+
+            '''for ENG
+            self.keep_prob = 0.9
+            self.rnn_size = 200
+            self.rnn_num_layers = 1
+            self.use_bert_optimization = True
+            '''
+
+            '''for KOR, CRZ
+            self.bert_keep_prob = 0.8
+            self.rnn_size = 256
+            self.starter_learning_rate = 0.001
+            self.decay_steps = 12000
+            self.decay_rate = 0.9
+            self.clip_norm = 10
+            self.use_bert_optimization = False
+            '''
 
 # -----------------------------------------------------------------------------
 # utility
