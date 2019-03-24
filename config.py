@@ -82,30 +82,31 @@ class Config:
             self.bert_max_seq_length = self.embvec.bert_max_seq_length
             self.bert_keep_prob = 0.9
             self.highway_used = False
-            self.starter_learning_rate = 2e-5
-            self.decay_steps = 5000
-            self.decay_rate = 0.9
-            self.clip_norm = 1.5
-            self.use_bert_optimization = False
-            self.num_train_steps = 0            # number of total training steps
-            self.num_warmup_steps = 0           # number of warmup steps
-            self.warmup_proportion = 0.1        # proportion of training to perform linear learning rate warmup for
-
-            '''for ENG
             self.keep_prob = 0.9
             self.rnn_size = 200
             self.rnn_num_layers = 1
-            self.use_bert_optimization = True
-            '''
+            self.starter_learning_rate = 2e-5
+            self.use_bert_optimization = False
+            if self.use_bert_optimization:
+                self.num_train_steps = 0            # number of total training steps for bert optimization
+                self.num_warmup_steps = 0           # number of warmup steps for bert optimization
+                self.warmup_proportion = 0.1        # proportion of training to perform linear learning rate warmup for bert optimization
+            else:
+                self.decay_steps = 1000
+                self.decay_rate = 0.9
+                self.clip_norm = 1.0
 
             '''for KOR, CRZ
             self.bert_keep_prob = 0.8
+            self.keep_prob = 0.7
             self.rnn_size = 256
+            self.rnn_num_layers = 2
             self.starter_learning_rate = 0.001
-            self.decay_steps = 12000
-            self.decay_rate = 0.9
-            self.clip_norm = 10
             self.use_bert_optimization = False
+            if not self.use_bert_optimization:
+                self.decay_steps = 12000
+                self.decay_rate = 0.9
+                self.clip_norm = 10
             '''
 
 # -----------------------------------------------------------------------------
