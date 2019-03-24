@@ -550,7 +550,7 @@ in IN O O O
       - BERT + CRF only
       - setting : `experiments 11, test 15`
       - per-token(partial) f1 : 0.929012534393152
-      - per-chunk(exact)   f1 : 0.9215426705498191 (chunk_eval), 92.00(conlleval)
+      - per-chunk(exact)   f1 : 0.9215426705498191 (chunk_eval), **92.00**(conlleval)
       - average processing time per bucket
         - 1 GPU(Tesla V100)  : pass
     - BERT(large)
