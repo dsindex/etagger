@@ -191,9 +191,9 @@ $ python train.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --ba
 $ python train.py --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --batch_size 20 --epoch 70
 
 * for BERT, BERT+ELMo
-$ python train.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --batch_size 16 --epoch 70
-$ python train.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --batch_size 16 --epoch 70
-$ python train.py --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --batch_size 16 --epoch 70
+$ python train.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --batch_size 16 --epoch 10
+$ python train.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --batch_size 16 --epoch 10
+$ python train.py --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --batch_size 16 --epoch 10
 
 $ rm -rf runs; tensorboard --logdir runs/summaries/ --port 6008
 ```
@@ -433,7 +433,7 @@ in IN O O O
     - Glove
       - setting : `experiments 14, test 8`
       - per-token(partial) f1 : 0.8892680845877263
-      - per-chunk(exact)   f1 : 0.8809544851966417
+      - per-chunk(exact)   f1 : 0.8809544851966417 (conlleval)
       - average processing time per bucket
         - 1 GPU(TITAN X(Pascal), 12196MiB)
           - restore version : 0.013028464151645457 sec
@@ -447,7 +447,7 @@ in IN O O O
     - Glove
       - setting : `experiments 7, test 9`
       - per-token(partial) f1 : 0.9083215796897038
-      - per-chunk(exact)   f1 : **0.904078014184397**
+      - per-chunk(exact)   f1 : **0.904078014184397** (chunk_eval)
       - average processing time per bucket
         - 1 GPU(TITAN X (Pascal), 12196MiB)
           - restore version        : 0.013825567226844812 sec
@@ -463,7 +463,7 @@ in IN O O O
     - Glove
       - setting : `experiments 9, test 1`
       - per-token(partial) f1 : 0.9152852267186738
-      - per-chunk(exact)   f1 : **0.9094911075893644**
+      - per-chunk(exact)   f1 : **0.9094911075893644** (chunk_eval)
       - average processing time per bucket
         - 1 GPU(TITAN X (Pascal), 12196MiB)
           - restore version        : 0.010454932072004718 sec
@@ -504,7 +504,7 @@ in IN O O O
     - ELMo
       - setting : `experiments 8, test 2`
       - per-token(partial) f1 : 0.9322728663199756
-      - per-chunk(exact)   f1 : **0.9253625751680227**
+      - per-chunk(exact)   f1 : **0.9253625751680227** (chunk_eval)
       ```
       $ etc/conlleval < pred.txt
       processed 46666 tokens with 5648 phrases; found: 5662 phrases; correct: 5234.
@@ -522,7 +522,7 @@ in IN O O O
     - ELMo + Glove
       - setting : `experiments 10, test 15`
       - per-token(partial) f1 : 0.931816792025928
-      - per-chunk(exact)   f1 : **0.9268680445151033**
+      - per-chunk(exact)   f1 : **0.9268680445151033** (chunk_eval)
       ```
       processed 46666 tokens with 5648 phrases; found: 5681 phrases; correct: 5248.
       accuracy:  98.42%; precision:  92.38%; recall:  92.92%; FB1:  92.65
@@ -537,43 +537,43 @@ in IN O O O
     - BERT(base)
       - setting : `experiments 11, test 1`
       - per-token(partial) f1 : 0.9234725113260683
-      - per-chunk(exact)   f1 : 0.9131509267431598
+      - per-chunk(exact)   f1 : 0.9131509267431598 (chunk_eval)
       - average processing time per bucket
         - 1 GPU(Tesla V100)  : 0.026964144585057526 sec
     - BERT(base) + Glove
       - setting : experiments 11, test 2`
       - per-token(partial) f1 : 0.921535076998289
-      - per-chunk(exact)   f1 : 0.9123210182075304
+      - per-chunk(exact)   f1 : 0.9123210182075304 (chunk_eval)
       - average processing time per bucket
         - 1 GPU(Tesla V100)  : 0.029030597688838533 sec
     - BERT(large)
-      - setting : `experiments 11, test 4`
-      - per-token(partial) f1 : 0.9270596895895958
-      - per-chunk(exact)   f1 : 0.9180153886972672
+      - setting : `experiments 11, test 15`
+      - per-token(partial) f1 : 0.9307875894988067
+      - per-chunk(exact)   f1 : 0.9220033565939405 (chunk_eval)
       - average processing time per bucket
-        - 1 GPU(Tesla V100)  : 0.03831603427404431 sec
+        - 1 GPU(Tesla V100)  : pass
     - BERT(large) + Glove
       - setting : `experiments 11, test 3`
       - per-token(partial) f1 : 0.9278869778869779
-      - per-chunk(exact)   f1 : **0.918813634351483**
+      - per-chunk(exact)   f1 : 0.918813634351483 (chunk_eval)
       - average processing time per bucket
         - 1 GPU(Tesla V100)  : 0.040225753178425645 sec
     - BERT(large) + Glove + Transformer
       - setting : `experiments 11, test 7`
       - per-token(partial) f1 : 0.9244949032533724
-      - per-chunk(exact)   f1 : 0.9170714474962465
+      - per-chunk(exact)   f1 : 0.9170714474962465 (chunk_eval)
       - average processing time per bucket
         - 1 GPU(Tesla V100)  : 0.05737522856032033 sec
   - BiLSTM + Transformer
     - Glove
       - setting : `experiments 7, test 10`
       - per-token(partial) f1 : 0.910979409787988
-      - per-chunk(exact)   f1 : **0.9047451049567825**
+      - per-chunk(exact)   f1 : **0.9047451049567825** (chunk_eval)
   - BiLSTM + multi-head attention
     - Glove
       - setting : `experiments 6, test 7`
       - per-token(partial) f1 : 0.9157317073170732
-      - per-chunk(exact)   f1 : **0.9102156238953694**
+      - per-chunk(exact)   f1 : **0.9102156238953694** (chunk_eval)
 
 - comparision to previous research
   - implementations
@@ -596,6 +596,8 @@ in IN O O O
       - F1 : 0.8845
         - just 1 block of Transformer encoder
   - SOTA
+    - [Cloze-driven Pretraining of Self-attention Networks](https://arxiv.org/pdf/1903.07785.pdf?fbclid=IwAR2eIBWLbo0EShXvIhkMtS9OCwAipX8xKMS3GibEfP5oDwzjRv8r5WdlMtc)
+      - reported F1 : 0.935
     - [Contextual String Embeddings for Sequence Labeling](https://drive.google.com/file/d/17yVpFA7MmXaQFTe-HDpZuqw9fJlmzg56/view)
       - reported F1 : 0.9309
     - [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/pdf/1810.04805.pdf)

@@ -849,6 +849,176 @@ chunk : 0.9027189265536724
 
 - experiments 11
 ```
+* test 16
+#word embedding size : 100(glove6B)
+bert embedding : cased_L-24_H-1024_A-16
+bert_keep_prob : 0.9
+keep_prob : 0.7 -> 0.9
+#chr_conv_type : conv1d
+#chracter embedding size : 25
+#chracter embedding random init : -1.0 ~ 1.0
+#filter_sizes : [3]
+#num_filters : 53
+#pos embedding size : 7
+#pos embedding random init : -0.5 ~ 0.5
+#chk embedding size : 10
+#chk embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused
+rnn_size : 256 -> 200
+rnn_num_layers : 2 -> 1
+#learning_rate : exponential_decay(), 2e-5 / 5000 / 0.9
+#gradient clipping : 1.5 -> 10
+learning_rate : use optimization.py from bert, 2e-5 / warmup proportion 0.1
+epoch : 10
+batch_size : 16
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+do_shuffle : True
+
+# epoch 10
+token : 0.9307875894988067
+chunk : 0.9220033565939405
+conlleval : 91.97          -> BERT large + LSTM + CRF best
+
+# epoch 4
+token :
+chunk :
+conlleval :
+
+* test 15
+#word embedding size : 100(glove6B)
+bert embedding : cased_L-24_H-1024_A-16
+bert_keep_prob : 0.9
+#keep_prob : 0.7
+#chr_conv_type : conv1d
+#chracter embedding size : 25
+#chracter embedding random init : -1.0 ~ 1.0
+#filter_sizes : [3]
+#num_filters : 53
+#pos embedding size : 7
+#pos embedding random init : -0.5 ~ 0.5
+#chk embedding size : 10
+#chk embedding random init : -0.5 ~ 0.5
+rnn_used : True -> False
+rnn_type : fused
+rnn_size : 256
+rnn_num_layers : 2
+#learning_rate : exponential_decay(), 2e-5 / 5000 / 0.9
+#gradient clipping : 1.5 -> 10
+learning_rate : use optimization.py from bert, 2e-5 / warmup proportion 0.1
+epoch : 4 -> 10
+batch_size : 16
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+do_shuffle : True
+
+# lr 2e-5, bs 16
+token : 0.929012534393152
+chunk : 0.9215426705498191
+conlleval : 92.00          -> BERT large + CRF best
+
+# same setting + epoch 70
+token : 0.9241430060710124
+chunk : 0.9144678590401983
+conlleval : 91.36
+
+* test 14
+#word embedding size : 100(glove6B)
+bert embedding : cased_L-24_H-1024_A-16
+bert_keep_prob : 0.9
+#keep_prob : 0.7
+#chr_conv_type : conv1d
+#chracter embedding size : 25
+#chracter embedding random init : -1.0 ~ 1.0
+#filter_sizes : [3]
+#num_filters : 53
+#pos embedding size : 7
+#pos embedding random init : -0.5 ~ 0.5
+#chk embedding size : 10
+#chk embedding random init : -0.5 ~ 0.5
+rnn_used : True -> False
+rnn_type : fused
+rnn_size : 256
+rnn_num_layers : 2
+#learning_rate : exponential_decay(), 2e-5 / 5000 / 0.9
+#gradient clipping : 1.5 -> 10
+learning_rate : use optimization.py from bert, 2e-5 / warmup proportion 0.1 -> 2e-5, 3e-5, 5e-5
+epoch : 4
+batch_size : 16 -> 16, 32
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+#CRF
++
+do_shuffle : True
+
+# lr 2e-5, bs 16
+token : 0.9291608092414889
+chunk : 0.9220033565939405
+conlleval : 91.82          -> BERT large + Softmax best
+-> repair (begining 'I-' and 'X')
+token : 0.9298879431755558
+chunk : 0.9220033565939405
+conlleval : 91.82
+
+# lr 2e-5, bs 32
+token : 0.925267338832875
+chunk : 0.9168650268888302
+conlleval : 91.29
+
+# lr 3e-5, bs 16
+token : 0.9251850492445096
+chunk : 0.9159092914497485
+conlleval : 91.26
+
+# lr 3e-5, bs 32
+token : pass
+chunk : pass
+conlleval : pass
+
+# lr 5e-5, bs 16
+token : 0.9269876270978806
+chunk : 0.9181456953642385
+conlleval : 91.52
+
+# lr 5e-5, bs 32
+token : 0.9251025782350419
+chunk : 0.9154518950437317
+conlleval : 91.24
 
 * test 13
 word embedding size : 100(glove6b)
@@ -1195,7 +1365,7 @@ save model by f1(token)
 
 # BERT only(no glove, no cnn, no lstm, no crf)
 token : 0.9275558564658091
-chunk : 0.9169470515317868 -> BERT large + Softmax best
+chunk : 0.9169470515317868
 
 * test 4
 #word embedding size : 300(glove6B)
@@ -1232,7 +1402,7 @@ save model by f1(token)
 CRF
 
 token : 0.9270596895895958
-chunk : 0.9180153886972672  -> BERT large + LSTM + CRF best
+chunk : 0.9180153886972672
 
 * test 3
 word embedding size : 300(glove6B)
