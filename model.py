@@ -219,12 +219,44 @@ class Model:
             self.global_step = tf.train.get_or_create_global_step()
             if 'bert' in config.emb_class and config.use_bert_optimization:
                 from bert import optimization
-                self.learning_rate = tf.constant(value=config.starter_learning_rate, shape=[], dtype=tf.float32)
-                self.train_op = optimization.create_optimizer(self.loss,
-                                                              config.starter_learning_rate,
-                                                              config.num_train_steps,
-                                                              config.num_warmup_steps,
-                                                              False)
+                if config.use_bert_optimization:
+                    self.learning_rate = tf.constant(value=config.starter_learning_rate, shape=[], dtype=tf.float32)
+                    self.train_op = optimization.create_optimizer(self.loss,
+                                                                  config.starter_learning_rate,
+                                                                  config.num_train_steps,
+                                                                  config.num_warmup_steps,
+                                                                  False)
+                else:
+                    # exponential decay of the learning rate
+                    self.learning_rate = tf.train.exponential_decay(config.starter_learning_rate,
+                                                                    self.global_step,
+                                                                    config.decay_steps,
+                                                                    config.decay_rate,
+                                                                    staircase=True)
+                    # linear warmup, if global_step < num_warmup_steps, then
+                    # learning rate = (global_step / num_warmup_steps) * starter_learning_rate
+                    num_warmup_steps = 1000 # fixed
+                    global_steps_int = tf.cast(self.global_step, tf.int32)
+                    warmup_steps_int = tf.constant(num_warmup_steps, dtype=tf.int32)
+                    global_steps_float = tf.cast(global_steps_int, tf.float32)
+                    warmup_steps_float = tf.cast(warmup_steps_int, tf.float32)
+                    warmup_percent_done = global_steps_float / warmup_steps_float
+                    warmup_learning_rate = config.starter_learning_rate * warmup_percent_done
+                    is_warmup = tf.cast(global_steps_int < warmup_steps_int, tf.float32)
+                    self.learning_rate = ((1.0 - is_warmup) * self.learning_rate + is_warmup * warmup_learning_rate)
+                    # Adam optimizer with correct L2 weight decay
+                    optimizer = optimization.AdamWeightDecayOptimizer(
+                        learning_rate=self.learning_rate,
+                        weight_decay_rate=0.01,
+                        beta_1=0.9,
+                        beta_2=0.999,
+                        epsilon=1e-6,
+                        exclude_from_weight_decay=["LayerNorm", "layer_norm", "bias"])
+                    tvars = tf.trainable_variables()
+                    grads, _ = tf.clip_by_global_norm(tf.gradients(self.loss, tvars), config.clip_norm)
+                    train_op = optimizer.apply_gradients(zip(grads, tvars), global_step=self.global_step)
+                    new_global_step = self.global_step + 1
+                    self.train_op = tf.group(train_op, [self.global_step.assign(new_global_step)])
             else:
                 self.learning_rate = tf.train.exponential_decay(config.starter_learning_rate,
                                                                 self.global_step,
