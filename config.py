@@ -93,6 +93,11 @@ class Config:
             self.decay_steps = 1000
             self.decay_rate = 0.9
             self.clip_norm = 1.0
+            '''for KOR, CRZ
+            self.rnn_size = 256
+            self.starter_learning_rate = 5e-5
+            self.decay_steps = 5000
+            '''
 
 # -----------------------------------------------------------------------------
 # utility

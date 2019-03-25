@@ -22,6 +22,9 @@ class Input:
         if type(data) is list: # treat data as bucket.
             # compute max sentence length
             self.max_sentence_length = len(data)
+            # trick for reusing codes.
+            if 'bert' in self.config.emb_class:
+                self.max_sentence_length = self.config.bert_max_seq_length
             self.num_examples = 1
             self.num_batches = 1
             # for inference, use example directly.
@@ -31,6 +34,9 @@ class Input:
         else:                  # treat as file path.
             # compute max sentence length, number of examples, number of batches.
             self.max_sentence_length, self.num_examples = self.stat(data)
+            # trick for reusing codes.
+            if 'bert' in self.config.emb_class:
+                self.max_sentence_length = self.config.bert_max_seq_length
             self.num_batches = (self.num_examples + config.batch_size - 1) // config.batch_size 
             # create tf records
             # if reuse is True, do not create tfrecords again.
@@ -43,10 +49,6 @@ class Input:
     def __create_tfrecords(self, data):
         """Create input tfrecords.
         """
-
-        # trick for reusing codes.
-        if 'bert' in self.config.emb_class:
-            self.max_sentence_length = self.config.bert_max_seq_length
 
         if type(data) is list: # treat data as bucket.
             bucket = data
