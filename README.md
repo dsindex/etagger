@@ -191,9 +191,9 @@ $ python train.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --ba
 $ python train.py --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --batch_size 20 --epoch 70
 
 * for BERT, BERT+ELMo
-$ python train.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --batch_size 16 --epoch 10
-$ python train.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --batch_size 16 --epoch 10
-$ python train.py --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --batch_size 16 --epoch 10
+$ python train.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --batch_size 16 --epoch 70
+$ python train.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --batch_size 16 --epoch 70
+$ python train.py --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --batch_size 16 --epoch 70
 
 $ rm -rf runs; tensorboard --logdir runs/summaries/ --port 6008
 ```
