@@ -680,9 +680,7 @@ in IN O O O
 
 - tips for BERT fine-tuning
   - it seems that the warmup and exponential decay of learing rate are worth to use.
-
-  ![](/et/warmup-1.png)
-
+  ![](/etc/warmup-1.png)
   ![](/etc/warmup-2.png)
 
 ## References
