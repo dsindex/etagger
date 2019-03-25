@@ -217,7 +217,7 @@ class Model:
 
         with tf.variable_scope('optimization'):
             self.global_step = tf.train.get_or_create_global_step()
-            if 'bert' in config.emb_class and config.use_bert_optimization:
+            if 'bert' in config.emb_class:
                 from bert import optimization
                 if config.use_bert_optimization:
                     self.learning_rate = tf.constant(value=config.starter_learning_rate, shape=[], dtype=tf.float32)
