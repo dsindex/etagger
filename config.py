@@ -88,9 +88,9 @@ class Config:
             self.starter_learning_rate = 2e-5
             self.use_bert_optimization = False
             self.num_train_steps = 0            # number of total training steps, assigned later
-            self.num_warmup_epoch = 1           # number of warmup epoch
+            self.num_warmup_epoch = 2           # number of warmup epoch
             self.num_warmup_steps = 0           # number of warmup steps, assigned later
-            self.decay_steps = 1000
+            self.decay_steps = 2000
             self.decay_rate = 0.9
             self.clip_norm = 1.0
             '''for KOR, CRZ
