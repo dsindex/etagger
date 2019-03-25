@@ -678,6 +678,11 @@ in IN O O O
   - feed max sentence length to session. this yields huge improvement of inference speed.
   - when it comes to using import_meta_graph(), you should run global_variable_initialzer() before restore().
 
+- tips for BERT fine-tuning
+  - it seems that the warmup and exponential decay of learing rate are worth to use.
+  ![](/et/warmup-1.png)
+  ![](/etc/warmup-2.png)
+
 ## References
 
 - general
