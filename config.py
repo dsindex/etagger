@@ -94,18 +94,6 @@ class Config:
             self.decay_rate = 0.9
             self.clip_norm = 1.0
 
-            '''for KOR, CRZ
-            self.bert_keep_prob = 0.8
-            self.keep_prob = 0.7
-            self.rnn_size = 256
-            self.rnn_num_layers = 2
-            self.starter_learning_rate = 0.001
-            self.use_bert_optimization = False
-            self.decay_steps = 12000
-            self.decay_rate = 0.9
-            self.clip_norm = 10
-            '''
-
 # -----------------------------------------------------------------------------
 # utility
 # -----------------------------------------------------------------------------
