@@ -87,14 +87,12 @@ class Config:
             self.rnn_num_layers = 1
             self.starter_learning_rate = 2e-5
             self.use_bert_optimization = False
-            if self.use_bert_optimization:
-                self.num_train_steps = 0            # number of total training steps for bert optimization
-                self.num_warmup_steps = 0           # number of warmup steps for bert optimization
-                self.warmup_proportion = 0.1        # proportion of training to perform linear learning rate warmup for bert optimization
-            else:
-                self.decay_steps = 1000
-                self.decay_rate = 0.9
-                self.clip_norm = 1.0
+            self.num_train_steps = 0            # number of total training steps, assigned later
+            self.num_warmup_epoch = 1           # number of warmup epoch
+            self.num_warmup_steps = 0           # number of warmup steps, assigned later
+            self.decay_steps = 1000
+            self.decay_rate = 0.9
+            self.clip_norm = 1.0
 
             '''for KOR, CRZ
             self.bert_keep_prob = 0.8
@@ -103,10 +101,9 @@ class Config:
             self.rnn_num_layers = 2
             self.starter_learning_rate = 0.001
             self.use_bert_optimization = False
-            if not self.use_bert_optimization:
-                self.decay_steps = 12000
-                self.decay_rate = 0.9
-                self.clip_norm = 10
+            self.decay_steps = 12000
+            self.decay_rate = 0.9
+            self.clip_norm = 10
             '''
 
 # -----------------------------------------------------------------------------

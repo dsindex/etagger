@@ -555,9 +555,9 @@ in IN O O O
         - 1 GPU(Tesla V100)  : pass
     - BERT(large)
       - BERT + LSTM + CRF only
-      - setting : `experiments 11, test 16`
-      - per-token(partial) f1 : 0.9307875894988067
-      - per-chunk(exact)   f1 : 0.9220033565939405 (chunk_eval), 91.97(conlleval)
+      - setting : `experiments 11, test 18`
+      - per-token(partial) f1 : 0.9286369473491102
+      - per-chunk(exact)   f1 : 0.9227642276422764 (chunk_eval), **92.08**(conlleval)
       - average processing time per bucket
         - 1 GPU(Tesla V100)  : pass
     - BERT(large) + Glove

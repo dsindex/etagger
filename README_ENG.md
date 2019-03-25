@@ -867,7 +867,7 @@ rnn_used : True
 rnn_type : fused
 rnn_size : 200
 rnn_num_layers : 1
-learning_rate : exponential_decay(), 2e-5 / 10000 / 0.9 + Warmup + AdamWeightDecayOptimizer
+learning_rate : exponential_decay(), 2e-5 / 1000 / 0.9 + Warmup + AdamWeightDecayOptimizer
 gradient clipping : 1.0
 #learning_rate : use optimization.py from bert, 2e-5 / warmup proportion 0.1
 epoch : 70
@@ -888,7 +888,13 @@ CRF
 +
 do_shuffle : True
 
-token : 
+# warmup : 1000, decay step : 1000
+token : 0.9286369473491102
+chunk : 0.9227642276422764
+conlleval : 92.08          -> BERT large + LSTM + CRF best
+
+# warmup : 2000, decay step : 2000
+token :
 chunk : 
 conlleval : 
 
@@ -977,7 +983,7 @@ do_shuffle : True
 # epoch 10
 token : 0.9307875894988067
 chunk : 0.9220033565939405
-conlleval : 91.97          -> BERT large + LSTM + CRF best
+conlleval : 91.97
 
 # epoch 4
 token : 0.9273462386669934

@@ -235,9 +235,8 @@ class Model:
                                                                     staircase=True)
                     # linear warmup, if global_step < num_warmup_steps, then
                     # learning rate = (global_step / num_warmup_steps) * starter_learning_rate
-                    num_warmup_steps = 1000 # fixed
                     global_steps_int = tf.cast(self.global_step, tf.int32)
-                    warmup_steps_int = tf.constant(num_warmup_steps, dtype=tf.int32)
+                    warmup_steps_int = tf.constant(config.num_warmup_steps, dtype=tf.int32)
                     global_steps_float = tf.cast(global_steps_int, tf.float32)
                     warmup_steps_float = tf.cast(warmup_steps_int, tf.float32)
                     warmup_percent_done = global_steps_float / warmup_steps_float
