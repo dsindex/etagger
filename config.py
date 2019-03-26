@@ -96,6 +96,7 @@ class Config:
             '''for KOR, CRZ
             self.rnn_size = 256
             self.starter_learning_rate = 5e-5
+            self.num_warmup_epoch = 1
             self.decay_steps = 5000
             '''
 
