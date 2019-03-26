@@ -426,7 +426,6 @@ in IN O O O
 ## Evaluation
 
 - [experiment logs](https://github.com/dsindex/etagger/blob/master/README_ENG.md)
-![](/etc/experiment_eng.png)
 
 - results
   - QRNN
