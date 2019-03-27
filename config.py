@@ -36,6 +36,9 @@ class Config:
         self.tf_ffn_keep_prob = 0.8         # keep probability for feed forward net
 
         self.starter_learning_rate = 0.001  # default learning rate
+        self.num_train_steps = 0            # number of total training steps, assigned later
+        self.num_warmup_epoch = 0           # number of warmup epoch
+        self.num_warmup_steps = 0           # number of warmup steps, assigned later
         self.decay_steps = 12000
         self.decay_rate = 0.9
         self.clip_norm = 10
@@ -87,9 +90,7 @@ class Config:
             self.rnn_num_layers = 1
             self.starter_learning_rate = 2e-5
             self.use_bert_optimization = False
-            self.num_train_steps = 0            # number of total training steps, assigned later
-            self.num_warmup_epoch = 2           # number of warmup epoch
-            self.num_warmup_steps = 0           # number of warmup steps, assigned later
+            self.num_warmup_epoch = 2 
             self.decay_steps = 2000
             self.decay_rate = 0.9
             self.clip_norm = 1.0

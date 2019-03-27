@@ -218,13 +218,13 @@ def train(config):
     #dev_data = Input(dev_file, config, build_output=True, reuse=True)
     tf.logging.debug('loading input data ... done')
 
-    # set for bert optimization
-    if 'bert' in config.emb_class:
-        config.num_train_steps = int((train_data.num_examples / config.batch_size) * config.epoch)
-        config.num_warmup_steps = config.num_warmup_epoch * int(train_data.num_examples / config.batch_size)
-        tf.logging.debug('config.num_train_steps = %s' % config.num_train_steps)
-        tf.logging.debug('config.num_warmup_epoch = %s' % config.num_warmup_epoch)
-        tf.logging.debug('config.num_warmup_steps = %s' % config.num_warmup_steps)
+    # set config after reading training data
+    config.num_train_steps = int((train_data.num_examples / config.batch_size) * config.epoch)
+    config.num_warmup_steps = config.num_warmup_epoch * int(train_data.num_examples / config.batch_size)
+    if config.num_warmup_steps == 0: config.num_warmup_steps = 1 # prevent dividing by zero
+    tf.logging.debug('config.num_train_steps = %s' % config.num_train_steps)
+    tf.logging.debug('config.num_warmup_epoch = %s' % config.num_warmup_epoch)
+    tf.logging.debug('config.num_warmup_steps = %s' % config.num_warmup_steps)
 
     # create model
     model = Model(config)
