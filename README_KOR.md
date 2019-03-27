@@ -369,6 +369,72 @@ average processing time per bucket(sentence)
 
 - experiments 1-2
 ```
+* test 9
+#word embedding size : 300(kor.glove.300k.300d.txt)
+bert embedding : all.200k.out.1m-step.reduced
+bert_keep_prob : 0.9
+keep_prob : 0.9
+#chr_conv_type : conv1d
+#chracter embedding size : 25
+#chracter embedding random init : -1.0 ~ 1.0
+#chk embedding size : 10
+#chk embedding random init : -0.5 ~ 0.5
+#filter_sizes : [3]
+#num_filters : 53
+#pos embedding size : 7
+#pos embedding random init : -0.5 ~ 0.5
+highway_used : False
+rnn_used : True
+rnn_type : fused
+rnn_size : 256
+rnn_num_layers : 1
+learning_rate : exponential_decay(), 5e-5 / 5000 / 0.9 + Warmup 1epoch + AdamWeightDecayOptimizer
+gradient clipping : 1.0
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+Shuffle
+
+# lr 5e-5
+##  test.txt
+token : 0.9152224196305857
+chunk : 0.9186171817750766
+conlleval : 91.78
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) : pass
+## test.confirmed.txt
+token : 0.9363073883429522
+chunk : 0.9385187690226582
+conlleval : 93.78
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) : pass
+
+# lr 2e-5
+##  test.txt
+token : 0.9137387142390949
+chunk : 0.9170126718792128
+conlleval : 91.57
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) : pass
+## test.confirmed.txt
+token : 0.936919163075645
+chunk : 0.9389798403463673
+conlleval : 93.74
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) : pass
 
 * test 8
 word embedding size : 300(kor.glove.300k.300d.txt)
