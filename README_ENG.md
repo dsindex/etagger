@@ -1942,6 +1942,11 @@ conlleval : 92.34
 average processing time per bucket(sentence)
   - 1 GPU(V100 TELSA) :0.0385546259719567 sec
 
+# extra trial 2
+token : 0.9321836971809455
+chunk : 0.9266184512259658
+conlleval : 92.64
+
 * test 14
 word embedding size : 300(glove6B)
 elmo embedding params : elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json
