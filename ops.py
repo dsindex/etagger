@@ -32,11 +32,11 @@ def linear(input_, output_size, scope=None):
     input_size = shape[1]
 
     # Now the computation.
-    with tf.variable_scope(scope or "SimpleLinear"):
-        matrix = tf.get_variable("Matrix", [output_size, input_size], dtype=input_.dtype)
-        bias_term = tf.get_variable("Bias", [output_size], dtype=input_.dtype)
+    with tf.compat.v1.variable_scope(scope or "SimpleLinear"):
+        matrix = tf.compat.v1.get_variable("Matrix", [output_size, input_size], dtype=input_.dtype, use_resource=False)
+        bias_term = tf.compat.v1.get_variable("Bias", [output_size], dtype=input_.dtype, use_resource=False)
 
-    return tf.matmul(input_, tf.transpose(matrix)) + bias_term
+    return tf.matmul(input_, tf.transpose(a=matrix)) + bias_term
 
 
 def highway(input_, size, num_layers=1, bias=-2.0, f=tf.nn.relu, scope='Highway'):
@@ -47,7 +47,7 @@ def highway(input_, size, num_layers=1, bias=-2.0, f=tf.nn.relu, scope='Highway'
     where g is nonlinearity, t is transform gate, and (1 - t) is carry gate.
     """
 
-    with tf.variable_scope(scope):
+    with tf.compat.v1.variable_scope(scope):
         for idx in range(num_layers):
             g = f(linear(input_, size, scope='highway_lin_%d' % idx))
 
@@ -85,7 +85,7 @@ def masked_conv1d_and_max(t, weights, filters, kernel_size, activation=tf.nn.rel
 
     """
     # Get shape and parameters
-    shape = tf.shape(t)
+    shape = tf.shape(input=t)
     ndims = t.shape.ndims
     dim1 = reduce(lambda x, y: x*y, [shape[i] for i in range(ndims - 2)])
     dim2 = shape[-2]
@@ -93,7 +93,7 @@ def masked_conv1d_and_max(t, weights, filters, kernel_size, activation=tf.nn.rel
 
     # Reshape weights
     weights = tf.reshape(weights, shape=[dim1, dim2, 1])
-    weights = tf.to_float(weights)
+    weights = tf.cast(weights, dtype=tf.float32)
 
     # Reshape input and apply weights
     flat_shape = [dim1, dim2, dim3]
@@ -101,12 +101,12 @@ def masked_conv1d_and_max(t, weights, filters, kernel_size, activation=tf.nn.rel
     t *= weights
 
     # Apply convolution
-    t_conv = tf.layers.conv1d(t, filters, kernel_size, padding='same', activation=activation)  # (dim1, dim2, filters)
+    t_conv = tf.compat.v1.layers.conv1d(t, filters, kernel_size, padding='same', activation=activation)  # (dim1, dim2, filters)
     t_conv *= weights
 
     # Reduce max -- set to zero if all padded
-    t_conv += (1. - weights) * tf.reduce_min(t_conv, axis=-2, keepdims=True)  # (dim1, dim2, filters) + (dim1, 1, filters)
-    t_max = tf.reduce_max(t_conv, axis=-2)  # (dim1, 1, filters)
+    t_conv += (1. - weights) * tf.reduce_min(input_tensor=t_conv, axis=-2, keepdims=True)  # (dim1, dim2, filters) + (dim1, 1, filters)
+    t_max = tf.reduce_max(input_tensor=t_conv, axis=-2)  # (dim1, 1, filters)
 
     # Reshape the output
     final_shape = [shape[i] for i in range(ndims-2)] + [filters]
@@ -147,15 +147,15 @@ def multihead_attention(queries,
     Returns:
       A 3d tensor with shape of (N, T_q, M)  
     """
-    with tf.variable_scope(scope, reuse=reuse):
+    with tf.compat.v1.variable_scope(scope, reuse=reuse):
         # Set the fall back option for num_units
         if num_units is None:
             num_units = queries.get_shape().as_list()[-1]
         
         # Linear projections
-        Q = tf.layers.dense(queries, num_units, activation=tf.nn.relu) # (N, T_q, C)
-        K = tf.layers.dense(keys, num_units, activation=tf.nn.relu) # (N, T_k, C)
-        V = tf.layers.dense(keys, num_units, activation=tf.nn.relu) # (N, T_k, C)
+        Q = tf.compat.v1.layers.dense(queries, num_units, activation=tf.nn.relu) # (N, T_q, C)
+        K = tf.compat.v1.layers.dense(keys, num_units, activation=tf.nn.relu) # (N, T_k, C)
+        V = tf.compat.v1.layers.dense(keys, num_units, activation=tf.nn.relu) # (N, T_k, C)
         
         # Split and concat
         Q_ = tf.concat(tf.split(Q, num_heads, axis=2), axis=0) # (h*N, T_q, C/h) 
@@ -163,15 +163,15 @@ def multihead_attention(queries,
         V_ = tf.concat(tf.split(V, num_heads, axis=2), axis=0) # (h*N, T_k, C/h) 
 
         # Multiplication
-        outputs = tf.matmul(Q_, tf.transpose(K_, [0, 2, 1])) # (h*N, T_q, T_k)
+        outputs = tf.matmul(Q_, tf.transpose(a=K_, perm=[0, 2, 1])) # (h*N, T_q, T_k)
         
         # Scale
         outputs = outputs / (K_.get_shape().as_list()[-1] ** 0.5)
         
         # Key Masking
-        key_masks = tf.sign(tf.abs(tf.reduce_sum(keys, axis=-1))) # (N, T_k)
+        key_masks = tf.sign(tf.abs(tf.reduce_sum(input_tensor=keys, axis=-1))) # (N, T_k)
         key_masks = tf.tile(key_masks, [num_heads, 1]) # (h*N, T_k)
-        key_masks = tf.tile(tf.expand_dims(key_masks, 1), [1, tf.shape(queries)[1], 1]) # (h*N, T_q, T_k)
+        key_masks = tf.tile(tf.expand_dims(key_masks, 1), [1, tf.shape(input=queries)[1], 1]) # (h*N, T_q, T_k)
         
         paddings = tf.ones_like(outputs)*(-2**32+1)
         outputs = tf.where(tf.equal(key_masks, 0), paddings, outputs) # (h*N, T_q, T_k)
@@ -180,7 +180,7 @@ def multihead_attention(queries,
         if causality:
             diag_vals = tf.ones_like(outputs[0, :, :]) # (T_q, T_k)
             tril = tf.contrib.linalg.LinearOperatorTriL(diag_vals).to_dense() # (T_q, T_k)
-            masks = tf.tile(tf.expand_dims(tril, 0), [tf.shape(outputs)[0], 1, 1]) # (h*N, T_q, T_k)
+            masks = tf.tile(tf.expand_dims(tril, 0), [tf.shape(input=outputs)[0], 1, 1]) # (h*N, T_q, T_k)
    
             paddings = tf.ones_like(masks)*(-2**32+1)
             outputs = tf.where(tf.equal(masks, 0), paddings, outputs) # (h*N, T_q, T_k)
@@ -189,13 +189,13 @@ def multihead_attention(queries,
         outputs = tf.nn.softmax(outputs) # (h*N, T_q, T_k)
          
         # Query Masking
-        query_masks = tf.sign(tf.abs(tf.reduce_sum(queries, axis=-1))) # (N, T_q)
+        query_masks = tf.sign(tf.abs(tf.reduce_sum(input_tensor=queries, axis=-1))) # (N, T_q)
         query_masks = tf.tile(query_masks, [num_heads, 1]) # (h*N, T_q)
-        query_masks = tf.tile(tf.expand_dims(query_masks, -1), [1, 1, tf.shape(keys)[1]]) # (h*N, T_q, T_k)
+        query_masks = tf.tile(tf.expand_dims(query_masks, -1), [1, 1, tf.shape(input=keys)[1]]) # (h*N, T_q, T_k)
         outputs *= query_masks # broadcasting. (N, T_q, T_k)
           
         # Dropouts
-        outputs = tf.layers.dropout(outputs, rate=dropout_rate, training=tf.convert_to_tensor(is_training))
+        outputs = tf.compat.v1.layers.dropout(outputs, rate=dropout_rate, training=tf.convert_to_tensor(value=is_training))
                
         # Weighted sum
         outputs = tf.matmul(outputs, V_) # ( h*N, T_q, C/h)
@@ -204,7 +204,7 @@ def multihead_attention(queries,
         outputs = tf.concat(tf.split(outputs, num_heads, axis=0), axis=2 ) # (N, T_q, C)
 
         # Linear projection
-        outputs = tf.layers.dense(outputs, model_dim, activation=tf.nn.relu) # (N, T_q, M)
+        outputs = tf.compat.v1.layers.dense(outputs, model_dim, activation=tf.nn.relu) # (N, T_q, M)
               
     return outputs
 
@@ -228,18 +228,18 @@ def feedforward(inputs,
     Returns:
       A 3d tensor with the same shape and dtype as inputs
     """
-    with tf.variable_scope(scope, reuse=reuse):
+    with tf.compat.v1.variable_scope(scope, reuse=reuse):
         # Inner layer
         inputs *= masks
         params = {"inputs": inputs, "filters": num_units[0], "kernel_size": kernel_size,
                   "padding": "same", "activation": tf.nn.relu, "use_bias": True}
-        outputs = tf.layers.conv1d(**params)
+        outputs = tf.compat.v1.layers.conv1d(**params)
         outputs *= masks
         
         # Readout layer
         params = {"inputs": outputs, "filters": num_units[1], "kernel_size": kernel_size,
                   "padding": "same", "activation": None, "use_bias": True}
-        outputs = tf.layers.conv1d(**params)
+        outputs = tf.compat.v1.layers.conv1d(**params)
         outputs *= masks
     
     return outputs
@@ -261,11 +261,11 @@ def normalize(inputs,
     Returns:
       A tensor with the same shape and data dtype as `inputs`.
     """
-    with tf.variable_scope(scope, reuse=reuse):
+    with tf.compat.v1.variable_scope(scope, reuse=reuse):
         inputs_shape = inputs.get_shape()
         params_shape = inputs_shape[-1:]
     
-        mean, variance = tf.nn.moments(inputs, [-1], keep_dims=True)
+        mean, variance = tf.nn.moments(x=inputs, axes=[-1], keepdims=True)
         beta= tf.Variable(tf.zeros(params_shape))
         gamma = tf.Variable(tf.ones(params_shape))
         normalized = (inputs - mean) / ( (variance + epsilon) ** (.5) )
@@ -299,11 +299,11 @@ def positional_encoding(lengths,
       embeddings for each position. All elements past `lengths` are zero.
     """
 
-    N = tf.shape(lengths)[0]
+    N = tf.shape(input=lengths)[0]
     T = maxlen
     Limit = 1024 # FIXME trick because we can't use range(T)
 
-    with tf.variable_scope(scope, reuse=reuse):
+    with tf.compat.v1.variable_scope(scope, reuse=reuse):
         position_ind = tf.tile(tf.expand_dims(tf.range(T), 0), [N, 1]) # (batch_size, maxlen)
 
         # First part of the PE function: sin and cos argument
@@ -316,12 +316,12 @@ def positional_encoding(lengths,
         position_enc[:, 1::2] = np.cos(position_enc[:, 1::2])  # dim 2i+1
 
         # Convert to a tensor
-        lookup_table = tf.convert_to_tensor(position_enc, dtype=tf.float32)
+        lookup_table = tf.convert_to_tensor(value=position_enc, dtype=tf.float32)
 
         if zero_pad:
             lookup_table = tf.concat((tf.zeros(shape=[1, num_units]),
                                       lookup_table[1:, :]), 0)
-        outputs = tf.nn.embedding_lookup(lookup_table, position_ind)
+        outputs = tf.nn.embedding_lookup(params=lookup_table, ids=position_ind)
 
         if scale:
             outputs = outputs * num_units**0.5
