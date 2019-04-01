@@ -67,6 +67,10 @@
 ```
 $ python -m venv python3.6
 $ source /home/python3.6/bin/activate
+or
+* after installing conda
+$ conda create -n python3.6 python=3.6
+$ conda activate python3.6
 ```
 
 - tensorflow >= 1.10
