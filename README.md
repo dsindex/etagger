@@ -164,7 +164,6 @@ $ python -m pip install numpy
 - convert word embedding to pickle
 ```
 * for Glove
-$ python embvec.py --emb_path embeddings/glove.6B.50d.txt  --wrd_dim 50  --train_path data/train.txt --total_path data/total.txt > embeddings/vocab.txt
 $ python embvec.py --emb_path embeddings/glove.6B.100d.txt --wrd_dim 100 --train_path data/train.txt --total_path data/total.txt > embeddings/vocab.txt
 $ python embvec.py --emb_path embeddings/glove.6B.200d.txt --wrd_dim 200 --train_path data/train.txt --total_path data/total.txt > embeddings/vocab.txt
 $ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt > embeddings/vocab.txt
