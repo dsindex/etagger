@@ -57,7 +57,7 @@ class Input:
             self.example = example 
         else:                  # treat data as file path.
             path = data
-            writer = tf.python_io.TFRecordWriter(self.tfrecords_file)
+            writer = tf.io.TFRecordWriter(self.tfrecords_file)
             bucket = []
             ex_index = 0
             for line in open(path):
@@ -65,7 +65,7 @@ class Input:
                     tf_example, example = self.__create_single_tf_example(bucket, ex_index)
                     writer.write(tf_example.SerializeToString())
                     if ex_index % 500 == 0:
-                        tf.logging.info("writing example %d" % (ex_index))
+                        tf.compat.v1.logging.info("writing example %d" % (ex_index))
                     bucket = []
                     ex_index += 1
                 else:
@@ -80,28 +80,28 @@ class Input:
         word_length = self.config.word_length
         class_size = self.config.class_size
         if 'bert' in self.config.emb_class:
-            keys_to_features['word_ids'] = tf.FixedLenFeature([seq_length], tf.int64)
-            keys_to_features['wordchr_ids'] = tf.FixedLenFeature([seq_length*word_length], tf.int64)
-            keys_to_features['pos_ids'] = tf.FixedLenFeature([seq_length], tf.int64)
-            keys_to_features['chk_ids'] = tf.FixedLenFeature([seq_length], tf.int64)
-            keys_to_features['bert_token_ids'] = tf.FixedLenFeature([seq_length], tf.int64)
-            keys_to_features['bert_token_masks'] = tf.FixedLenFeature([seq_length], tf.int64)
-            keys_to_features['bert_segment_ids'] = tf.FixedLenFeature([seq_length], tf.int64)
-            keys_to_features['bert_wordidx2tokenidx'] = tf.FixedLenFeature([seq_length], tf.int64)
+            keys_to_features['word_ids'] = tf.io.FixedLenFeature([seq_length], tf.int64)
+            keys_to_features['wordchr_ids'] = tf.io.FixedLenFeature([seq_length*word_length], tf.int64)
+            keys_to_features['pos_ids'] = tf.io.FixedLenFeature([seq_length], tf.int64)
+            keys_to_features['chk_ids'] = tf.io.FixedLenFeature([seq_length], tf.int64)
+            keys_to_features['bert_token_ids'] = tf.io.FixedLenFeature([seq_length], tf.int64)
+            keys_to_features['bert_token_masks'] = tf.io.FixedLenFeature([seq_length], tf.int64)
+            keys_to_features['bert_segment_ids'] = tf.io.FixedLenFeature([seq_length], tf.int64)
+            keys_to_features['bert_wordidx2tokenidx'] = tf.io.FixedLenFeature([seq_length], tf.int64)
             if 'elmo' in self.config.emb_class:
-                keys_to_features['bert_elmo_indices'] = tf.FixedLenFeature([seq_length*2], tf.int64)
-                keys_to_features['elmo_wordchr_ids'] = tf.FixedLenFeature([(seq_length+2)*word_length], tf.int64)
+                keys_to_features['bert_elmo_indices'] = tf.io.FixedLenFeature([seq_length*2], tf.int64)
+                keys_to_features['elmo_wordchr_ids'] = tf.io.FixedLenFeature([(seq_length+2)*word_length], tf.int64)
             if self.build_output:
-                keys_to_features['tags'] = tf.FixedLenFeature([seq_length*class_size], tf.int64)
+                keys_to_features['tags'] = tf.io.FixedLenFeature([seq_length*class_size], tf.int64)
         else:
-            keys_to_features['word_ids'] = tf.FixedLenFeature([seq_length], tf.int64)
-            keys_to_features['wordchr_ids'] = tf.FixedLenFeature([seq_length*word_length], tf.int64)
-            keys_to_features['pos_ids'] = tf.FixedLenFeature([seq_length], tf.int64)
-            keys_to_features['chk_ids'] = tf.FixedLenFeature([seq_length], tf.int64)
+            keys_to_features['word_ids'] = tf.io.FixedLenFeature([seq_length], tf.int64)
+            keys_to_features['wordchr_ids'] = tf.io.FixedLenFeature([seq_length*word_length], tf.int64)
+            keys_to_features['pos_ids'] = tf.io.FixedLenFeature([seq_length], tf.int64)
+            keys_to_features['chk_ids'] = tf.io.FixedLenFeature([seq_length], tf.int64)
             if 'elmo' in self.config.emb_class:
-                keys_to_features['elmo_wordchr_ids'] = tf.FixedLenFeature([(seq_length+2)*word_length], tf.int64)
+                keys_to_features['elmo_wordchr_ids'] = tf.io.FixedLenFeature([(seq_length+2)*word_length], tf.int64)
             if self.build_output:
-                keys_to_features['tags'] = tf.FixedLenFeature([seq_length*class_size], tf.int64)
+                keys_to_features['tags'] = tf.io.FixedLenFeature([seq_length*class_size], tf.int64)
         return keys_to_features
 
 
@@ -112,7 +112,7 @@ class Input:
         dataset = tf.data.TFRecordDataset(filenames)
 
         def parser(record):
-            parsed = tf.parse_single_example(record, self.keys_to_features)
+            parsed = tf.io.parse_single_example(serialized=record, features=self.keys_to_features)
             # convert 1D back to original dimension.
             if 'bert' in self.config.emb_class:
                 parsed['word_ids'] = tf.cast(parsed['word_ids'], tf.int32)
@@ -303,7 +303,7 @@ class Input:
                 bert_elmo_indices.append([ex_index, i])
                 ntokens_last += 1
             if len(ntokens) == bert_max_seq_length - 1:
-                tf.logging.debug('len(ntokens): %s' % str(len(ntokens)))
+                tf.compat.v1.logging.debug('len(ntokens): %s' % str(len(ntokens)))
                 break
         '''
         ntokens.append('[SEP]')
@@ -350,20 +350,20 @@ class Input:
 
         if ex_index < 5:
             from bert import tokenization  
-            tf.logging.debug('*** Example ***')
-            tf.logging.debug('ntokens: %s' % ' '.join([tokenization.printable_text(x) for x in ntokens]))
-            tf.logging.debug('bert_token_ids: %s' % ' '.join([str(x) for x in bert_token_ids]))
-            tf.logging.debug('bert_token_masks: %s' % ' '.join([str(x) for x in bert_token_masks]))
-            tf.logging.debug('bert_segment_ids: %s' % ' '.join([str(x) for x in bert_segment_ids]))
-            tf.logging.debug('bert_word_ids: %s' % ' '.join([str(x) for x in bert_word_ids]))
+            tf.compat.v1.logging.debug('*** Example ***')
+            tf.compat.v1.logging.debug('ntokens: %s' % ' '.join([tokenization.printable_text(x) for x in ntokens]))
+            tf.compat.v1.logging.debug('bert_token_ids: %s' % ' '.join([str(x) for x in bert_token_ids]))
+            tf.compat.v1.logging.debug('bert_token_masks: %s' % ' '.join([str(x) for x in bert_token_masks]))
+            tf.compat.v1.logging.debug('bert_segment_ids: %s' % ' '.join([str(x) for x in bert_segment_ids]))
+            tf.compat.v1.logging.debug('bert_word_ids: %s' % ' '.join([str(x) for x in bert_word_ids]))
             '''
             tf.logging.debug('bert_wordchr_ids: %s' % ' '.join([str(x) for x in bert_wordchr_ids]))
             tf.logging.debug('bert_pos_ids: %s' % ' '.join([str(x) for x in bert_pos_ids]))
             tf.logging.debug('bert_chk_ids: %s' % ' '.join([str(x) for x in bert_chk_ids]))
             tf.logging.debug('bert_tags: %s' % ' '.join([str(x) for x in bert_tags]))
             '''
-            tf.logging.debug('bert_wordidx2tokenidx: %s' % ' '.join([str(x) for x in bert_wordidx2tokenidx]))
-            tf.logging.debug('bert_elmo_indices: %s' % ' '.join([str(x) for x in bert_elmo_indices]))
+            tf.compat.v1.logging.debug('bert_wordidx2tokenidx: %s' % ' '.join([str(x) for x in bert_wordidx2tokenidx]))
+            tf.compat.v1.logging.debug('bert_elmo_indices: %s' % ' '.join([str(x) for x in bert_elmo_indices]))
 
         return bert_token_ids, bert_token_masks, bert_segment_ids, \
                bert_word_ids, bert_wordchr_ids, bert_pos_ids, bert_chk_ids, \
