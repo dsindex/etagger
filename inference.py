@@ -19,17 +19,17 @@ def inference_bucket(config):
     model = Model(config)
 
     # Restore model
-    session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
+    session_conf = tf.compat.v1.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     '''
     session_conf = tf.ConfigProto(allow_soft_placement=True,
                                   log_device_placement=False,
                                   inter_op_parallelism_threads=1,
                                   intra_op_parallelism_threads=1)
     '''
-    sess = tf.Session(config=session_conf)
+    sess = tf.compat.v1.Session(config=session_conf)
     feed_dict = {model.wrd_embeddings_init: config.embvec.wrd_embeddings}
-    sess.run(tf.global_variables_initializer(), feed_dict=feed_dict)
-    saver = tf.train.Saver()
+    sess.run(tf.compat.v1.global_variables_initializer(), feed_dict=feed_dict)
+    saver = tf.compat.v1.train.Saver()
     saver.restore(sess, config.restore)
     sys.stderr.write('model restored' +'\n')
     '''
@@ -75,7 +75,7 @@ def inference_bucket(config):
             bucket = []
             duration_time = time.time() - start_time
             out = 'duration_time : ' + str(duration_time) + ' sec'
-            tf.logging.info(out)
+            tf.compat.v1.logging.info(out)
             num_buckets += 1
             total_duration_time += duration_time
         if line : bucket.append(line)
@@ -109,13 +109,13 @@ def inference_bucket(config):
         sys.stdout.write('\n')
         duration_time = time.time() - start_time
         out = 'duration_time : ' + str(duration_time) + ' sec'
-        tf.logging.info(out)
+        tf.compat.v1.logging.info(out)
         num_buckets += 1
         total_duration_time += duration_time
 
     out = 'total_duration_time : ' + str(total_duration_time) + ' sec' + '\n'
     out += 'average processing time / bucket : ' + str(total_duration_time / num_buckets) + ' sec'
-    tf.logging.info(out)
+    tf.compat.v1.logging.info(out)
 
     sess.close()
 
@@ -157,14 +157,14 @@ def inference_line(config):
     model = Model(config)
 
     # Restore model
-    session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
-    sess = tf.Session(config=session_conf)
+    session_conf = tf.compat.v1.ConfigProto(allow_soft_placement=True, log_device_placement=False)
+    sess = tf.compat.v1.Session(config=session_conf)
     feed_dict = {}
     feed_dict = {model.wrd_embeddings_init: config.embvec.wrd_embeddings}
-    sess.run(tf.global_variables_initializer(), feed_dict=feed_dict)
-    saver = tf.train.Saver()
+    sess.run(tf.compat.v1.global_variables_initializer(), feed_dict=feed_dict)
+    saver = tf.compat.v1.train.Saver()
     saver.restore(sess, config.restore)
-    tf.logging.info('model restored' +'\n')
+    tf.compat.v1.logging.info('model restored' +'\n')
 
     while 1:
         try: line = sys.stdin.readline()
@@ -215,7 +215,7 @@ if __name__ == '__main__':
     parser.add_argument('--mode', type=str, default='bulk', help='bulk, bucket, line')
 
     args = parser.parse_args()
-    tf.logging.set_verbosity(tf.logging.INFO)
+    tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
 
     config = Config(args, is_training=False, emb_class='glove', use_crf=True)
     if args.mode == 'bucket': inference_bucket(config)
