@@ -34,19 +34,25 @@
   768    hidden_size
   202592 vocab_size
   2.5G   bert_model.ckpt
-  64     bert_max_seq_length
+  64     bert_max_seq_length (55)
 
 2) multi_cased_L-12_H-768_A-12
   768    hidden_size
   119547 vocab_size
   682M   bert_model.ckpt
-  96     bert_max_seq_length
+  96     bert_max_seq_length (88)
 
 3) all.200k.out.1m-step.reduced
   768    hidden_size
   100795 vocab_size
   627M   bert_model.ckpt
-  96     bert_max_seq_length
+  64     bert_max_seq_length (55)
+
+4) all.bpe.4.8m_step
+  768    hidden_size
+  100102 vocab.txt
+  1.9G   bert_model.ckpt
+  64     bert_max_seq_length (61)
 
 5. evaluation by CRF(wapiti)
 token : 0.900468066343
@@ -59,8 +65,6 @@ conlleval : 91.42
 ```
 - embedding
 * for Glove
-$ python embvec.py --emb_path embeddings/kor.glove.100d.txt --wrd_dim 100 --train_path data/kor.train.txt --total_path data/kor.total.txt > embeddings/vocab.txt
-$ python embvec.py --emb_path embeddings/kor.glove.300d.txt --wrd_dim 300 --train_path data/kor.train.txt --total_path data/kor.total.txt > embeddings/vocab.txt
 $ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/kor.train.txt --total_path data/kor.total.txt > embeddings/vocab.txt
 
 * for ELMo
@@ -76,17 +80,15 @@ $ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 -
 $ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/kor.train.txt --total_path data/kor.total.txt --bert_config_path embeddings/multi_cased_L-12_H-768_A-12/bert_config.json --bert_vocab_path embeddings/multi_cased_L-12_H-768_A-12/vocab.txt --bert_do_lower_case False --bert_init_checkpoint embeddings/multi_cased_L-12_H-768_A-12/bert_model.ckpt --bert_max_seq_length 96 > embeddings/vocab.txt
 
 * for BERT(all.200k.out.1m-step.reduced)
-$ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/kor.train.txt --total_path data/kor.total.txt --bert_config_path embeddings/all.200k.out.1m-step.reduced/bert_config.json --bert_vocab_path embeddings/all.200k.out.1m-step.reduced/vocab.txt --bert_do_lower_case False --bert_init_checkpoint embeddings/all.200k.out.1m-step.reduced/bert_model.ckpt --bert_max_seq_length 96 > embeddings/vocab.txt
+$ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/kor.train.txt --total_path data/kor.total.txt --bert_config_path embeddings/all.200k.out.1m-step.reduced/bert_config.json --bert_vocab_path embeddings/all.200k.out.1m-step.reduced/vocab.txt --bert_do_lower_case False --bert_init_checkpoint embeddings/all.200k.out.1m-step.reduced/bert_model.ckpt --bert_max_seq_length 64 > embeddings/vocab.txt
 
+* for BERT(all.bpe.4.8m_step)
+$ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/kor.train.txt --total_path data/kor.total.txt --bert_config_path embeddings/all.bpe.4.8m_step/bert_config.json --bert_vocab_path embeddings/all.bpe.4.8m_step/vocab.txt --bert_do_lower_case False --bert_init_checkpoint embeddings/all.bpe.4.8m_step/bert_model.ckpt --bert_max_seq_length 64 > embeddings/vocab.txt
 
 - train
-$ python train.py --emb_path embeddings/kor.glove.100d.txt.pkl --wrd_dim 100 --batch_size 20 --epoch 70
-$ python train.py --emb_path embeddings/kor.glove.300d.txt.pkl --wrd_dim 300 --batch_size 20 --epoch 70
 $ python train.py --emb_path embeddings/kor.glove.300k.300d.txt.pkl --wrd_dim 300 --batch_size 20 --epoch 70
 
 - inference
-$ python inference.py --mode bucket --emb_path embeddings/kor.glove.100d.txt.pkl --wrd_dim 100 --restore checkpoint/ner_model < data/kor.test.txt > pred.txt
-$ python inference.py --mode bucket --emb_path embeddings/kor.glove.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/kor.test.txt > pred.txt
 $ python inference.py --mode bucket --emb_path embeddings/kor.glove.300k.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/kor.test.txt > pred.txt
 $ python inference.py --mode bucket --emb_path embeddings/kor.glove.300k.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/kor.test.confirmed.txt > pred.txt
 ```
@@ -369,6 +371,58 @@ average processing time per bucket(sentence)
 
 - experiments 1-2
 ```
+* test 10
+#word embedding size : 300(kor.glove.300k.300d.txt)
+bert embedding : all.bpe.4.8m_step
+bert_keep_prob : 0.9
+keep_prob : 0.9
+#chr_conv_type : conv1d
+#chracter embedding size : 25
+#chracter embedding random init : -1.0 ~ 1.0
+#chk embedding size : 10
+#chk embedding random init : -0.5 ~ 0.5
+#filter_sizes : [3]
+#num_filters : 53
+#pos embedding size : 7
+#pos embedding random init : -0.5 ~ 0.5
+highway_used : False
+rnn_used : True
+rnn_type : fused
+rnn_size : 256
+rnn_num_layers : 1
+learning_rate : exponential_decay(), 5e-5 / 5000 / 0.9 + Warmup 1epoch + AdamWeightDecayOptimizer
+gradient clipping : 1.0
+epoch : 70
+batch_size : 20
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+Shuffle
+
+#  test.txt
+token : 0.9244998239111841
+chunk : 0.9312579662554819
+conlleval : 93.04
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) : pass
+# test.confirmed.txt
+token : 0.9419287756693527
+chunk : 0.9470835025037218
+conlleval : 94.65
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) : pass
+
 * test 9
 #word embedding size : 300(kor.glove.300k.300d.txt)
 bert embedding : all.200k.out.1m-step.reduced
