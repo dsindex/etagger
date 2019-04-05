@@ -414,7 +414,7 @@ in IN O O O
   or
   $ ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/contrib/util/convert_graphdef_memmapped_format --in_graph=exported/ner_frozen.pb.transformed --out_graph=exported/ner_frozen.pb.memmapped
   * inference using C++
-  $ ./cc/build/inference_mm exported/ner_frozen.pb.memmapped ../embeddings/vocab.txt < ../data/test.txt > pred.txt
+  $ ./cc/build/inference exported/ner_frozen.pb.memmapped ../embeddings/vocab.txt 1 < ../data/test.txt > pred.txt
   * inspect `pred.txt` whether the predictions are same.
   $ python ../token_eval.py < pred.txt
 

@@ -23,7 +23,7 @@ class TFUtil {
     tensorflow::Session* CreateSession(tensorflow::MemmappedEnv* memmapped_env, int num_threads);
     void DestroySession(tensorflow::Session* sess);
     tensorflow::Status LoadFrozenModel(tensorflow::Session *sess, string graph_fn);
-    tensorflow::Status LoadFrozenMemmappedModel(tensorflow::MemmappedEnv* memmapped_env, tensorflow::Session *sess, string graph_fn);
+    tensorflow::Status LoadFrozenMemmappedModel(tensorflow::MemmappedEnv* memmapped_env, tensorflow::Session *sess);
     tensorflow::Status LoadModel(tensorflow::Session *sess, string graph_fn, string checkpoint_fn);
     ~TFUtil();
   

@@ -7,16 +7,28 @@
 int main(int argc, char const *argv[])
 {
   if( argc < 3 ) {
-    cerr << argv[0] << " <frozen_graph_fn> <vocab_fn>" << endl;
+    cerr << argv[0] << " <frozen_graph_fn> <vocab_fn> [is_memmapped(1 | 0:default)]" << endl;
     return 1;
   } 
 
   const string frozen_graph_fn = argv[1];
   const string vocab_fn = argv[2];
+  bool is_memmapped = false;
+  if( argc == 4 && argv[3][0] == '1' ) is_memmapped = true;
 
   TFUtil util = TFUtil();
-  tensorflow::Session* sess = util.CreateSession(NULL, 0); //memmapped_env = NULL,  num_threads = 0(all cores) | n(n core)
-  TF_CHECK_OK(util.LoadFrozenModel(sess, frozen_graph_fn));
+  tensorflow::MemmappedEnv* memmapped_env = NULL;
+  tensorflow::Session* sess = NULL;
+  int num_threads = 0; // 0(all cores) | n(n cores)
+
+  if( is_memmapped ) {
+    memmapped_env = util.CreateMemmappedEnv(frozen_graph_fn); 
+    sess = util.CreateSession(memmapped_env, num_threads);
+    TF_CHECK_OK(util.LoadFrozenMemmappedModel(memmapped_env, sess));
+  } else {
+    sess = util.CreateSession(NULL, num_threads);
+    TF_CHECK_OK(util.LoadFrozenModel(sess, frozen_graph_fn));
+  }
  
   Config config = Config(15); // word_length=15
   Vocab vocab = Vocab(vocab_fn, true);  // lowercase=true

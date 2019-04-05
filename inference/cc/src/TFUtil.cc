@@ -58,7 +58,7 @@ tensorflow::Status TFUtil::LoadFrozenModel(tensorflow::Session* sess, string gra
   return tensorflow::Status::OK();
 }
 
-tensorflow::Status TFUtil::LoadFrozenMemmappedModel(tensorflow::MemmappedEnv* memmapped_env, tensorflow::Session* sess, string graph_fn)
+tensorflow::Status TFUtil::LoadFrozenMemmappedModel(tensorflow::MemmappedEnv* memmapped_env, tensorflow::Session* sess)
 {
   tensorflow::Status status;
 
