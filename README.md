@@ -2,7 +2,7 @@
 
 ## Description
 
-- personally, i'm interested in NER tasks. so, i decided to implement a sequence tagging model which consists of 
+### personally, i'm interested in NER tasks. so, i decided to implement a sequence tagging model which consists of 
   - encoding
     - basic embedding
       - [x] 1) word embedding(glove), character convolutional embedding
@@ -19,7 +19,7 @@
   - decoding
     - [x] CRF decoder
 
-- there are so many repositories available for reference. i borrowed those codes as many as possible to use here.
+### there are so many repositories available for reference. i borrowed those codes as many as possible to use here.
   - [ner-lstm](https://github.com/monikkinom/ner-lstm)
   - [cnn-text-classification-tf/text_cnn.py](https://github.com/dennybritz/cnn-text-classification-tf/blob/master/text_cnn.py)
   - [transformer/modules.py](https://github.com/Kyubyong/transformer/blob/master/modules.py)
@@ -33,7 +33,7 @@
   - [bert_lstm_ner.py](https://github.com/dsindex/BERT-BiLSTM-CRF-NER/blob/master/bert_lstm_ner.py)
   - [model.py](https://github.com/mkroutikov/tf-lstm-char-cnn/blob/master/model.py)
 
-- my main questions are :
+### my main questions are :
   - can this module perform at the level of state of the art?
     - [x] the f1 score is near SOTA based on Glove(100)+ELMo+CNN(char)+BiLSTM+CRF
       - 92.65% (best), **92.45%(average, 10 runs)**, `experiments 10, test 15`
@@ -63,7 +63,7 @@
 
 ## Pre-requisites
 
-- python >= 3.6
+### python >= 3.6
 ```
 $ python -m venv python3.6
 $ source /home/python3.6/bin/activate
@@ -73,7 +73,7 @@ $ conda create -n python3.6 python=3.6
 $ conda activate python3.6
 ```
 
-- tensorflow >= 1.10
+### tensorflow >= 1.10
 ```
 $ python -m pip install tensorflow-gpu
 * version matches
@@ -85,12 +85,12 @@ $ python -m pip install tensorflow-gpu
   (cuda-9.0-pkg/cuda-9.0/lib64, cudnn-9.0-v73/lib64, TensorRT-4.0.1.6/lib)
 ```
 
-- numpy
+### numpy
 ```
 $ python -m pip install numpy
 ```
 
-- tf_metrics
+### tf_metrics
   - install [tf_metrics](https://github.com/guillaumegenthial/tf_metrics)
   ```
   $ git clone https://github.com/guillaumegenthial/tf_metrics.git
@@ -98,7 +98,7 @@ $ python -m pip install numpy
   $ python setup.py install
   ```
 
-- glove embedding
+### glove embedding
   - [download Glove6B](http://nlp.stanford.edu/data/glove.6B.zip)
   - [download Glove840B](http://nlp.stanford.edu/data/glove.840B.300d.zip)
   - unzip to 'embeddings' dir
@@ -111,7 +111,7 @@ $ python -m pip install numpy
   $ unzip glove.6B.zip 
   ```
 
-- bilm
+### bilm
   - install [bilm-tf](https://github.com/allenai/bilm-tf)
   ```
   $ cd bilm-tf
@@ -129,7 +129,7 @@ $ python -m pip install numpy
   $ python test_bilm.py
   ```
 
-- bert
+### bert
   - clone [bert](https://github.com/google-research/bert) in the path of `etagger/bert`
   ```
   $ cd etagger
@@ -142,14 +142,14 @@ $ python -m pip install numpy
   cased_L-12_H-768_A-12  cased_L-24_H-1024_A-16
   ```
 
-- spacy [optional]
+### spacy [optional]
   - if you want to analyze input string and see how it detects entities, then you need to install spacy lib.
   ```
   $ python -m pip install spacy
   $ python -m spacy download en
   ```
 
-- tensorflow_qrnn [optional]
+### tensorflow_qrnn [optional]
   - if you want to use QRNN, install [tensorflow_qrnn](https://github.com/JonathanRaiman/tensorflow_qrnn).
   ```
   * before install qrnn, remove `TENSORFLOW_BUILD_DIR` path from `LD_LIBRARY_PATH`
@@ -161,7 +161,7 @@ $ python -m pip install numpy
 
 ## How to run
 
-- convert word embedding to pickle
+### convert word embedding to pickle
 ```
 * for Glove
 $ python embvec.py --emb_path embeddings/glove.6B.100d.txt --wrd_dim 100 --train_path data/train.txt --total_path data/total.txt > embeddings/vocab.txt
@@ -175,8 +175,6 @@ $ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train
 $ python embvec.py --emb_path embeddings/glove.840B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --lowercase False --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json --elmo_weight_path embeddings/elmo_2x4096_512_2048cnn_2xhighway_5.5B_weights.hdf5 > embeddings/vocab.txt 
 
 * for BERT
-$ python embvec.py --emb_path embeddings/glove.6B.100d.txt --wrd_dim 100 --train_path data/train.txt --total_path data/total.txt --bert_config_path embeddings/cased_L-12_H-768_A-12/bert_config.json --bert_vocab_path embeddings/cased_L-12_H-768_A-12/vocab.txt --bert_do_lower_case False --bert_init_checkpoint embeddings/cased_L-12_H-768_A-12/bert_model.ckpt --bert_max_seq_length 180 > embeddings/vocab.txt
-$ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --bert_config_path embeddings/cased_L-12_H-768_A-12/bert_config.json --bert_vocab_path embeddings/cased_L-12_H-768_A-12/vocab.txt --bert_do_lower_case False --bert_init_checkpoint embeddings/cased_L-12_H-768_A-12/bert_model.ckpt --bert_max_seq_length 180 > embeddings/vocab.txt
 $ python embvec.py --emb_path embeddings/glove.6B.100d.txt --wrd_dim 100 --train_path data/train.txt --total_path data/total.txt --bert_config_path embeddings/cased_L-24_H-1024_A-16/bert_config.json --bert_vocab_path embeddings/cased_L-24_H-1024_A-16/vocab.txt --bert_do_lower_case False --bert_init_checkpoint embeddings/cased_L-24_H-1024_A-16/bert_model.ckpt --bert_max_seq_length 180 > embeddings/vocab.txt
 $ python embvec.py --emb_path embeddings/glove.6B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --bert_config_path embeddings/cased_L-24_H-1024_A-16/bert_config.json --bert_vocab_path embeddings/cased_L-24_H-1024_A-16/vocab.txt --bert_do_lower_case False --bert_init_checkpoint embeddings/cased_L-24_H-1024_A-16/bert_model.ckpt --bert_max_seq_length 180 > embeddings/vocab.txt
 $ python embvec.py --emb_path embeddings/glove.840B.300d.txt --wrd_dim 300 --train_path data/train.txt --total_path data/total.txt --lowercase False --bert_config_path embeddings/cased_L-24_H-1024_A-16/bert_config.json --bert_vocab_path embeddings/cased_L-24_H-1024_A-16/vocab.txt --bert_do_lower_case False --bert_init_checkpoint embeddings/cased_L-24_H-1024_A-16/bert_model.ckpt --bert_max_seq_length 180 > embeddings/vocab.txt
@@ -186,7 +184,7 @@ python embvec.py --emb_path embeddings/glove.6B.100d.txt --wrd_dim 100 --train_p
 
 ```
 
-- train
+### train
 ```
 * for Glove, ELMo
 $ python train.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --batch_size 20 --epoch 70
@@ -201,7 +199,7 @@ $ python train.py --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --
 $ rm -rf runs; tensorboard --logdir runs/summaries/ --port 6008
 ```
     
-- inference(bucket)
+### inference(bucket)
 ```
 $ python inference.py --mode bucket --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --restore checkpoint/ner_model < data/test.txt > pred.txt
 $ python inference.py --mode bucket --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/test.txt > pred.txt
@@ -212,7 +210,7 @@ $ python chunk_eval.py < pred.txt
 $ perl   etc/conlleval < pred.txt
 ```
 
-- inference(line)
+### inference(line)
 ```
 $ python inference.py --mode line --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --restore checkpoint/ner_model
 ...
@@ -255,7 +253,7 @@ in IN O O O
 . . O I-DATE O
 ```
 
-- inference(bucket) using frozen model, tensorRT, C++
+### inference(bucket) using frozen model, tensorRT, C++
   - [tensorflow-cmake](https://github.com/PatWie/tensorflow-cmake)
   - [build tensorflow from source](https://www.tensorflow.org/install/source)
   ```
@@ -428,9 +426,9 @@ in IN O O O
 
 ## Evaluation
 
-- [experiment logs](https://github.com/dsindex/etagger/blob/master/README_ENG.md)
+### [experiment logs](https://github.com/dsindex/etagger/blob/master/README_ENG.md)
 
-- results
+### results
   - QRNN
     - Glove
       - setting : `experiments 14, test 8`
@@ -585,7 +583,7 @@ in IN O O O
       - per-token(partial) f1 : 0.9157317073170732
       - per-chunk(exact)   f1 : **0.9102156238953694** (chunk_eval)
 
-- comparision to previous research
+### comparision to previous research
   - implementations
     - [Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs](https://github.com/kamalkraj/Named-Entity-Recognition-with-Bidirectional-LSTM-CNNs)
       - tested
@@ -621,10 +619,10 @@ in IN O O O
 
 ## Development note
 
-- accuracy and loss
+### accuracy and loss
 ![](/etc/graph-2.png)
 
-- abnormal case when using multi-head
+### abnormal case when using multi-head
 ![](/etc/graph-3.png)
   - why? 
   ```
@@ -641,10 +639,10 @@ in IN O O O
   - after replacing layer_norm() to normalize() and applying the dropout of word embeddings
   ![](/etc/graph-4.png)
 
-- train, dev accuracy after applying LSTMBlockFusedCell
+### train, dev accuracy after applying LSTMBlockFusedCell
 ![](/etc/graph-5.png)
 
-- tips for training speed up
+### tips for training speed up
   - filter out words(which are not in train/dev/test data) from glove840B word embeddings. but not for service.
   - use LSTMBlockFusedCell for bidirectional LSTM. this is faster than LSTMCell.
     - about 3.13 times faster during training time.
@@ -660,7 +658,7 @@ in IN O O O
     ```
   - use early stopping
 
-- tips for Transformer
+### tips for Transformer
   - start with small learning rate.
   - be careful to use residual connection after multi-head attention or feed forward net.
     - `x = tf.nn.dropout(x + y)` -> `x = tf.nn.dropout(x_norm + y)`
@@ -674,20 +672,20 @@ in IN O O O
     - after applying kernel_size 3
     ![](/etc/graph-6.png)
 
-- tips in general
+### tips in general
   - save best model by using token-based f1. token-based f1 is slightly better than chunk-based f1
   - be careful for word lowercase when you are using glove6B embeddings. those are all lowercased.
   - feed max sentence length to session. this yields huge improvement of inference speed.
   - when it comes to using import_meta_graph(), you should run global_variable_initialzer() before restore().
 
-- tips for BERT fine-tuning
+### tips for BERT fine-tuning
   - it seems that the warmup and exponential decay of learing rate are worth to use.
   ![](/etc/warmup-1.png)
   ![](/etc/warmup-2.png)
 
 ## References
 
-- general
+### general
   - articles
     - [Named Entity Recognition with Bidirectional LSTM-CNNs](https://www.aclweb.org/anthology/Q16-1026)
     - [Towards Deep Learning in Hindi NER: An approach to tackle the Labelled Data Scarcity](https://arxiv.org/pdf/1610.09756.pdf)
@@ -703,7 +701,7 @@ in IN O O O
   - pytorch impl
     - [torchnlp](https://github.com/kolloldas/torchnlp/tree/master/torchnlp)
 
-- character convolution
+### character convolution
   - articles
     - [Implementing a CNN for Text Classification in TensorFlow](http://www.wildml.com/2015/12/implementing-a-cnn-for-text-classification-in-tensorflow/)
     - [Implementing a sentence classification using Char level CNN & RNN](https://github.com/cuteboydot/Sentence-Classification-using-Char-CNN-and-RNN)
@@ -711,7 +709,7 @@ in IN O O O
     - [cnn-text-classification-tf/text_cnn.py](https://github.com/dennybritz/cnn-text-classification-tf/blob/master/text_cnn.py)
     - [lstm-char-cnn-tensorflow/LSTMTDNN.py](https://github.com/carpedm20/lstm-char-cnn-tensorflow/blob/master/models/LSTMTDNN.py)
 
-- Transformer
+### Transformer
   - articles
     - [Building the Mighty Transformer for Sequence Tagging in PyTorch](https://medium.com/@kolloldas/building-the-mighty-transformer-for-sequence-tagging-in-pytorch-part-i-a1815655cd8)
     - [QANET: COMBINING LOCAL CONVOLUTION WITH GLOBAL SELF-ATTENTION FOR READING COMPREHENSION](https://arxiv.org/pdf/1804.09541.pdf)
@@ -722,7 +720,7 @@ in IN O O O
   - pytorch impl
     - [torchnlp/sublayers.py](https://github.com/kolloldas/torchnlp/blob/master/torchnlp/modules/transformer/sublayers.py)
 
-- CRF
+### CRF
   - articles
     - [Sequence Tagging with Tensorflow](https://guillaumegenthial.github.io/sequence-tagging-with-tensorflow.html)
     - [ADVANCED: MAKING DYNAMIC DECISIONS AND THE BI-LSTM CRF](https://pytorch.org/tutorials/beginner/nlp/advanced_tutorial.html)
@@ -733,7 +731,7 @@ in IN O O O
   - pytorch impl
     - [allennlp/conditional_random_field.py](https://github.com/allenai/allennlp/blob/master/allennlp/modules/conditional_random_field.py)
 
-- pretrained LM
+### pretrained LM
   - articles
     - [Contextual String Embeddings for Sequence Labeling](https://drive.google.com/file/d/17yVpFA7MmXaQFTe-HDpZuqw9fJlmzg56/view)
     - [Semi-Supervised Sequence Modeling with Cross-View Training](https://arxiv.org/pdf/1809.08370.pdf)
@@ -747,7 +745,7 @@ in IN O O O
   - pytorch impl
     - [flair](https://github.com/zalandoresearch/flair)
    
-- tensorflow 
+### tensorflow 
   - tensorflow save and restore from python/C/C++
     - [save, restore tensorflow models quick complete tutorial](https://cv-tricks.com/tensorflow-tutorial/save-restore-tensorflow-models-quick-complete-tutorial/amp/)
     - [tensorflow-cmake](https://github.com/PatWie/tensorflow-cmake)
@@ -814,7 +812,7 @@ in IN O O O
       - or Eigen with MKL-DNN backend
   ```
 
-- etc
+### etc
   - QRNN
     - [QRNN](https://arxiv.org/pdf/1611.01576.pdf?fbclid=IwAR3hreOvBGmJZe54-631X49XedcbsQoDYIRu87BcCHEBf_vMKF8FDKK_7Nw)
     - [QRNN Explained](http://mlexplained.com/2018/04/09/paper-dissected-quasi-recurrent-neural-networks-explained/?fbclid=IwAR1s0khdARsUTpvgaoqeYza4BVYPKVyAHx71OfjdCKG1qJn1nBeV3Nh9ynk)
