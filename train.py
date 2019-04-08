@@ -15,8 +15,9 @@ from chunk_eval  import ChunkEval
 from progbar import Progbar
 from early_stopping import EarlyStopping
 
-def train_step(sess, model, config, data, summary_op, summary_writer):
+def train_step(sess, model, data, summary_op, summary_writer):
     start_time = time.time()
+    config = model.config
     runopts = tf.RunOptions(report_tensor_allocations_upon_oom=True)
     prog = Progbar(target=data.num_batches)
     iterator = data.dataset.make_initializable_iterator()
@@ -81,7 +82,8 @@ def np_concat(sum_var, var):
     else: sum_var = var
     return sum_var
 
-def dev_step(sess, model, config, data, summary_writer, epoch):
+def dev_step(sess, model, data, summary_writer, epoch):
+    config = model.config
     sum_loss = 0.0
     sum_accuracy = 0.0
     sum_f1 = 0.0
@@ -154,7 +156,8 @@ def dev_step(sess, model, config, data, summary_writer, epoch):
     
     return token_f1, chunk_f1, avg_f1
 
-def do_train(model, config, train_data, dev_data):
+def fit(model, train_data, dev_data):
+    config = model.config
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     session_conf.gpu_options.allow_growth = True
     sess = tf.Session(config=session_conf)
@@ -182,8 +185,8 @@ def do_train(model, config, train_data, dev_data):
     max_chunk_f1 = 0
     max_avg_f1 = 0
     for e in range(config.epoch):
-        train_step(sess, model, config, train_data, train_summary_op, train_summary_writer)
-        token_f1, chunk_f1, avg_f1  = dev_step(sess, model, config, dev_data, dev_summary_writer, e)
+        train_step(sess, model, train_data, train_summary_op, train_summary_writer)
+        token_f1, chunk_f1, avg_f1  = dev_step(sess, model, dev_data, dev_summary_writer, e)
         # early stopping
         if early_stopping.validate(token_f1, measure='f1'): break
         if token_f1 > max_token_f1 or (max_token_f1 - token_f1 < 0.0005 and chunk_f1 > max_chunk_f1):
@@ -226,11 +229,10 @@ def train(config):
     tf.logging.debug('config.num_warmup_epoch = %s' % config.num_warmup_epoch)
     tf.logging.debug('config.num_warmup_steps = %s' % config.num_warmup_steps)
 
-    # create model
+    # create model / compile / fit
     model = Model(config)
-
-    # training
-    do_train(model, config, train_data, dev_data)
+    model.compile()
+    fit(model, train_data, dev_data)
         
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

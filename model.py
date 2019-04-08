@@ -9,10 +9,10 @@ from ops import multihead_attention, feedforward, normalize, positional_encoding
 class Model:
 
     def __init__(self, config):
-        """Build model
+        """Build model(define computational blocks).
 
         Args:
-          config: an instance of Config class
+          config: an instance of Config class.
         """
         self.config = config
         self.embvec = config.embvec
@@ -213,13 +213,17 @@ class Model:
         self.output_data_indices = tf.argmax(self.output_data, axis=-1, output_type=tf.int32) # (batch_size, sentence_length)
 
         """
-        Loss, Prediction, Measures, Optimization
+        Prediction
         """
-        self.loss = self.__compute_loss()
         self.prediction = self.__compute_prediction()
         self.logits_indices = tf.identity(self.prediction, name='logits_indices')
-        self.accuracy, self.precision, self.recall, self.f1 = self.__compute_measures()
 
+    def compile(self):
+        """Define operations for loss, measures, optimization.
+        """
+        self.loss = self.__compute_loss()
+        self.accuracy, self.precision, self.recall, self.f1 = self.__compute_measures()
+        config = self.config
         with tf.variable_scope('optimization'):
             self.global_step = tf.train.get_or_create_global_step()
             if 'bert' in config.emb_class:
@@ -521,14 +525,10 @@ class Model:
     def __compute_loss(self):
         """Compute loss(self.output_data, self.logits).
         """
-        trans_params = tf.get_variable('trans_params',
-                                       shape=[self.class_size, self.class_size],
-                                       initializer=initializers.xavier_initializer())
-        self.trans_params = trans_params
         if self.use_crf:
-            log_likelihood, trans_params = tf.contrib.crf.crf_log_likelihood(inputs=self.logits,
+            log_likelihood, self.trans_params = tf.contrib.crf.crf_log_likelihood(inputs=self.logits,
                                                                              tag_indices=self.output_data_indices,
-                                                                             transition_params=trans_params,
+                                                                             transition_params=self.trans_params,
                                                                              sequence_lengths=self.sentence_lengths)
             return tf.reduce_mean(-log_likelihood)
         else:
@@ -539,12 +539,14 @@ class Model:
             cross_entropy *= tf.to_float(masks)
             cross_entropy = tf.reduce_sum(cross_entropy, reduction_indices=1)     # (batch_size)
             cross_entropy /= tf.cast(self.sentence_lengths, tf.float32)           # (batch_size)
-            trans_params = tf.constant(0.0, shape=[self.class_size, self.class_size])
             return tf.reduce_mean(cross_entropy)
 
     def __compute_prediction(self):
         """Compute prediction(self.logits, self.trans_params).
         """
+        self.trans_params = tf.get_variable('trans_params',
+                                            shape=[self.class_size, self.class_size],
+                                            initializer=initializers.xavier_initializer())
         if self.use_crf:
             prediction, _ = tf.contrib.crf.crf_decode(potentials=self.logits,
                                                       transition_params=self.trans_params,
