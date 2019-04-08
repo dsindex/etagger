@@ -11,9 +11,10 @@ from token_eval  import TokenEval
 from chunk_eval  import ChunkEval
 from input import Input
 
-def build_input_feed_dict(model, bucket, config):
+def build_input_feed_dict(model, bucket):
     """Build input and feed_dict for bucket(inference only)
     """
+    config = model.config
     inp = Input(bucket, config, build_output=False)
     feed_dict = {model.input_data_pos_ids: inp.example['pos_ids'],
                  model.input_data_chk_ids: inp.example['chk_ids'],
@@ -66,7 +67,7 @@ def inference_bucket(config):
         line = line.strip()
         if not line and len(bucket) >= 1:
             start_time = time.time()
-            inp, feed_dict = build_input_feed_dict(model, bucket, config)
+            inp, feed_dict = build_input_feed_dict(model, bucket)
             logits_indices, sentence_lengths = sess.run([model.logits_indices, model.sentence_lengths], feed_dict=feed_dict)
             tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
             for i in range(len(bucket)):
@@ -86,7 +87,7 @@ def inference_bucket(config):
         if line : bucket.append(line)
     if len(bucket) != 0:
         start_time = time.time()
-        inp, feed_dict = build_input_feed_dict(model, bucket, config)
+        inp, feed_dict = build_input_feed_dict(model, bucket)
         logits_indices, sentence_lengths = sess.run([model.logits_indices, model.sentence_lengths], feed_dict=feed_dict)
         tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
         for i in range(len(bucket)):
@@ -167,7 +168,7 @@ def inference_line(config):
         except Exception as e:
             sys.stderr.write(str(e) +'\n')
             continue
-        inp, feed_dict = build_input_feed_dict(model, bucket, config)
+        inp, feed_dict = build_input_feed_dict(model, bucket)
         logits_indices, sentence_lengths = sess.run([model.logits_indices, model.sentence_lengths], feed_dict=feed_dict)
         tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
         for i in range(len(bucket)):

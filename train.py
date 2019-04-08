@@ -15,9 +15,10 @@ from chunk_eval  import ChunkEval
 from progbar import Progbar
 from early_stopping import EarlyStopping
 
-def build_feed_dict(model, dataset, config, max_sentence_length):
+def build_feed_dict(model, dataset, max_sentence_length):
     """Build feed_dict for dataset
     """ 
+    config = model.config
     feed_dict={model.input_data_pos_ids: dataset['pos_ids'],
                model.input_data_chk_ids: dataset['chk_ids'],
                model.output_data: dataset['tags'],
@@ -39,7 +40,6 @@ def train_step(sess, model, data, summary_op, summary_writer):
     """Train one epoch
     """
     start_time = time.time()
-    config = model.config
     runopts = tf.RunOptions(report_tensor_allocations_upon_oom=True)
     prog = Progbar(target=data.num_batches)
     iterator = data.dataset.make_initializable_iterator()
@@ -50,9 +50,9 @@ def train_step(sess, model, data, summary_op, summary_writer):
             dataset = sess.run(next_element)
         except tf.errors.OutOfRangeError:
             break
-        config.is_training = True
-        feed_dict = build_feed_dict(model, dataset, config, data.max_sentence_length)
-        if 'bert' in config.emb_class:
+        model.config.is_training = True
+        feed_dict = build_feed_dict(model, dataset, data.max_sentence_length)
+        if 'bert' in model.config.emb_class:
             step, summaries, _, loss, accuracy, f1, learning_rate, bert_embeddings = \
                 sess.run([model.global_step, summary_op, model.train_op, \
                           model.loss, model.accuracy, model.f1, model.learning_rate, \
@@ -95,7 +95,6 @@ def np_concat(sum_var, var):
 def dev_step(sess, model, data, summary_writer, epoch):
     """Evaluate dev data
     """
-    config = model.config
     sum_loss = 0.0
     sum_accuracy = 0.0
     sum_f1 = 0.0
@@ -114,8 +113,8 @@ def dev_step(sess, model, data, summary_writer, epoch):
             dataset = sess.run(next_element)
         except tf.errors.OutOfRangeError:
             break
-        config.is_training = False
-        feed_dict = build_feed_dict(model, dataset, config, data.max_sentence_length)
+        model.config.is_training = False
+        feed_dict = build_feed_dict(model, dataset, data.max_sentence_length)
         global_step, logits_indices, sentence_lengths, loss, accuracy, f1 = \
             sess.run([model.global_step, model.logits_indices, model.sentence_lengths, \
                       model.loss, model.accuracy, model.f1], feed_dict=feed_dict)
@@ -133,10 +132,10 @@ def dev_step(sess, model, data, summary_writer, epoch):
     avg_loss = sum_loss / data.num_batches
     avg_accuracy = sum_accuracy / data.num_batches
     avg_f1 = sum_f1 / data.num_batches
-    tag_preds = config.logits_indices_to_tags_seq(sum_logits_indices, sum_sentence_lengths)
-    tag_corrects = config.logits_indices_to_tags_seq(sum_output_indices, sum_sentence_lengths)
-    tf.logging.debug('\n[epoch %s/%s] dev precision, recall, f1(token): ' % (epoch, config.epoch))
-    token_f1, l_token_prec, l_token_rec, l_token_f1  = TokenEval.compute_f1(config.class_size, 
+    tag_preds = model.config.logits_indices_to_tags_seq(sum_logits_indices, sum_sentence_lengths)
+    tag_corrects = model.config.logits_indices_to_tags_seq(sum_output_indices, sum_sentence_lengths)
+    tf.logging.debug('\n[epoch %s/%s] dev precision, recall, f1(token): ' % (epoch, model.config.epoch))
+    token_f1, l_token_prec, l_token_rec, l_token_f1  = TokenEval.compute_f1(model.config.class_size, 
                                                                             sum_logits_indices,
                                                                             sum_output_indices,
                                                                             sum_sentence_lengths)
@@ -209,7 +208,7 @@ def fit(model, train_data, dev_data):
     sess.close()
 
 def train(config):
-    """Prepare data(train, dev), model and fit(training)
+    """Prepare input data(train, dev), model and fit
     """
 
     # build input data
@@ -223,13 +222,11 @@ def train(config):
     train_file = 'data/cruise.train.txt.in'
     dev_file = 'data/cruise.dev.txt.in'
     '''
-    train_data = Input(train_file, config, build_output=True, do_shuffle=True)
-    dev_data = Input(dev_file, config, build_output=True)
-    #train_data = Input(train_file, config, build_output=True, do_shuffle=True, reuse=True)
-    #dev_data = Input(dev_file, config, build_output=True, reuse=True)
+    train_data = Input(train_file, config, build_output=True, do_shuffle=True, reuse=False)
+    dev_data = Input(dev_file, config, build_output=True, reuse=False)
     tf.logging.debug('loading input data ... done')
 
-    # set config after reading training data
+    # modify config after reading training data
     config.num_train_steps = int((train_data.num_examples / config.batch_size) * config.epoch)
     config.num_warmup_steps = config.num_warmup_epoch * int(train_data.num_examples / config.batch_size)
     if config.num_warmup_steps == 0: config.num_warmup_steps = 1 # prevent dividing by zero
@@ -237,9 +234,11 @@ def train(config):
     tf.logging.debug('config.num_warmup_epoch = %s' % config.num_warmup_epoch)
     tf.logging.debug('config.num_warmup_steps = %s' % config.num_warmup_steps)
 
-    # create model, compile anbd fit
+    # create model, compile
     model = Model(config)
     model.compile()
+
+    # do actual training
     fit(model, train_data, dev_data)
         
 if __name__ == '__main__':
