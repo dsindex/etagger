@@ -1840,14 +1840,21 @@ token : 0.9297237839159129
 chunk : 0.924091828656874
 conlleval : 92.40
 average processing time per bucket(sentence)
-  - 1 GPU(V100 TESLA) : 0.036901780694367184
+  - 1 GPU(V100 TESLA) : 0.036901780694367184 sec
 
 # trial 2
 token : 0.927712322042219
 chunk : 0.9243876464323749
 conlleval : 92.46
 average processing time per bucket(sentence)
-  - 1 GPU(V100 TESLA) : 0.038546528412387114
+  - 1 GPU(V100 TESLA) : 0.038546528412387114 sec
+
+# trial 3
+token : 0.9302496328928046
+chunk : 0.9256344504377046
+conlleval : 92.56
+average processing time per bucket(sentence)
+  - 1 GPU(V100 TESLA) : 0.03891986110181943 sec
 
 
 * test 15
