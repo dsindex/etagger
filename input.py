@@ -508,6 +508,8 @@ class Input:
 
     @staticmethod
     def stat(file_name):
+        """Compute the number of examples and maximum sentence length of examples
+        """
         temp_len = 0
         max_length = 0
         num_examples = 0

@@ -133,9 +133,12 @@ class TokenEval:
         recall = []
         fscore = []
         for i in range(class_size + 1):
-            precision.append(tp[i] * 1.0 / (tp[i] + fp[i]))
-            recall.append(tp[i] * 1.0 / (tp[i] + fn[i]))
-            fscore.append(2.0 * precision[i] * recall[i] / (precision[i] + recall[i]))
+            if tp[i] + fp[i] == 0: precision.append(0.0)
+            else: precision.append(tp[i] * 1.0 / (tp[i] + fp[i]))
+            if tp[i] + fn[i] == 0: recall.append(0.0)
+            else: recall.append(tp[i] * 1.0 / (tp[i] + fn[i]))
+            if precision[i] + recall[i] == 0: fscore.append(0.0)
+            else: fscore.append(2.0 * precision[i] * recall[i] / (precision[i] + recall[i]))
         return fscore[class_size], precision, recall, fscore
 
 if __name__ == '__main__':

@@ -54,8 +54,9 @@ def train_step(sess, model, data, summary_op, summary_writer):
         feed_dict = build_feed_dict(model, dataset, config, data.max_sentence_length)
         if 'bert' in config.emb_class:
             step, summaries, _, loss, accuracy, f1, learning_rate, bert_embeddings = \
-                   sess.run([model.global_step, summary_op, model.train_op, \
-                             model.loss, model.accuracy, model.f1, model.learning_rate, model.bert_embeddings], feed_dict=feed_dict, options=runopts)
+                sess.run([model.global_step, summary_op, model.train_op, \
+                          model.loss, model.accuracy, model.f1, model.learning_rate, \
+                          model.bert_embeddings], feed_dict=feed_dict, options=runopts)
             if idx == 0:
                 tf.logging.debug('# bert_token_ids')
                 t = dataset['bert_token_ids'][:3]
@@ -71,8 +72,9 @@ def train_step(sess, model, data, summary_op, summary_writer):
                 tf.logging.debug(' '.join([str(x) for x in t]))
         else:
             step, summaries, _, loss, accuracy, f1, learning_rate = \
-                   sess.run([model.global_step, summary_op, model.train_op, \
-                             model.loss, model.accuracy, model.f1, model.learning_rate], feed_dict=feed_dict, options=runopts)
+                sess.run([model.global_step, summary_op, model.train_op, \
+                          model.loss, model.accuracy, model.f1, \
+                          model.learning_rate], feed_dict=feed_dict, options=runopts)
 
         summary_writer.add_summary(summaries, step)
         prog.update(idx + 1,
@@ -115,8 +117,8 @@ def dev_step(sess, model, data, summary_writer, epoch):
         config.is_training = False
         feed_dict = build_feed_dict(model, dataset, config, data.max_sentence_length)
         global_step, logits_indices, sentence_lengths, loss, accuracy, f1 = \
-                 sess.run([model.global_step, model.logits_indices, model.sentence_lengths, \
-                           model.loss, model.accuracy, model.f1], feed_dict=feed_dict)
+            sess.run([model.global_step, model.logits_indices, model.sentence_lengths, \
+                      model.loss, model.accuracy, model.f1], feed_dict=feed_dict)
         prog.update(idx + 1,
                     [('dev loss', loss),
                      ('dev accuracy', accuracy),
@@ -134,12 +136,17 @@ def dev_step(sess, model, data, summary_writer, epoch):
     tag_preds = config.logits_indices_to_tags_seq(sum_logits_indices, sum_sentence_lengths)
     tag_corrects = config.logits_indices_to_tags_seq(sum_output_indices, sum_sentence_lengths)
     tf.logging.debug('\n[epoch %s/%s] dev precision, recall, f1(token): ' % (epoch, config.epoch))
-    token_f1, l_token_prec, l_token_rec, l_token_f1  = TokenEval.compute_f1(config.class_size, sum_logits_indices, sum_output_indices, sum_sentence_lengths)
+    token_f1, l_token_prec, l_token_rec, l_token_f1  = TokenEval.compute_f1(config.class_size, 
+                                                                            sum_logits_indices,
+                                                                            sum_output_indices,
+                                                                            sum_sentence_lengths)
     tf.logging.debug('[' + ' '.join([str(x) for x in l_token_prec]) + ']')
     tf.logging.debug('[' + ' '.join([str(x) for x in l_token_rec]) + ']')
     tf.logging.debug('[' + ' '.join([str(x) for x in l_token_f1]) + ']')
     chunk_prec, chunk_rec, chunk_f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
-    tf.logging.debug('dev precision(chunk), recall(chunk), f1(chunk): %s, %s, %s' % (chunk_prec, chunk_rec, chunk_f1) + '(invalid for bert due to X tag)')
+    tf.logging.debug('dev precision(chunk), recall(chunk), f1(chunk): %s, %s, %s' % \
+        (chunk_prec, chunk_rec, chunk_f1) + \
+        '(invalid for bert due to X tag)')
 
     # create summaries manually.
     summary_value = [tf.Summary.Value(tag='loss', simple_value=avg_loss),
