@@ -9,6 +9,11 @@ from ops import multihead_attention, feedforward, normalize, positional_encoding
 class Model:
 
     def __init__(self, config):
+        """Build model
+
+        Args:
+          config: an instance of Config class
+        """
         self.config = config
         self.embvec = config.embvec
         self.wrd_vocab_size = len(self.embvec.wrd_embeddings)

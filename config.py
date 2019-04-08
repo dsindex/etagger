@@ -5,6 +5,14 @@ import pickle as pkl
 class Config:
 
     def __init__(self, args, is_training=True, emb_class='glove', use_crf=True):
+        """Set all parameters for model.
+
+        Args:
+          args: args from train.py, inference,py.
+          is_training: True for training, False for evaluation/inference.
+          emb_class: class of embedding, glove | elmo | bert | bert+elmo.
+          use_crf: if True, use crf decoder(bypass).
+        """
         self.emb_path = args.emb_path
         self.embvec = pkl.load(open(self.emb_path, 'rb')) # resources(glove, vocab, path, etc)
         self.wrd_dim = args.wrd_dim         # size of word embedding(glove)

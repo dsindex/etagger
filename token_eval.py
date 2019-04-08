@@ -4,6 +4,8 @@ import argparse
 import numpy as np
 
 class TokenEval:
+    """Token-based evaluation
+    """
 
     def __init__(self):
         self.cls = {}
@@ -108,7 +110,8 @@ class TokenEval:
 
     @staticmethod
     def compute_f1(class_size, prediction, target, length):
-        """Compute micro F1 measure given prediction and target.
+        """Compute micro Fscore given prediction and target
+        along with list of Precision, Recall, Fscore for each class.
         """
         tp = np.array([0] * (class_size + 1))
         fp = np.array([0] * (class_size + 1))

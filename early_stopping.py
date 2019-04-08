@@ -5,7 +5,15 @@ source from http://forensics.tistory.com/29
 '''
 
 class EarlyStopping():
+
     def __init__(self, patience=0, measure='loss', verbose=0):
+        """Set early stopping condition
+
+        Args:
+          patience: how many times to be patient before early stopping.
+          measure: checking measure, loss | f1 | accuracy.
+          verbose: if 1, enable verbose mode.
+        """
         self._step = 0
         if measure == 'loss': # loss
             self._value = float('inf')

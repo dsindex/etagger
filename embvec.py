@@ -8,6 +8,11 @@ from random import random
 class EmbVec:
 
     def __init__(self, args):
+        """Build embedding, vocabularies, other resources
+
+        Args:
+          args: args from this script(embvec.py).
+        """
         self.pad = '#PAD#'
         self.unk = '#UNK#'
         self.lowercase = True

@@ -9,6 +9,7 @@ class Input:
 
     def __init__(self, data, config, build_output=True, do_shuffle=False, reuse=False):
         """Converting input data as tfrecords(and raw example).
+
         Args:
           data: a bucket or a file path.
           config: an instance of Config.

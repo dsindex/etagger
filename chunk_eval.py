@@ -3,6 +3,8 @@ import sys
 import argparse
 
 class ChunkEval:
+    """Chunk-based evaluation
+    """
 
     def __init__(self):
         self.tag_sents = []
@@ -31,7 +33,7 @@ class ChunkEval:
         self.pred_sents.append(pred_sent)
 
     def eval(self):
-        """Compute micro chunk precision, recall, fscore given file.
+        """Compute micro chunk fscore along with precision, recall given file.
         """
         bucket = []
         while 1:
@@ -50,6 +52,9 @@ class ChunkEval:
 
     @staticmethod
     def compute_precision(guessed_sentences, correct_sentences):
+        """Compute micro precision given tag-predictions(guessed sentences)
+        and tag-corrects(correct sentences).
+        """
         assert(len(guessed_sentences) == len(correct_sentences))
         correctCount = 0
         count = 0
@@ -87,7 +92,8 @@ class ChunkEval:
 
     @staticmethod
     def compute_f1(tag_preds, tag_corrects): 
-        """Compute micro F1 measure given tag-predictions and tag-corrects.
+        """Compute micro Fscore given tag-predictions and tag-corrects
+        along with Precision, Recall.
         """
         prec = ChunkEval.compute_precision(tag_preds, tag_corrects)
         rec = ChunkEval.compute_precision(tag_corrects, tag_preds)
