@@ -11,6 +11,26 @@ from token_eval  import TokenEval
 from chunk_eval  import ChunkEval
 from input import Input
 
+def build_input_feed_dict(model, bucket, config):
+    """Build input and feed_dict for bucket(inference only)
+    """
+    inp = Input(bucket, config, build_output=False)
+    feed_dict = {model.input_data_pos_ids: inp.example['pos_ids'],
+                 model.input_data_chk_ids: inp.example['chk_ids'],
+                 model.is_train: False,
+                 model.sentence_length: inp.max_sentence_length}
+    feed_dict[model.input_data_word_ids] = inp.example['word_ids']
+    feed_dict[model.input_data_wordchr_ids] = inp.example['wordchr_ids']
+    if 'elmo' in config.emb_class:
+        feed_dict[model.elmo_input_data_wordchr_ids] = inp.example['elmo_wordchr_ids']
+    if 'bert' in config.emb_class:
+        feed_dict[model.bert_input_data_token_ids] = inp.example['bert_token_ids']
+        feed_dict[model.bert_input_data_token_masks] = inp.example['bert_token_masks']
+        feed_dict[model.bert_input_data_segment_ids] = inp.example['bert_segment_ids']
+        if 'elmo' in config.emb_class:
+            feed_dict[model.bert_input_data_elmo_indices] = inp.example['bert_elmo_indices']
+    return inp, feed_dict
+
 def inference_bucket(config):
     """Inference for bucket.
     """
@@ -46,22 +66,7 @@ def inference_bucket(config):
         line = line.strip()
         if not line and len(bucket) >= 1:
             start_time = time.time()
-            # Build input data
-            inp = Input(bucket, config, build_output=False)
-            feed_dict = {model.input_data_pos_ids: inp.example['pos_ids'],
-                         model.input_data_chk_ids: inp.example['chk_ids'],
-                         model.is_train: False,
-                         model.sentence_length: inp.max_sentence_length}
-            feed_dict[model.input_data_word_ids] = inp.example['word_ids']
-            feed_dict[model.input_data_wordchr_ids] = inp.example['wordchr_ids']
-            if 'elmo' in config.emb_class:
-                feed_dict[model.elmo_input_data_wordchr_ids] = inp.example['elmo_wordchr_ids']
-            if 'bert' in config.emb_class:
-                feed_dict[model.bert_input_data_token_ids] = inp.example['bert_token_ids']
-                feed_dict[model.bert_input_data_token_masks] = inp.example['bert_token_masks']
-                feed_dict[model.bert_input_data_segment_ids] = inp.example['bert_segment_ids']
-                if 'elmo' in config.emb_class:
-                    feed_dict[model.bert_input_data_elmo_indices] = inp.example['bert_elmo_indices']
+            inp, feed_dict = build_input_feed_dict(model, bucket, config)
             logits_indices, sentence_lengths = sess.run([model.logits_indices, model.sentence_lengths], feed_dict=feed_dict)
             tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
             for i in range(len(bucket)):
@@ -81,22 +86,7 @@ def inference_bucket(config):
         if line : bucket.append(line)
     if len(bucket) != 0:
         start_time = time.time()
-        # Build input data
-        inp = Input(bucket, config, build_output=False)
-        feed_dict = {model.input_data_pos_ids: inp.example['pos_ids'],
-                     model.input_data_chk_ids: inp.example['chk_ids'],
-                     model.is_train: False,
-                     model.sentence_length: inp.max_sentence_length}
-        feed_dict[model.input_data_word_ids] = inp.example['word_ids']
-        feed_dict[model.input_data_wordchr_ids] = inp.example['wordchr_ids']
-        if 'elmo' in config.emb_class:
-            feed_dict[model.elmo_input_data_wordchr_ids] = inp.example['elmo_wordchr_ids']
-        if 'bert' in config.emb_class:
-            feed_dict[model.bert_input_data_token_ids] = inp.example['bert_token_ids']
-            feed_dict[model.bert_input_data_token_masks] = inp.example['bert_token_masks']
-            feed_dict[model.bert_input_data_segment_ids] = inp.example['bert_segment_ids']
-            if 'elmo' in config.emb_class:
-                feed_dict[model.bert_input_data_elmo_indices] = inp.example['bert_elmo_indices']
+        inp, feed_dict = build_input_feed_dict(model, bucket, config)
         logits_indices, sentence_lengths = sess.run([model.logits_indices, model.sentence_lengths], feed_dict=feed_dict)
         tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
         for i in range(len(bucket)):
@@ -177,22 +167,7 @@ def inference_line(config):
         except Exception as e:
             sys.stderr.write(str(e) +'\n')
             continue
-        # Build input data
-        inp = Input(bucket, config, build_output=False)
-        feed_dict = {model.input_data_pos_ids: inp.example['pos_ids'],
-                     model.input_data_chk_ids: inp.example['chk_ids'],
-                     model.is_train: False,
-                     model.sentence_length: inp.max_sentence_length}
-        feed_dict[model.input_data_word_ids] = inp.example['word_ids']
-        feed_dict[model.input_data_wordchr_ids] = inp.example['wordchr_ids']
-        if 'elmo' in config.emb_class:
-            feed_dict[model.elmo_input_data_wordchr_ids] = inp.example['elmo_wordchr_ids']
-        if 'bert' in config.emb_class:
-            feed_dict[model.bert_input_data_token_ids] = inp.example['bert_token_ids']
-            feed_dict[model.bert_input_data_token_masks] = inp.example['bert_token_masks']
-            feed_dict[model.bert_input_data_segment_ids] = inp.example['bert_segment_ids']
-            if 'elmo' in config.emb_class:
-                feed_dict[model.bert_input_data_elmo_indices] = inp.example['bert_elmo_indices']
+        inp, feed_dict = build_input_feed_dict(model, bucket, config)
         logits_indices, sentence_lengths = sess.run([model.logits_indices, model.sentence_lengths], feed_dict=feed_dict)
         tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
         for i in range(len(bucket)):

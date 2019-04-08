@@ -15,7 +15,29 @@ from chunk_eval  import ChunkEval
 from progbar import Progbar
 from early_stopping import EarlyStopping
 
+def build_feed_dict(model, dataset, config, max_sentence_length):
+    """Build feed_dict for dataset
+    """ 
+    feed_dict={model.input_data_pos_ids: dataset['pos_ids'],
+               model.input_data_chk_ids: dataset['chk_ids'],
+               model.output_data: dataset['tags'],
+               model.is_train: config.is_training,
+               model.sentence_length: max_sentence_length}
+    feed_dict[model.input_data_word_ids] = dataset['word_ids']
+    feed_dict[model.input_data_wordchr_ids] = dataset['wordchr_ids']
+    if 'elmo' in config.emb_class:
+        feed_dict[model.elmo_input_data_wordchr_ids] = dataset['elmo_wordchr_ids']
+    if 'bert' in config.emb_class:
+        feed_dict[model.bert_input_data_token_ids] = dataset['bert_token_ids']
+        feed_dict[model.bert_input_data_token_masks] = dataset['bert_token_masks']
+        feed_dict[model.bert_input_data_segment_ids] = dataset['bert_segment_ids']
+        if 'elmo' in config.emb_class:
+            feed_dict[model.bert_input_data_elmo_indices] = dataset['bert_elmo_indices']
+    return feed_dict
+
 def train_step(sess, model, data, summary_op, summary_writer):
+    """Train one epoch
+    """
     start_time = time.time()
     config = model.config
     runopts = tf.RunOptions(report_tensor_allocations_upon_oom=True)
@@ -29,21 +51,7 @@ def train_step(sess, model, data, summary_op, summary_writer):
         except tf.errors.OutOfRangeError:
             break
         config.is_training = True
-        feed_dict={model.input_data_pos_ids: dataset['pos_ids'],
-                   model.input_data_chk_ids: dataset['chk_ids'],
-                   model.output_data: dataset['tags'],
-                   model.is_train: config.is_training,
-                   model.sentence_length: data.max_sentence_length}
-        feed_dict[model.input_data_word_ids] = dataset['word_ids']
-        feed_dict[model.input_data_wordchr_ids] = dataset['wordchr_ids']
-        if 'elmo' in config.emb_class:
-            feed_dict[model.elmo_input_data_wordchr_ids] = dataset['elmo_wordchr_ids']
-        if 'bert' in config.emb_class:
-            feed_dict[model.bert_input_data_token_ids] = dataset['bert_token_ids']
-            feed_dict[model.bert_input_data_token_masks] = dataset['bert_token_masks']
-            feed_dict[model.bert_input_data_segment_ids] = dataset['bert_segment_ids']
-            if 'elmo' in config.emb_class:
-                feed_dict[model.bert_input_data_elmo_indices] = dataset['bert_elmo_indices']
+        feed_dict = build_feed_dict(model, dataset, config, data.max_sentence_length)
         if 'bert' in config.emb_class:
             step, summaries, _, loss, accuracy, f1, learning_rate, bert_embeddings = \
                    sess.run([model.global_step, summary_op, model.train_op, \
@@ -83,6 +91,8 @@ def np_concat(sum_var, var):
     return sum_var
 
 def dev_step(sess, model, data, summary_writer, epoch):
+    """Evaluate dev data
+    """
     config = model.config
     sum_loss = 0.0
     sum_accuracy = 0.0
@@ -103,21 +113,7 @@ def dev_step(sess, model, data, summary_writer, epoch):
         except tf.errors.OutOfRangeError:
             break
         config.is_training = False
-        feed_dict={model.input_data_pos_ids: dataset['pos_ids'],
-                   model.input_data_chk_ids: dataset['chk_ids'],
-                   model.output_data: dataset['tags'],
-                   model.is_train: config.is_training,
-                   model.sentence_length: data.max_sentence_length}
-        feed_dict[model.input_data_word_ids] = dataset['word_ids']
-        feed_dict[model.input_data_wordchr_ids] = dataset['wordchr_ids']
-        if 'elmo' in config.emb_class:
-            feed_dict[model.elmo_input_data_wordchr_ids] = dataset['elmo_wordchr_ids']
-        if 'bert' in config.emb_class:
-            feed_dict[model.bert_input_data_token_ids] = dataset['bert_token_ids']
-            feed_dict[model.bert_input_data_token_masks] = dataset['bert_token_masks']
-            feed_dict[model.bert_input_data_segment_ids] = dataset['bert_segment_ids']
-            if 'elmo' in config.emb_class:
-                feed_dict[model.bert_input_data_elmo_indices] = dataset['bert_elmo_indices']
+        feed_dict = build_feed_dict(model, dataset, config, data.max_sentence_length)
         global_step, logits_indices, sentence_lengths, loss, accuracy, f1 = \
                  sess.run([model.global_step, model.logits_indices, model.sentence_lengths, \
                            model.loss, model.accuracy, model.f1], feed_dict=feed_dict)
@@ -157,6 +153,8 @@ def dev_step(sess, model, data, summary_writer, epoch):
     return token_f1, chunk_f1, avg_f1
 
 def fit(model, train_data, dev_data):
+    """Actual training
+    """
     config = model.config
     session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
     session_conf.gpu_options.allow_growth = True
@@ -204,6 +202,9 @@ def fit(model, train_data, dev_data):
     sess.close()
 
 def train(config):
+    """Prepare data(train, dev), model and fit(training)
+    """
+
     # build input data
     train_file = 'data/train.txt'
     dev_file = 'data/dev.txt'
@@ -229,7 +230,7 @@ def train(config):
     tf.logging.debug('config.num_warmup_epoch = %s' % config.num_warmup_epoch)
     tf.logging.debug('config.num_warmup_steps = %s' % config.num_warmup_steps)
 
-    # create model / compile / fit
+    # create model, compile anbd fit
     model = Model(config)
     model.compile()
     fit(model, train_data, dev_data)
