@@ -36,20 +36,12 @@ def inference_bucket(config):
     """Inference for bucket.
     """
 
-    # Create model
+    # create model and compile
     model = Model(config)
+    model.compile()
+    sess = model.sess
 
-    # Restore model
-    session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
-    '''
-    session_conf = tf.ConfigProto(allow_soft_placement=True,
-                                  log_device_placement=False,
-                                  inter_op_parallelism_threads=1,
-                                  intra_op_parallelism_threads=1)
-    '''
-    sess = tf.Session(config=session_conf)
-    feed_dict = {model.wrd_embeddings_init: config.embvec.wrd_embeddings}
-    sess.run(tf.global_variables_initializer(), feed_dict=feed_dict)
+    # restore model
     saver = tf.train.Saver()
     saver.restore(sess, config.restore)
     sys.stderr.write('model restored' +'\n')
@@ -144,15 +136,12 @@ def inference_line(config):
     import spacy
     nlp = spacy.load('en')
 
-    # Create model
+    # create model and compile
     model = Model(config)
+    model.compile()
+    sess = model.sess
 
-    # Restore model
-    session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
-    sess = tf.Session(config=session_conf)
-    feed_dict = {}
-    feed_dict = {model.wrd_embeddings_init: config.embvec.wrd_embeddings}
-    sess.run(tf.global_variables_initializer(), feed_dict=feed_dict)
+    # restore model
     saver = tf.train.Saver()
     saver.restore(sess, config.restore)
     tf.logging.info('model restored' +'\n')
@@ -163,7 +152,7 @@ def inference_line(config):
         if not line: break
         line = line.strip()
         if not line: continue
-        # Create bucket
+        # create bucket
         try: bucket = build_bucket(nlp, line)
         except Exception as e:
             sys.stderr.write(str(e) +'\n')

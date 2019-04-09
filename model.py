@@ -220,10 +220,12 @@ class Model:
 
     def compile(self):
         """Define operations for loss, measures, optimization.
+        and create session, initialize variables.
         """
+        config = self.config
+        # define operations for loss, measures, optimization
         self.loss = self.__compute_loss()
         self.accuracy, self.precision, self.recall, self.f1 = self.__compute_measures()
-        config = self.config
         with tf.variable_scope('optimization'):
             self.global_step = tf.train.get_or_create_global_step()
             if 'bert' in config.emb_class:
@@ -287,6 +289,21 @@ class Model:
                 tvars = tf.trainable_variables()
                 grads, _ = tf.clip_by_global_norm(tf.gradients(self.loss, tvars), config.clip_norm)
                 self.train_op = optimizer.apply_gradients(zip(grads, tvars), global_step=self.global_step)
+
+        # create session, initialize variables. this should be placed at the end of graph definitions.
+        session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
+        '''
+        session_conf = tf.ConfigProto(allow_soft_placement=True,
+                                      log_device_placement=False,
+                                      inter_op_parallelism_threads=1,
+                                      intra_op_parallelism_threads=1)
+        '''
+        session_conf.gpu_options.allow_growth = True
+        sess = tf.Session(config=session_conf)
+        feed_dict = {self.wrd_embeddings_init: config.embvec.wrd_embeddings}
+        sess.run(tf.global_variables_initializer(), feed_dict=feed_dict) # feed large embedding data
+        sess.run(tf.local_variables_initializer()) # for tf_metrics
+        self.sess = sess
     
     def __word_embedding(self, inputs, keep_prob=0.5, scope='word-embedding'):
         """Look up word embeddings.

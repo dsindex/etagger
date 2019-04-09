@@ -36,10 +36,11 @@ def build_feed_dict(model, dataset, max_sentence_length):
             feed_dict[model.bert_input_data_elmo_indices] = dataset['bert_elmo_indices']
     return feed_dict
 
-def train_step(sess, model, data, summary_op, summary_writer):
+def train_step(model, data, summary_op, summary_writer):
     """Train one epoch
     """
     start_time = time.time()
+    sess = model.sess
     runopts = tf.RunOptions(report_tensor_allocations_upon_oom=True)
     prog = Progbar(target=data.num_batches)
     iterator = data.dataset.make_initializable_iterator()
@@ -92,9 +93,10 @@ def np_concat(sum_var, var):
     else: sum_var = var
     return sum_var
 
-def dev_step(sess, model, data, summary_writer, epoch):
+def dev_step(model, data, summary_writer, epoch):
     """Evaluate dev data
     """
+    sess = model.sess
     sum_loss = 0.0
     sum_accuracy = 0.0
     sum_f1 = 0.0
@@ -107,6 +109,7 @@ def dev_step(sess, model, data, summary_writer, epoch):
     iterator = data.dataset.make_initializable_iterator()
     next_element = iterator.get_next()
     sess.run(iterator.initializer)
+
     # evaluate on dev data sliced by batch_size to prevent OOM(Out Of Memory).
     for idx in range(data.num_batches):
         try:
@@ -159,15 +162,12 @@ def dev_step(sess, model, data, summary_writer, epoch):
     return token_f1, chunk_f1, avg_f1
 
 def fit(model, train_data, dev_data):
-    """Actual training
+    """Do actual training. 
     """
     config = model.config
-    session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
-    session_conf.gpu_options.allow_growth = True
-    sess = tf.Session(config=session_conf)
-    feed_dict = {model.wrd_embeddings_init: config.embvec.wrd_embeddings}
-    sess.run(tf.global_variables_initializer(), feed_dict=feed_dict) # feed large embedding data
-    sess.run(tf.local_variables_initializer()) # for tf_metrics
+    sess = model.sess
+
+    # restore model
     saver = tf.train.Saver()
     if config.restore is not None:
         saver.restore(sess, config.restore)
@@ -183,14 +183,15 @@ def fit(model, train_data, dev_data):
     train_summary_writer = tf.summary.FileWriter(train_summary_dir, sess.graph)
     dev_summary_dir = os.path.join(config.summary_dir, 'summaries', 'dev')
     dev_summary_writer = tf.summary.FileWriter(dev_summary_dir, sess.graph)
-
+    
+    # train and evaluate
     early_stopping = EarlyStopping(patience=10, measure='f1', verbose=1)
     max_token_f1 = 0
     max_chunk_f1 = 0
     max_avg_f1 = 0
     for e in range(config.epoch):
-        train_step(sess, model, train_data, train_summary_op, train_summary_writer)
-        token_f1, chunk_f1, avg_f1  = dev_step(sess, model, dev_data, dev_summary_writer, e)
+        train_step(model, train_data, train_summary_op, train_summary_writer)
+        token_f1, chunk_f1, avg_f1  = dev_step(model, dev_data, dev_summary_writer, e)
         # early stopping
         if early_stopping.validate(token_f1, measure='f1'): break
         if token_f1 > max_token_f1 or (max_token_f1 - token_f1 < 0.0005 and chunk_f1 > max_chunk_f1):
@@ -234,7 +235,7 @@ def train(config):
     tf.logging.debug('config.num_warmup_epoch = %s' % config.num_warmup_epoch)
     tf.logging.debug('config.num_warmup_steps = %s' % config.num_warmup_steps)
 
-    # create model, compile
+    # create model and compile
     model = Model(config)
     model.compile()
 
