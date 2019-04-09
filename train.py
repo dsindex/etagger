@@ -167,7 +167,7 @@ def fit(model, train_data, dev_data):
     config = model.config
     sess = model.sess
 
-    # restore model
+    # restore previous model if provided
     saver = tf.train.Saver()
     if config.restore is not None:
         saver.restore(sess, config.restore)
