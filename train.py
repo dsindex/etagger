@@ -15,14 +15,14 @@ from chunk_eval  import ChunkEval
 from progbar import Progbar
 from early_stopping import EarlyStopping
 
-def build_feed_dict(model, dataset, max_sentence_length):
+def build_feed_dict(model, dataset, max_sentence_length, is_train):
     """Build feed_dict for dataset
     """ 
     config = model.config
     feed_dict={model.input_data_pos_ids: dataset['pos_ids'],
                model.input_data_chk_ids: dataset['chk_ids'],
                model.output_data: dataset['tags'],
-               model.is_train: config.is_training,
+               model.is_train: is_train,
                model.sentence_length: max_sentence_length}
     feed_dict[model.input_data_word_ids] = dataset['word_ids']
     feed_dict[model.input_data_wordchr_ids] = dataset['wordchr_ids']
@@ -51,8 +51,7 @@ def train_step(model, data, summary_op, summary_writer):
             dataset = sess.run(next_element)
         except tf.errors.OutOfRangeError:
             break
-        model.config.is_training = True
-        feed_dict = build_feed_dict(model, dataset, data.max_sentence_length)
+        feed_dict = build_feed_dict(model, dataset, data.max_sentence_length, True)
         if 'bert' in model.config.emb_class:
             step, summaries, _, loss, accuracy, f1, learning_rate, bert_embeddings = \
                 sess.run([model.global_step, summary_op, model.train_op, \
@@ -116,8 +115,7 @@ def dev_step(model, data, summary_writer, epoch):
             dataset = sess.run(next_element)
         except tf.errors.OutOfRangeError:
             break
-        model.config.is_training = False
-        feed_dict = build_feed_dict(model, dataset, data.max_sentence_length)
+        feed_dict = build_feed_dict(model, dataset, data.max_sentence_length, False)
         global_step, logits_indices, sentence_lengths, loss, accuracy, f1 = \
             sess.run([model.global_step, model.logits_indices, model.sentence_lengths, \
                       model.loss, model.accuracy, model.f1], feed_dict=feed_dict)
@@ -212,7 +210,7 @@ def train(config):
     """Prepare input data(train, dev), model and fit
     """
 
-    # build input data
+    # build input train and dev data
     train_file = 'data/train.txt'
     dev_file = 'data/dev.txt'
     '''for KOR
@@ -226,11 +224,7 @@ def train(config):
     train_data = Input(train_file, config, build_output=True, do_shuffle=True, reuse=False)
     dev_data = Input(dev_file, config, build_output=True, reuse=False)
     tf.logging.debug('loading input data ... done')
-
-    # modify config after reading training data
-    config.num_train_steps = int((train_data.num_examples / config.batch_size) * config.epoch)
-    config.num_warmup_steps = config.num_warmup_epoch * int(train_data.num_examples / config.batch_size)
-    if config.num_warmup_steps == 0: config.num_warmup_steps = 1 # prevent dividing by zero
+    config.update(train_data)
     tf.logging.debug('config.num_train_steps = %s' % config.num_train_steps)
     tf.logging.debug('config.num_warmup_epoch = %s' % config.num_warmup_epoch)
     tf.logging.debug('config.num_warmup_steps = %s' % config.num_warmup_steps)
