@@ -7,8 +7,6 @@ import numpy as np
 from embvec import EmbVec
 from config import Config
 from model import Model
-from token_eval  import TokenEval
-from chunk_eval  import ChunkEval
 from input import Input
 
 def build_input_feed_dict(model, bucket):

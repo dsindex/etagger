@@ -17,8 +17,6 @@ from tensorflow.contrib import tensorrt as trt
 
 from embvec import EmbVec
 from config import Config
-from token_eval  import TokenEval
-from chunk_eval  import ChunkEval
 from input import Input
 
 def load_frozen_graph_def(frozen_graph_filename):
