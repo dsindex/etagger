@@ -135,6 +135,19 @@ $ python -m pip install numpy
   $ cd etagger
   $ git clone https://github.com/google-research/bert.git
   ```
+  - edit bert/modeling.py
+  ```
+  is_training: bool. true for training model, false for eval model. Controls
+  -> 
+  is_training: tf.bool. true for training model, false for eval model. Controls
+  ...
+  if not is_training:
+    config.hidden_dropout_prob = 0.0
+    config.attention_probs_dropout_prob = 0.0
+  ->
+  config.hidden_dropout_prob = tf.cond(is_training, lambda: config.hidden_dropout_prob, lambda: 0.0)
+  config.attention_probs_dropout_prob = tf.cond(is_training, lambda: config.attention_probs_dropout_prob, lambda: 0.0)
+  ```
   - download `cased_L-12_H-768_A-12`, `cased_L-24_H-1024_A-16` 
   ```
   $ cd etagger
