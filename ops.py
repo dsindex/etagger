@@ -125,7 +125,7 @@ def multihead_attention(queries,
                         num_heads=4,
                         model_dim=400,
                         dropout_rate=0,
-                        is_training=True,
+                        is_train=True,
                         causality=False,
                         scope="multihead_attention", 
                         reuse=None):
@@ -138,7 +138,7 @@ def multihead_attention(queries,
       num_heads: An int. Number of heads. (h)
       model_dim: output model dimension for the last linear projection. (M)
       dropout_rate: A floating point number.
-      is_training: Boolean or A bool tensor, Controller of mechanism for dropout.
+      is_train: Boolean or A bool tensor, Controller of mechanism for dropout.
       causality: Boolean. If true, units that reference the future are masked. 
       scope: Optional scope for `variable_scope`.
       reuse: Boolean, whether to reuse the weights of a previous layer
@@ -195,7 +195,7 @@ def multihead_attention(queries,
         outputs *= query_masks # broadcasting. (N, T_q, T_k)
           
         # Dropouts
-        outputs = tf.layers.dropout(outputs, rate=dropout_rate, training=tf.convert_to_tensor(is_training))
+        outputs = tf.layers.dropout(outputs, rate=dropout_rate, training=tf.convert_to_tensor(is_train))
                
         # Weighted sum
         outputs = tf.matmul(outputs, V_) # ( h*N, T_q, C/h)

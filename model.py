@@ -334,7 +334,7 @@ class Model:
         from bert import modeling
         bert_model = modeling.BertModel(
             config=self.bert_config,
-            is_training=self.is_training,
+            is_training=self.is_train,
             input_ids=token_ids,
             input_mask=token_masks,
             token_type_ids=segment_ids,
@@ -520,7 +520,7 @@ class Model:
                                                    num_heads=self.config.tf_mh_num_heads,
                                                    model_dim=model_dim,
                                                    dropout_rate=1.0 - keep_prob,
-                                                   is_training=self.is_training,
+                                                   is_train=self.is_train,
                                                    causality=False, # no future masking
                                                    scope='multihead-attention',
                                                    reuse=None)
