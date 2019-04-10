@@ -137,6 +137,8 @@ $ python -m pip install numpy
   ```
   - edit bert/modeling.py
   ```
+  * we do not use estimator, so modify bool to tf.bool for is_training.
+
   is_training: bool. true for training model, false for eval model. Controls
   -> 
   is_training: tf.bool. true for training model, false for eval model. Controls
