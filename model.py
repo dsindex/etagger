@@ -36,26 +36,26 @@ class Model:
         """
         self.is_train = tf.placeholder(tf.bool, name='is_train')
         self.sentence_length = tf.placeholder(tf.int32, name='sentence_length')
-        keep_prob = tf.cond(self.is_train, lambda: config.keep_prob, lambda: 1.0)
+        self.keep_prob = tf.cond(self.is_train, lambda: config.keep_prob, lambda: 1.0)
 
         # pos embedding
         self.input_data_pos_ids = tf.placeholder(tf.int32, shape=[None, None], name='input_data_pos_ids') # (batch_size, sentence_length)
         self.sentence_masks   = self.__compute_sentence_masks(self.input_data_pos_ids)
         sentence_lengths = self.__compute_sentence_lengths(self.sentence_masks)
         self.sentence_lengths = tf.identity(sentence_lengths, name='sentence_lengths')
-        masks = tf.to_float(tf.expand_dims(self.sentence_masks, -1))
-        self.pos_embeddings = self.__pos_embedding(self.input_data_pos_ids, keep_prob=keep_prob, scope='pos-embedding')
+        masks = tf.to_float(tf.expand_dims(self.sentence_masks, -1)) # (batch_size, sentence_length, 1)
+        self.pos_embeddings = self.__pos_embedding(self.input_data_pos_ids, keep_prob=self.keep_prob, scope='pos-embedding')
 
         # chk embedding
         self.input_data_chk_ids = tf.placeholder(tf.int32, shape=[None, None], name='input_data_chk_ids') # (batch_size, sentence_length)
-        self.chk_embeddings = self.__chk_embedding(self.input_data_chk_ids, keep_prob=keep_prob, scope='chk-embedding')
+        self.chk_embeddings = self.__chk_embedding(self.input_data_chk_ids, keep_prob=self.keep_prob, scope='chk-embedding')
 
         # (large) word embedding data
         self.wrd_embeddings_init = tf.placeholder(tf.float32, shape=[self.wrd_vocab_size, self.wrd_dim], name='wrd_embeddings_init')
         self.wrd_embeddings = tf.Variable(self.wrd_embeddings_init, name='wrd_embeddings', trainable=False)
         # word embeddings
         self.input_data_word_ids = tf.placeholder(tf.int32, shape=[None, None], name='input_data_word_ids') # (batch_size, sentence_length)
-        self.word_embeddings = self.__word_embedding(self.input_data_word_ids, keep_prob=keep_prob, scope='word-embedding')
+        self.word_embeddings = self.__word_embedding(self.input_data_word_ids, keep_prob=self.keep_prob, scope='word-embedding')
 
         # character embeddings
         self.input_data_wordchr_ids = tf.placeholder(tf.int32,
@@ -63,11 +63,11 @@ class Model:
                                                      name='input_data_wordchr_ids')
         if config.chr_conv_type == 'conv1d':
             self.wordchr_embeddings = self.__wordchr_embedding_conv1d(self.input_data_wordchr_ids,
-                                                                      keep_prob=keep_prob,
+                                                                      keep_prob=self.keep_prob,
                                                                       scope='wordchr-embedding-conv1d')
         else:
             self.wordchr_embeddings = self.__wordchr_embedding_conv2d(self.input_data_wordchr_ids,
-                                                                      keep_prob=keep_prob,
+                                                                      keep_prob=self.keep_prob,
                                                                       scope='wordchr-embedding-conv2d')
 
         if 'elmo' in self.emb_class:
@@ -89,7 +89,6 @@ class Model:
             self.bert_embeddings = self.__bert_embedding(self.bert_input_data_token_ids,
                                                          self.bert_input_data_token_masks,
                                                          self.bert_input_data_segment_ids,
-                                                         masks,
                                                          keep_prob=bert_keep_prob)
 
         concat_in = [self.word_embeddings, self.wordchr_embeddings, self.pos_embeddings, self.chk_embeddings]
@@ -110,7 +109,7 @@ class Model:
             self.input_data = tf.reshape(self.input_data, [-1, input_dim]) 
             self.input_data = highway(self.input_data, input_dim, num_layers=2, scope='highway')
             self.input_data = tf.reshape(self.input_data, [-1, self.sentence_length, input_dim])
-            self.input_data = tf.nn.dropout(self.input_data, keep_prob=keep_prob)
+            self.input_data = tf.nn.dropout(self.input_data, keep_prob=self.keep_prob)
 
         # masking (for confirmation)
         self.input_data *= masks
@@ -118,84 +117,12 @@ class Model:
         """
         RNN layer
         """
-        rnn_output = tf.identity(self.input_data)
-        if config.rnn_used:
-            for i in range(config.rnn_num_layers):
-                if config.rnn_type == 'fused':
-                    scope = 'bi-lstm-fused-%s' % i
-                    rnn_output = self.__bi_lstm_fused(rnn_output,
-                                                      self.sentence_lengths,
-                                                      rnn_size=config.rnn_size,
-                                                      keep_prob=keep_prob,
-                                                      scope=scope) # (batch_size, sentence_length, 2*rnn_size)
-                elif config.rnn_type == 'qrnn':
-                    scope = 'bi-qrnn-%s' % i
-                    xp = self.__projection(rnn_output,
-                                           config.qrnn_size*2,
-                                           scope='projection-%s' % scope) # (batch_size, sentence_length, config.qrnn_size*2)
-                    x = xp
-                    y = self.__bi_qrnn(xp,
-                                       self.sentence_lengths,
-                                       rnn_size=config.qrnn_size,
-                                       keep_prob=1.0,
-                                       scope=scope)   # (batch_size, sentence_length, input_dim)
-                    # residual and dropout
-                    rnn_output = tf.nn.dropout(y + x, keep_prob=keep_prob)
-                else:
-                    scope = 'bi-lstm-%s' % i
-                    rnn_output = self.__bi_lstm(rnn_output,
-                                                self.sentence_lengths,
-                                                rnn_size=config.rnn_size,
-                                                keep_prob=keep_prob, scope=scope) # (batch_size, sentence_length, 2*rnn_size)
-        self.rnn_output = rnn_output
+        self.rnn_output = self.__bi_rnn(self.input_data)
 
         """
         Transformer layer
         """
-        transformed_output = tf.identity(self.rnn_output)
-        if config.tf_used:
-            tf_keep_prob = tf.cond(self.is_train, lambda: config.tf_keep_prob, lambda: 1.0)
-            tf_mh_keep_prob = tf.cond(self.is_train, lambda: config.tf_mh_keep_prob, lambda: 1.0)
-            tf_ffn_keep_prob = tf.cond(self.is_train, lambda: config.tf_ffn_keep_prob, lambda: 1.0)
-            # last dimension must be equal to model_dim because we use a residual connection. 
-            model_dim = transformed_output.get_shape().as_list()[-1]
-            # sinusoidal positional signal
-            signal = positional_encoding(self.sentence_lengths,
-                                         self.sentence_length,
-                                         model_dim,
-                                         zero_pad=False,
-                                         scale=False,
-                                         scope='positional-encoding',
-                                         reuse=None)
-            transformed_output += signal
-            # block
-            for i in range(config.tf_num_layers):
-                x = transformed_output
-                # layer norm
-                x_norm = normalize(x, scope='layer-norm-sa-%s'%i, reuse=None)
-                # multi-head attention
-                y = self.__self_attention(x_norm,
-                                          masks,
-                                          model_dim=model_dim,
-                                          keep_prob=tf_mh_keep_prob,
-                                          scope='self-attention-%s'%i)
-                # residual and dropout
-                x = tf.nn.dropout(x_norm + y, keep_prob=tf_keep_prob)
-                # layer norm
-                x_norm = normalize(x, scope='layer-norm-ffn-%s'%i, reuse=None)
-                # position-wise feed forward net
-                y = self.__feedforward(x_norm,
-                                       masks,
-                                       model_dim=model_dim,
-                                       kernel_size=config.tf_ffn_kernel_size,
-                                       keep_prob=tf_ffn_keep_prob,
-                                       scope='feed-forward-%s'%i)
-                # residual and dropout
-                x = tf.nn.dropout(x_norm + y, keep_prob=tf_keep_prob)
-                transformed_output = x
-            # final layer norm
-            transformed_output = normalize(transformed_output, scope='layer-norm', reuse=None)
-        self.transformed_output = transformed_output
+        self.transformed_output = self.__transform(self.rnn_output, masks)
 
         """
         Projection layer
@@ -220,10 +147,12 @@ class Model:
 
     def compile(self):
         """Define operations for loss, measures, optimization.
+        and create session, initialize variables.
         """
+        config = self.config
+        # define operations for loss, measures, optimization
         self.loss = self.__compute_loss()
         self.accuracy, self.precision, self.recall, self.f1 = self.__compute_measures()
-        config = self.config
         with tf.variable_scope('optimization'):
             self.global_step = tf.train.get_or_create_global_step()
             if 'bert' in config.emb_class:
@@ -287,7 +216,22 @@ class Model:
                 tvars = tf.trainable_variables()
                 grads, _ = tf.clip_by_global_norm(tf.gradients(self.loss, tvars), config.clip_norm)
                 self.train_op = optimizer.apply_gradients(zip(grads, tvars), global_step=self.global_step)
-    
+
+        # create session, initialize variables. this should be placed at the end of graph definitions.
+        session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
+        '''
+        session_conf = tf.ConfigProto(allow_soft_placement=True,
+                                      log_device_placement=False,
+                                      inter_op_parallelism_threads=1,
+                                      intra_op_parallelism_threads=1)
+        '''
+        session_conf.gpu_options.allow_growth = True
+        sess = tf.Session(config=session_conf)
+        feed_dict = {self.wrd_embeddings_init: config.embvec.wrd_embeddings}
+        sess.run(tf.global_variables_initializer(), feed_dict=feed_dict) # feed large embedding data
+        sess.run(tf.local_variables_initializer()) # for tf_metrics
+        self.sess = sess
+ 
     def __word_embedding(self, inputs, keep_prob=0.5, scope='word-embedding'):
         """Look up word embeddings.
         """
@@ -384,7 +328,7 @@ class Model:
         elmo_embeddings *= masks
         return tf.nn.dropout(elmo_embeddings, keep_prob)
 
-    def __bert_embedding(self, token_ids, token_masks, segment_ids, masks, keep_prob=0.8):
+    def __bert_embedding(self, token_ids, token_masks, segment_ids, keep_prob=0.8):
         """Compute BERT embeddings.
         """
         from bert import modeling
@@ -435,6 +379,41 @@ class Model:
             chk_embeddings *= tf.to_float(masks)                              # broadcasting
             return tf.nn.dropout(chk_embeddings, keep_prob)
 
+    def __bi_rnn(self, input_data):
+        """Apply bi-directional RNN
+        """
+        config = self.config
+        rnn_output = tf.identity(input_data)
+        if config.rnn_used:
+            for i in range(config.rnn_num_layers):
+                if config.rnn_type == 'fused':
+                    scope = 'bi-lstm-fused-%s' % i
+                    rnn_output = self.__bi_lstm_fused(rnn_output,
+                                                      self.sentence_lengths,
+                                                      rnn_size=config.rnn_size,
+                                                      keep_prob=self.keep_prob,
+                                                      scope=scope) # (batch_size, sentence_length, 2*rnn_size)
+                elif config.rnn_type == 'qrnn':
+                    scope = 'bi-qrnn-%s' % i
+                    xp = self.__projection(rnn_output,
+                                           config.qrnn_size*2,
+                                           scope='projection-%s' % scope) # (batch_size, sentence_length, config.qrnn_size*2)
+                    x = xp
+                    y = self.__bi_qrnn(xp,
+                                       self.sentence_lengths,
+                                       rnn_size=config.qrnn_size,
+                                       keep_prob=1.0,
+                                       scope=scope)   # (batch_size, sentence_length, input_dim)
+                    # residual and dropout
+                    rnn_output = tf.nn.dropout(y + x, keep_prob=self.keep_prob)
+                else:
+                    scope = 'bi-lstm-%s' % i
+                    rnn_output = self.__bi_lstm(rnn_output,
+                                                self.sentence_lengths,
+                                                rnn_size=config.rnn_size,
+                                                keep_prob=self.keep_prob, scope=scope) # (batch_size, sentence_length, 2*rnn_size)
+        return rnn_output
+
     def __bi_lstm(self, inputs, lengths, rnn_size, keep_prob=0.5, scope='bi-lstm'):
         """Apply bi-directional LSTM.
         """
@@ -477,6 +456,55 @@ class Model:
             outputs_bw = tf.reverse_sequence(outputs_bw, lengths, batch_axis=0, seq_axis=1)
             outputs = tf.concat([outputs_fw, outputs_bw], axis=-1)
             return tf.nn.dropout(outputs, keep_prob)
+
+    def __transform(self, input_data, masks):
+        """Apply transformer encoder
+        """
+        config = self.config
+        transformed_output = tf.identity(input_data)
+        if config.tf_used:
+            tf_keep_prob = tf.cond(self.is_train, lambda: config.tf_keep_prob, lambda: 1.0)
+            tf_mh_keep_prob = tf.cond(self.is_train, lambda: config.tf_mh_keep_prob, lambda: 1.0)
+            tf_ffn_keep_prob = tf.cond(self.is_train, lambda: config.tf_ffn_keep_prob, lambda: 1.0)
+            # last dimension must be equal to model_dim because we use a residual connection. 
+            model_dim = transformed_output.get_shape().as_list()[-1]
+            # sinusoidal positional signal
+            signal = positional_encoding(self.sentence_lengths,
+                                         self.sentence_length,
+                                         model_dim,
+                                         zero_pad=False,
+                                         scale=False,
+                                         scope='positional-encoding',
+                                         reuse=None)
+            transformed_output += signal
+            # block
+            for i in range(config.tf_num_layers):
+                x = transformed_output
+                # layer norm
+                x_norm = normalize(x, scope='layer-norm-sa-%s'%i, reuse=None)
+                # multi-head attention
+                y = self.__self_attention(x_norm,
+                                          masks,
+                                          model_dim=model_dim,
+                                          keep_prob=tf_mh_keep_prob,
+                                          scope='self-attention-%s'%i)
+                # residual and dropout
+                x = tf.nn.dropout(x_norm + y, keep_prob=tf_keep_prob)
+                # layer norm
+                x_norm = normalize(x, scope='layer-norm-ffn-%s'%i, reuse=None)
+                # position-wise feed forward net
+                y = self.__feedforward(x_norm,
+                                       masks,
+                                       model_dim=model_dim,
+                                       kernel_size=config.tf_ffn_kernel_size,
+                                       keep_prob=tf_ffn_keep_prob,
+                                       scope='feed-forward-%s'%i)
+                # residual and dropout
+                x = tf.nn.dropout(x_norm + y, keep_prob=tf_keep_prob)
+                transformed_output = x
+            # final layer norm
+            transformed_output = normalize(transformed_output, scope='layer-norm', reuse=None)
+        return transformed_output
 
     def __self_attention(self, inputs, masks, model_dim=None, keep_prob=0.5, scope='self-attention'):
         """Apply self attention.
@@ -535,8 +563,7 @@ class Model:
             cross_entropy = self.output_data * tf.log(tf.nn.softmax(self.logits)) # (batch_size, sentence_length, class_size)
             cross_entropy = -tf.reduce_sum(cross_entropy, reduction_indices=2)    # (batch_size, sentence_length)
             # masking
-            masks = self.sentence_masks 
-            cross_entropy *= tf.to_float(masks)
+            cross_entropy *= tf.to_float(self.sentence_masks)
             cross_entropy = tf.reduce_sum(cross_entropy, reduction_indices=1)     # (batch_size)
             cross_entropy /= tf.cast(self.sentence_lengths, tf.float32)           # (batch_size)
             return tf.reduce_mean(cross_entropy)
@@ -559,21 +586,19 @@ class Model:
     def __compute_measures(self):
         """Compute measures(self.prediction, self.output_data_indices).
         """
-        masks = self.sentence_masks
-
         # compute accuracy
         correct_prediction = tf.cast(tf.equal(self.prediction, self.output_data_indices),
                                      tf.float32)                                     # (batch_size, sentence_length)
-        correct_prediction *= tf.to_float(masks)
+        correct_prediction *= tf.to_float(self.sentence_masks)
         correct_prediction = tf.reduce_sum(correct_prediction, reduction_indices=1)  # (batch_size)
         correct_prediction /= tf.cast(self.sentence_lengths, tf.float32)             # (batch_size)
         accuracy = tf.reduce_mean(correct_prediction)
 
         # compute precision, recall, f1
         indices = [i for i in range(2, self.class_size)] # ignore '0' for 'O', '1' for 'X'
-        prec, prec_op = tf_metrics.precision(self.output_data_indices, self.prediction, self.class_size, indices, masks)
-        rec, rec_op = tf_metrics.recall(self.output_data_indices, self.prediction, self.class_size, indices, masks)
-        f1, f1_op = tf_metrics.f1(self.output_data_indices, self.prediction, self.class_size, indices, masks)
+        prec, prec_op = tf_metrics.precision(self.output_data_indices, self.prediction, self.class_size, indices, self.sentence_masks)
+        rec, rec_op = tf_metrics.recall(self.output_data_indices, self.prediction, self.class_size, indices, self.sentence_masks)
+        f1, f1_op = tf_metrics.f1(self.output_data_indices, self.prediction, self.class_size, indices, self.sentence_masks)
         return accuracy, prec_op, rec_op, f1_op
 
     def __compute_sentence_lengths(self, sentence_masks):

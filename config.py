@@ -9,7 +9,7 @@ class Config:
 
         Args:
           args: args from train.py, inference,py.
-          is_training: True for training, False for evaluation/inference.
+          is_training: True for training(from train.py), False for inference(inference.py)
           emb_class: class of embedding, glove | elmo | bert | bert+elmo.
           use_crf: if True, use crf decoder(bypass).
         """
@@ -44,9 +44,9 @@ class Config:
         self.tf_ffn_keep_prob = 0.8         # keep probability for feed forward net
 
         self.starter_learning_rate = 0.001  # default learning rate
-        self.num_train_steps = 0            # number of total training steps, assigned later
+        self.num_train_steps = 0            # number of total training steps, assigned by update()
         self.num_warmup_epoch = 0           # number of warmup epoch
-        self.num_warmup_steps = 0           # number of warmup steps, assigned later
+        self.num_warmup_steps = 0           # number of warmup steps, assigned by update()
         self.decay_steps = 12000
         self.decay_rate = 0.9
         self.clip_norm = 10
@@ -108,6 +108,18 @@ class Config:
             self.num_warmup_epoch = 1
             self.decay_steps = 5000
             '''
+
+    def update(self, data):
+        """Update num_train_steps, num_warmup_steps after reading training data
+
+        Args:
+          data: an instance of Input class, training data.
+        """
+        if not self.is_training: return False
+        self.num_train_steps = int((data.num_examples / self.batch_size) * self.epoch)
+        self.num_warmup_steps = self.num_warmup_epoch * int(data.num_examples / self.batch_size)
+        if self.num_warmup_steps == 0: self.num_warmup_steps = 1 # prevent dividing by zero
+        return True
 
 # -----------------------------------------------------------------------------
 # utility
