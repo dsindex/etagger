@@ -783,11 +783,19 @@ save model by f1(token)
 +
 CRF
 
+# 300d
 token : 0.9195406172849909
 chunk : 0.9275132677092717
 conlleval : 92.75          -> Glove + CNN + LSTM + CRF best
 average processing time per bucket(sentence)
   - 1 GPU(TITAN X PASCAL) : 0.014556412826012726 sec
+
+# 200d
+token : 0.9169116222658322
+chunk : 0.925200607243548
+conlleval : 92.52
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) : 0.014463350388482146 sec
 
 * test 1
 word embedding size : 300
