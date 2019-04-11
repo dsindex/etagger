@@ -890,9 +890,9 @@ CRF
 +
 do_shuffle : True
 
-token :
-chunk :
-conlleval :
+token : 0.9272571148184495
+chunk : 0.9180356827415651
+conlleval : 91.61
 
 * test 21
 word embedding size : 100(glove6B)
