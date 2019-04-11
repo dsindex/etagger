@@ -849,6 +849,51 @@ chunk : 0.9027189265536724
 
 - experiments 11
 ```
+* test 22
+word embedding size : 100(glove6B)
+bert embedding : cased_L-24_H-1024_A-16
+bert_keep_prob : 0.9
+keep_prob : 0.9
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+chk embedding size : 10
+chk embedding random init : -0.5 ~ 0.5
+highway : True
+highway dropout : keep_prob
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 1
+learning_rate : exponential_decay(), 2e-5 / 2000 / 0.9 + Warmup 2epoch + AdamWeightDecayOptimizer
+gradient clipping : 1.0
+#learning_rate : use optimization.py from bert, 2e-5 / warmup proportion 0.1
+epoch : 70
+batch_size : 16
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+do_shuffle : True
+
+token :
+chunk :
+conlleval :
+
 * test 21
 word embedding size : 100(glove6B)
 bert embedding : cased_L-24_H-1024_A-16
@@ -986,6 +1031,11 @@ token : 0.930369281646151
 chunk : 0.9202085358310506
 conlleval : 91.87
 
+# warmup : 2epoch, decay step : 2000, correct is_training(use tf.bool is_train)
+token : 0.9310957309977338
+chunk : 0.9240976645435245
+conlleval : 92.23          -> BERT large + LSTM + CRF best
+
 * test 18
 #word embedding size : 100(glove6B)
 bert embedding : cased_L-24_H-1024_A-16
@@ -1027,7 +1077,7 @@ do_shuffle : True
 
 token : 0.9286369473491102
 chunk : 0.9227642276422764
-conlleval : 92.08          -> BERT large + LSTM + CRF best
+conlleval : 92.08
 
 * test 17
 #word embedding size : 100(glove6B)
