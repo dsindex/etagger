@@ -7,6 +7,9 @@ class BaseHandler(tornado.web.RequestHandler):
     def log(self):
         return self.application.log
     @property
+    def ppid(self):
+        return self.application.ppid
+    @property
     def etagger(self):
         return self.application.etagger
     @property

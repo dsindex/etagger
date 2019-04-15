@@ -138,7 +138,7 @@ class Application(tornado.web.Application):
         self.etagger[pid] = m
         ###############################################################################################
         self.log.info('initialize per process[%s] ... done' % (pid))
-        
+
     def finalize(self):
         # finalize resources
         self.log.info('finalize resources...')

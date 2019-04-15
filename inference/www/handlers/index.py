@@ -11,8 +11,6 @@ import time
 # etagger
 path = os.path.dirname(os.path.abspath(__file__)) + '/../..'
 sys.path.append(path)
-import tensorflow as tf
-from embvec import EmbVec
 from input import Input
 
 # common functions
