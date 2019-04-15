@@ -1,0 +1,186 @@
+from __future__ import print_function
+import sys
+import os
+import logging
+import tornado.web
+from handlers.base import BaseHandler
+import json
+import time
+
+###############################################################################################
+# etagger
+path = os.path.dirname(os.path.abspath(__file__)) + '/../..'
+sys.path.append(path)
+import tensorflow as tf
+from embvec import EmbVec
+from input import Input
+
+# common functions
+def get_entity(doc, begin, end):
+    for ent in doc.ents:
+        # check included
+        if ent.start_char <= begin and end <= ent.end_char:
+            if ent.start_char == begin: return 'B-' + ent.label_
+            else: return 'I-' + ent.label_
+    return 'O'
+ 
+def build_bucket(nlp, line):
+    bucket = []
+    doc = nlp(line)
+    for token in doc:
+        begin = token.idx
+        end   = begin + len(token.text) - 1
+        temp = []
+        temp.append(token.text)
+        temp.append(token.tag_)
+        temp.append('O')     # no chunking info
+        entity = get_entity(doc, begin, end)
+        temp.append(entity)  # entity by spacy
+        temp = ' '.join(temp)
+        bucket.append(temp)
+    return bucket
+
+def build_input_feed_dict(graph, bucket, config):
+    """Build input and feed_dict for bucket(inference only)
+    """
+    # mapping placeholders
+    p_is_train = graph.get_tensor_by_name('prefix/is_train:0')
+    p_sentence_length = graph.get_tensor_by_name('prefix/sentence_length:0')
+    p_input_data_pos_ids = graph.get_tensor_by_name('prefix/input_data_pos_ids:0')
+    p_input_data_chk_ids = graph.get_tensor_by_name('prefix/input_data_chk_ids:0')
+    p_input_data_word_ids = graph.get_tensor_by_name('prefix/input_data_word_ids:0')
+    p_input_data_wordchr_ids = graph.get_tensor_by_name('prefix/input_data_wordchr_ids:0')
+
+    inp = Input(bucket, config, build_output=False)
+    feed_dict = {p_input_data_pos_ids: inp.example['pos_ids'],
+                 p_input_data_chk_ids: inp.example['chk_ids'],
+                 p_is_train: False,
+                 p_sentence_length: inp.max_sentence_length}
+    feed_dict[p_input_data_word_ids] = inp.example['word_ids']
+    feed_dict[p_input_data_wordchr_ids] = inp.example['wordchr_ids']
+    if 'elmo' in config.emb_class:
+        feed_dict[p_elmo_input_data_wordchr_ids] = inp.example['elmo_wordchr_ids']
+    if 'bert' in config.emb_class:
+        feed_dict[p_bert_input_data_token_ids] = inp.example['bert_token_ids']
+        feed_dict[p_bert_input_data_token_masks] = inp.example['bert_token_masks']
+        feed_dict[p_bert_input_data_segment_ids] = inp.example['bert_segment_ids']
+        if 'elmo' in config.emb_class:
+            feed_dict[p_bert_input_data_elmo_indices] = inp.example['bert_elmo_indices']
+    return inp, feed_dict
+###############################################################################################
+
+class IndexHandler(BaseHandler):
+    def get(self):
+        q = self.get_argument('q', '')
+        self.render('index.html', q=q)
+
+class HCheckHandler(BaseHandler):
+    def get(self):
+        self.set_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+        templates_dir = 'templates'
+        hdn_filename = '_hcheck.hdn'
+        err_filename = 'error.html'
+        try : fid = open(templates_dir + "/" + hdn_filename, 'r')
+        except :
+            self.set_status(404)
+            self.render(err_filename)
+        else :
+            fid.close()
+            self.render(hdn_filename)
+
+class EtaggerHandler(BaseHandler):
+    def get(self) :
+        start_time = time.time()
+        
+        callback = self.get_argument('callback', '')
+        mode = self.get_argument('mode', 'product')
+        try :
+            query = self.get_argument('q', '')
+        except :
+            query = "Invalid unicode in q"
+
+        debug = {}
+        debug['callback'] = callback
+        debug['mode'] = mode
+        pid = os.getpid()
+        debug['pid'] = pid
+
+        rst = {}
+        rst['msg'] = ''
+        rst['query'] = query
+        if mode == 'debug' : rst['debug'] = debug
+
+        config = self.config
+        m = self.etagger[pid]
+        sess = m['sess']
+        graph = m['graph']
+        nlp = self.nlp
+        try :
+            ###############################################################################################
+            # analyze query by spacy, etagger
+            bucket = build_bucket(nlp, query)
+            inp, feed_dict = build_input_feed_dict(graph, bucket, config)
+            ## mapping output tensors
+            t_logits_indices = graph.get_tensor_by_name('prefix/logits_indices:0')
+            t_sentence_lengths = graph.get_tensor_by_name('prefix/sentence_lengths:0')
+            ## analyze
+            logits_indices, sentence_lengths = sess.run([t_logits_indices, t_sentence_lengths], feed_dict=feed_dict)
+            tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
+            ## build output
+            out = []
+            for i in range(len(bucket)):
+                if 'bert' in config.emb_class:
+                    j = inp.example['bert_wordidx2tokenidx'][0][i]
+                    tmp = bucket[i] + ' ' + tags[j]
+                else:
+                    tmp = bucket[i] + ' ' + tags[i]
+                tl  = tmp.split()
+                entry = {}
+                entry['word'] = tl[0]
+                entry['pos']  = tl[1]
+                entry['chk']  = tl[2]
+                entry['_tag']  = tl[3] 
+                entry['tag']  = tl[4] 
+                out.append(entry)
+            ###############################################################################################
+            rst['status'] = 200
+            rst['output'] = out
+        except :
+            rst['status'] = 500
+            rst['output'] = []
+            rst['msg'] = 'analyze() fail'
+
+        if mode == 'debug' :
+            duration_time = time.time() - start_time
+            debug['exectime'] = duration_time
+
+        try :
+            ret = json.dumps(rst)
+        except :
+            msg = "json.dumps() fail for query %s" % (query)
+            self.log.debug(msg + "\n")
+            err = {}
+            err['status'] = 500
+            err['msg'] = msg
+            ret = json.dumps(err)
+
+        if mode == 'debug' :
+            self.set_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+
+        if callback.strip() :
+            self.set_header('Content-Type', 'application/javascript; charset=utf-8')
+            ret = 'if (typeof %s === "function") %s(%s);' % (callback, callback, ret)
+        else :
+            self.set_header('Content-Type', 'application/json; charset=utf-8')
+
+        self.write(ret)
+        self.finish()    
+        
+
+    def post(self):
+        self.get()
+
+class EtaggerTestHandler(BaseHandler):
+    def post(self):
+        self.finish()
+
