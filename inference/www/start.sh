@@ -128,31 +128,35 @@ PROCESS=$2
 
 check_running ${daemon_name}
 
+mkdir -p ${CDIR}/data
+
+function copy_resources {
+    cp -rf ${PPDIR}/embeddings/${EMB_FILENAME} ${CDIR}/data
+    cp -rf ${PDIR}/exported/${FROZEN_FILENAME} ${CDIR}/data
+}
+copy_resources
+EMB_PATH=${CDIR}/data/${EMB_FILENAME}
+FROZEN_PATH=${CDIR}/data/${FROZEN_FILENAME}
+
 cd ${CDIR}
 
 if (( MODE == 0 )); then
-	nohup ${python} ${PPPDIR}/bazel-bin/work/dragnn_examples/${daemon_name} \
+    nohup ${python} ${CDIR}/${daemon_name} \
 		--debug=True \
 		--port=${port_devel} \
-		--enable_konlpy=${enable_konlpy} \
-		--dragnn_spec=${DRAGNN_SPEC_FILE} \
-		--resource_path=${DATA_DIR} \
-		--checkpoint_filename=${CHECKPOINT_FILE} \
-		--enable_tracing=False \
-		--tf_master=${TF_MASTER} \
+        --emb_path=${EMB_PATH} \
+        --wrd_dim=${WRD_DIM} \
+		--frozen_path=${FROZEN_PATH} \
 		--log_file_prefix=${CDIR}/log/access.log \
 		> /dev/null 2> /dev/null &
 else
-	nohup ${python}  ${PPPDIR}/bazel-bin/work/dragnn_examples/${daemon_name} \
+    nohup ${python} ${CDIR}/${daemon_name} \
 		--debug=False \
 		--port=${port_service} \
 		--process=${PROCESS} \
-		--enable_konlpy=${enable_konlpy} \
-		--dragnn_spec=${DRAGNN_SPEC_FILE} \
-		--resource_path=${DATA_DIR} \
-		--checkpoint_filename=${CHECKPOINT_FILE} \
-		--enable_tracing=False \
-		--tf_master=${TF_MASTER} \
+        --emb_path=${EMB_PATH} \
+        --wrd_dim=${WRD_DIM} \
+		--frozen_path=${FROZEN_PATH} \
 		--log_file_prefix=${CDIR}/log/access.log \
 		> /dev/null 2> /dev/null &
 fi

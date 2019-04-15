@@ -3,7 +3,7 @@ $(document).ready(function() {
 	if (submitElem) {
 		submitElem.on('click', function() {
 			$.ajax({
-				url: '/dragnntest',
+				url: '/etaggertest',
 				data: $('#docForm').serialize(),
 				method: 'POST'
 			}).done(function(data) {
