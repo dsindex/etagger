@@ -144,11 +144,9 @@ class EtaggerHandler(BaseHandler):
                 out.append(entry)
             ###############################################################################################
             rst['status'] = 200
-            rst['text'] = query
             rst['output'] = out
         except :
             rst['status'] = 500
-            rst['text'] = query
             rst['output'] = []
             rst['msg'] = 'analyze() fail'
 
