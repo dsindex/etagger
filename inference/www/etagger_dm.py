@@ -18,14 +18,10 @@ from tornado.options import define, options
 
 ###############################################################################################
 # etagger, spacy
+## <caution> do not import tensorflow before forking processes
+## see : https://github.com/tensorflow/tensorflow/issues/5448
 path = os.path.dirname(os.path.abspath(__file__)) + '/../..'
 sys.path.append(path)
-import tensorflow as tf
-## for LSTMBlockFusedCell(), https://github.com/tensorflow/tensorflow/issues/23369
-tf.contrib.rnn
-## for QRNN
-try: import qrnn
-except: sys.stderr.write('import qrnn, failed\n')
 from embvec import EmbVec
 from config import Config
 import spacy
@@ -103,7 +99,39 @@ class Application(tornado.web.Application):
 
         log.info('http start...')
 
-    def load_frozen_graph(self, frozen_graph_filename, prefix='prefix'):
+    def initialize(self) :
+        ###############################################################################################
+        # tensorflow should be imported here
+        # see : https://github.com/tensorflow/tensorflow/issues/5448
+        import tensorflow as tf
+        ## for LSTMBlockFusedCell(), https://github.com/tensorflow/tensorflow/issues/23369
+        tf.contrib.rnn
+        ## for QRNN
+        try: import qrnn
+        except: sys.stderr.write('import qrnn, failed\n')
+        ###############################################################################################
+
+        pid = os.getpid()
+        self.log.info('initialize per process[%s] ...' % (pid))
+        ###############################################################################################
+        # loading frozen model for each child process
+        self.etagger = {}
+        graph = self.load_frozen_graph(tf, options.frozen_path)
+        gpu_ops = tf.GPUOptions()
+        session_conf = tf.ConfigProto(allow_soft_placement=True,
+                                      log_device_placement=False,
+                                      gpu_options=gpu_ops,
+                                      inter_op_parallelism_threads=1,
+                                      intra_op_parallelism_threads=1)
+        sess = tf.Session(graph=graph, config=session_conf)
+        m = {}
+        m['sess'] = sess
+        m['graph'] = graph
+        self.etagger[pid] = m
+        ###############################################################################################
+        self.log.info('initialize per process[%s] ... done' % (pid))
+
+    def load_frozen_graph(self, tf, frozen_graph_filename, prefix='prefix'):
         with tf.gfile.GFile(frozen_graph_filename, "rb") as f:
             graph_def = tf.GraphDef()
             graph_def.ParseFromString(f.read())
@@ -118,27 +146,6 @@ class Application(tornado.web.Application):
             )
         return graph
 
-    def initialize(self) :
-        pid = os.getpid()
-        self.log.info('initialize per process[%s] ...' % (pid))
-        ###############################################################################################
-        # loading frozen model for each child process
-        self.etagger = {}
-        graph = self.load_frozen_graph(options.frozen_path)
-        gpu_ops = tf.GPUOptions()
-        session_conf = tf.ConfigProto(allow_soft_placement=True,
-                                      log_device_placement=False,
-                                      gpu_options=gpu_ops,
-                                      inter_op_parallelism_threads=1,
-                                      intra_op_parallelism_threads=1)
-        sess = tf.Session(graph=graph, config=session_conf)
-        m = {}
-        m['sess'] = sess
-        m['graph'] = graph
-        self.etagger[pid] = m
-        ###############################################################################################
-        self.log.info('initialize per process[%s] ... done' % (pid))
-        
     def finalize(self):
         # finalize resources
         self.log.info('finalize resources...')
@@ -157,24 +164,21 @@ def main():
     tornado.options.parse_command_line()
 
     application = Application()
-    application.initialize()
     httpServer = tornado.httpserver.HTTPServer(application, no_keep_alive=True)
     if options.debug == True :
         httpServer.listen(options.port)
+        application.initialize()
     else :
         httpServer.bind(options.port)
         if options.process == 0 :
             httpServer.start(0) # Forks multiple sub-processes, maximum to number of cores
-            pid = os.getpid()
-            if pid != application.ppid :
-                application.initialize()
         else :
             if options.process < 0 :
                 options.process = 1
             httpServer.start(options.process) # Forks multiple sub-processes, given number
-            pid = os.getpid()
-            if pid != application.ppid :
-                application.initialize()
+        pid = os.getpid()
+        if pid != application.ppid :
+            application.initialize()
 
     MAX_WAIT_SECONDS_BEFORE_SHUTDOWN = 3
 
