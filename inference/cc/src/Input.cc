@@ -4,12 +4,12 @@
  *  public methods
  */
 
-Input::Input(Config& config, Vocab& vocab, vector<string>& bucket)
+Input::Input(Config* config, Vocab* vocab, vector<string>& bucket)
 {
   this->max_sentence_length = bucket.size();
 
   // create input tensors
-  int word_length = config.GetWordLength();
+  int word_length = config->GetWordLength();
   tensorflow::TensorShape shape1({1, this->max_sentence_length});
   this->sentence_word_ids = new tensorflow::Tensor(tensorflow::DT_INT32, shape1);
   tensorflow::TensorShape shape2({1, this->max_sentence_length, word_length});
@@ -30,7 +30,7 @@ Input::Input(Config& config, Vocab& vocab, vector<string>& bucket)
   for( int i = 0; i < max_sentence_length; i++ ) {
     string line = bucket[i];
     vector<string> tokens;
-    vocab.Split(line, tokens);
+    vocab->Split(line, tokens);
     if( tokens.size() != 4 ) {
       throw runtime_error("input tokens must be size 4");
     }
@@ -39,24 +39,24 @@ Input::Input(Config& config, Vocab& vocab, vector<string>& bucket)
     string chk   = tokens[2];
     string tag   = tokens[3];
     // build sentence_word_ids
-    int wid = vocab.GetWid(word);
+    int wid = vocab->GetWid(word);
     data_word_ids[i] = wid;
     // build sentence_wordchr_ids
     int wlen = word.length();
     for( int j = 0; j < wlen && j < word_length; j++ ) {
       string ch = string() + word[j];
-      int cid = vocab.GetCid(ch);
+      int cid = vocab->GetCid(ch);
       data_wordchr_ids[i*word_length + j] = cid;
     }
     for( int j = 0; j < word_length - wlen; j++ ) { // padding cid
-      int pad_cid = vocab.GetPadCid();
+      int pad_cid = vocab->GetPadCid();
       data_wordchr_ids[i*word_length + wlen + j] = pad_cid;
     }
     // build sentence_pos_ids
-    int pid = vocab.GetPid(pos);
+    int pid = vocab->GetPid(pos);
     data_pos_ids[i] = pid;
     // build sentence_chk_ids
-    int kid = vocab.GetKid(chk);
+    int kid = vocab->GetKid(chk);
     data_chk_ids[i] = kid;
   }
   *data_sentence_length = this->max_sentence_length;

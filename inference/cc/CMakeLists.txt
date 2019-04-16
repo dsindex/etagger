@@ -30,7 +30,7 @@ TARGET_LINK_LIBRARIES(TensorFlow_FW_DEP INTERFACE -Wl,--allow-multiple-definitio
 
 # build libraries
 include_directories(include)
-set(etagger_src "src/Config.cc" "src/Vocab.cc" "src/Input.cc" "src/TFUtil.cc")
+set(etagger_src "src/Config.cc" "src/Vocab.cc" "src/Input.cc" "src/TFUtil.cc" "src/Etagger.cc")
 add_library(etagger SHARED ${etagger_src})
 target_include_directories(etagger PRIVATE TensorFlow_DEP)
 target_link_libraries(etagger PRIVATE TensorFlow_DEP)
