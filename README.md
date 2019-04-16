@@ -448,8 +448,8 @@ in IN O O O
   ```
   - web
     - demo : http://host:8898
-    ![](/etc/webapi-2.png) 
     - api  : http://host:8898?q=
+    ![](/etc/webapi-2.png) 
     ![](/etc/webapi-1.png) 
 
 ## Evaluation
