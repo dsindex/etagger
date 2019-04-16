@@ -64,6 +64,36 @@ def build_input_feed_dict(graph, bucket, config):
         if 'elmo' in config.emb_class:
             feed_dict[p_bert_input_data_elmo_indices] = inp.example['bert_elmo_indices']
     return inp, feed_dict
+
+def analyze(graph, sess, query, config, nlp):
+    """Analyze query by spacy, etagger
+    """
+    bucket = build_bucket(nlp, query)
+    inp, feed_dict = build_input_feed_dict(graph, bucket, config)
+    ## mapping output tensors
+    t_logits_indices = graph.get_tensor_by_name('prefix/logits_indices:0')
+    t_sentence_lengths = graph.get_tensor_by_name('prefix/sentence_lengths:0')
+    ## analyze
+    logits_indices, sentence_lengths = sess.run([t_logits_indices, t_sentence_lengths], feed_dict=feed_dict)
+    tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
+    ## build output
+    out = []
+    for i in range(len(bucket)):
+        if 'bert' in config.emb_class:
+            j = inp.example['bert_wordidx2tokenidx'][0][i]
+            tmp = bucket[i] + ' ' + tags[j]
+        else:
+            tmp = bucket[i] + ' ' + tags[i]
+        tl  = tmp.split()
+        entry = {}
+        entry['id'] = i
+        entry['word'] = tl[0]
+        entry['pos']  = tl[1]
+        entry['chk']  = tl[2]
+        entry['_tag']  = tl[3]
+        entry['tag']  = tl[4]
+        out.append(entry)
+    return out
 ###############################################################################################
 
 class IndexHandler(BaseHandler):
@@ -113,33 +143,7 @@ class EtaggerHandler(BaseHandler):
         graph = m['graph']
         nlp = self.nlp
         try :
-            ###############################################################################################
-            # analyze query by spacy, etagger
-            bucket = build_bucket(nlp, query)
-            inp, feed_dict = build_input_feed_dict(graph, bucket, config)
-            ## mapping output tensors
-            t_logits_indices = graph.get_tensor_by_name('prefix/logits_indices:0')
-            t_sentence_lengths = graph.get_tensor_by_name('prefix/sentence_lengths:0')
-            ## analyze
-            logits_indices, sentence_lengths = sess.run([t_logits_indices, t_sentence_lengths], feed_dict=feed_dict)
-            tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
-            ## build output
-            out = []
-            for i in range(len(bucket)):
-                if 'bert' in config.emb_class:
-                    j = inp.example['bert_wordidx2tokenidx'][0][i]
-                    tmp = bucket[i] + ' ' + tags[j]
-                else:
-                    tmp = bucket[i] + ' ' + tags[i]
-                tl  = tmp.split()
-                entry = {}
-                entry['word'] = tl[0]
-                entry['pos']  = tl[1]
-                entry['chk']  = tl[2]
-                entry['_tag']  = tl[3] 
-                entry['tag']  = tl[4] 
-                out.append(entry)
-            ###############################################################################################
+            out = analyze(graph, sess, query, config, nlp)
             rst['status'] = 200
             rst['output'] = out
         except :
@@ -179,5 +183,39 @@ class EtaggerHandler(BaseHandler):
 
 class EtaggerTestHandler(BaseHandler):
     def post(self):
-        self.finish()
+        if self.request.body :
+            try:
+                json_data = json.loads(self.request.body)
+                self.request.arguments.update(json_data)
+                content = ''
+                if 'content' in json_data : content = json_data['content']
+                is_json_request = True
+            except:
+                content = self.get_argument('content', "", True)
+                is_json_request = False
+        else:
+            self.write(dict(success=False, info='no request body for post'))
+            self.finish()
 
+        pid = os.getpid()
+        config = self.config
+        m = self.etagger[pid]
+        sess = m['sess']
+        graph = m['graph']
+        nlp = self.nlp
+
+        if is_json_request : lines = content
+        else: lines = content.split('\n')
+        try:
+            out_list=[]
+            for line in lines :
+                line = line.strip()
+                if not line : continue
+                out = analyze(graph, sess, line, config, nlp)
+                out_list.append(out)
+            self.write(dict(success=True, record=out_list, info=None))
+        except Exception as e:
+            msg = str(e)
+            self.write(dict(success=False, info=msg))
+
+        self.finish()
