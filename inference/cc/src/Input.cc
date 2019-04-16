@@ -6,6 +6,12 @@
 
 Input::Input(Config* config, Vocab* vocab, vector<string>& bucket)
 {
+  /*
+   *  Args:
+   *    config: configuration info. class_size, word_length, etc.
+   *    vocab: vocab info. word id, pos id, chk id, tag id, etc.
+   *    bucket: list of 'word pos chk tag'
+   */
   this->max_sentence_length = bucket.size();
 
   // create input tensors
@@ -37,7 +43,7 @@ Input::Input(Config* config, Vocab* vocab, vector<string>& bucket)
     string word  = tokens[0];
     string pos   = tokens[1];
     string chk   = tokens[2];
-    string tag   = tokens[3];
+    string tag   = tokens[3]; // correct tag(answer) or dummy 'O'
     // build sentence_word_ids
     int wid = vocab->GetWid(word);
     data_word_ids[i] = wid;

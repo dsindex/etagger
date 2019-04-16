@@ -41,6 +41,8 @@ int Etagger::Analyze(vector<string>& bucket)
    *  Returns:
    *    number of tokens.
    *    -1 if failed.
+   *    analyzed results are saved to bucket itself.
+   *    bucket: list of 'word pos chk tag predict'
    */
   Input input = Input(this->config, this->vocab, bucket);
   int max_sentence_length = input.GetMaxSentenceLength();
@@ -96,7 +98,11 @@ int Etagger::Analyze(vector<string>& bucket)
     {"is_train", *is_train},
   };
   std::vector<tensorflow::Tensor> outputs;
-  TF_CHECK_OK(this->sess->Run(feed_dict, {"logits_indices"}, {}, &outputs));
+  tensorflow::Status run_status = this->sess->Run(feed_dict, {"logits_indices"}, {}, &outputs);
+  if( !run_status.ok() ) {
+    cerr << run_status.error_message() << endl;
+    return -1;
+  }
   /*
   cout << "logits_indices   " << outputs[0].DebugString() << endl;
   */

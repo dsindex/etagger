@@ -20,8 +20,8 @@ $(document).ready(function() {
 						trHTML += "<th>word</th>";
 						trHTML += "<th>pos</th>";
 						trHTML += "<th>chk</th>";
-						trHTML += "<th>_tag</th>";
 						trHTML += "<th>tag</th>";
+						trHTML += "<th>predict</th>";
 						trHTML += "</tr>";
 						$.each(data.record, function (i, entry) {
 							$.each(entry, function (j, item) {
@@ -29,8 +29,8 @@ $(document).ready(function() {
 								trHTML += '</td><td>' + item.word;
 								trHTML += '</td><td>' + item.pos;
 								trHTML += '</td><td>' + item.chk;
-								trHTML += '</td><td>' + item._tag;
 								trHTML += '</td><td>' + item.tag;
+								trHTML += '</td><td>' + item.predict;
 								trHTML += '</td></tr>';
 							});
 							trHTML += '<tr></tr>';

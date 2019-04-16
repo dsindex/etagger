@@ -90,8 +90,8 @@ def analyze(graph, sess, query, config, nlp):
         entry['word'] = tl[0]
         entry['pos']  = tl[1]
         entry['chk']  = tl[2]
-        entry['_tag']  = tl[3]
-        entry['tag']  = tl[4]
+        entry['tag']  = tl[3]
+        entry['predict']  = tl[4]
         out.append(entry)
     return out
 ###############################################################################################
