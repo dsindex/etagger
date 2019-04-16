@@ -439,6 +439,19 @@ in IN O O O
   ...
   ```
 
+### web api
+  - how to run
+  ```
+  $ cd inference/www
+  $ ./stop.sh
+  $ ./start.sh
+  ```
+  - web
+    - demo : http://host:8898
+    ![](/etc/webapi-2.png) 
+    - api  : http://host:8898?q=
+    ![](/etc/webapi-1.png) 
+
 ## Evaluation
 
 ### [experiment logs](https://github.com/dsindex/etagger/blob/master/README_ENG.md)
