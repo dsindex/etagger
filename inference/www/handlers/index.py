@@ -13,7 +13,6 @@ path = os.path.dirname(os.path.abspath(__file__)) + '/../..'
 sys.path.append(path)
 from input import Input
 
-# common functions
 def get_entity(doc, begin, end):
     for ent in doc.ents:
         # check included

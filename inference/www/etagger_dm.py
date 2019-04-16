@@ -85,16 +85,15 @@ class Application(tornado.web.Application):
 
         self.log = setupAppLogger()
         ppid = os.getpid()
-        self.log.info('initialize parent process[%s] ...' % (ppid))
         self.ppid = ppid
         self.log.info('initialize parent process[%s] ... done' % (ppid))
 
         ###############################################################################################
         # create etagger config, spacy only once
         self.config = Config(options, is_training=False, emb_class='glove', use_crf=True)
-        self.log.info('initialize config[%s] ... done' % (ppid))
+        self.log.info('initialize config on parent process[%s] ... done' % (ppid))
         self.nlp = spacy.load('en')
-        self.log.info('initialize spacy[%s] ... done' % (ppid))
+        self.log.info('initialize spacy on parent process[%s] ... done' % (ppid))
         ###############################################################################################
 
         log.info('http start...')
@@ -112,7 +111,7 @@ class Application(tornado.web.Application):
         ###############################################################################################
 
         pid = os.getpid()
-        self.log.info('initialize per process[%s] ...' % (pid))
+        self.log.info('initialize per child process[%s] ...' % (pid))
         ###############################################################################################
         # loading frozen model for each child process
         self.etagger = {}
@@ -129,7 +128,7 @@ class Application(tornado.web.Application):
         m['graph'] = graph
         self.etagger[pid] = m
         ###############################################################################################
-        self.log.info('initialize per process[%s] ... done' % (pid))
+        self.log.info('initialize per child process[%s] ... done' % (pid))
 
     def load_frozen_graph(self, tf, frozen_graph_filename, prefix='prefix'):
         with tf.gfile.GFile(frozen_graph_filename, "rb") as f:
@@ -150,7 +149,8 @@ class Application(tornado.web.Application):
         # finalize resources
         self.log.info('finalize resources...')
         ## finalize something....
-        for pid, sess in self.etagger.iteritems() :
+        for pid, m in self.etagger.iteritems() :
+            sess = m['sess']
             sess.close()
         
         log.info('Close logger...')
@@ -159,9 +159,20 @@ class Application(tornado.web.Application):
             log.removeHandler(i)
             i.flush()
             i.close()
+        self.log.info('finalize resources... done')
 
 def main():
     tornado.options.parse_command_line()
+
+    '''
+    # you can prefork tornado before creating application. 
+    # code snippet:
+    sockets = tornado.netutil.bind_sockets(options.port)
+    tornado.process.fork_processes(options.process)
+    application = Application()
+    httpServer = tornado.httpserver.HTTPServer(application, no_keep_alive=True)
+    httpServer.add_sockets(sockets) 
+    '''
 
     application = Application()
     httpServer = tornado.httpserver.HTTPServer(application, no_keep_alive=True)
