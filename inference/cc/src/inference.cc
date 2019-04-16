@@ -33,6 +33,7 @@ int main(int argc, char const *argv[])
        gettimeofday(&t3, NULL);
 
        int ret = etagger.Analyze(bucket);
+       if( ret < 0 ) continue;
        for( int i = 0; i < ret; i++ ) {
          cout << bucket[i] << endl;
        }
