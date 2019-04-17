@@ -10,7 +10,7 @@ Input::Input(Config* config, Vocab* vocab, vector<string>& bucket)
    *  Args:
    *    config: configuration info. class_size, word_length, etc.
    *    vocab: vocab info. word id, pos id, chk id, tag id, etc.
-   *    bucket: list of 'word pos chk tag'
+   *    bucket: list of 'word pos chk tag'.
    */
   this->max_sentence_length = bucket.size();
 

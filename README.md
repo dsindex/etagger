@@ -438,6 +438,11 @@ in IN O O O
   7fae40522000-7fae4a000000 r--s 00000000 08:11 749936602                  /root/etagger/inference/exported/ner_frozen.pb.memmapped
   ...
   ```
+  - python wrapper for C
+  ```
+  $ cd inference/cc/wrapper
+  $ python inference.py --frozen_graph_fn ../../exported/ner_frozen.pb.memmapped --vocab_fn ../../../embeddings/vocab.txt
+  ```
 
 ### web api
   - inference api using frozen model

@@ -11,13 +11,12 @@ Etagger::Etagger(string frozen_graph_fn, string vocab_fn, int word_length, bool 
    *    frozen_graph_fn: path to a file of frozen graph.
    *    vocab_fn: path to a vocab file.
    *    word_length: max character size of word. ex) 15
-   *    lowercase: true if vocab file was all lowercased. ex) true
+   *    lowercase: true if vocab file was all lowercased, otherwise false.
    *    is_memmapped: true if frozen graph was memmapped, otherwise false.
    *    num_threads: number of threads for tensorflow. 0 for all cores, n for n cores.
    */ 
   this->util = new TFUtil();
   this->sess = NULL;
-
   if( is_memmapped ) {
     tensorflow::MemmappedEnv* memmapped_env = this->util->CreateMemmappedEnv(frozen_graph_fn); 
     this->sess = this->util->CreateSession(memmapped_env, num_threads);
@@ -38,6 +37,7 @@ int Etagger::Analyze(vector<string>& bucket)
   /*
    *  Args:
    *    bucket: list of 'word pos chk tag'
+   *
    *  Returns:
    *    number of tokens.
    *    -1 if failed.
