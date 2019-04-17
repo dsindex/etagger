@@ -39,9 +39,9 @@ extern "C" {
      *
      *    frozen_graph_fn = 'path-to/ner_frozen.pb'
      *    vocab_fn = 'path-to/vocab.txt'
-     *    word_length = c.c_int( 15 )
+     *    word_length = c.c_int(15)
      *    lowercase = c.c_int(1)
-     *    is_memmapped = c.c_int(0)
+     *    is_memmapped = c.c_int(1)
      *    num_threads = c.c_int(0)
      *    etagger = libetagger.initialize(frozen_graph_fn, vocab_fn, c.byref(word_length), c.byref(lowercase), c.byref(is_memmapped), c.byref(num_threads))
      */ 
