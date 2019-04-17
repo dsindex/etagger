@@ -268,19 +268,6 @@ in IN O O O
 . . O I-DATE O
 ```
 
-### web api
-  - how to run
-  ```
-  $ cd inference/python/www
-  $ ./stop.sh
-  $ ./start.sh
-  ```
-  - web
-    - demo : http://host:8898
-    - api  : http://host:8898?q=
-    ![](/etc/webapi-2.png) 
-    ![](/etc/webapi-1.png) 
-
 ### inference(bucket) using frozen model, tensorRT, C++
   - [tensorflow-cmake](https://github.com/PatWie/tensorflow-cmake)
   - [build tensorflow from source](https://www.tensorflow.org/install/source)
@@ -451,6 +438,20 @@ in IN O O O
   7fae40522000-7fae4a000000 r--s 00000000 08:11 749936602                  /root/etagger/inference/exported/ner_frozen.pb.memmapped
   ...
   ```
+
+### web api
+  - inference api using frozen model
+  ```
+  $ cd inference/python/www
+  $ ./stop.sh
+  $ ./start.sh
+  ```
+  - web
+    - demo : http://host:8898
+    - api  : http://host:8898?q=
+    ![](/etc/webapi-2.png) 
+    ![](/etc/webapi-1.png) 
+  - inference api using memmapped model, C++, C/python wrapper 
 
 ## Evaluation, Dev note, References, Etc
   - [read more](/MORE.md)
