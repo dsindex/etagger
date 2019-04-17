@@ -12,7 +12,7 @@ def inference(frozen_graph_fn, vocab_fn, word_length):
                                  vocab_fn,
                                  word_length=word_length,
                                  lowercase=True,
-                                 is_memmapped=True,
+                                 is_memmapped=False,
                                  num_threads=0)
 
     num_buckets = 0
@@ -26,7 +26,7 @@ def inference(frozen_graph_fn, vocab_fn, word_length):
         out = Etagger.analyze(etagger, line)
         if not out: continue
         for o in out:
-            print(' '.join(o))
+            print(' '.join(o).decode('utf-8'))
         print('\n')
         duration_time = time.time() - start_time
         out = 'duration_time : ' + str(duration_time) + ' sec'

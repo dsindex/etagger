@@ -24,21 +24,21 @@ class Result( c.Structure ):
                 ('tag', c.c_char * MAX_TAG ),
                 ('predict', c.c_char * MAX_TAG )]
 
-def initialize(frozen_graph_fn, vocab_fn, word_length=15, lowercase=True, is_memmapped=True, num_threads=0):
+def initialize(frozen_graph_fn, vocab_fn, word_length=15, lowercase=True, is_memmapped=False, num_threads=0):
     c_frozen_graph_fn = c.c_char_p(frozen_graph_fn.encode('utf-8')) # unicode -> utf-8
     c_vocab_fn = c.c_char_p(vocab_fn.encode('utf-8')) # unicode -> utf-8
     c_word_length = c.c_int(word_length)
     c_lowercase = c.c_int(0)
-    if lowercase: c_lowercase = c.c_int(1)
+    if lowercase == True: c_lowercase = c.c_int(1)
     c_is_memmapped = c.c_int(0)
-    if is_memmapped: c_is_memmapped = c.c_int(1)
+    if is_memmapped == True: c_is_memmapped = c.c_int(1)
     c_num_threads = c.c_int(num_threads)
     etagger = libetagger.initialize(c_frozen_graph_fn,
                                     c_vocab_fn,
-                                    c.byref(c_word_length),
-                                    c.byref(c_lowercase),
-                                    c.byref(c_is_memmapped),
-                                    c.byref(c_num_threads))
+                                    c_word_length,
+                                    c_lowercase,
+                                    c_is_memmapped,
+                                    c_num_threads)
     return etagger
 
 def analyze(etagger, line):
@@ -47,13 +47,13 @@ def analyze(etagger, line):
     robj = (Result * max_sentence_length)() 
     for i in range(max_sentence_length):
         tokens = bucket[i].split()
-        robj[i].word = tokens[0]
-        robj[i].pos = tokens[1]
-        robj[i].chk = tokens[2]
-        robj[i].tag = tokens[3]
-        robj[i].predict = 'O' # initial value 'O'(out of tag)
+        robj[i].word = tokens[0].encode('utf-8')
+        robj[i].pos = tokens[1].encode('utf-8')
+        robj[i].chk = tokens[2].encode('utf-8')
+        robj[i].tag = tokens[3].encode('utf-8')
+        robj[i].predict = b'O' # initial value 'O'(out of tag)
     c_max_sentence_length = c.c_int(max_sentence_length)
-    ret = libetagger.analyze(etagger, c.byref(robj), c.byref(c_max_sentence_length))
+    ret = libetagger.analyze(etagger, c.byref(robj), c_max_sentence_length)
     if ret < 0: return None 
     out = []
     for r in robj:

@@ -15,6 +15,7 @@ Etagger::Etagger(string frozen_graph_fn, string vocab_fn, int word_length, bool 
    *    is_memmapped: true if frozen graph was memmapped, otherwise false.
    *    num_threads: number of threads for tensorflow. 0 for all cores, n for n cores.
    */ 
+  
   this->util = new TFUtil();
   this->sess = NULL;
   if( is_memmapped ) {
@@ -25,11 +26,15 @@ Etagger::Etagger(string frozen_graph_fn, string vocab_fn, int word_length, bool 
     this->sess = this->util->CreateSession(NULL, num_threads);
     TF_CHECK_OK(this->util->LoadFrozenModel(this->sess, frozen_graph_fn));
   }
+  cerr << "Loading graph and creating session ... done" << endl; 
  
   this->config = new Config(word_length);
+  cerr << "Loading Config ... done" << endl; 
+  cerr << "Loading Vocab From " << vocab_fn;
   this->vocab = new Vocab(vocab_fn, lowercase);
+  cerr << " ... done" << endl;
   this->config->SetClassSize(this->vocab->GetTagVocabSize());
-  cerr << "class size = " << this->config->GetClassSize() << endl;
+  cerr << "Class size: " << this->config->GetClassSize() << endl;
 }
 
 int Etagger::Analyze(vector<string>& bucket)
