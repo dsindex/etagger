@@ -20,7 +20,7 @@ from tornado.options import define, options
 # etagger, spacy
 ## <caution> do not import tensorflow before forking processes
 ## see : https://github.com/tensorflow/tensorflow/issues/5448
-path = os.path.dirname(os.path.abspath(__file__)) + '/../..'
+path = os.path.dirname(os.path.abspath(__file__)) + '/../../..'
 sys.path.append(path)
 from embvec import EmbVec
 from config import Config

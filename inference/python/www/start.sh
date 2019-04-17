@@ -131,8 +131,8 @@ check_running ${daemon_name}
 mkdir -p ${CDIR}/data
 
 function copy_resources {
-    cp -rf ${PPDIR}/embeddings/${EMB_FILENAME} ${CDIR}/data
-    cp -rf ${PDIR}/exported/${FROZEN_FILENAME} ${CDIR}/data
+    cp -rf ${PPPDIR}/embeddings/${EMB_FILENAME} ${CDIR}/data
+    cp -rf ${PPDIR}/exported/${FROZEN_FILENAME} ${CDIR}/data
 }
 copy_resources
 EMB_PATH=${CDIR}/data/${EMB_FILENAME}
