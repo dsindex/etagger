@@ -442,7 +442,7 @@ in IN O O O
 ### web api
   - how to run
   ```
-  $ cd inference/www
+  $ cd inference/python/www
   $ ./stop.sh
   $ ./start.sh
   ```
