@@ -9,7 +9,7 @@ import time
 
 ###############################################################################################
 # etagger
-path = os.path.dirname(os.path.abspath(__file__)) + '/../..'
+path = os.path.dirname(os.path.abspath(__file__)) + '/../../..'
 sys.path.append(path)
 from input import Input
 
