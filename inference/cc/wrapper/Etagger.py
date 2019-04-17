@@ -7,10 +7,6 @@ import ctypes as c
 path = os.path.dirname(os.path.abspath(__file__)) + '/../build'
 libetagger = c.cdll.LoadLibrary(path + '/' + 'libetagger.so')
 
-# nlp : spacy
-import spacy
-nlp = spacy.load('en')
-
 # Result class interface to 'struct result_obj'.
 # this values should be same as those in 'result_obj.h'.
 MAX_WORD = 64
@@ -41,8 +37,7 @@ def initialize(frozen_graph_fn, vocab_fn, word_length=15, lowercase=True, is_mem
                                     c_num_threads)
     return etagger
 
-def analyze(etagger, line):
-    bucket = build_bucket(nlp, line)
+def analyze(etagger, bucket):
     max_sentence_length = len(bucket)
     robj = (Result * max_sentence_length)() 
     for i in range(max_sentence_length):
@@ -57,40 +52,12 @@ def analyze(etagger, line):
     if ret < 0: return None 
     out = []
     for r in robj:
-        out.append([r.word, r.pos, r.chk, r.tag, r.predict])
+        out.append([r.word.decode('utf-8'),
+                    r.pos.decode('utf-8'),
+                    r.chk.decode('utf-8'),
+                    r.tag.decode('utf-8'),
+                    r.predict.decode('utf-8')])
     return out
 
 def finalize(etagger):
     libetagger.finalize(etagger)
-
-###############################################################################
-# nlp : spacy
-###############################################################################
-
-def get_entity(doc, begin, end):
-    for ent in doc.ents:
-        # check included
-        if ent.start_char <= begin and end <= ent.end_char:
-            if ent.start_char == begin: return 'B-' + ent.label_
-            else: return 'I-' + ent.label_
-    return 'O'
- 
-def build_bucket(nlp, line):
-    bucket = []
-    doc = nlp(line)
-    for token in doc:
-        begin = token.idx
-        end   = begin + len(token.text) - 1
-        temp = []
-        '''
-        print(token.i, token.text, token.lemma_, token.pos_, token.tag_, token.dep_,
-              token.shape_, token.is_alpha, token.is_stop, begin, end)
-        '''
-        temp.append(token.text)
-        temp.append(token.tag_)
-        temp.append('O')     # no chunking info
-        entity = get_entity(doc, begin, end)
-        temp.append(entity)  # entity by spacy
-        temp = ' '.join(temp)
-        bucket.append(temp)
-    return bucket
