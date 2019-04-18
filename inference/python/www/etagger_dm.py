@@ -17,7 +17,7 @@ import tornado.autoreload as autoreload
 from tornado.options import define, options
 
 ###############################################################################################
-# etagger, spacy
+# etagger
 ## <caution> do not `import tensorflow` before forking processes.
 ## see : https://github.com/tensorflow/tensorflow/issues/5448
 path = os.path.dirname(os.path.abspath(__file__)) + '/../../..'
@@ -27,7 +27,7 @@ from config import Config
 # etagger arguments
 define('emb_path', default='', help='path to word embedding vector + vocab(.pkl)', type=str)
 define('wrd_dim', default=100, help='dimension of word embedding vector', type=int)
-define('word_length', default=15, help='dimension of word embedding vector', type=int)
+define('word_length', default=15, help='max word length', type=int)
 define('frozen_path', default='', help='path to frozen graph', type=str)
 define('restore', default='', help='dummy path for config', type=str)
 ###############################################################################################
