@@ -18,18 +18,18 @@ from tornado.options import define, options
 
 ###############################################################################################
 # etagger
-## <caution> do not `import tensorflow` before forking processes.
-## see : https://github.com/tensorflow/tensorflow/issues/5448
-path = os.path.dirname(os.path.abspath(__file__)) + '/../../..'
+path = os.path.dirname(os.path.abspath(__file__)) + '/../wrapper'
 sys.path.append(path)
-from embvec import EmbVec
-from config import Config
+import Etagger
+
 # etagger arguments
-define('emb_path', default='', help='path to word embedding vector + vocab(.pkl)', type=str)
-define('wrd_dim', default=100, help='dimension of word embedding vector', type=int)
-define('word_length', default=15, help='max word length', type=int)
-define('frozen_path', default='', help='path to frozen graph', type=str)
-define('restore', default='', help='dummy path for config', type=str)
+define('so_path', default='', help='path to libetagger.so.', type=str)
+define('frozen_graph_fn', default='', help='path to frozen model(ex, ./exported/ner_frozen.pb).', type=str)
+define('vocab_fn', default='', help='path to vocab(ex, vocab.txt).', type=str)
+define('word_length', default=15, help='max word length.', type=int)
+define('lowercase', default='True', help='True if vocab file was all lowercased, otherwise False.', type=str)
+define('is_memmapped', default='False', help='is memory mapped graph, True | False.', type=str)
+define('num_threads', default=1, help='number of threads for tensorflow. 0 for all cores, n for n cores.', type=int)
 ###############################################################################################
 
 ###############################################################################################
@@ -38,9 +38,9 @@ import spacy
 ###############################################################################################
 
 from handlers.index import IndexHandler, HCheckHandler, EtaggerHandler, EtaggerTestHandler
-define('port', default=8897, help='run on the given port', type=int)
-define('debug', default=True, help='run on debug mode', type=bool)
-define('process', default=3, help='number of process for service mode', type=int)
+define('port', default=8897, help='run on the given port.', type=int)
+define('debug', default=True, help='run on debug mode.', type=bool)
+define('process', default=3, help='number of process for service mode.', type=int)
 
 
 log = logging.getLogger('tornado.application')
@@ -91,10 +91,9 @@ class Application(tornado.web.Application):
         self.log.info('initialize parent process[%s] ... done' % (ppid))
 
         ###############################################################################################
-        # create etagger config only once
-        self.config = Config(options, is_training=False, emb_class='glove', use_crf=True)
-        self.log.info('initialize config on parent process[%s] ... done' % (ppid))
-        # create nlp(spacy) only once
+        # save Etagger(python instance) for passing to handlers.
+        self.Etagger = Etagger
+        # create nlp(spacy) only once.
         self.nlp = spacy.load('en')
         self.log.info('initialize spacy on parent process[%s] ... done' % (ppid))
         ###############################################################################################
@@ -102,59 +101,33 @@ class Application(tornado.web.Application):
         log.info('http start...')
 
     def initialize(self) :
-        ###############################################################################################
-        # tensorflow should be imported here for child process.
-        # see : https://github.com/tensorflow/tensorflow/issues/5448
-        import tensorflow as tf
-        ## for LSTMBlockFusedCell(), https://github.com/tensorflow/tensorflow/issues/23369
-        tf.contrib.rnn
-        ## for QRNN
-        try: import qrnn
-        except: sys.stderr.write('import qrnn, failed\n')
-        ###############################################################################################
-
         pid = os.getpid()
         self.log.info('initialize per child process[%s] ...' % (pid))
         ###############################################################################################
-        # loading frozen model for each child process.
+        # create etagger instance for each child process.
         self.etagger = {}
-        graph = self.load_frozen_graph(tf, options.frozen_path)
-        gpu_ops = tf.GPUOptions()
-        session_conf = tf.ConfigProto(allow_soft_placement=True,
-                                      log_device_placement=False,
-                                      gpu_options=gpu_ops,
-                                      inter_op_parallelism_threads=1,
-                                      intra_op_parallelism_threads=1)
-        sess = tf.Session(graph=graph, config=session_conf)
-        m = {}
-        m['sess'] = sess
-        m['graph'] = graph
-        self.etagger[pid] = m
+        lowercase = False
+        if options.lowercase == 'True': lowercase = True
+        is_memmapped = False
+        if options.is_memmapped == 'True': is_memmapped = True
+        etagger = Etagger.initialize(options.so_path,
+                                     options.frozen_graph_fn,
+                                     options.vocab_fn,
+                                     word_length=options.word_length,
+                                     lowercase=lowercase,
+                                     is_memmapped=is_memmapped,
+                                     num_threads=options.num_threads)
+        
+        self.etagger[pid] = etagger
         ###############################################################################################
         self.log.info('initialize per child process[%s] ... done' % (pid))
-
-    def load_frozen_graph(self, tf, frozen_graph_filename, prefix='prefix'):
-        with tf.gfile.GFile(frozen_graph_filename, "rb") as f:
-            graph_def = tf.GraphDef()
-            graph_def.ParseFromString(f.read())
-        with tf.Graph().as_default() as graph:
-            tf.import_graph_def(
-                graph_def, 
-                input_map=None, 
-                return_elements=None, 
-                op_dict=None, 
-                producer_op_list=None,
-                name=prefix,
-            )
-        return graph
 
     def finalize(self):
         # finalize resources
         self.log.info('finalize resources...')
         ## finalize something....
-        for pid, m in self.etagger.iteritems() :
-            sess = m['sess']
-            sess.close()
+        for pid, etagger in self.etagger.iteritems() :
+            Etagger.finalize(etagger)
         
         log.info('Close logger...')
         x = list(log.handlers)
