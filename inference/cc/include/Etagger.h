@@ -45,13 +45,13 @@ extern "C" {
      *    import ctypes as c
      *    libetagger = c.cdll.LoadLibrary('./libetagger.so')
      *
-     *    frozen_graph_fn = 'path-to/ner_frozen.pb'
-     *    vocab_fn = 'path-to/vocab.txt'
+     *    frozen_graph_fn = c.c_char_p(b'path-to/ner_frozen.pb')
+     *    vocab_fn = c.c_char_p(b'path-to/vocab.txt')
      *    word_length = c.c_int(15)
      *    lowercase = c.c_int(1)
      *    is_memmapped = c.c_int(1)
      *    num_threads = c.c_int(0)
-     *    etagger = libetagger.initialize(frozen_graph_fn, vocab_fn, c.byref(word_length), c.byref(lowercase), c.byref(is_memmapped), c.byref(num_threads))
+     *    etagger = libetagger.initialize(frozen_graph_fn, vocab_fn, word_length, lowercase, is_memmapped, num_threads)
      */ 
     bool b_lowercase = false;
     if( lowercase ) b_lowercase = true;
@@ -95,14 +95,20 @@ extern "C" {
      *    # fill robj from bucket.
      *    for i in range(max_sentence_length):
      *        tokens = bucket[i].split()
-     *        robj[i].word = tokens[0]
-     *        robj[i].pos = tokens[1]
-     *        robj[i].chk = tokens[2]
-     *        robj[i].tag = tokens[3]
-     *        robj[i].predict = 'O'
-     *    ret = libetagger.analyze(etagger, c.byref(robj))
+     *        robj[i].word = tokens[0].encode('utf-8')
+     *        robj[i].pos = tokens[1].encode('utf-8')
+     *        robj[i].chk = tokens[2].encode('utf-8')
+     *        robj[i].tag = tokens[3].encode('utf-8')
+     *        robj[i].predict = b'O'
+     *    c_max_sentence_length = c.c_int(max_sentence_length)
+     *    ret = libetagger.analyze(etagger, c.byref(robj), c_max_sentence_length)
+     *    out = []
      *    for r in robj:
-     *        print(r.word, r.pos, r.chk, r.tag, r.predict)
+     *        out.append([r.word.decode('utf-8'),
+     *        r.pos.decode('utf-8'),
+     *        r.chk.decode('utf-8'),
+     *        r.tag.decode('utf-8'),
+     *        r.predict.decode('utf-8')])
      *
      *  Returns:
      *    number of tokens.
@@ -119,9 +125,11 @@ extern "C" {
                  string(robj[i].tag);
       bucket.push_back(s);
     }
+    // bucket: list of 'word pos chk tag'
 
     int ret = etagger->Analyze(bucket);
     if( ret < 0 ) return -1;
+    // bucket: list of 'word pos chk tag predict'
 
     // assign predict to robj
     for( int i = 0; i < max; i++ ) {

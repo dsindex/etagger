@@ -1,11 +1,9 @@
 from __future__ import print_function
 import sys
 import os
-
-# etagger
 import ctypes as c
-path = os.path.dirname(os.path.abspath(__file__)) + '/../build'
-libetagger = c.cdll.LoadLibrary(path + '/' + 'libetagger.so')
+
+libetagger = None
 
 # Result class interface to 'struct result_obj'.
 # this values should be same as those in 'result_obj.h'.
@@ -20,7 +18,10 @@ class Result( c.Structure ):
                 ('tag', c.c_char * MAX_TAG ),
                 ('predict', c.c_char * MAX_TAG )]
 
-def initialize(frozen_graph_fn, vocab_fn, word_length=15, lowercase=True, is_memmapped=False, num_threads=0):
+def initialize(so_path, frozen_graph_fn, vocab_fn, word_length=15, lowercase=True, is_memmapped=False, num_threads=0):
+    global libetagger
+    if not libetagger:
+        libetagger = c.cdll.LoadLibrary(so_path)
     c_frozen_graph_fn = c.c_char_p(frozen_graph_fn.encode('utf-8')) # unicode -> utf-8
     c_vocab_fn = c.c_char_p(vocab_fn.encode('utf-8')) # unicode -> utf-8
     c_word_length = c.c_int(word_length)
@@ -38,6 +39,7 @@ def initialize(frozen_graph_fn, vocab_fn, word_length=15, lowercase=True, is_mem
     return etagger
 
 def analyze(etagger, bucket):
+    global libetagger
     max_sentence_length = len(bucket)
     robj = (Result * max_sentence_length)() 
     for i in range(max_sentence_length):
@@ -60,4 +62,5 @@ def analyze(etagger, bucket):
     return out
 
 def finalize(etagger):
+    global libetagger
     libetagger.finalize(etagger)
