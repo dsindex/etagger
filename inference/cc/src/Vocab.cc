@@ -73,7 +73,6 @@ Vocab::~Vocab()
 
 bool Vocab::load_vocab(string vocab_fn)
 {
-  cerr << "Loading Vocab From " << vocab_fn  << endl; 
   fstream fs(vocab_fn, ios_base::in);
   if( !fs.is_open() ) {
     cerr << "Can't find " << vocab_fn << endl;
