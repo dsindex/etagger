@@ -9,11 +9,11 @@ class BaseHandler(tornado.web.RequestHandler):
     def ppid(self):
         return self.application.ppid
     @property
+    def Etagger(self):
+        return self.application.Etagger
+    @property
     def etagger(self):
         return self.application.etagger
-    @property
-    def config(self):
-        return self.application.config
     @property
     def nlp(self):
         return self.application.nlp

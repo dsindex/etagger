@@ -131,12 +131,12 @@ check_running ${daemon_name}
 mkdir -p ${CDIR}/data
 
 function copy_resources {
-    cp -rf ${PPPDIR}/embeddings/${EMB_FILENAME} ${CDIR}/data
     cp -rf ${PPDIR}/exported/${FROZEN_FILENAME} ${CDIR}/data
+    cp -rf ${PPPDIR}/embeddings/${VOCAB_FILENAME} ${CDIR}/data
 }
 copy_resources
-EMB_PATH=${CDIR}/data/${EMB_FILENAME}
 FROZEN_PATH=${CDIR}/data/${FROZEN_FILENAME}
+VOCAB_PATH=${CDIR}/data/${VOCAB_FILENAME}
 
 cd ${CDIR}
 
@@ -144,9 +144,13 @@ if (( MODE == 0 )); then
     nohup ${python} ${CDIR}/${daemon_name} \
 		--debug=True \
 		--port=${port_devel} \
-        --emb_path=${EMB_PATH} \
-        --wrd_dim=${WRD_DIM} \
-		--frozen_path=${FROZEN_PATH} \
+        --so_path=${SO_PATH} \
+		--frozen_graph_fn=${FROZEN_PATH} \
+        --vocab_fn=${VOCAB_PATH} \
+        --word_length=${WRD_LEN} \
+        --lowercase=${LOWERCASE} \
+        --is_memmapped=${IS_MEMMAPPED} \
+        --num_threads=${NUM_THREADS} \
 		--log_file_prefix=${CDIR}/log/access.log \
 		> /dev/null 2> /dev/null &
 else
@@ -154,9 +158,13 @@ else
 		--debug=False \
 		--port=${port_service} \
 		--process=${PROCESS} \
-        --emb_path=${EMB_PATH} \
-        --wrd_dim=${WRD_DIM} \
-		--frozen_path=${FROZEN_PATH} \
+        --so_path=${SO_PATH} \
+		--frozen_graph_fn=${FROZEN_PATH} \
+        --vocab_fn=${VOCAB_PATH} \
+        --word_length=${WRD_LEN} \
+        --lowercase=${LOWERCASE} \
+        --is_memmapped=${IS_MEMMAPPED} \
+        --num_threads=${NUM_THREADS} \
 		--log_file_prefix=${CDIR}/log/access.log \
 		> /dev/null 2> /dev/null &
 fi

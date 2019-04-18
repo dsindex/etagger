@@ -8,14 +8,7 @@ import json
 import time
 
 ###############################################################################################
-# etagger
-path = os.path.dirname(os.path.abspath(__file__)) + '/../../..'
-sys.path.append(path)
-# although `import tensorflow as tf statement is in the `input.py`,
-# this statement will not be called by 
-# `from handlers.index import IndexHandler, HCheckHandler, EtaggerHandler, EtaggerTestHandler`.
-from input import Input
-
+# nlp : spacy
 def get_entity(doc, begin, end):
     for ent in doc.ents:
         # check included
@@ -40,54 +33,15 @@ def build_bucket(nlp, line):
         bucket.append(temp)
     return bucket
 
-def build_input_feed_dict(graph, bucket, config):
-    """Build input and feed_dict for bucket(inference only)
-    """
-    # mapping placeholders
-    p_is_train = graph.get_tensor_by_name('prefix/is_train:0')
-    p_sentence_length = graph.get_tensor_by_name('prefix/sentence_length:0')
-    p_input_data_pos_ids = graph.get_tensor_by_name('prefix/input_data_pos_ids:0')
-    p_input_data_chk_ids = graph.get_tensor_by_name('prefix/input_data_chk_ids:0')
-    p_input_data_word_ids = graph.get_tensor_by_name('prefix/input_data_word_ids:0')
-    p_input_data_wordchr_ids = graph.get_tensor_by_name('prefix/input_data_wordchr_ids:0')
-
-    inp = Input(bucket, config, build_output=False)
-    feed_dict = {p_input_data_pos_ids: inp.example['pos_ids'],
-                 p_input_data_chk_ids: inp.example['chk_ids'],
-                 p_is_train: False,
-                 p_sentence_length: inp.max_sentence_length}
-    feed_dict[p_input_data_word_ids] = inp.example['word_ids']
-    feed_dict[p_input_data_wordchr_ids] = inp.example['wordchr_ids']
-    if 'elmo' in config.emb_class:
-        feed_dict[p_elmo_input_data_wordchr_ids] = inp.example['elmo_wordchr_ids']
-    if 'bert' in config.emb_class:
-        feed_dict[p_bert_input_data_token_ids] = inp.example['bert_token_ids']
-        feed_dict[p_bert_input_data_token_masks] = inp.example['bert_token_masks']
-        feed_dict[p_bert_input_data_segment_ids] = inp.example['bert_segment_ids']
-        if 'elmo' in config.emb_class:
-            feed_dict[p_bert_input_data_elmo_indices] = inp.example['bert_elmo_indices']
-    return inp, feed_dict
-
-def analyze(graph, sess, query, config, nlp):
-    """Analyze query by spacy, etagger
+def analyze(Etagger, etagger, nlp, query):
+    """Analyze query by nlp, etagger
     """
     bucket = build_bucket(nlp, query)
-    inp, feed_dict = build_input_feed_dict(graph, bucket, config)
-    ## mapping output tensors
-    t_logits_indices = graph.get_tensor_by_name('prefix/logits_indices:0')
-    t_sentence_lengths = graph.get_tensor_by_name('prefix/sentence_lengths:0')
-    ## analyze
-    logits_indices, sentence_lengths = sess.run([t_logits_indices, t_sentence_lengths], feed_dict=feed_dict)
-    tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
+    result = Etagger.analyze(etagger, bucket) 
     ## build output
     out = []
-    for i in range(len(bucket)):
-        if 'bert' in config.emb_class:
-            j = inp.example['bert_wordidx2tokenidx'][0][i]
-            tmp = bucket[i] + ' ' + tags[j]
-        else:
-            tmp = bucket[i] + ' ' + tags[i]
-        tl  = tmp.split()
+    for i in range(len(result)):
+        tl = result[i]
         entry = {}
         entry['id'] = i
         entry['word'] = tl[0]
@@ -140,13 +94,11 @@ class EtaggerHandler(BaseHandler):
         rst['query'] = query
         if mode == 'debug' : rst['debug'] = debug
 
-        config = self.config
-        m = self.etagger[pid]
-        sess = m['sess']
-        graph = m['graph']
+        Etagger = self.Etagger
+        etagger = self.etagger[pid]
         nlp = self.nlp
         try :
-            out = analyze(graph, sess, query, config, nlp)
+            out = analyze(Etagger, etagger, nlp, query)
             rst['status'] = 200
             rst['output'] = out
         except :
@@ -201,10 +153,8 @@ class EtaggerTestHandler(BaseHandler):
             self.finish()
 
         pid = os.getpid()
-        config = self.config
-        m = self.etagger[pid]
-        sess = m['sess']
-        graph = m['graph']
+        Etagger = self.Etagger
+        etagger = self.etagger[pid]
         nlp = self.nlp
 
         if is_json_request : lines = content
@@ -214,7 +164,7 @@ class EtaggerTestHandler(BaseHandler):
             for line in lines :
                 line = line.strip()
                 if not line : continue
-                out = analyze(graph, sess, line, config, nlp)
+                out = analyze(Etagger, etagger, nlp, line)
                 out_list.append(out)
             self.write(dict(success=True, record=out_list, info=None))
         except Exception as e:

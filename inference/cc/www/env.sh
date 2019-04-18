@@ -31,6 +31,8 @@ export LANG=ko_KR.UTF-8
 ## current dir of this script
 CDIR=$(readlink -f $(dirname $(readlink -f ${BASH_SOURCE[0]})))
 PDIR=$(readlink -f $(dirname $(readlink -f ${BASH_SOURCE[0]}))/..)
+PPDIR=$(readlink -f $(dirname $(readlink -f ${BASH_SOURCE[0]}))/../..)
+PPPDIR=$(readlink -f $(dirname $(readlink -f ${BASH_SOURCE[0]}))/../../..)
 
 # server 
 daemon_name='etagger_dm.py'
@@ -41,9 +43,13 @@ port_service=8898
 python='env python'
 
 # setting
-EMB_FILENAME=glove.6B.100d.txt.pkl
-WRD_DIM=100
-FROZEN_FILENAME=ner_frozen.pb
+SO_PATH=${PPDIR}/cc/build/libetagger.so
+FROZEN_FILENAME=ner_frozen.pb.memmapped
+VOCAB_FILENAME=vocab.txt
+WRD_LEN=15
+LOWERCASE=True
+IS_MEMMAPPED=True
+NUM_THREADS=1
 
 # functions
 
