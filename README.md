@@ -460,6 +460,11 @@ in IN O O O
     ![](/etc/webapi-2.png) 
     ![](/etc/webapi-1.png) 
   - inference api using memmapped model, C++, C/python wrapper 
+  ```
+  $ cd inference/cc/www
+  $ ./stop.sh
+  $ ./start.sh
+  ```
 
 ## Evaluation, Dev note, References, Etc
   - [read more](/MORE.md)
