@@ -441,6 +441,7 @@ in IN O O O
   - python wrapper for C
   ```
   $ cd inference/cc/wrapper
+  * edit inferency.py : so_path = os.path.dirname(os.path.abspath(__file__)) + '/../build' + '/' + 'libetagger.so'
   $ python inference.py --frozen_graph_fn ../../exported/ner_frozen.pb --vocab_fn ../../../embeddings/vocab.txt < ../../../data/test.txt.sentences > pred.txt
   or
   $ python inference.py --frozen_graph_fn ../../exported/ner_frozen.pb.memmapped --vocab_fn ../../../embeddings/vocab.txt --is_memmapped=True < ../../../data/test.txt.sentences > pred.txt

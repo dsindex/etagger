@@ -18,12 +18,22 @@ from tornado.options import define, options
 
 ###############################################################################################
 # etagger, spacy
-## <caution> do not import tensorflow before forking processes
+## <caution> do not `import tensorflow` before forking processes.
 ## see : https://github.com/tensorflow/tensorflow/issues/5448
 path = os.path.dirname(os.path.abspath(__file__)) + '/../../..'
 sys.path.append(path)
 from embvec import EmbVec
 from config import Config
+# etagger arguments
+define('emb_path', default='', help='path to word embedding vector + vocab(.pkl)', type=str)
+define('wrd_dim', default=100, help='dimension of word embedding vector', type=int)
+define('word_length', default=15, help='dimension of word embedding vector', type=int)
+define('frozen_path', default='', help='path to frozen graph', type=str)
+define('restore', default='', help='dummy path for config', type=str)
+###############################################################################################
+
+###############################################################################################
+# nlp : spacy
 import spacy
 ###############################################################################################
 
@@ -32,14 +42,6 @@ define('port', default=8897, help='run on the given port', type=int)
 define('debug', default=True, help='run on debug mode', type=bool)
 define('process', default=3, help='number of process for service mode', type=int)
 
-###############################################################################################
-# etagger arguments
-define('emb_path', default='', help='path to word embedding vector + vocab(.pkl)', type=str)
-define('wrd_dim', default=100, help='dimension of word embedding vector', type=int)
-define('word_length', default=15, help='dimension of word embedding vector', type=int)
-define('frozen_path', default='', help='path to frozen graph', type=str)
-define('restore', default='', help='dummy path for config', type=str)
-###############################################################################################
 
 log = logging.getLogger('tornado.application')
 
@@ -89,9 +91,10 @@ class Application(tornado.web.Application):
         self.log.info('initialize parent process[%s] ... done' % (ppid))
 
         ###############################################################################################
-        # create etagger config, spacy only once
+        # create etagger config only once
         self.config = Config(options, is_training=False, emb_class='glove', use_crf=True)
         self.log.info('initialize config on parent process[%s] ... done' % (ppid))
+        # create nlp(spacy) only once
         self.nlp = spacy.load('en')
         self.log.info('initialize spacy on parent process[%s] ... done' % (ppid))
         ###############################################################################################
@@ -100,7 +103,7 @@ class Application(tornado.web.Application):
 
     def initialize(self) :
         ###############################################################################################
-        # tensorflow should be imported here
+        # tensorflow should be imported here for child process.
         # see : https://github.com/tensorflow/tensorflow/issues/5448
         import tensorflow as tf
         ## for LSTMBlockFusedCell(), https://github.com/tensorflow/tensorflow/issues/23369
@@ -113,7 +116,7 @@ class Application(tornado.web.Application):
         pid = os.getpid()
         self.log.info('initialize per child process[%s] ...' % (pid))
         ###############################################################################################
-        # loading frozen model for each child process
+        # loading frozen model for each child process.
         self.etagger = {}
         graph = self.load_frozen_graph(tf, options.frozen_path)
         gpu_ops = tf.GPUOptions()

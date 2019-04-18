@@ -11,6 +11,9 @@ import time
 # etagger
 path = os.path.dirname(os.path.abspath(__file__)) + '/../../..'
 sys.path.append(path)
+# although `import tensorflow as tf statement is in the `input.py`,
+# this statement will not be called by 
+# `from handlers.index import IndexHandler, HCheckHandler, EtaggerHandler, EtaggerTestHandler`.
 from input import Input
 
 def get_entity(doc, begin, end):

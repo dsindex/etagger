@@ -41,9 +41,10 @@ def build_bucket(nlp, line):
     return bucket
 ###############################################################################
 
-def inference(frozen_graph_fn, vocab_fn, word_length, lowercase=True, is_memmapped=False):
+def inference(so_path, frozen_graph_fn, vocab_fn, word_length, lowercase=True, is_memmapped=False):
 
-    etagger = Etagger.initialize(frozen_graph_fn,
+    etagger = Etagger.initialize(so_path,
+                                 frozen_graph_fn,
                                  vocab_fn,
                                  word_length=word_length,
                                  lowercase=lowercase,
@@ -86,4 +87,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     is_memmapped = False
     if args.is_memmapped == 'True': is_memmapped = True
-    inference(args.frozen_graph_fn, args.vocab_fn, args.word_length, lowercase=True, is_memmapped=is_memmapped)
+
+    # etagger library path
+    so_path = os.path.dirname(os.path.abspath(__file__)) + '/../build' + '/' + 'libetagger.so'
+
+    inference(so_path, args.frozen_graph_fn, args.vocab_fn, args.word_length, lowercase=True, is_memmapped=is_memmapped)
