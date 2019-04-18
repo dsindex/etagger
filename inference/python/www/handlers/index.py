@@ -69,7 +69,7 @@ def build_input_feed_dict(graph, bucket, config):
     return inp, feed_dict
 
 def analyze(graph, sess, query, config, nlp):
-    """Analyze query by spacy, etagger
+    """Analyze query by nlp, etagger
     """
     bucket = build_bucket(nlp, query)
     inp, feed_dict = build_input_feed_dict(graph, bucket, config)
