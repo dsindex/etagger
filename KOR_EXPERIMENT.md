@@ -91,8 +91,16 @@ $ python train.py --emb_path embeddings/kor.glove.300k.300d.txt.pkl --wrd_dim 30
 - inference
 $ python inference.py --mode bucket --emb_path embeddings/kor.glove.300k.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/kor.test.txt > pred.txt
 $ python inference.py --mode bucket --emb_path embeddings/kor.glove.300k.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/kor.test.confirmed.txt > pred.txt
-```
 
+- inference using C++
+$ cd inference
+$ python export.py --restore ../checkpoint/ner_model --export exported/ner_model --export-pb exported
+$ python freeze.py --model_dir exported --output_node_names logits_indices,sentence_lengths --frozen_model_name ner_frozen.pb
+$ python python/inference.py --emb_path ../embeddings/kor.glove.300k.300d.txt.pkl --wrd_dim 300 --frozen_path exported/ner_frozen.pb < ../data/kor.test.txt > pred.txt
+$ ./cc/build/inference exported/ner_frozen.pb ../embeddings/vocab.txt < ../data/kor.test.txt > pred.txt
+$ ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/contrib/util/convert_graphdef_memmapped_format --in_graph=exported/ner_frozen.pb --out_graph=exported/ner_frozen.pb.memmapped
+$ ./cc/build/inference exported/ner_frozen.pb.memmapped ../embeddings/vocab.txt 1 < ../data/kor.test.txt > pred.txt
+```
 
 - experiments 1-4
 ```
