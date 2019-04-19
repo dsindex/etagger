@@ -27,6 +27,9 @@ class Input {
     tensorflow::Tensor* sentence_length;      // scalar tensor
     tensorflow::Tensor* is_train;             // scalar tensor
 
+    int utf8_len(char chr);
+    unsigned int* build_coffarr(char* in, int in_size);
+
 };
 
 #endif

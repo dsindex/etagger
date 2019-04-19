@@ -40,10 +40,9 @@ extern "C" {
      *    num_threads: number of threads for tensorflow. 0 for all cores, n for n cores.
      *
      *  Python: 
-     *    import sys
-     *    sys.path.append('path-to/lib')
      *    import ctypes as c
-     *    libetagger = c.cdll.LoadLibrary('./libetagger.so')
+     *    so_path = 'path-to/lib' + '/' + 'libetagger.so'    
+     *    libetagger = c.cdll.LoadLibrary(so_path)
      *
      *    frozen_graph_fn = c.c_char_p(b'path-to/ner_frozen.pb')
      *    vocab_fn = c.c_char_p(b'path-to/vocab.txt')
