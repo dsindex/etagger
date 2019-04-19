@@ -218,13 +218,10 @@ class Model:
                 self.train_op = optimizer.apply_gradients(zip(grads, tvars), global_step=self.global_step)
 
         # create session, initialize variables. this should be placed at the end of graph definitions.
-        session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
-        '''
         session_conf = tf.ConfigProto(allow_soft_placement=True,
                                       log_device_placement=False,
-                                      inter_op_parallelism_threads=1,
-                                      intra_op_parallelism_threads=1)
-        '''
+                                      inter_op_parallelism_threads=0,
+                                      intra_op_parallelism_threads=0)
         session_conf.gpu_options.allow_growth = True
         sess = tf.Session(config=session_conf)
         feed_dict = {self.wrd_embeddings_init: config.embvec.wrd_embeddings}
