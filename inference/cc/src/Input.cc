@@ -50,17 +50,37 @@ Input::Input(Config* config, Vocab* vocab, vector<string>& bucket)
     int wid = vocab->GetWid(word);
     data_word_ids[i] = wid;
     // build sentence_wordchr_ids
-    // TODO : handling utf8 string via coffarr.
     int wlen = word.length();
-    for( int j = 0; j < wlen && j < word_length; j++ ) {
-      string ch = string() + word[j];
+    unsigned int* coffarr = build_coffarr(word.c_str(), wlen);
+    int cpos_prev = -1;
+    string ch = string();
+    int index = 0;
+    for( int bpos = 0; bpos < wlen && bpos < word_length; bpos++ ) {
+      int cpos = coffarr[bpos];
+      if( cpos == cpos_prev ) {
+        ch = ch + word[bpos];
+      } else {
+        if( !ch.empty() ) {
+          // 1 character, ex) '가', 'a', '1', '!'
+          int cid = vocab->GetCid(ch);
+          data_wordchr_ids[i*word_length + index] = cid;
+          index += 1;
+        }
+        ch.clear();
+        ch = word[bpos];
+      }
+      cpos_prev = cpos;
+    }
+    if( !ch.empty() ) {
       int cid = vocab->GetCid(ch);
-      data_wordchr_ids[i*word_length + j] = cid;
+      data_wordchr_ids[i*word_length + index] = cid;
+      index += 1;
     }
-    for( int j = 0; j < word_length - wlen; j++ ) { // padding cid
+    for( int j = 0; j < word_length - index; j++ ) { // padding cid
       int pad_cid = vocab->GetPadCid();
-      data_wordchr_ids[i*word_length + wlen + j] = pad_cid;
+      data_wordchr_ids[i*word_length + index + j] = pad_cid;
     }
+    if( coffarr ) free(coffarr);
     // build sentence_pos_ids
     int pid = vocab->GetPid(pos);
     data_pos_ids[i] = pid;
@@ -114,7 +134,7 @@ int Input::utf8_len(char chr)
   return 0;
 }
 
-unsigned int* Input::build_coffarr(char* in, int in_size)
+unsigned int* Input::build_coffarr(const char* in, int in_size)
 {
   /*
    *  compute character offset array
@@ -142,7 +162,7 @@ unsigned int* Input::build_coffarr(char* in, int in_size)
     int i, j;
     int index;
     int codelen;
-    char *s = in;
+    const char *s = in;
     unsigned int *char_offset_array;
 
     char_offset_array = (unsigned int*)malloc(sizeof(unsigned int) * (in_size+2));
