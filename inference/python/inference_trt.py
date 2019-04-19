@@ -93,14 +93,11 @@ def inference(config, frozen_pb_path):
 
     # create session with optimized graph
     gpu_ops = tf.GPUOptions(per_process_gpu_memory_fraction = 0.50)
-    '''
-    session_conf = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False, gpu_options=gpu_ops)
-    '''
     session_conf = tf.ConfigProto(allow_soft_placement=True,
                                   log_device_placement=False,
                                   gpu_options=gpu_ops,
-                                  inter_op_parallelism_threads=1,
-                                  intra_op_parallelism_threads=1)
+                                  inter_op_parallelism_threads=0,
+                                  intra_op_parallelism_threads=0)
     sess = tf.Session(graph=graph, config=session_conf)
 
     # mapping output tensors
