@@ -376,15 +376,15 @@ in IN O O O
   ```
   $ cd inference
   * let's assume that we have a saved model :
-  *   1) BiLSTM, LSTMCell(), without ELMo, BERT
-  *   2) BiLSTM, LSTMBlockFusedCell(), withoug ELMo, BERT
+  *   1) BiLSTM, LSTMCell()
+  *   2) BiLSTM, LSTMBlockFusedCell()
   *     : can't find `BlockLSTM` when using import_meta_graph()
   *     : similar issue => https://stackoverflow.com/questions/50298058/restore-trained-tensorflow-model-keyerror-blocklstm
         : how to fix? => https://github.com/tensorflow/tensorflow/issues/23369
         : what about C++? => https://stackoverflow.com/questions/50475320/executing-frozen-tensorflow-graph-that-uses-tensorflow-contrib-resampler-using-c
           we can load '_lstm_ops.so' for LSTMBlockFusedCell().
-  *   3) Transformer, without ELMo, BERT
-  *   4) BiQRNN, without ELMo, BERT
+  *   3) Transformer
+  *   4) BiQRNN
 
   * restore the model to check list of operations, placeholders and tensors for mapping. and export it another place.
   $ python export.py --restore ../checkpoint/ner_model --export exported/ner_model --export-pb exported
@@ -392,20 +392,24 @@ in IN O O O
   * freeze graph
   $ python freeze.py --model_dir exported --output_node_names logits_indices,sentence_lengths --frozen_model_name ner_frozen.pb
 
+  $ ln -s ../embeddings embeddings
+
   * inference using python
-  $ python python/inference.py --emb_path ../embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
-  $ python python/inference.py --emb_path ../embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
-  $ python python/inference.py --emb_path ../embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
+  $ python python/inference.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
+  $ python python/inference.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
+  $ python python/inference.py --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
 
   * inference using python with optimized graph_def via tensorRT (only for GPU)
-  $ python python/inference_trt.py --emb_path ../embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
-  $ python python/inference_trt.py --emb_path ../embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
-  $ python python/inference_trt.py --emb_path ../embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
+  $ python python/inference_trt.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
+  $ python python/inference_trt.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
+  $ python python/inference_trt.py --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
   * inspect `pred.txt` whether the predictions are same.
   $ python ../token_eval.py < pred.txt
 
+  * for C++, use emb_class='glove' only
+
   * inference using C++
-  $ ./cc/build/inference exported/ner_frozen.pb ../embeddings/vocab.txt < ../data/test.txt > pred.txt
+  $ ./cc/build/inference exported/ner_frozen.pb embeddings/vocab.txt < ../data/test.txt > pred.txt
   * inspect `pred.txt` whether the predictions are same.
   $ python ../token_eval.py < pred.txt
   ```
@@ -429,7 +433,7 @@ in IN O O O
   or
   $ ${TENSORFLOW_SOURCE_DIR}/bazel-bin/tensorflow/contrib/util/convert_graphdef_memmapped_format --in_graph=exported/ner_frozen.pb.transformed --out_graph=exported/ner_frozen.pb.memmapped
   * inference using C++
-  $ ./cc/build/inference exported/ner_frozen.pb.memmapped ../embeddings/vocab.txt 1 < ../data/test.txt > pred.txt
+  $ ./cc/build/inference exported/ner_frozen.pb.memmapped embeddings/vocab.txt 1 < ../data/test.txt > pred.txt
   * inspect `pred.txt` whether the predictions are same.
   $ python ../token_eval.py < pred.txt
 
