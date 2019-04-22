@@ -72,23 +72,23 @@ $ cat cruise.train.txt.in cruise.dev.txt.in cruise.test.txt.in > cruise.total.tx
 
 - embedding
 * Glove
-$ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in > embeddings/vocab.txt
+$ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in > embeddings/crz_vocab.txt
 
 * for ELMo
-$ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/kor_elmo_2x4096_512_2048cnn_2xhighway_622k_options.json --elmo_weight_path embeddings/kor_elmo_2x4096_512_2048cnn_2xhighway_622k_weights.hdf5 > embeddings/vocab.txt
-$ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in --elmo_vocab_path embeddings/elmo_vocab.txt --elmo_options_path embeddings/kor_elmo_2x4096_512_2048cnn_2xhighway_882k_options.json --elmo_weight_path embeddings/kor_elmo_2x4096_512_2048cnn_2xhighway_882k_weights.hdf5 > embeddings/vocab.txt
+$ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in --elmo_vocab_path embeddings/crz_elmo_vocab.txt --elmo_options_path embeddings/kor_elmo_2x4096_512_2048cnn_2xhighway_622k_options.json --elmo_weight_path embeddings/kor_elmo_2x4096_512_2048cnn_2xhighway_622k_weights.hdf5 > embeddings/crz_vocab.txt
+$ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in --elmo_vocab_path embeddings/crz_elmo_vocab.txt --elmo_options_path embeddings/kor_elmo_2x4096_512_2048cnn_2xhighway_882k_options.json --elmo_weight_path embeddings/kor_elmo_2x4096_512_2048cnn_2xhighway_882k_weights.hdf5 > embeddings/crz_vocab.txt
 
 * for BERT(all.dha.2.5m_step)
-$ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in --bert_config_path embeddings/all.dha.2.5m_step/bert_config.json --bert_vocab_path embeddings/all.dha.2.5m_step/vocab.txt --bert_do_lower_case False --bert_init_checkpoint embeddings/all.dha.2.5m_step/bert_model.ckpt --bert_max_seq_length 64 > embeddings/vocab.txt
+$ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in --bert_config_path embeddings/all.dha.2.5m_step/bert_config.json --bert_vocab_path embeddings/all.dha.2.5m_step/vocab.txt --bert_do_lower_case False --bert_init_checkpoint embeddings/all.dha.2.5m_step/bert_model.ckpt --bert_max_seq_length 64 > embeddings/crz_vocab.txt
 
 * for BERT(multi_cased_L-12_H-768_A-12)
-$ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in --bert_config_path embeddings/multi_cased_L-12_H-768_A-12/bert_config.json --bert_vocab_path embeddings/multi_cased_L-12_H-768_A-12/vocab.txt --bert_do_lower_case False --bert_init_checkpoint embeddings/multi_cased_L-12_H-768_A-12/bert_model.ckpt --bert_max_seq_length 96 > embeddings/vocab.txt
+$ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in --bert_config_path embeddings/multi_cased_L-12_H-768_A-12/bert_config.json --bert_vocab_path embeddings/multi_cased_L-12_H-768_A-12/vocab.txt --bert_do_lower_case False --bert_init_checkpoint embeddings/multi_cased_L-12_H-768_A-12/bert_model.ckpt --bert_max_seq_length 96 > embeddings/crz_vocab.txt
 
 * for BERT(all.200k.out.1m-step.reduced)
-$ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in --bert_config_path embeddings/all.200k.out.1m-step.reduced/bert_config.json --bert_vocab_path embeddings/all.200k.out.1m-step.reduced/vocab.txt --bert_do_lower_case False --bert_init_checkpoint embeddings/all.200k.out.1m-step.reduced/bert_model.ckpt --bert_max_seq_length 64 > embeddings/vocab.txt
+$ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in --bert_config_path embeddings/all.200k.out.1m-step.reduced/bert_config.json --bert_vocab_path embeddings/all.200k.out.1m-step.reduced/vocab.txt --bert_do_lower_case False --bert_init_checkpoint embeddings/all.200k.out.1m-step.reduced/bert_model.ckpt --bert_max_seq_length 64 > embeddings/crz_vocab.txt
 
 * for BERT(all.bpe.4.8m_step)
-$ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in --bert_config_path embeddings/all.bpe.4.8m_step/bert_config.json --bert_vocab_path embeddings/all.bpe.4.8m_step/vocab.txt --bert_do_lower_case False --bert_init_checkpoint embeddings/all.bpe.4.8m_step/bert_model.ckpt --bert_max_seq_length 96 > embeddings/vocab.txt
+$ python embvec.py --emb_path embeddings/kor.glove.300k.300d.txt --wrd_dim 300 --train_path data/cruise.train.txt.in --total_path data/cruise.total.txt.in --bert_config_path embeddings/all.bpe.4.8m_step/bert_config.json --bert_vocab_path embeddings/all.bpe.4.8m_step/vocab.txt --bert_do_lower_case False --bert_init_checkpoint embeddings/all.bpe.4.8m_step/bert_model.ckpt --bert_max_seq_length 96 > embeddings/crz_vocab.txt
 
 - train
 $ python train.py --emb_path embeddings/kor.glove.300k.300d.txt.pkl --wrd_dim 300 --batch_size 20 --epoch 70
