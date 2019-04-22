@@ -26,6 +26,7 @@ from embvec import EmbVec
 from config import Config
 # etagger arguments
 define('emb_path', default='', help='path to word embedding vector + vocab(.pkl)', type=str)
+define('emb_class', default='glove', help='class of embedding(glove, elmo, bert, bert+elmo)', type=str)
 define('wrd_dim', default=100, help='dimension of word embedding vector', type=int)
 define('word_length', default=15, help='max word length', type=int)
 define('frozen_path', default='', help='path to frozen graph', type=str)
@@ -92,7 +93,7 @@ class Application(tornado.web.Application):
 
         ###############################################################################################
         # create etagger config only once
-        self.config = Config(options, is_training=False, emb_class='glove', use_crf=True)
+        self.config = Config(options, is_training=False, emb_class=options.emb_class, use_crf=True)
         self.log.info('initialize config on parent process[%s] ... done' % (ppid))
         # create nlp(spacy) only once
         self.nlp = spacy.load('en')
@@ -118,7 +119,7 @@ class Application(tornado.web.Application):
         ###############################################################################################
         # loading frozen model for each child process.
         self.etagger = {}
-        graph = self.load_frozen_graph(tf, options.frozen_path)
+        graph = self.load_frozen_graph(tf, options.frozen_path, emb_class=self.config.emb_class)
         gpu_ops = tf.GPUOptions()
         session_conf = tf.ConfigProto(allow_soft_placement=True,
                                       log_device_placement=False,
@@ -133,10 +134,28 @@ class Application(tornado.web.Application):
         ###############################################################################################
         self.log.info('initialize per child process[%s] ... done' % (pid))
 
-    def load_frozen_graph(self, tf, frozen_graph_filename, prefix='prefix'):
+    def modify_op_for_elmo(self, graph_def):
+        """
+        reference : https://github.com/onnx/tensorflow-onnx/issues/77#issuecomment-445066091 
+        """
+        for node in graph_def.node:
+            if node.op == 'Assign':
+                node.op = 'Identity'
+                if 'use_locking' in node.attr: del node.attr['use_locking']
+                if 'validate_shape' in node.attr: del node.attr['validate_shape']
+                if len(node.input) == 2:
+                    # input0: ref: Should be from a Variable node. May be uninitialized.
+                    # input1: value: The value to be assigned to the variable.
+                    node.input[0] = node.input[1]
+                    del node.input[1]
+        return graph_def
+
+    def load_frozen_graph(self, tf, frozen_graph_filename, emb_class='glove', prefix='prefix'):
         with tf.gfile.GFile(frozen_graph_filename, "rb") as f:
             graph_def = tf.GraphDef()
             graph_def.ParseFromString(f.read())
+            if 'elmo' in emb_class:
+                graph_def = self.modify_op_for_elmo(graph_def)
         with tf.Graph().as_default() as graph:
             tf.import_graph_def(
                 graph_def, 

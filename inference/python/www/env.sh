@@ -24,7 +24,6 @@ function readlink()
 }
 export -f readlink
 
-export LC_ALL=ko_KR.UTF-8
 export LANG=ko_KR.UTF-8
 
 # directory
@@ -42,6 +41,7 @@ python='env python'
 
 # setting
 EMB_FILENAME=glove.6B.100d.txt.pkl
+EMB_CLASS=glove
 WRD_DIM=100
 FROZEN_FILENAME=ner_frozen.pb
 

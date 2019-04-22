@@ -50,6 +50,14 @@ def build_input_feed_dict(graph, bucket, config):
     p_input_data_chk_ids = graph.get_tensor_by_name('prefix/input_data_chk_ids:0')
     p_input_data_word_ids = graph.get_tensor_by_name('prefix/input_data_word_ids:0')
     p_input_data_wordchr_ids = graph.get_tensor_by_name('prefix/input_data_wordchr_ids:0')
+    if 'elmo' in config.emb_class:
+        p_elmo_input_data_wordchr_ids = graph.get_tensor_by_name('prefix/elmo_input_data_wordchr_ids:0')
+    if 'bert' in config.emb_class:
+        p_bert_input_data_token_ids = graph.get_tensor_by_name('prefix/bert_input_data_token_ids:0')
+        p_bert_input_data_token_masks = graph.get_tensor_by_name('prefix/bert_input_data_token_masks:0')
+        p_bert_input_data_segment_ids = graph.get_tensor_by_name('prefix/bert_input_data_segment_ids:0')
+        if 'elmo' in config.emb_class:
+            p_bert_input_data_elmo_indices = graph.get_tensor_by_name('prefix/bert_input_data_elmo_indices:0')
 
     inp = Input(bucket, config, build_output=False)
     feed_dict = {p_input_data_pos_ids: inp.example['pos_ids'],

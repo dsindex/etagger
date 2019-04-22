@@ -131,11 +131,12 @@ check_running ${daemon_name}
 mkdir -p ${CDIR}/data
 
 function copy_resources {
-    cp -rf ${PPPDIR}/embeddings/${EMB_FILENAME} ${CDIR}/data
     cp -rf ${PPDIR}/exported/${FROZEN_FILENAME} ${CDIR}/data
 }
 copy_resources
-EMB_PATH=${CDIR}/data/${EMB_FILENAME}
+
+ln -s ${PPPDIR}/embeddings embeddings
+EMB_PATH=${CDIR}/embeddings/${EMB_FILENAME}
 FROZEN_PATH=${CDIR}/data/${FROZEN_FILENAME}
 
 cd ${CDIR}
@@ -145,6 +146,7 @@ if (( MODE == 0 )); then
 		--debug=True \
 		--port=${port_devel} \
         --emb_path=${EMB_PATH} \
+        --emb_class=${EMB_CLASS} \
         --wrd_dim=${WRD_DIM} \
 		--frozen_path=${FROZEN_PATH} \
 		--log_file_prefix=${CDIR}/log/access.log \
@@ -155,6 +157,7 @@ else
 		--port=${port_service} \
 		--process=${PROCESS} \
         --emb_path=${EMB_PATH} \
+        --emb_class=${EMB_CLASS} \
         --wrd_dim=${WRD_DIM} \
 		--frozen_path=${FROZEN_PATH} \
 		--log_file_prefix=${CDIR}/log/access.log \
