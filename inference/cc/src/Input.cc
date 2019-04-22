@@ -55,7 +55,7 @@ Input::Input(Config* config, Vocab* vocab, vector<string>& bucket)
     int cpos_prev = -1;
     string ch = string();
     int index = 0;
-    for( int bpos = 0; bpos < wlen && bpos < word_length; bpos++ ) {
+    for( int bpos = 0; bpos < wlen && index < word_length; bpos++ ) {
       int cpos = coffarr[bpos];
       if( cpos == cpos_prev ) {
         ch = ch + word[bpos];
