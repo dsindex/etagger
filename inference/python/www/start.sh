@@ -134,8 +134,9 @@ function copy_resources {
     cp -rf ${PPDIR}/exported/${FROZEN_FILENAME} ${CDIR}/data
 }
 copy_resources
-
-ln -s ${PPPDIR}/embeddings embeddings
+# make symbolic link to 'embeddings' directory
+rm -rf ${CDIR}/embeddings
+ln -s ${PPPDIR}/embeddings ${CDIR}/embeddings
 EMB_PATH=${CDIR}/embeddings/${EMB_FILENAME}
 FROZEN_PATH=${CDIR}/data/${FROZEN_FILENAME}
 
