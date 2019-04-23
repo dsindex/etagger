@@ -376,15 +376,12 @@ in IN O O O
   ```
   $ cd inference
   * let's assume that we have a saved model :
-  *   1) BiLSTM, LSTMCell()
-  *   2) BiLSTM, LSTMBlockFusedCell()
-  *     : can't find `BlockLSTM` when using import_meta_graph()
+  *   <note> BiLSTM, LSTMBlockFusedCell()
+  *     : if you can't find `BlockLSTM` when using import_meta_graph()
   *     : similar issue => https://stackoverflow.com/questions/50298058/restore-trained-tensorflow-model-keyerror-blocklstm
         : how to fix? => https://github.com/tensorflow/tensorflow/issues/23369
         : what about C++? => https://stackoverflow.com/questions/50475320/executing-frozen-tensorflow-graph-that-uses-tensorflow-contrib-resampler-using-c
           we can load '_lstm_ops.so' for LSTMBlockFusedCell().
-  *   3) Transformer
-  *   4) BiQRNN
 
   * restore the model to check list of operations, placeholders and tensors for mapping. and export it another place.
   $ python export.py --restore ../checkpoint/ner_model --export exported/ner_model --export-pb exported
@@ -406,7 +403,7 @@ in IN O O O
   * inspect `pred.txt` whether the predictions are same.
   $ python ../token_eval.py < pred.txt
 
-  * for C++, use emb_class='glove' only
+  * for inference by C++, i implemented emb_class='glove' only.
 
   * inference using C++
   $ ./cc/build/inference exported/ner_frozen.pb embeddings/vocab.txt < ../data/test.txt > pred.txt
