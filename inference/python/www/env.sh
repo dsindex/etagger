@@ -44,6 +44,7 @@ EMB_FILENAME=glove.6B.100d.txt.pkl
 EMB_CLASS=glove
 WRD_DIM=100
 FROZEN_FILENAME=ner_frozen.pb
+export CUDA_VISIBLE_DEVICES=0
 
 # functions
 
