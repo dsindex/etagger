@@ -17,28 +17,10 @@ from embvec import EmbVec
 from config import Config
 from input import Input
 
-def modify_op_for_elmo(graph_def):
-    """
-    reference : https://github.com/onnx/tensorflow-onnx/issues/77#issuecomment-445066091 
-    """
-    for node in graph_def.node:
-        if node.op == 'Assign':
-            node.op = 'Identity'
-            if 'use_locking' in node.attr: del node.attr['use_locking']
-            if 'validate_shape' in node.attr: del node.attr['validate_shape']
-            if len(node.input) == 2:
-                # input0: ref: Should be from a Variable node. May be uninitialized.
-                # input1: value: The value to be assigned to the variable.
-                node.input[0] = node.input[1]
-                del node.input[1]
-    return graph_def
-
-def load_frozen_graph(frozen_graph_filename, emb_class='glove', prefix='prefix'):
+def load_frozen_graph(frozen_graph_filename, prefix='prefix'):
     with tf.gfile.GFile(frozen_graph_filename, "rb") as f:
         graph_def = tf.GraphDef()
         graph_def.ParseFromString(f.read())
-        if 'elmo' in emb_class:
-            graph_def = modify_op_for_elmo(graph_def)
 
     with tf.Graph().as_default() as graph:
         tf.import_graph_def(
@@ -93,7 +75,7 @@ def inference(config, frozen_pb_path):
     """
 
     # load graph
-    graph = load_frozen_graph(frozen_pb_path, emb_class=config.emb_class)
+    graph = load_frozen_graph(frozen_pb_path)
     for op in graph.get_operations():
         sys.stderr.write(op.name + '\n')
 
