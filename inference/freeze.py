@@ -15,6 +15,22 @@ source is from https://gist.github.com/morgangiraud/249505f540a5e53a48b0c1a869d3
 
 dir = os.path.dirname(os.path.realpath(__file__))
 
+def modify_op(graph_def):
+    """
+    reference : https://github.com/onnx/tensorflow-onnx/issues/77#issuecomment-445066091 
+    """
+    for node in graph_def.node:
+        if node.op == 'Assign':
+            node.op = 'Identity'
+            if 'use_locking' in node.attr: del node.attr['use_locking']
+            if 'validate_shape' in node.attr: del node.attr['validate_shape']
+            if len(node.input) == 2:
+                # input0: ref: Should be from a Variable node. May be uninitialized.
+                # input1: value: The value to be assigned to the variable.
+                node.input[0] = node.input[1]
+                del node.input[1]
+    return graph_def
+
 def freeze_graph(model_dir, output_node_names, frozen_model_name, optimize_graph_def=0):
     """Extract the sub graph defined by the output nodes and convert 
     all its variables into constant 
@@ -59,6 +75,9 @@ def freeze_graph(model_dir, output_node_names, frozen_model_name, optimize_graph
             tf.get_default_graph().as_graph_def(), # The graph_def is used to retrieve the nodes 
             output_node_names.split(',') # The output node names are used to select the usefull nodes
         )
+
+        # Modify for 'float_ref'
+        output_graph_def = modify_op(output_graph_def)
 
         # Optimize graph_def via tensorRT
         if optimize_graph_def:
