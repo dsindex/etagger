@@ -395,6 +395,8 @@ in IN O O O
   $ python python/inference.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
   $ python python/inference.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
   $ python python/inference.py --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
+  * you may need to modify build_input_feed_dict() in 'python/inference.py' for emb_class='bert'.
+  * since some of input tensor might not exist in the frozen graph. ex) 'input_data_chk_ids'
 
   * inference using python with optimized graph_def via tensorRT (only for GPU)
   $ python python/inference_trt.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
