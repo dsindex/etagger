@@ -806,6 +806,13 @@ conlleval : 92.52
 average processing time per bucket(sentence)
   - 1 GPU(TITAN X PASCAL) : 0.014463350388482146 sec
 
+# 300d, shuffle, without CRF
+conlleval : 91.39
+average processing time per bucket(sentence)
+  - 1 GPU(TITAN X PASCAL) : 0.00722679559548805 sec
+  - 32 CPU : 0.003329 sec
+  - 1 CPU : 0.004814 sec
+
 * test 1
 word embedding size : 300
 bert embedding : all.dha.2.5m_step
