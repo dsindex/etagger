@@ -1906,6 +1906,11 @@ conlleval : 92.56
 average processing time per bucket(sentence)
   - 1 GPU(V100 TESLA) : 0.03891986110181943 sec
 
+# trial 4
+token : 0.9322386962382061
+chunk : 0.928729526339088
+conlleval : 92.83          -> Glove(6B) + ELMo + CNN + LSTM + CRF best
+
 
 * test 15
 word embedding size : 300(glove6B) -> 100(glove6B)
@@ -1958,7 +1963,7 @@ chunk : 0.9231721333215455
 
 # trial 4
 token : 0.931816792025928
-chunk : 0.9268680445151033 -> Glove(6B) + ELMo + CNN + LSTM + CRF best
+chunk : 0.9268680445151033
 
 # trial 5
 token : 0.9280303030303031

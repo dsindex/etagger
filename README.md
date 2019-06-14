@@ -36,7 +36,7 @@
 ### my main questions are :
   - can this module perform at the level of state of the art?
     - [x] the f1 score is near SOTA based on Glove(100)+ELMo+CNN(char)+BiLSTM+CRF
-      - 92.65% (best), **92.45%(average, 10 runs)**, `experiments 10, test 15`
+      - 92.83% (best, `experiments 10, test 16`), **92.45%(average, 10 runs, `experiments 10, test 15)**
   - how to make it faster when it comes to using the BiLSTM?
     - [x] the solution is LSTMBlockFusedCell().
       - 3.13 times faster than LSTMCell() during training time.

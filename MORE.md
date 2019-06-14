@@ -95,16 +95,16 @@
         - 32 processor CPU(multi-threading)      : 0.40098162731570347 sec
         - 1 CPU(single-thread)              : 0.7398052649182165 sec
     - ELMo + Glove
-      - setting : `experiments 10, test 15`
-      - per-token(partial) f1 : 0.931816792025928
-      - per-chunk(exact)   f1 : **0.9268680445151033** (chunk_eval)
+      - setting : `experiments 10, test 16`
+      - per-token(partial) f1 : 0.9322386962382061
+      - per-chunk(exact)   f1 : **0.928729526339088** (chunk_eval)
       ```
-      processed 46666 tokens with 5648 phrases; found: 5681 phrases; correct: 5248.
-      accuracy:  98.42%; precision:  92.38%; recall:  92.92%; FB1:  92.65
-            LOC: precision:  93.11%; recall:  94.00%; FB1:  93.56  1684
-           MISC: precision:  83.12%; recall:  82.76%; FB1:  82.94  699
-            ORG: precision:  90.31%; recall:  91.99%; FB1:  91.14  1692
-            PER: precision:  97.82%; recall:  97.16%; FB1:  97.49  1606
+      processed 46666 tokens with 5648 phrases; found: 5657 phrases; correct: 5247.
+      accuracy:  98.44%; precision:  92.75%; recall:  92.90%; FB1:  92.83
+                    LOC: precision:  93.89%; recall:  94.00%; FB1:  93.95  1670
+                   MISC: precision:  85.03%; recall:  83.33%; FB1:  84.17  688
+                    ORG: precision:  90.17%; recall:  91.63%; FB1:  90.89  1688
+                    PER: precision:  97.58%; recall:  97.22%; FB1:  97.40  1611
       ```
       - average processing time per bucket
         - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.036233977567360014 sec
