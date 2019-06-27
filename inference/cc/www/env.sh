@@ -43,9 +43,9 @@ port_service=8898
 python='env python'
 
 # setting
-SO_PATH=${PPDIR}/cc/build/libetagger.so
 FROZEN_FILENAME=ner_frozen.pb.memmapped
 VOCAB_FILENAME=vocab.txt
+SO_FILENAME=libetagger.so
 WRD_LEN=15
 LOWERCASE=True
 IS_MEMMAPPED=True

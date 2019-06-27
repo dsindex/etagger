@@ -129,14 +129,19 @@ PROCESS=$2
 check_running ${daemon_name}
 
 mkdir -p ${CDIR}/data
+mkdir -p ${CDIR}/lib
 
 function copy_resources {
+    # data
     cp -rf ${PPDIR}/exported/${FROZEN_FILENAME} ${CDIR}/data
     cp -rf ${PPPDIR}/embeddings/${VOCAB_FILENAME} ${CDIR}/data
+    # lib
+    cp -rf ${PPDIR}/cc/build/${SO_FILENAME}* ${CDIR}/lib
 }
 copy_resources
 FROZEN_PATH=${CDIR}/data/${FROZEN_FILENAME}
 VOCAB_PATH=${CDIR}/data/${VOCAB_FILENAME}
+SO_PATH=${CDIR}/lib/${SO_FILENAME}
 
 cd ${CDIR}
 
