@@ -40,7 +40,8 @@ port_service=8898
 python='env python'
 
 # setting
-EMB_FILENAME=glove.6B.100d.txt.pkl
+#EMB_FILENAME=kor.glove.300k.300d.txt.pkl # kor
+EMB_FILENAME=glove.6B.100d.txt.pkl       # eng
 EMB_CLASS=glove
 WRD_DIM=100
 FROZEN_FILENAME=ner_frozen.pb

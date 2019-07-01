@@ -129,15 +129,20 @@ PROCESS=$2
 check_running ${daemon_name}
 
 mkdir -p ${CDIR}/data
+mkdir -p ${CDIR}/lib
 
 function copy_resources {
+    # data
+    cp -rf ${PPPDIR}/embeddings/${EMB_FILENAME} ${CDIR}/data
     cp -rf ${PPDIR}/exported/${FROZEN_FILENAME} ${CDIR}/data
+    # lib
+    cp -rf ${PPPDIR}/embvec.py ${CDIR}/lib
+    cp -rf ${PPPDIR}/config.py ${CDIR}/lib
+    cp -rf ${PPPDIR}/input.py  ${CDIR}/lib
 }
 copy_resources
-# make symbolic link to 'embeddings' directory
-rm -rf ${CDIR}/embeddings
-ln -s ${PPPDIR}/embeddings ${CDIR}/embeddings
-EMB_PATH=${CDIR}/embeddings/${EMB_FILENAME}
+
+EMB_PATH=${CDIR}/data/${EMB_FILENAME}
 FROZEN_PATH=${CDIR}/data/${FROZEN_FILENAME}
 
 cd ${CDIR}

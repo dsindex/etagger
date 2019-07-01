@@ -9,7 +9,7 @@ import time
 
 ###############################################################################################
 # etagger
-path = os.path.dirname(os.path.abspath(__file__)) + '/../../..'
+path = os.path.dirname(os.path.abspath(__file__)) + '/lib'
 sys.path.append(path)
 # although `import tensorflow as tf statement is in the `input.py`,
 # this statement will not be called by 
