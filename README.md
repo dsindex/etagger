@@ -288,7 +288,7 @@ in IN O O O
   $ ./configure
 
   * build pip package with optimizations for FMA, AVX and SSE( https://medium.com/@sometimescasey/building-tensorflow-from-source-for-sse-avx-fma-instructions-worth-the-effort-fbda4e30eec3 ).
-  * bazel version : 0.24.1
+  * bazel version : 0.19.2
   $ python -m pip install --upgrade pip
   $ python -m pip install --upgrade setuptools
   $ bazel build -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.2 //tensorflow/tools/pip_package:build_pip_package
