@@ -276,6 +276,13 @@ in IN O O O
   $ python -m venv python3.6_tfsrc
   $ source /home/python3.6_tfsrc/bin/activate
 
+  * install bazel 0.19.2 ( https://github.com/bazelbuild/bazel/releases, bazel-0.19.2-installer-linux-x86_64.sh )
+  $ ./bazel-0.19.2-installer-linux-x86_64.sh --user
+  $ source /data1/index.shin/.bazel/bin/bazel-complete.bash
+  * you may need to install 'ares'.
+  $ yum install c-ares.x86_64 c-ares-devel.x86_64
+  * or add '--define=grpc_no_ares=true' option to bazel command line.
+
   * build tensorflow from source.
   $ git clone https://github.com/tensorflow/tensorflow.git tensorflow-src-cpu
   $ cd tensorflow-src-cpu
@@ -288,10 +295,13 @@ in IN O O O
   $ ./configure
 
   * build pip package with optimizations for FMA, AVX and SSE( https://medium.com/@sometimescasey/building-tensorflow-from-source-for-sse-avx-fma-instructions-worth-the-effort-fbda4e30eec3 ).
-  * bazel version : 0.19.2
   $ python -m pip install --upgrade pip
   $ python -m pip install --upgrade setuptools
+  $ pip install keras_applications==1.0.4 --no-deps
+  $ pip install keras_preprocessing==1.0.2 --no-deps
   $ bazel build -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.2 //tensorflow/tools/pip_package:build_pip_package
+  or
+  bazel build -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.2 --define=grpc_no_ares=true //tensorflow/tools/pip_package:build_pip_package
   $ bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
   * install pip package
   $ python -m pip install /tmp/tensorflow_pkg/tensorflow-1.11.0-cp36-cp36m-linux_x86_64.whl
