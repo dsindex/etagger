@@ -284,7 +284,7 @@ in IN O O O
   $ git clone https://github.com/tensorflow/tensorflow.git tensorflow-src-cpu
   $ cd tensorflow-src-cpu
   * you should checkout the same version of pip used for training.
-  $ git checkout -b r1.11
+  $ git checkout r1.11
   * modify a source file for memory mapped graph(convert_graphdef_memmapped_format)
     ./tensorflow/core/platform/posix/posix_file_system.cc:  mmap(nullptr, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0); in 'NewReadOnlyMemoryRegionFromFile'
     MAP_PRIVATE -> MAP_SHARED
