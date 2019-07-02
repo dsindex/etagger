@@ -281,7 +281,6 @@ in IN O O O
   $ source /data1/index.shin/.bazel/bin/bazel-complete.bash
   * you may need to install 'ares'.
   $ yum install c-ares.x86_64 c-ares-devel.x86_64
-  * or add '--define=grpc_no_ares=true' option to bazel command line.
 
   * build tensorflow from source.
   $ git clone https://github.com/tensorflow/tensorflow.git tensorflow-src-cpu
@@ -300,14 +299,11 @@ in IN O O O
   $ pip install keras_applications==1.0.4 --no-deps
   $ pip install keras_preprocessing==1.0.2 --no-deps
   $ bazel build -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.2 //tensorflow/tools/pip_package:build_pip_package
-  or
-  bazel build -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.2 --define=grpc_no_ares=true //tensorflow/tools/pip_package:build_pip_package
   $ bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
   * install pip package
   $ python -m pip install /tmp/tensorflow_pkg/tensorflow-1.11.0-cp36-cp36m-linux_x86_64.whl
 
   * build libraries and binaries we need.
-  * if there is an error on 'ares', add '--define=grpc_no_ares=true' option to bazel command line.
   $ bazel build -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.2 //tensorflow:libtensorflow.so
   $ bazel build -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.2 //tensorflow:libtensorflow_cc.so
   $ bazel build -c opt --copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-mfpmath=both --copt=-msse4.2 //tensorflow:libtensorflow_framework.so
