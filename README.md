@@ -291,7 +291,7 @@ in IN O O O
   * configure without CUDA
   $ ./configure
 
-  * build pip package with optimizations for FMA, AVX and SSE( https://medium.com/@sometimescasey/building-tensorflow-from-source-for-sse-avx-fma-instructions-worth-the-effort-fbda4e30eec3 ).
+  * build pip package (for FMA, AVX and SSE optimization, see https://medium.com/@sometimescasey/building-tensorflow-from-source-for-sse-avx-fma-instructions-worth-the-effort-fbda4e30eec3 ).
   $ python -m pip install --upgrade pip
   $ python -m pip install --upgrade setuptools
   $ pip install keras_applications==1.0.4 --no-deps
