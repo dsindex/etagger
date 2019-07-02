@@ -345,10 +345,10 @@ in IN O O O
   $ cd /home/etagger
   * build and save sample model
   $ cd inference
-  $ python train_sample.py
+  $ python train_example.py
 
   * inference using python
-  $ python python/inference_sample.py
+  $ python python/inference_example.py
 
   * inference using c++
   * edit etagger/inference/cc/CMakeLists.txt
@@ -359,7 +359,7 @@ in IN O O O
   $ cmake ..
   $ make
   $ cd ../..
-  $ ./cc/build/inference_sample
+  $ ./cc/build/inference_example
   ```
   - *test* build iris model, freezing and inference by C++
   ```
