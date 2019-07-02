@@ -276,11 +276,9 @@ in IN O O O
   $ python -m venv python3.6_tfsrc
   $ source /home/python3.6_tfsrc/bin/activate
 
-  * install bazel 0.19.2 ( https://github.com/bazelbuild/bazel/releases, bazel-0.19.2-installer-linux-x86_64.sh )
-  $ ./bazel-0.19.2-installer-linux-x86_64.sh --user
+  * install bazel ( https://github.com/bazelbuild/bazel/releases )
+  $ ./bazel-${bazel-version}-installer-linux-x86_64.sh --user
   $ source /data1/index.shin/.bazel/bin/bazel-complete.bash
-  * you may need to install 'ares'.
-  $ yum install c-ares.x86_64 c-ares-devel.x86_64
 
   * build tensorflow from source.
   $ git clone https://github.com/tensorflow/tensorflow.git tensorflow-src-cpu
