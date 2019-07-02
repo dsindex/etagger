@@ -66,7 +66,7 @@ int Etagger::Analyze(vector<string>& bucket)
   cout << endl;
   cout << "[wordchr ids]" << endl;
   auto data_wordchr_ids = sentence_wordchr_ids->flat<int>().data();
-  int word_length = config.GetWordLength();
+  int word_length = this->config->GetWordLength();
   for( int i = 0; i < max_sentence_length; i++ ) {
     for( int j = 0; j < word_length; j++ ) {
       cout << data_wordchr_ids[i*word_length + j] << " ";
