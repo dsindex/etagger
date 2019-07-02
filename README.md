@@ -376,7 +376,7 @@ in IN O O O
   * inference using C++
   * edit etagger/inference/cc/CMakeLists.txt
     find_package(TensorFlow 1.11 EXACT REQUIRED)
-  * cmake >= 3.14.5
+  * cmake >= 2.8
   $ cd etagger/inference/cc
   $ mkdir build
   $ cd build
