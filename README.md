@@ -276,7 +276,7 @@ in IN O O O
   $ python -m venv python3.6_tfsrc
   $ source /home/python3.6_tfsrc/bin/activate
 
-  * install bazel ( https://github.com/bazelbuild/bazel/releases, ex) bazel 0.19.2 for tensorflow 1.11.0 )
+  * install bazel ( https://github.com/bazelbuild/bazel/releases )
   $ ./bazel-${bazel-version}-installer-linux-x86_64.sh --user
   $ source /data1/index.shin/.bazel/bin/bazel-complete.bash
 
