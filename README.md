@@ -295,6 +295,8 @@ in IN O O O
   * build pip package (for FMA, AVX and SSE optimization, see https://medium.com/@sometimescasey/building-tensorflow-from-source-for-sse-avx-fma-instructions-worth-the-effort-fbda4e30eec3 ).
   $ python -m pip install --upgrade pip
   $ python -m pip install --upgrade setuptools
+  $ python -m pip install keras_applications --no-deps
+  $ python -m pip install keras_preprocessing --no-deps
   $ bazel build --config=opt //tensorflow/tools/pip_package:build_pip_package
   $ bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
   * install pip package
