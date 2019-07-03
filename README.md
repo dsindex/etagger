@@ -276,8 +276,8 @@ in IN O O O
   $ python -m venv python3.6_tfsrc
   $ source /home/python3.6_tfsrc/bin/activate
 
-  * install bazel ( https://github.com/bazelbuild/bazel/releases )
-  * bazel 0.19.2 for tensorflow 1.11.0
+  * install bazel ( https://github.com/bazelbuild/bazel/releases , https://www.tensorflow.org/install/source#linux )
+  * ex) bazel 0.15.0 for tensorflow 1.11.0, tensorflow 1.12.0
   $ ./bazel-${bazel-version}-installer-linux-x86_64.sh --user
   $ source /data1/index.shin/.bazel/bin/bazel-complete.bash
 
@@ -295,8 +295,6 @@ in IN O O O
   * build pip package (for FMA, AVX and SSE optimization, see https://medium.com/@sometimescasey/building-tensorflow-from-source-for-sse-avx-fma-instructions-worth-the-effort-fbda4e30eec3 ).
   $ python -m pip install --upgrade pip
   $ python -m pip install --upgrade setuptools
-  $ pip install keras_applications==1.0.4 --no-deps
-  $ pip install keras_preprocessing==1.0.2 --no-deps
   $ bazel build --config=opt //tensorflow/tools/pip_package:build_pip_package
   $ bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
   * install pip package
