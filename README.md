@@ -351,7 +351,8 @@ in IN O O O
   $ cd etagger/inference/cc
   $ mkdir build
   $ cd build
-  $ cmake ..
+  * cmake >= 3.11
+  $ cmake .. -DPYTHON_EXECUTABLE=/usr/local/bin/python3.6m
   $ make
   $ cd ../..
   $ ./cc/build/inference_example
@@ -376,7 +377,7 @@ in IN O O O
   $ cd etagger/inference/cc
   $ mkdir build
   $ cd build
-  $ cmake ..
+  $ cmake .. -DPYTHON_EXECUTABLE=/usr/local/bin/python3.6m
   $ make
   $ cd ../..
   $ ./cc/build/inference_iris
