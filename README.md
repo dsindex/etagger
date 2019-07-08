@@ -351,7 +351,7 @@ in IN O O O
   $ cd etagger/inference/cc
   $ mkdir build
   $ cd build
-  * cmake >= 3.11
+  * cmake >= 3.11, set DPYTHON_EXECUTABLE as absolute path
   $ cmake .. -DPYTHON_EXECUTABLE=/usr/local/bin/python3.6m
   $ make
   $ cd ../..
@@ -373,7 +373,7 @@ in IN O O O
   * inference using C++
   * edit etagger/inference/cc/CMakeLists.txt
     find_package(TensorFlow 1.11 EXACT REQUIRED)
-  * cmake >= 3.11
+  * cmake >= 3.11, set DPYTHON_EXECUTABLE as absolute path
   $ cd etagger/inference/cc
   $ mkdir build
   $ cd build
