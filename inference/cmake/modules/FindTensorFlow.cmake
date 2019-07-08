@@ -52,7 +52,7 @@ if(WIN32)
                   "https://github.com/PatWie/tensorflow-cmake")
 endif(WIN32)
 
-set(PYTHON_EXECUTABLE "python3" CACHE STRING "specify the python version TensorFlow is installed on.")
+set(PYTHON_EXECUTABLE "python" CACHE STRING "specify the python version TensorFlow is installed on.")
 
 if(TensorFlow_FOUND)
   # reuse cached variables
