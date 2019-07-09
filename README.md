@@ -297,20 +297,21 @@ in IN O O O
   $ python -m pip install --upgrade setuptools
   $ python -m pip install keras_applications --no-deps
   $ python -m pip install keras_preprocessing --no-deps
-  $ bazel build --config=opt //tensorflow/tools/pip_package:build_pip_package
+  * without AVX
+  $ bazel build --config=opt --copt=-march=core2 //tensorflow/tools/pip_package:build_pip_package
   $ bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
   * install pip package
   $ python -m pip uninstall tensorflow
   $ python -m pip install /tmp/tensorflow_pkg/tensorflow-1.11.0-cp36-cp36m-linux_x86_64.whl
 
   * build libraries and binaries we need.
-  $ bazel build --config=opt //tensorflow:libtensorflow.so
-  $ bazel build --config=opt //tensorflow:libtensorflow_cc.so
-  $ bazel build --config=opt //tensorflow:libtensorflow_framework.so
-  $ bazel build --config=opt //tensorflow/python/tools:optimize_for_inference
-  $ bazel build --config=opt //tensorflow/tools/quantization:quantize_graph
-  $ bazel build --config=opt //tensorflow/contrib/util:convert_graphdef_memmapped_format
-  $ bazel build --config=opt //tensorflow/tools/graph_transforms:transform_graph
+  $ bazel build --config=opt --copt=-march=core2 //tensorflow:libtensorflow.so
+  $ bazel build --config=opt --copt=-march=core2 //tensorflow:libtensorflow_cc.so
+  $ bazel build --config=opt --copt=-march=core2 //tensorflow:libtensorflow_framework.so
+  $ bazel build --config=opt --copt=-march=core2 //tensorflow/python/tools:optimize_for_inference
+  $ bazel build --config=opt --copt=-march=core2 //tensorflow/tools/quantization:quantize_graph
+  $ bazel build --config=opt --copt=-march=core2 //tensorflow/contrib/util:convert_graphdef_memmapped_format
+  $ bazel build --config=opt --copt=-march=core2 //tensorflow/tools/graph_transforms:transform_graph
 
   * copy libraries to dist directory, export dist and includes directory.
   $ export TENSORFLOW_SOURCE_DIR='/home/tensorflow-src-cpu'
