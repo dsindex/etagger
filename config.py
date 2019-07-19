@@ -64,13 +64,16 @@ class Config:
             self.checkpoint_dir = args.checkpoint_dir
             self.summary_dir = args.summary_dir
 
-        '''for CRZ without chk
+        '''for CRZ wighout chk
         self.chk_dim = 10
         self.highway_used = False
         '''
         '''for CRZ with chk
         self.chk_dim = 64
         self.highway_used = True
+        '''
+        '''for KOR nbest
+        self.chk_dim = 64
         '''
         
         if 'elmo' in self.emb_class:
