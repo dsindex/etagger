@@ -69,10 +69,11 @@ def inference(so_path, frozen_graph_fn, vocab_fn, word_length, lowercase=True, i
         out = 'duration_time : ' + str(duration_time) + ' sec'
         sys.stderr.write(out + '\n')
         num_buckets += 1
-        total_duration_time += duration_time
+        if num_buckets != 1: # first one may takes longer time, so ignore in computing duration.
+            total_duration_time += duration_time
 
     out = 'total_duration_time : ' + str(total_duration_time) + ' sec' + '\n'
-    out += 'average processing time / bucket : ' + str(total_duration_time / num_buckets) + ' sec'
+    out += 'average processing time / bucket : ' + str(total_duration_time / (num_buckets-1)) + ' sec'
     sys.stderr.write(out + '\n')
 
     Etagger.finalize(etagger)

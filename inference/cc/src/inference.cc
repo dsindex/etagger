@@ -45,7 +45,9 @@ int main(int argc, char const *argv[])
        gettimeofday(&t4, NULL);
        double duration_time = ((t4.tv_sec - t3.tv_sec)*1000000 + t4.tv_usec - t3.tv_usec)/(double)1000000;
        fprintf(stderr,"elapsed time per sentence = %lf sec\n", duration_time);
-       total_duration_time += duration_time;
+       if( num_buckets != 1) { // first one may takes longer time, so ignore in computing duration.
+           total_duration_time += duration_time;
+       }
     } else {
        bucket.push_back(line);
     }
@@ -53,7 +55,7 @@ int main(int argc, char const *argv[])
   gettimeofday(&t2, NULL);
   double duration_time = ((t2.tv_sec - t1.tv_sec)*1000000 + t2.tv_usec - t1.tv_usec)/(double)1000000;
   fprintf(stderr,"elapsed time = %lf sec\n", duration_time);
-  fprintf(stderr,"duration time on average = %lf sec\n", total_duration_time / num_buckets);
+  fprintf(stderr,"duration time on average = %lf sec\n", total_duration_time / (num_buckets-1));
 
   return 0;
 }
