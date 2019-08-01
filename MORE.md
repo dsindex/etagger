@@ -179,18 +179,19 @@
       - F1 : 0.8845
         - just 1 block of Transformer encoder
   - SOTA
-    - [Cloze-driven Pretraining of Self-attention Networks](https://arxiv.org/pdf/1903.07785.pdf?fbclid=IwAR2eIBWLbo0EShXvIhkMtS9OCwAipX8xKMS3GibEfP5oDwzjRv8r5WdlMtc)
-      - reported F1 : 0.935
-    - [Contextual String Embeddings for Sequence Labeling](https://drive.google.com/file/d/17yVpFA7MmXaQFTe-HDpZuqw9fJlmzg56/view)
-      - reported F1 : 0.9309
-    - [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/pdf/1810.04805.pdf)
-      - reported F1 : 0.928
-    - [Semi-Supervised Sequence Modeling with Cross-View Training](https://arxiv.org/pdf/1809.08370.pdf)
-      - reported F1 : 0.926
-    - [Deep contextualized word representations](https://arxiv.org/pdf/1802.05365.pdf)
-      - reported F1 : 0.9222
-    - [Semi-supervised sequence tagging with bidirectional language models](https://arxiv.org/pdf/1705.00108.pdf)
-      - reported F1 : 0.9193
+    - [SOTA on named-entity-recognition-ner-on-conll-2003](https://paperswithcode.com/sota/named-entity-recognition-ner-on-conll-2003)
+      - [Cloze-driven Pretraining of Self-attention Networks](https://arxiv.org/pdf/1903.07785.pdf?fbclid=IwAR2eIBWLbo0EShXvIhkMtS9OCwAipX8xKMS3GibEfP5oDwzjRv8r5WdlMtc)
+        - reported F1 : 0.935
+      - [Contextual String Embeddings for Sequence Labeling](https://drive.google.com/file/d/17yVpFA7MmXaQFTe-HDpZuqw9fJlmzg56/view)
+        - reported F1 : 0.9309
+      - [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/pdf/1810.04805.pdf)
+        - reported F1 : 0.928
+      - [Semi-Supervised Sequence Modeling with Cross-View Training](https://arxiv.org/pdf/1809.08370.pdf)
+        - reported F1 : 0.926
+      - [Deep contextualized word representations](https://arxiv.org/pdf/1802.05365.pdf)
+        - reported F1 : 0.9222
+      - [Semi-supervised sequence tagging with bidirectional language models](https://arxiv.org/pdf/1705.00108.pdf)
+        - reported F1 : 0.9193
 
 ## Development note
 
