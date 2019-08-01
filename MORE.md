@@ -182,6 +182,8 @@
     - [SOTA on named-entity-recognition-ner-on-conll-2003](https://paperswithcode.com/sota/named-entity-recognition-ner-on-conll-2003)
       - [Cloze-driven Pretraining of Self-attention Networks](https://arxiv.org/pdf/1903.07785.pdf?fbclid=IwAR2eIBWLbo0EShXvIhkMtS9OCwAipX8xKMS3GibEfP5oDwzjRv8r5WdlMtc)
         - reported F1 : 0.935
+      - [GCDT: A Global Context Enhanced Deep Transition Architecture for Sequence Labeling](https://arxiv.org/pdf/1906.02437v1.pdf)
+        - reported F1 : 0.9347
       - [Contextual String Embeddings for Sequence Labeling](https://drive.google.com/file/d/17yVpFA7MmXaQFTe-HDpZuqw9fJlmzg56/view)
         - reported F1 : 0.9309
       - [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/pdf/1810.04805.pdf)
