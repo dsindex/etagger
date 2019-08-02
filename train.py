@@ -9,31 +9,11 @@ from embvec import EmbVec
 from config import Config
 from model import Model
 from input import Input
+import feed
 from token_eval  import TokenEval
 from chunk_eval  import ChunkEval
 from progbar import Progbar
 from early_stopping import EarlyStopping
-
-def build_feed_dict(model, dataset, max_sentence_length, is_train):
-    """Build feed_dict for dataset
-    """ 
-    config = model.config
-    feed_dict={model.input_data_pos_ids: dataset['pos_ids'],
-               model.input_data_chk_ids: dataset['chk_ids'],
-               model.output_data: dataset['tags'],
-               model.is_train: is_train,
-               model.sentence_length: max_sentence_length}
-    feed_dict[model.input_data_word_ids] = dataset['word_ids']
-    feed_dict[model.input_data_wordchr_ids] = dataset['wordchr_ids']
-    if 'elmo' in config.emb_class:
-        feed_dict[model.elmo_input_data_wordchr_ids] = dataset['elmo_wordchr_ids']
-    if 'bert' in config.emb_class:
-        feed_dict[model.bert_input_data_token_ids] = dataset['bert_token_ids']
-        feed_dict[model.bert_input_data_token_masks] = dataset['bert_token_masks']
-        feed_dict[model.bert_input_data_segment_ids] = dataset['bert_segment_ids']
-        if 'elmo' in config.emb_class:
-            feed_dict[model.bert_input_data_elmo_indices] = dataset['bert_elmo_indices']
-    return feed_dict
 
 def train_step(model, data, summary_op, summary_writer):
     """Train one epoch
@@ -50,12 +30,14 @@ def train_step(model, data, summary_op, summary_writer):
             dataset = sess.run(next_element)
         except tf.errors.OutOfRangeError:
             break
-        feed_dict = build_feed_dict(model, dataset, data.max_sentence_length, True)
+        feed_dict = feed.build_feed_dict(model, dataset, data.max_sentence_length, True)
         if 'bert' in model.config.emb_class:
-            step, summaries, _, loss, accuracy, f1, learning_rate, bert_embeddings = \
-                sess.run([model.global_step, summary_op, model.train_op, \
-                          model.loss, model.accuracy, model.f1, model.learning_rate, \
-                          model.bert_embeddings], feed_dict=feed_dict, options=runopts)
+            # compute bert embedding at runtime
+            bert_embeddings = sess.run([model.bert_embeddings], feed_dict=feed_dict, options=runopts)
+            # update feed_dict
+            feed.update_feed_dict(model, feed_dict, bert_embeddings, dataset['bert_wordidx2tokenidx'])
+            step, summaries, _, loss, accuracy, f1, learning_rate = sess.run([model.global_step, summary_op, model.train_op, \
+                model.loss, model.accuracy, model.f1, model.learning_rate], feed_dict=feed_dict, options=runopts)
             if idx == 0:
                 tf.logging.debug('# bert_token_ids')
                 t = dataset['bert_token_ids'][:3]
@@ -95,6 +77,7 @@ def dev_step(model, data, summary_writer, epoch):
     """Evaluate dev data
     """
     sess = model.sess
+    runopts = tf.RunOptions(report_tensor_allocations_upon_oom=True)
     sum_loss = 0.0
     sum_accuracy = 0.0
     sum_f1 = 0.0
@@ -114,7 +97,12 @@ def dev_step(model, data, summary_writer, epoch):
             dataset = sess.run(next_element)
         except tf.errors.OutOfRangeError:
             break
-        feed_dict = build_feed_dict(model, dataset, data.max_sentence_length, False)
+        feed_dict = feed.build_feed_dict(model, dataset, data.max_sentence_length, False)
+        if 'bert' in model.config.emb_class:
+            # compute bert embedding at runtime
+            bert_embeddings = sess.run([model.bert_embeddings], feed_dict=feed_dict, options=runopts)
+            # update feed_dict
+            feed.update_feed_dict(model, feed_dict, bert_embeddings, dataset['bert_wordidx2tokenidx'])
         global_step, logits_indices, sentence_lengths, loss, accuracy, f1 = \
             sess.run([model.global_step, model.logits_indices, model.sentence_lengths, \
                       model.loss, model.accuracy, model.f1], feed_dict=feed_dict)

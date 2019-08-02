@@ -94,6 +94,7 @@ class Config:
                 vocab_file=self.embvec.bert_vocab_path, do_lower_case=self.embvec.bert_do_lower_case)
             self.bert_init_checkpoint = self.embvec.bert_init_checkpoint
             self.bert_max_seq_length = self.embvec.bert_max_seq_length
+            self.bert_dim = self.embvec.bert_dim
             self.bert_keep_prob = 0.9
             self.highway_used = False
             self.keep_prob = 0.9

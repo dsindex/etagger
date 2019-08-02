@@ -90,7 +90,6 @@ class Input:
             keys_to_features['bert_segment_ids'] = tf.FixedLenFeature([seq_length], tf.int64)
             keys_to_features['bert_wordidx2tokenidx'] = tf.FixedLenFeature([seq_length], tf.int64)
             if 'elmo' in self.config.emb_class:
-                keys_to_features['bert_elmo_indices'] = tf.FixedLenFeature([seq_length*2], tf.int64)
                 keys_to_features['elmo_wordchr_ids'] = tf.FixedLenFeature([(seq_length+2)*word_length], tf.int64)
             if self.build_output:
                 keys_to_features['tags'] = tf.FixedLenFeature([seq_length*class_size], tf.int64)
@@ -125,7 +124,6 @@ class Input:
                 parsed['bert_segment_ids'] = tf.cast(parsed['bert_segment_ids'], tf.int32)
                 parsed['bert_wordidx2tokenidx'] = tf.cast(parsed['bert_wordidx2tokenidx'], tf.int32)
                 if 'elmo' in self.config.emb_class:
-                    parsed['bert_elmo_indices'] = tf.reshape(tf.cast(parsed['bert_elmo_indices'], tf.int32), [-1, 2])
                     parsed['elmo_wordchr_ids'] = tf.reshape(tf.cast(parsed['elmo_wordchr_ids'], tf.int32), [-1, self.config.word_length])
                 if self.build_output:
                     parsed['tags'] = tf.reshape(tf.cast(parsed['tags'], tf.int32), [-1, self.config.class_size])
@@ -153,8 +151,7 @@ class Input:
         if 'bert' in self.config.emb_class:
             bert_token_ids, bert_token_masks, bert_segment_ids, \
             bert_word_ids, bert_wordchr_ids, bert_pos_ids, bert_chk_ids, \
-            bert_tags, bert_wordidx2tokenidx, bert_elmo_indices = \
-                self.__create_bert_input(bucket, ex_index)
+            bert_tags, bert_wordidx2tokenidx = self.__create_bert_input(bucket, ex_index)
             example['word_ids'] = bert_word_ids                             # [bert_max_seq_length]
             example['wordchr_ids'] = bert_wordchr_ids                       # [bert_max_seq_length, word_length]
             example['pos_ids'] = bert_pos_ids                               # [bert_max_seq_length]
@@ -164,7 +161,6 @@ class Input:
             example['bert_segment_ids'] = bert_segment_ids                  # [bert_max_seq_length]
             example['bert_wordidx2tokenidx'] = bert_wordidx2tokenidx        # [bert_max_seq_length]
             if 'elmo' in self.config.emb_class:
-                example['bert_elmo_indices'] = bert_elmo_indices            # [bert_max_seq_length, 2]
                 elmo_wordchr_ids = self.__create_elmo_wordchr_ids(bucket)
                 example['elmo_wordchr_ids'] = elmo_wordchr_ids              # [bert_max_seq_length+2, word_length]
             if self.build_output:
@@ -209,8 +205,6 @@ class Input:
             features['bert_segment_ids'] = create_int_feature(example['bert_segment_ids'])
             features['bert_wordidx2tokenidx'] = create_int_feature(example['bert_wordidx2tokenidx'])
             if 'elmo' in self.config.emb_class:
-                t = np.reshape(example['bert_elmo_indices'], -1)
-                features['bert_elmo_indices'] = create_int_feature(t)
                 t = np.reshape(example['elmo_wordchr_ids'], -1)
                 features['elmo_wordchr_ids'] = create_int_feature(t)
             if self.build_output:
@@ -246,8 +240,7 @@ class Input:
                bert pos id,
                bert chk id,
                bert tag
-               bert wordidx to tokenidx,
-               bert for elmo indices
+               bert wordidx to tokenidx
         """
         word_ids = self.__create_word_ids(bucket)
         wordchr_ids = self.__create_wordchr_ids(bucket)
@@ -256,31 +249,25 @@ class Input:
         tags = self.__create_tags(bucket)
 
         bert_word_ids = []
-        bert_wordchr_ids = []
+        bert_wordchr_ids = [] 
         bert_pos_ids = []
         bert_chk_ids = []
         bert_tags = []
+
+        pad_chr_ids = []
+        for _ in range(self.config.word_length):
+            pad_chr_ids.append(self.config.embvec.pad_cid) # 0
 
         bert_tokenizer = self.config.bert_tokenizer
         bert_max_seq_length = self.config.bert_max_seq_length
         ntokens = []
         bert_segment_ids = []
         bert_wordidx2tokenidx = []
-        bert_elmo_indices = []
-        ntokens_last = 0
 
+        tokenidx = 0
         ntokens.append('[CLS]')
         bert_segment_ids.append(0)
-        bert_elmo_indices.append([0,0])
-        bert_word_ids.append(self.config.embvec.pad_wid) # 0
-        pad_chr_ids = []
-        for _ in range(self.config.word_length):
-            pad_chr_ids.append(self.config.embvec.pad_cid) # 0
-        bert_wordchr_ids.append(pad_chr_ids)
-        bert_pos_ids.append(self.config.embvec.unk_pid) # 1, do not use pad_pid
-        bert_chk_ids.append(self.config.embvec.unk_kid) # 1, unk_kid
-        bert_tags.append(self.__tag_vec(self.config.embvec.oot_tag, self.config.class_size)) # 'O' tag
-        ntokens_last += 1
+        tokenidx += 1
 
         for i, line in enumerate(bucket):
             line = line.strip()
@@ -291,31 +278,23 @@ class Input:
             for j, bert_token in enumerate(bert_tokens):
                 ntokens.append(bert_token)
                 bert_segment_ids.append(0)
-                # extend bert_word_ids, bert_wordchr_ids, bert_pos_ids, bert_chk_ids, bert_tags
-                bert_word_ids.append(word_ids[i])
-                bert_wordchr_ids.append(wordchr_ids[i])
-                bert_pos_ids.append(pos_ids[i])
-                bert_chk_ids.append(chk_ids[i])
                 if j == 0:
+                    bert_word_ids.append(word_ids[i])
+                    bert_wordchr_ids.append(wordchr_ids[i])
+                    bert_pos_ids.append(pos_ids[i])
+                    bert_chk_ids.append(chk_ids[i])
                     bert_tags.append(tags[i])
-                    bert_wordidx2tokenidx.append(ntokens_last)
-                else:
-                    bert_tags.append(self.__tag_vec(self.config.embvec.xot_tag, self.config.class_size)) # 'X' tag
-                bert_elmo_indices.append([ex_index, i])
-                ntokens_last += 1
+                    bert_wordidx2tokenidx.append(tokenidx)
+                tokenidx += 1
             if len(ntokens) == bert_max_seq_length - 1:
                 tf.logging.debug('len(ntokens): %s' % str(len(ntokens)))
                 break
+
         '''
         ntokens.append('[SEP]')
         bert_segment_ids.append(0)
-        bert_word_ids.append(self.config.embvec.pad_wid) # 0
-        bert_wordchr_ids.append(pad_chr_ids)
-        bert_pos_ids.append(self.config.embvec.unk_pid) # 1, do not use pad_pid
-        bert_chk_ids.append(self.config.embvec.unk_kid) # 1, unk_kid
-        bert_tags.append(self.__tag_vec(self.config.embvec.oot_tag, self.config.class_size)) # 'O' tag
-        ntokens_last += 1
         '''
+        bert_wordidx2tokenidx.append(tokenidx) # indicating last+1 token idx
 
         bert_token_ids = bert_tokenizer.convert_tokens_to_ids(ntokens)
         bert_token_masks = [1] * len(bert_token_ids)
@@ -344,10 +323,6 @@ class Input:
         while len(bert_wordidx2tokenidx) < bert_max_seq_length:
             bert_wordidx2tokenidx.append(0)
         assert len(bert_wordidx2tokenidx) == bert_max_seq_length
-        # padding for bert_elmo_indices
-        while len(bert_elmo_indices) < bert_max_seq_length:
-            bert_elmo_indices.append([0,0])
-        assert len(bert_elmo_indices) == bert_max_seq_length
 
         if ex_index < 5:
             from bert import tokenization  
@@ -364,11 +339,10 @@ class Input:
             tf.logging.debug('bert_tags: %s' % ' '.join([str(x) for x in bert_tags]))
             '''
             tf.logging.debug('bert_wordidx2tokenidx: %s' % ' '.join([str(x) for x in bert_wordidx2tokenidx]))
-            tf.logging.debug('bert_elmo_indices: %s' % ' '.join([str(x) for x in bert_elmo_indices]))
 
         return bert_token_ids, bert_token_masks, bert_segment_ids, \
                bert_word_ids, bert_wordchr_ids, bert_pos_ids, bert_chk_ids, \
-               bert_tags, bert_wordidx2tokenidx, bert_elmo_indices
+               bert_tags, bert_wordidx2tokenidx
 
     def __create_word_ids(self, bucket):
         """Create an word id vector.

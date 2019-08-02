@@ -68,6 +68,7 @@ class EmbVec:
         if args.bert_do_lower_case == 'True': self.bert_do_lower_case = True 
         self.bert_init_checkpoint = args.bert_init_checkpoint
         self.bert_max_seq_length = args.bert_max_seq_length
+        self.bert_dim = args.bert_dim
 
         # build character/pos/chunk/tag/elmo vocab.
         cid = self.unk_cid + 1
@@ -199,6 +200,7 @@ if __name__ == '__main__':
     parser.add_argument('--bert_do_lower_case', type=str, help='apply lower case for bert', default=False)
     parser.add_argument('--bert_init_checkpoint', type=str, help='path to bert init checkpoint', default='')
     parser.add_argument('--bert_max_seq_length', type=int, help='maximum total input sequence length after WordPiece tokenization.', default=180)
+    parser.add_argument('--bert_dim', type=int, help='bert output dimension size', default=1024)
     args = parser.parse_args()
     embvec = EmbVec(args)
     pkl.dump(embvec, open(args.emb_path + '.pkl', 'wb'))

@@ -79,17 +79,19 @@ class Model:
                                                               name='elmo_input_data_wordchr_ids')   # '+2' stands for '<S>', '</S>'
             self.elmo_embeddings = self.__elmo_embedding(self.elmo_input_data_wordchr_ids, masks, keep_prob=elmo_keep_prob)
         if 'bert' in self.emb_class:
-            # bert embeddings
+            # bert embeddings in subgraph
             self.bert_config = config.bert_config
             self.bert_init_checkpoint = config.bert_init_checkpoint
-            bert_keep_prob = tf.cond(self.is_train, lambda: config.bert_keep_prob, lambda: 1.0)
             self.bert_input_data_token_ids   = tf.placeholder(tf.int32, shape=[None, config.bert_max_seq_length], name='bert_input_data_token_ids')
             self.bert_input_data_token_masks = tf.placeholder(tf.int32, shape=[None, config.bert_max_seq_length], name='bert_input_data_token_masks') 
             self.bert_input_data_segment_ids = tf.placeholder(tf.int32, shape=[None, config.bert_max_seq_length], name='bert_input_data_segment_ids') 
-            self.bert_embeddings = self.__bert_embedding(self.bert_input_data_token_ids,
-                                                         self.bert_input_data_token_masks,
-                                                         self.bert_input_data_segment_ids,
-                                                         keep_prob=bert_keep_prob)
+            self.bert_embeddings_subgraph = self.__bert_embedding(self.bert_input_data_token_ids,
+                                                                  self.bert_input_data_token_masks,
+                                                                  self.bert_input_data_segment_ids)
+            # bert embedding at runtime
+            self.bert_embeddings = tf.placeholder(tf.float32, shape=[None, config.bert_max_seq_length, config.bert_dim], name='bert_embeddings')
+            bert_keep_prob = tf.cond(self.is_train, lambda: config.bert_keep_prob, lambda: 1.0)
+            self.bert_embeddings = tf.nn.dropout(self.bert_embeddings, bert_keep_prob)
 
         concat_in = [self.word_embeddings, self.wordchr_embeddings, self.pos_embeddings, self.chk_embeddings]
         if self.emb_class == 'elmo':
@@ -97,9 +99,6 @@ class Model:
         if self.emb_class == 'bert':
             concat_in = [self.bert_embeddings]
         if self.emb_class == 'bert+elmo':
-            # we need to extend elmo_embeddings for bert(token based) via tf.gather_nd().
-            self.bert_input_data_elmo_indices = tf.placeholder(tf.int32, shape=[None, None, 2], name='bert_input_data_elmo_indices') # (batch_size, bert_max_seq_length, 2)
-            self.elmo_embeddings = tf.gather_nd(self.elmo_embeddings, self.bert_input_data_elmo_indices)
             concat_in = [self.word_embeddings, self.wordchr_embeddings, self.bert_embeddings, self.elmo_embeddings, self.pos_embeddings, self.chk_embeddings]
         self.input_data = tf.concat(concat_in, axis=-1, name='input_data') # (batch_size, sentence_length, input_dim)
         
@@ -338,8 +337,8 @@ class Model:
         elmo_embeddings *= masks
         return tf.nn.dropout(elmo_embeddings, keep_prob)
 
-    def __bert_embedding(self, token_ids, token_masks, segment_ids, keep_prob=0.8):
-        """Compute BERT embeddings.
+    def __bert_embedding(self, token_ids, token_masks, segment_ids):
+        """Compute BERT embeddings in sub-graph.
         """
         from bert import modeling
         bert_model = modeling.BertModel(
@@ -361,7 +360,7 @@ class Model:
                 if var.name in initialized_variable_names:
                     init_string = ", *INIT_FROM_CKPT*"
                 tf.logging.debug("  name = %s, shape = %s%s", var.name, var.shape, init_string)
-        return tf.nn.dropout(bert_embeddings, keep_prob)
+        return bert_embeddings
 
     def __pos_embedding(self, inputs, keep_prob=0.5, scope='pos-embedding'):
         """Computing pos embeddings.
