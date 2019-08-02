@@ -49,7 +49,8 @@ def update_feed_dict(model, feed_dict, bert_embeddings, bert_wordidx2tokenidx):
          : align bert_embeddings via bert_wordidx2tokenidx
            ex) word  : 'johanson was a guy to'          [0 ~ 4]
                token : 'johan ##son was a gu ##y t ##o' [0 ~ 7]
-               wordidx2tokenidx : [1 3 4 5 7 9] (bert embedding begins with [CLS] token and should be larger than 2, see input.py)
+               wordidx2tokenidx : [1 3 4 5 7 9 0 0 ...] (bert embedding begins with [CLS] token)
+               bert embedding :   [em('CLS'), em('johan'), em('##son'), em('was'), em('a'), em('gu'), em('##y'), em('t'), em('##o'), 0, ...]
          : delete unused keys for the future.
     """
     def reduce_mean_list(ls):
@@ -63,29 +64,53 @@ def update_feed_dict(model, feed_dict, bert_embeddings, bert_wordidx2tokenidx):
                 ls[0][index] += value
         return [value / len(ls) for value in ls[0]]
 
+    # 4-dim -> 3-dim
+    t_bert_embeddings = []
+    for b in bert_embeddings[0]: # batch, ex) 16
+        se = []
+        for s in b:              # seq,   ex) 180
+            te = []
+            for d in s:          # dim,   ex) 786
+                d = float(d)
+                te.append(d)
+            se.append(te)
+        t_bert_embeddings.append(se)
+    bert_embeddings = t_bert_embeddings
+    
     config = model.config
-    # config.bert_max_seq_length
-    # config.bert_dim
     bert_embeddings_updated = []
-    for i in range(bert_wordidx2tokenidx):        # batch
+    batch_size = len(bert_wordidx2tokenidx)
+    for i in range(batch_size): # batch
         bert_embedding_updated = []
         prev = 1
-        for j in range(bert_wordidx2tokenidx[i]): # seq
+        for j in range(len(bert_wordidx2tokenidx[i])): # seq
             cur = bert_wordidx2tokenidx[i][j]
-            if j == 1: continue # skip first
+            if j == 0:
+                prev = cur
+                continue        # skip first
+            if cur == 0: break  # process before padding area
+            
             # mean prev ~ cur
-            pooled = reduce_mean_list(bert_embeddings[i][prev:cur])
-            bert_embedding_updated.append(pooled)
+            try:
+                pooled = reduce_mean_list(bert_embeddings[i][prev:cur])
+                bert_embedding_updated.append(pooled)
+            except:
+                tf.logging.debug('[ERROR] ' + 'seq:' + str(i) + '\t' + 'prev:' + str(prev) + '\t' + 'cur:' + str(cur))
+                # error padding
+                padding = [0.0] * config.bert_dim
+                bert_embedding_updated.append(padding)
+            
             prev = cur
         # padding
         while len(bert_embedding_updated) < config.bert_max_seq_length:
             padding = [0.0] * config.bert_dim
             bert_embedding_updated.append(padding)
+        '''
         if i == 0:
             tf.logging.debug('# bert_embedding_updated')
-            t = bert_embedding_updated[:3]
-            tf.logging.debug(' '.join([str(x) for x in np.shape(t)]))
+            t = bert_embedding_updated[:1]
             tf.logging.debug(' '.join([str(x) for x in t]))
+        '''
         bert_embeddings_updated.append(bert_embedding_updated)
 
     feed_dict[model.bert_embeddings] = bert_embeddings_updated

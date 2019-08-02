@@ -33,24 +33,30 @@ def train_step(model, data, summary_op, summary_writer):
         feed_dict = feed.build_feed_dict(model, dataset, data.max_sentence_length, True)
         if 'bert' in model.config.emb_class:
             # compute bert embedding at runtime
-            bert_embeddings = sess.run([model.bert_embeddings], feed_dict=feed_dict, options=runopts)
-            # update feed_dict
-            feed.update_feed_dict(model, feed_dict, bert_embeddings, dataset['bert_wordidx2tokenidx'])
-            step, summaries, _, loss, accuracy, f1, learning_rate = sess.run([model.global_step, summary_op, model.train_op, \
-                model.loss, model.accuracy, model.f1, model.learning_rate], feed_dict=feed_dict, options=runopts)
+            bert_embeddings = sess.run([model.bert_embeddings_subgraph], feed_dict=feed_dict, options=runopts)
             if idx == 0:
                 tf.logging.debug('# bert_token_ids')
-                t = dataset['bert_token_ids'][:3]
+                t = dataset['bert_token_ids'][:1]
                 tf.logging.debug(' '.join([str(x) for x in np.shape(t)]))
                 tf.logging.debug(' '.join([str(x) for x in t]))
                 tf.logging.debug('# bert_token_masks')
-                t = dataset['bert_token_masks'][:3]
+                t = dataset['bert_token_masks'][:1]
                 tf.logging.debug(' '.join([str(x) for x in np.shape(t)]))
                 tf.logging.debug(' '.join([str(x) for x in t]))
                 tf.logging.debug('# bert_embedding')
-                t = bert_embeddings[:3]
+                t = bert_embeddings[0][:1]
                 tf.logging.debug(' '.join([str(x) for x in np.shape(t)]))
                 tf.logging.debug(' '.join([str(x) for x in t]))
+                tf.logging.debug('# bert_wordidx2tokenidx')
+                t = dataset['bert_wordidx2tokenidx'][:1]
+                tf.logging.debug(' '.join([str(x) for x in np.shape(t)]))
+                tf.logging.debug(' '.join([str(x) for x in t]))
+            # update feed_dict
+            feed.update_feed_dict(model, feed_dict, bert_embeddings, dataset['bert_wordidx2tokenidx'])
+            step, summaries, _, loss, accuracy, f1, learning_rate = \
+                sess.run([model.global_step, summary_op, model.train_op, \
+                          model.loss, model.accuracy, model.f1, \
+                          model.learning_rate], feed_dict=feed_dict, options=runopts)
         else:
             step, summaries, _, loss, accuracy, f1, learning_rate = \
                 sess.run([model.global_step, summary_op, model.train_op, \
@@ -100,7 +106,7 @@ def dev_step(model, data, summary_writer, epoch):
         feed_dict = feed.build_feed_dict(model, dataset, data.max_sentence_length, False)
         if 'bert' in model.config.emb_class:
             # compute bert embedding at runtime
-            bert_embeddings = sess.run([model.bert_embeddings], feed_dict=feed_dict, options=runopts)
+            bert_embeddings = sess.run([model.bert_embeddings_subgraph], feed_dict=feed_dict, options=runopts)
             # update feed_dict
             feed.update_feed_dict(model, feed_dict, bert_embeddings, dataset['bert_wordidx2tokenidx'])
         global_step, logits_indices, sentence_lengths, loss, accuracy, f1 = \
