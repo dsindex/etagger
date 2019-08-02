@@ -97,7 +97,6 @@ class Model:
         if self.emb_class == 'elmo':
             concat_in = [self.word_embeddings, self.wordchr_embeddings, self.elmo_embeddings, self.pos_embeddings, self.chk_embeddings]
         if self.emb_class == 'bert':
-            #concat_in = [self.bert_embeddings]
             concat_in = [self.word_embeddings, self.wordchr_embeddings, self.bert_embeddings, self.pos_embeddings, self.chk_embeddings]
         if self.emb_class == 'bert+elmo':
             concat_in = [self.word_embeddings, self.wordchr_embeddings, self.bert_embeddings, self.elmo_embeddings, self.pos_embeddings, self.chk_embeddings]
