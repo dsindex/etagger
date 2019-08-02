@@ -216,6 +216,19 @@ class Model:
                 tvars = tf.trainable_variables()
                 grads, _ = tf.clip_by_global_norm(tf.gradients(self.loss, tvars), config.clip_norm)
                 self.train_op = optimizer.apply_gradients(zip(grads, tvars), global_step=self.global_step)
+                '''
+                # Adam optimizer with cyclical learning rate
+                import clr # https://github.com/mhmoodlan/cyclic-learning-rate
+                self.learning_rate = clr.cyclic_learning_rate(global_step=self.global_step,
+                                                              learning_rate=config.starter_learning_rate * 0.3, # 0.0003
+                                                              max_lr=config.starter_learning_rate,              # 0.001
+                                                              step_size=5000,
+                                                              mode='triangular')
+                optimizer = tf.train.AdamOptimizer(self.learning_rate)
+                tvars = tf.trainable_variables()
+                grads, _ = tf.clip_by_global_norm(tf.gradients(self.loss, tvars), config.clip_norm)
+                self.train_op = optimizer.apply_gradients(zip(grads, tvars), global_step=self.global_step)
+                '''
 
         # create session, initialize variables. this should be placed at the end of graph definitions.
         session_conf = tf.ConfigProto(allow_soft_placement=True,
