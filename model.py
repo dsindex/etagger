@@ -349,7 +349,11 @@ class Model:
             input_mask=token_masks,
             token_type_ids=segment_ids,
             use_one_hot_embeddings=False)
-        bert_embeddings = bert_model.get_sequence_output()  # (batch_size, bert_max_seq_length, bert_embedding_size)
+        # last layer
+        # bert_embeddings = bert_model.get_sequence_output()  # (batch_size, bert_max_seq_length, bert_embedding_size)
+        # mid layer(base 6, large 18)
+        bert_embeddings = bert_model.get_all_encoder_layers()[-7] # -1 : 12, -2 : 11, ..., -7 : 6
+                                                                  # -1 : 24, -2 : 23, ..., -7 : 18
         # initialize pre-trained bert
         if self.is_training and self.bert_init_checkpoint:
             tvars = tf.trainable_variables()
