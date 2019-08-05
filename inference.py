@@ -38,14 +38,15 @@ def inference_bucket(config):
         if not line and len(bucket) >= 1:
             start_time = time.time()
             inp, feed_dict = feed.build_input_feed_dict(model, bucket)
+            if 'bert' in config.emb_class:
+                # compute bert embedding at runtime
+                bert_embeddings = sess.run([model.bert_embeddings_subgraph], feed_dict=feed_dict)
+                # update feed_dict
+                feed.update_feed_dict(model, feed_dict, bert_embeddings, inp.example['bert_wordidx2tokenidx'], -1)
             logits_indices, sentence_lengths = sess.run([model.logits_indices, model.sentence_lengths], feed_dict=feed_dict)
             tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
             for i in range(len(bucket)):
-                if 'bert' in config.emb_class:
-                    j = inp.example['bert_wordidx2tokenidx'][0][i]
-                    out = bucket[i] + ' ' + tags[j]
-                else:
-                    out = bucket[i] + ' ' + tags[i]
+                out = bucket[i] + ' ' + tags[i]
                 sys.stdout.write(out + '\n')
             sys.stdout.write('\n')
             bucket = []
@@ -59,14 +60,15 @@ def inference_bucket(config):
     if len(bucket) != 0:
         start_time = time.time()
         inp, feed_dict = feed.build_input_feed_dict(model, bucket)
+        if 'bert' in config.emb_class:
+            # compute bert embedding at runtime
+            bert_embeddings = sess.run([model.bert_embeddings_subgraph], feed_dict=feed_dict)
+            # update feed_dict
+            feed.update_feed_dict(model, feed_dict, bert_embeddings, inp.example['bert_wordidx2tokenidx'], -1)
         logits_indices, sentence_lengths = sess.run([model.logits_indices, model.sentence_lengths], feed_dict=feed_dict)
         tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
         for i in range(len(bucket)):
-            if 'bert' in config.emb_class:
-                j = inp.example['bert_wordidx2tokenidx'][0][i]
-                out = bucket[i] + ' ' + tags[j]
-            else:
-                out = bucket[i] + ' ' + tags[i]
+            out = bucket[i] + ' ' + tags[i]
             sys.stdout.write(out + '\n')
         sys.stdout.write('\n')
         duration_time = time.time() - start_time
@@ -137,14 +139,15 @@ def inference_line(config):
             sys.stderr.write(str(e) +'\n')
             continue
         inp, feed_dict = feed.build_input_feed_dict(model, bucket)
+        if 'bert' in config.emb_class:
+            # compute bert embedding at runtime
+            bert_embeddings = sess.run([model.bert_embeddings_subgraph], feed_dict=feed_dict)
+            # update feed_dict
+            feed.update_feed_dict(model, feed_dict, bert_embeddings, inp.example['bert_wordidx2tokenidx'], -1)
         logits_indices, sentence_lengths = sess.run([model.logits_indices, model.sentence_lengths], feed_dict=feed_dict)
         tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
         for i in range(len(bucket)):
-            if 'bert' in config.emb_class:
-                j = inp.example['bert_wordidx2tokenidx'][0][i]
-                out = bucket[i] + ' ' + tags[j]
-            else:
-                out = bucket[i] + ' ' + tags[i]
+            out = bucket[i] + ' ' + tags[i]
             sys.stdout.write(out + '\n')
         sys.stdout.write('\n')
 
