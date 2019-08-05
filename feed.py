@@ -44,7 +44,7 @@ def build_input_feed_dict(model, bucket):
         feed_dict[model.bert_input_data_segment_ids] = inp.example['bert_segment_ids']
     return inp, feed_dict
 
-def update_feed_dict(model, feed_dict, bert_embeddings, bert_wordidx2tokenidx):
+def update_feed_dict(model, feed_dict, bert_embeddings, bert_wordidx2tokenidx, idx):
     """Update feed_dict for bert_embeddings
          : align bert_embeddings via bert_wordidx2tokenidx
            ex) word  : 'johanson was a guy to'          [0 ~ 4]
@@ -57,6 +57,8 @@ def update_feed_dict(model, feed_dict, bert_embeddings, bert_wordidx2tokenidx):
         '''arverage the mutiple list
            from https://github.com/Adaxry/get_aligned_BERT_emb/blob/master/get_aligned_bert_emb.py#L27
         '''
+        return ls[0] # first one
+
         if len(ls) == 1:
             return ls[0]
         for item in ls[1:]:
@@ -64,19 +66,16 @@ def update_feed_dict(model, feed_dict, bert_embeddings, bert_wordidx2tokenidx):
                 ls[0][index] += value
         return [value / len(ls) for value in ls[0]]
 
+    if idx == 0:
+        tf.logging.debug('# bert_embeddings')
+        t = bert_embeddings[0]
+        tf.logging.debug(' '.join([str(x) for x in np.shape(t)]))
+        t = bert_embeddings[0][0][1] # first (batch, seq, token) embedding
+        tf.logging.debug(' '.join([str(x) for x in t]))
+
     # 4-dim -> 3-dim
-    t_bert_embeddings = []
-    for b in bert_embeddings[0]: # batch, ex) 16
-        se = []
-        for s in b:              # seq,   ex) 180
-            te = []
-            for d in s:          # dim,   ex) 786
-                d = float(d)
-                te.append(d)
-            se.append(te)
-        t_bert_embeddings.append(se)
-    bert_embeddings = t_bert_embeddings
-    
+    bert_embeddings = bert_embeddings[0]    
+
     config = model.config
     bert_embeddings_updated = []
     batch_size = len(bert_wordidx2tokenidx)
@@ -105,13 +104,12 @@ def update_feed_dict(model, feed_dict, bert_embeddings, bert_wordidx2tokenidx):
         while len(bert_embedding_updated) < config.bert_max_seq_length:
             padding = [0.0] * config.bert_dim
             bert_embedding_updated.append(padding)
-        '''
-        if i == 0:
-            tf.logging.debug('# bert_embedding_updated')
-            t = bert_embedding_updated[:1]
-            tf.logging.debug(' '.join([str(x) for x in t]))
-        '''
         bert_embeddings_updated.append(bert_embedding_updated)
+
+    if idx == 0:
+        tf.logging.debug('# bert_embeddings_updated')
+        t = bert_embeddings_updated[0][0] # first (batch, seq, token) embedding
+        tf.logging.debug(' '.join([str(x) for x in t]))
 
     feed_dict[model.bert_embeddings] = bert_embeddings_updated
     del feed_dict[model.bert_input_data_token_ids]
