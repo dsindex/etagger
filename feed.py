@@ -57,8 +57,6 @@ def update_feed_dict(model, feed_dict, bert_embeddings, bert_wordidx2tokenidx, i
         '''arverage the mutiple list
            from https://github.com/Adaxry/get_aligned_BERT_emb/blob/master/get_aligned_bert_emb.py#L27
         '''
-        return ls[0] # first one
-
         if len(ls) == 1:
             return ls[0]
         for item in ls[1:]:
@@ -86,7 +84,7 @@ def update_feed_dict(model, feed_dict, bert_embeddings, bert_wordidx2tokenidx, i
             cur = bert_wordidx2tokenidx[i][j]
             if j == 0:
                 prev = cur
-                continue        # skip first
+                continue        # skip first for '[CLS]'
             if cur == 0: break  # process before padding area
             
             # mean prev ~ cur
