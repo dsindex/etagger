@@ -1,6 +1,225 @@
 - summary
   - https://docs.google.com/spreadsheets/d/1Zj9MF0LK2IE4XHiKTRkRpd8EajEnfqLGvI-IqUMC7A0/edit?usp=sharing
 
+- experiments 15
+```
+* test 5
+word embedding size : 100(glove6B)
+bert embedding : cased_L-24_H-1024_A-16, first embedding, 18 -> 24 layer
+bert_keep_prob : 0.9
+keep_prob : 0.9 -> 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+chk embedding size : 10
+chk embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused
+rnn_size : 200 -> 250
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / (2000 -> 12000) / 0.9 + Warmup 2epoch + AdamWeightDecayOptimizer
+gradient clipping : 1.0 -> 10
+#learning_rate : use optimization.py from bert, 0.001 / Warmup 2epoch
+epoch : 70
+batch_size : 16
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+do_shuffle : True
+
+token :
+chunk :
+conlleval :
+
+* test 4
+word embedding size : 100(glove6B)
+bert embedding : cased_L-24_H-1024_A-16, mean pooling, 18 layer
+bert_keep_prob : 0.9
+keep_prob : 0.9 -> 0.7
+chr_conv_type : conv1d
+chracter embedding size : 25
+chracter embedding random init : -1.0 ~ 1.0
+filter_sizes : [3]
+num_filters : 53
+pos embedding size : 7
+pos embedding random init : -0.5 ~ 0.5
+chk embedding size : 10
+chk embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused
+rnn_size : 200 -> 250
+rnn_num_layers : 2
+learning_rate : exponential_decay(), 0.001 / (2000 -> 12000) / 0.9 + Warmup 2epoch + AdamWeightDecayOptimizer
+gradient clipping : 1.0 -> 10
+#learning_rate : use optimization.py from bert, 0.001 / Warmup 2epoch
+epoch : 70
+batch_size : 16
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+do_shuffle : True
+
+token : 0.9205979659355471
+chunk : 0.9132549297020072
+conlleval : 91.31
+
+* test 3
+#word embedding size : 100(glove6B)
+bert embedding : cased_L-24_H-1024_A-16, first embedding, 18 layer
+bert_keep_prob : 0.9
+keep_prob : 0.9
+#chr_conv_type : conv1d
+#chracter embedding size : 25
+#chracter embedding random init : -1.0 ~ 1.0
+#filter_sizes : [3]
+#num_filters : 53
+#pos embedding size : 7
+#pos embedding random init : -0.5 ~ 0.5
+#chk embedding size : 10
+#chk embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 2
+learning_rate : exponential_decay(), (0.001 -> 0.008) / 2000 / 0.9 + Warmup 2epoch + AdamWeightDecayOptimizer
+gradient clipping : 1.0
+#learning_rate : use optimization.py from bert, 0.001 / Warmup 2epoch
+epoch : 70
+batch_size : 16
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+do_shuffle : True
+
+token : 0.9043242242921472
+chunk : 0.8996965911119044
+conlleval : 89.97
+
+* test 2
+#word embedding size : 100(glove6B)
+bert embedding : cased_L-24_H-1024_A-16, mean pooling, 18 layer
+bert_keep_prob : 0.9
+keep_prob : 0.9
+#chr_conv_type : conv1d
+#chracter embedding size : 25
+#chracter embedding random init : -1.0 ~ 1.0
+#filter_sizes : [3]
+#num_filters : 53
+#pos embedding size : 7
+#pos embedding random init : -0.5 ~ 0.5
+#chk embedding size : 10
+#chk embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 1 -> 2
+learning_rate : exponential_decay(), 0.001 / (2000 -> 12000) / 0.9 + Warmup 2epoch + AdamWeightDecayOptimizer
+gradient clipping : 1.0
+#learning_rate : use optimization.py from bert, 0.001 / Warmup 2epoch
+epoch : 70
+batch_size : 16
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+do_shuffle : True
+
+token : 0.9120832058733557
+chunk : 0.9015151515151516
+conlleval : 90.14
+
+* test 1
+#word embedding size : 100(glove6B)
+bert embedding : cased_L-24_H-1024_A-16, mean pooling, 18 layer
+bert_keep_prob : 0.9
+keep_prob : 0.9
+#chr_conv_type : conv1d
+#chracter embedding size : 25
+#chracter embedding random init : -1.0 ~ 1.0
+#filter_sizes : [3]
+#num_filters : 53
+#pos embedding size : 7
+#pos embedding random init : -0.5 ~ 0.5
+#chk embedding size : 10
+#chk embedding random init : -0.5 ~ 0.5
+rnn_used : True
+rnn_type : fused
+rnn_size : 200
+rnn_num_layers : 1
+learning_rate : exponential_decay(), 0.001 / 2000 / 0.9 + Warmup 2epoch + AdamWeightDecayOptimizer
+gradient clipping : 1.0
+#learning_rate : use optimization.py from bert, 0.001 / Warmup 2epoch
+epoch : 70
+batch_size : 16
++
+tf_used : False
+tf_keep_prob : 0.8
+tf_mh_num_layers : 4
+tf_mh_num_heads : 4
+tf_mh_num_units : 64
+tf_mh_keep_prob : 0.8
+tf_ffn_keep_prob : 0.8
+tf_ffn_kernel_size : 3
++
+save model by f1(token)
++
+CRF
++
+do_shuffle : True
+
+token : 0.9064914522114741
+chunk : 0.8973410811762634
+conlleval : 89.56
+
+```
+
 - experiments 14
 ```
 * test 11

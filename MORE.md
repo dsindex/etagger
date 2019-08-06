@@ -109,44 +109,59 @@
       - average processing time per bucket
         - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.036233977567360014 sec
         - 1 GPU(Tesla V100, 32510MiB) : 0.031166194639816864 sec
-    - BERT(base)
-      - setting : `experiments 11, test 1`
-      - per-token(partial) f1 : 0.9234725113260683
-      - per-chunk(exact)   f1 : 0.9131509267431598 (chunk_eval)
-      - average processing time per bucket
-        - 1 GPU(Tesla V100)  : 0.026964144585057526 sec
-    - BERT(base) + Glove
-      - setting : experiments 11, test 2`
-      - per-token(partial) f1 : 0.921535076998289
-      - per-chunk(exact)   f1 : 0.9123210182075304 (chunk_eval)
-      - average processing time per bucket
-        - 1 GPU(Tesla V100)  : 0.029030597688838533 sec
-    - BERT(large)
-      - BERT + CRF only
-      - setting : `experiments 11, test 15`
-      - per-token(partial) f1 : 0.929012534393152
-      - per-chunk(exact)   f1 : 0.9215426705498191 (chunk_eval), **92.00**(conlleval)
-      - average processing time per bucket
-        - 1 GPU(Tesla V100)  : pass
-    - BERT(large)
-      - BERT + LSTM + CRF only
-      - setting : `experiments 11, test 19`
-      - per-token(partial) f1 : 0.9310957309977338
-      - per-chunk(exact)   f1 : 0.9240976645435245 (chunk_eval), **92.23**(conlleval)
-      - average processing time per bucket
-        - 1 GPU(Tesla V100)  : pass
-    - BERT(large) + Glove
-      - setting : `experiments 11, test 3`
-      - per-token(partial) f1 : 0.9278869778869779
-      - per-chunk(exact)   f1 : 0.918813634351483 (chunk_eval)
-      - average processing time per bucket
-        - 1 GPU(Tesla V100)  : 0.040225753178425645 sec
-    - BERT(large) + Glove + Transformer
-      - setting : `experiments 11, test 7`
-      - per-token(partial) f1 : 0.9244949032533724
-      - per-chunk(exact)   f1 : 0.9170714474962465 (chunk_eval)
-      - average processing time per bucket
-        - 1 GPU(Tesla V100)  : 0.05737522856032033 sec
+    - BERT(new result, aligned wordpiece+word embeddings)
+      - BERT(large) + Glove
+        - setting : `experiments 15, test 4`
+        - per-token(partial) f1 : 0.9205979659355471
+        - per-chunk(exact)   f1 : 0.9132549297020072(chunk_eval), 91.31(conlleval)
+        - average processing time per bucket
+          - 1 GPU(Tesla V100)  : pass
+      - BERT(large)
+        - BERT + LSTM + CRF only
+        - setting : `experiments 15, test 2`
+        - per-token(partial) f1 : 0.9120832058733557
+        - per-chunk(exact)   f1 : 0.9015151515151516(chunk_eval), 90.14(conlleval)
+        - average processing time per bucket
+          - 1 GPU(Tesla V100)  : pass
+    - BERT(old result, extending word embeddings for wordpieces)
+      - BERT(base)
+        - setting : `experiments 11, test 1`
+        - per-token(partial) f1 : 0.9234725113260683
+        - per-chunk(exact)   f1 : 0.9131509267431598 (chunk_eval)
+        - average processing time per bucket
+          - 1 GPU(Tesla V100)  : 0.026964144585057526 sec
+      - BERT(base) + Glove
+        - setting : experiments 11, test 2`
+        - per-token(partial) f1 : 0.921535076998289
+        - per-chunk(exact)   f1 : 0.9123210182075304 (chunk_eval)
+        - average processing time per bucket
+          - 1 GPU(Tesla V100)  : 0.029030597688838533 sec
+      - BERT(large)
+        - BERT + CRF only
+        - setting : `experiments 11, test 15`
+        - per-token(partial) f1 : 0.929012534393152
+        - per-chunk(exact)   f1 : 0.9215426705498191 (chunk_eval), **92.00**(conlleval)
+        - average processing time per bucket
+          - 1 GPU(Tesla V100)  : pass
+      - BERT(large)
+        - BERT + LSTM + CRF only
+        - setting : `experiments 11, test 19`
+        - per-token(partial) f1 : 0.9310957309977338
+        - per-chunk(exact)   f1 : 0.9240976645435245 (chunk_eval), **92.23**(conlleval)
+        - average processing time per bucket
+          - 1 GPU(Tesla V100)  : pass
+      - BERT(large) + Glove
+        - setting : `experiments 11, test 3`
+        - per-token(partial) f1 : 0.9278869778869779
+        - per-chunk(exact)   f1 : 0.918813634351483 (chunk_eval)
+        - average processing time per bucket
+          - 1 GPU(Tesla V100)  : 0.040225753178425645 sec
+      - BERT(large) + Glove + Transformer
+        - setting : `experiments 11, test 7`
+        - per-token(partial) f1 : 0.9244949032533724
+        - per-chunk(exact)   f1 : 0.9170714474962465 (chunk_eval)
+        - average processing time per bucket
+          - 1 GPU(Tesla V100)  : 0.05737522856032033 sec
   - BiLSTM + Transformer
     - Glove
       - setting : `experiments 7, test 10`
