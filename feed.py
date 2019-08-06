@@ -25,7 +25,7 @@ def build_feed_dict(model, dataset, max_sentence_length, is_train):
         feed_dict[model.bert_input_data_segment_ids] = dataset['bert_segment_ids']
     return feed_dict
 
-def build_input_feed_dict(model, bucket):
+def build_input_feed_dict(model, bucket, Input):
     """Build input and feed_dict for bucket(inference only)
     """
     config = model.config
