@@ -37,7 +37,7 @@ def inference_bucket(config):
         line = line.strip()
         if not line and len(bucket) >= 1:
             start_time = time.time()
-            inp, feed_dict = feed.build_input_feed_dict(model, bucket)
+            inp, feed_dict = feed.build_input_feed_dict(model, bucket, Input)
             if 'bert' in config.emb_class:
                 # compute bert embedding at runtime
                 bert_embeddings = sess.run([model.bert_embeddings_subgraph], feed_dict=feed_dict)
@@ -59,7 +59,7 @@ def inference_bucket(config):
         if line : bucket.append(line)
     if len(bucket) != 0:
         start_time = time.time()
-        inp, feed_dict = feed.build_input_feed_dict(model, bucket)
+        inp, feed_dict = feed.build_input_feed_dict(model, bucket, Input)
         if 'bert' in config.emb_class:
             # compute bert embedding at runtime
             bert_embeddings = sess.run([model.bert_embeddings_subgraph], feed_dict=feed_dict)
