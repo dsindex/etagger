@@ -109,11 +109,17 @@
       - average processing time per bucket
         - 1 GPU(TITAN X (Pascal), 12196MiB) : 0.036233977567360014 sec
         - 1 GPU(Tesla V100, 32510MiB) : 0.031166194639816864 sec
-    - BERT(new result, aligned wordpiece+word embeddings)
+    - BERT `new result, aligned wordpiece+word embeddings)`
+      - BERT(large) + Glove + ELMo
+        - setting : `experiments 15, test 7`
+        - per-token(partial) f1 :
+        - per-chunk(exact)   f1 : (chunk_eval), (conlleval)
+        - average processing time per bucket
+          - 1 GPU(Tesla V100)  : pass
       - BERT(large) + Glove
-        - setting : `experiments 15, test 4`
-        - per-token(partial) f1 : 0.9205979659355471
-        - per-chunk(exact)   f1 : 0.9132549297020072(chunk_eval), 91.31(conlleval)
+        - setting : `experiments 15, test 6`
+        - per-token(partial) f1 : 0.9223324758054636
+        - per-chunk(exact)   f1 : 0.9159886805801203(chunk_eval), 91.57(conlleval)
         - average processing time per bucket
           - 1 GPU(Tesla V100)  : pass
       - BERT(large)
@@ -123,7 +129,7 @@
         - per-chunk(exact)   f1 : 0.9015151515151516(chunk_eval), 90.14(conlleval)
         - average processing time per bucket
           - 1 GPU(Tesla V100)  : pass
-    - BERT(old result, extending word embeddings for wordpieces)
+    - BERT `old result, extending word embeddings for wordpieces`
       - BERT(base)
         - setting : `experiments 11, test 1`
         - per-token(partial) f1 : 0.9234725113260683
