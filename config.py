@@ -95,17 +95,11 @@ class Config:
             self.bert_init_checkpoint = self.embvec.bert_init_checkpoint
             self.bert_max_seq_length = self.embvec.bert_max_seq_length
             self.bert_dim = self.embvec.bert_dim
-            self.bert_keep_prob = 0.9
+            self.bert_keep_prob = 0.7
             self.highway_used = False
-            self.keep_prob = 0.9
-            self.rnn_size = 200
-            self.rnn_num_layers = 1
-            self.starter_learning_rate = 2e-5
+            self.starter_learning_rate = 0.001
             self.use_bert_optimization = False
             self.num_warmup_epoch = 2 
-            self.decay_steps = 2000
-            self.decay_rate = 0.9
-            self.clip_norm = 1.0
             '''for KOR, CRZ
             self.rnn_size = 256
             self.starter_learning_rate = 5e-5
