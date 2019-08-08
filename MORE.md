@@ -112,8 +112,8 @@
     - BERT `new result, aligned wordpiece+word embeddings)`
       - BERT(large) + Glove + ELMo
         - setting : `experiments 15, test 7`
-        - per-token(partial) f1 :
-        - per-chunk(exact)   f1 : (chunk_eval), (conlleval)
+        - per-token(partial) f1 : 0.9306700873495816
+        - per-chunk(exact)   f1 : 0.9264420532721821(chunk_eval), **92.64**(conlleval)
         - average processing time per bucket
           - 1 GPU(Tesla V100)  : pass
       - BERT(large) + Glove
