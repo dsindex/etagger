@@ -42,7 +42,7 @@ def inference_bucket(config):
                 # compute bert embedding at runtime
                 bert_embeddings = sess.run([model.bert_embeddings_subgraph], feed_dict=feed_dict)
                 # update feed_dict
-                feed.update_feed_dict(model, feed_dict, bert_embeddings, inp.example['bert_wordidx2tokenidx'], -1)
+                feed_dict[model.bert_embeddings] = feed.align_bert_embeddings(config, bert_embeddings, inp.example['bert_wordidx2tokenidx'], -1)
             logits_indices, sentence_lengths = sess.run([model.logits_indices, model.sentence_lengths], feed_dict=feed_dict)
             tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
             for i in range(len(bucket)):
@@ -64,7 +64,7 @@ def inference_bucket(config):
             # compute bert embedding at runtime
             bert_embeddings = sess.run([model.bert_embeddings_subgraph], feed_dict=feed_dict)
             # update feed_dict
-            feed.update_feed_dict(model, feed_dict, bert_embeddings, inp.example['bert_wordidx2tokenidx'], -1)
+            feed_dict[model.bert_embeddings] = feed.align_bert_embeddings(config, bert_embeddings, inp.example['bert_wordidx2tokenidx'], -1)
         logits_indices, sentence_lengths = sess.run([model.logits_indices, model.sentence_lengths], feed_dict=feed_dict)
         tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
         for i in range(len(bucket)):
@@ -143,7 +143,7 @@ def inference_line(config):
             # compute bert embedding at runtime
             bert_embeddings = sess.run([model.bert_embeddings_subgraph], feed_dict=feed_dict)
             # update feed_dict
-            feed.update_feed_dict(model, feed_dict, bert_embeddings, inp.example['bert_wordidx2tokenidx'], -1)
+            feed_dict[model.bert_embeddings] = feed.align_bert_embeddings(config, bert_embeddings, inp.example['bert_wordidx2tokenidx'], -1)
         logits_indices, sentence_lengths = sess.run([model.logits_indices, model.sentence_lengths], feed_dict=feed_dict)
         tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
         for i in range(len(bucket)):

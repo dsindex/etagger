@@ -48,7 +48,7 @@ def train_step(model, data, summary_op, summary_writer):
                 tf.logging.debug(' '.join([str(x) for x in np.shape(t)]))
                 tf.logging.debug(' '.join([str(x) for x in t]))
             # update feed_dict
-            feed.update_feed_dict(model, feed_dict, bert_embeddings, dataset['bert_wordidx2tokenidx'], idx)
+            feed_dict[model.bert_embeddings] = feed.align_bert_embeddings(config, bert_embeddings, dataset['bert_wordidx2tokenidx'], idx)
             step, summaries, _, loss, accuracy, f1, learning_rate = \
                 sess.run([model.global_step, summary_op, model.train_op, \
                           model.loss, model.accuracy, model.f1, \
@@ -104,7 +104,7 @@ def dev_step(model, data, summary_writer, epoch):
             # compute bert embedding at runtime
             bert_embeddings = sess.run([model.bert_embeddings_subgraph], feed_dict=feed_dict, options=runopts)
             # update feed_dict
-            feed.update_feed_dict(model, feed_dict, bert_embeddings, dataset['bert_wordidx2tokenidx'], idx)
+            feed_dict[model.bert_embeddings] = feed.align_bert_embeddings(config, bert_embeddings, dataset['bert_wordidx2tokenidx'], idx)
         global_step, logits_indices, sentence_lengths, loss, accuracy, f1 = \
             sess.run([model.global_step, model.logits_indices, model.sentence_lengths, \
                       model.loss, model.accuracy, model.f1], feed_dict=feed_dict)

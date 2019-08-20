@@ -44,14 +44,12 @@ def build_input_feed_dict(model, bucket, Input):
         feed_dict[model.bert_input_data_segment_ids] = inp.example['bert_segment_ids']
     return inp, feed_dict
 
-def update_feed_dict(model, feed_dict, bert_embeddings, bert_wordidx2tokenidx, idx):
-    """Update feed_dict for bert_embeddings
-         : align bert_embeddings via bert_wordidx2tokenidx
-           ex) word  : 'johanson was a guy to'          [0 ~ 4]
-               token : 'johan ##son was a gu ##y t ##o' [0 ~ 7]
-               wordidx2tokenidx : [1 3 4 5 7 9 0 0 ...] (bert embedding begins with [CLS] token)
-               bert embedding :   [em('CLS'), em('johan'), em('##son'), em('was'), em('a'), em('gu'), em('##y'), em('t'), em('##o'), 0, ...]
-         : delete unused keys for the future.
+def align_bert_embeddings(config, bert_embeddings, bert_wordidx2tokenidx, idx):
+    """Align bert_embeddings via bert_wordidx2tokenidx
+         ex) word  : 'johanson was a guy to'          [0 ~ 4]
+             token : 'johan ##son was a gu ##y t ##o' [0 ~ 7]
+             wordidx2tokenidx : [1 3 4 5 7 9 0 0 ...] (bert embedding begins with [CLS] token)
+             bert embedding :   [em('CLS'), em('johan'), em('##son'), em('was'), em('a'), em('gu'), em('##y'), em('t'), em('##o'), 0, ...]
     """
     def mean_pooling(ls):
         '''Reduce by averaging along with rows.
@@ -87,7 +85,6 @@ def update_feed_dict(model, feed_dict, bert_embeddings, bert_wordidx2tokenidx, i
     # 4-dim -> 3-dim
     bert_embeddings = bert_embeddings[0]    
 
-    config = model.config
     bert_embeddings_updated = []
     batch_size = len(bert_wordidx2tokenidx)
     for i in range(batch_size): # batch
@@ -126,8 +123,5 @@ def update_feed_dict(model, feed_dict, bert_embeddings, bert_wordidx2tokenidx, i
         t = bert_embeddings_updated[0][0] # first (batch, seq, token) embedding
         tf.logging.debug(' '.join([str(x) for x in t]))
 
-    feed_dict[model.bert_embeddings] = bert_embeddings_updated
-    del feed_dict[model.bert_input_data_token_ids]
-    del feed_dict[model.bert_input_data_token_masks]
-    del feed_dict[model.bert_input_data_segment_ids]
+    return bert_embeddings_updated
 

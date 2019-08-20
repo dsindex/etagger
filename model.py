@@ -85,9 +85,11 @@ class Model:
             self.bert_input_data_token_ids   = tf.placeholder(tf.int32, shape=[None, config.bert_max_seq_length], name='bert_input_data_token_ids')
             self.bert_input_data_token_masks = tf.placeholder(tf.int32, shape=[None, config.bert_max_seq_length], name='bert_input_data_token_masks') 
             self.bert_input_data_segment_ids = tf.placeholder(tf.int32, shape=[None, config.bert_max_seq_length], name='bert_input_data_segment_ids') 
-            self.bert_embeddings_subgraph = self.__bert_embedding(self.bert_input_data_token_ids,
-                                                                  self.bert_input_data_token_masks,
-                                                                  self.bert_input_data_segment_ids)
+            bert_embeddings_subgraph = self.__bert_embedding(self.bert_input_data_token_ids,
+                                                             self.bert_input_data_token_masks,
+                                                             self.bert_input_data_segment_ids)
+            self.bert_embeddings_subgraph = tf.identity(bert_embeddings_subgraph, name='bert_embeddings_subgraph')
+
             # bert embedding at runtime
             self.bert_embeddings = tf.placeholder(tf.float32, shape=[None, config.bert_max_seq_length, config.bert_dim], name='bert_embeddings')
             bert_keep_prob = tf.cond(self.is_train, lambda: config.bert_keep_prob, lambda: 1.0)

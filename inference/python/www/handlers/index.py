@@ -15,6 +15,7 @@ sys.path.append(path)
 # this statement will not be called by 
 # `from handlers.index import IndexHandler, HCheckHandler, EtaggerHandler, EtaggerTestHandler`.
 from input import Input
+import feed
 
 def get_entity(doc, begin, end):
     for ent in doc.ents:
@@ -56,8 +57,6 @@ def build_input_feed_dict(graph, bucket, config):
         p_bert_input_data_token_ids = graph.get_tensor_by_name('prefix/bert_input_data_token_ids:0')
         p_bert_input_data_token_masks = graph.get_tensor_by_name('prefix/bert_input_data_token_masks:0')
         p_bert_input_data_segment_ids = graph.get_tensor_by_name('prefix/bert_input_data_segment_ids:0')
-        if 'elmo' in config.emb_class:
-            p_bert_input_data_elmo_indices = graph.get_tensor_by_name('prefix/bert_input_data_elmo_indices:0')
 
     inp = Input(bucket, config, build_output=False)
     feed_dict = {p_input_data_pos_ids: inp.example['pos_ids'],
@@ -72,8 +71,6 @@ def build_input_feed_dict(graph, bucket, config):
         feed_dict[p_bert_input_data_token_ids] = inp.example['bert_token_ids']
         feed_dict[p_bert_input_data_token_masks] = inp.example['bert_token_masks']
         feed_dict[p_bert_input_data_segment_ids] = inp.example['bert_segment_ids']
-        if 'elmo' in config.emb_class:
-            feed_dict[p_bert_input_data_elmo_indices] = inp.example['bert_elmo_indices']
     return inp, feed_dict
 
 def analyze(graph, sess, query, config, nlp):
@@ -81,20 +78,24 @@ def analyze(graph, sess, query, config, nlp):
     """
     bucket = build_bucket(nlp, query)
     inp, feed_dict = build_input_feed_dict(graph, bucket, config)
+    ## mapping output/input tensors for bert
+    t_bert_embeddings_subgraph = graph.get_tensor_by_name('prefix/bert_embeddings_subgraph:0')
+    p_bert_embeddings = graph.get_tensor_by_name('prefix/bert_embeddings:0')
     ## mapping output tensors
     t_logits_indices = graph.get_tensor_by_name('prefix/logits_indices:0')
     t_sentence_lengths = graph.get_tensor_by_name('prefix/sentence_lengths:0')
     ## analyze
+    if 'bert' in config.emb_class:
+        # compute bert embedding at runtime
+        bert_embeddings = sess.run([t_bert_embeddings_subgraph], feed_dict=feed_dict)
+        # update feed_dict
+        feed_dict[p_bert_embeddgins] = feed.align_bert_embeddings(config, bert_embeddings, inp.example['bert_wordidx2tokenidx'], -1)
     logits_indices, sentence_lengths = sess.run([t_logits_indices, t_sentence_lengths], feed_dict=feed_dict)
     tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
     ## build output
     out = []
     for i in range(len(bucket)):
-        if 'bert' in config.emb_class:
-            j = inp.example['bert_wordidx2tokenidx'][0][i]
-            tmp = bucket[i] + ' ' + tags[j]
-        else:
-            tmp = bucket[i] + ' ' + tags[i]
+        tmp = bucket[i] + ' ' + tags[i]
         tl  = tmp.split()
         entry = {}
         entry['id'] = i

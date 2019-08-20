@@ -139,6 +139,7 @@ function copy_resources {
     cp -rf ${PPPDIR}/embvec.py ${CDIR}/lib
     cp -rf ${PPPDIR}/config.py ${CDIR}/lib
     cp -rf ${PPPDIR}/input.py  ${CDIR}/lib
+    cp -rf ${PPPDIR}/feed.py  ${CDIR}/lib
 }
 copy_resources
 
