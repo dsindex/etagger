@@ -53,9 +53,11 @@ def update_feed_dict(model, feed_dict, bert_embeddings, bert_wordidx2tokenidx, i
                bert embedding :   [em('CLS'), em('johan'), em('##son'), em('was'), em('a'), em('gu'), em('##y'), em('t'), em('##o'), 0, ...]
          : delete unused keys for the future.
     """
-    def reduce_mean_list(ls):
-        '''arverage the mutiple list
-           from https://github.com/Adaxry/get_aligned_BERT_emb/blob/master/get_aligned_bert_emb.py#L27
+    def mean_pooling(ls):
+        '''Reduce by averaging along with rows.
+             Args:
+               ls: list of embedding
+           code from https://github.com/Adaxry/get_aligned_BERT_emb/blob/master/get_aligned_bert_emb.py#L27
         '''
         if len(ls) == 1:
             return ls[0]
@@ -63,6 +65,17 @@ def update_feed_dict(model, feed_dict, bert_embeddings, bert_wordidx2tokenidx, i
             for index, value in enumerate(item):
                 ls[0][index] += value
         return [value / len(ls) for value in ls[0]]
+
+    def mean_pooling_with_cls(ls, cls):
+        '''Reduce by averaging along with rows.
+             Args:
+               ls: list of embedding
+               cls: '[CLS]' sentence embedding for BERT
+        '''
+        for item in ls:
+            for index, value in enumerate(item):
+                cls[index] += value
+        return [value / (len(ls)+1) for value in cls]
 
     if idx == 0:
         tf.logging.debug('# bert_embeddings')
@@ -89,7 +102,11 @@ def update_feed_dict(model, feed_dict, bert_embeddings, bert_wordidx2tokenidx, i
             
             # mean prev ~ cur
             try:
-                pooled = reduce_mean_list(bert_embeddings[i][prev:cur])
+                pooled = mean_pooling(bert_embeddings[i][prev:cur])
+                '''
+                cls = bert_embeddings[i][0]
+                pooled = mean_pooling_with_cls(bert_embeddings[i][prev:cur], cls)
+                '''
                 bert_embedding_updated.append(pooled)
             except:
                 tf.logging.debug('[ERROR] ' + 'seq:' + str(i) + '\t' + 'prev:' + str(prev) + '\t' + 'cur:' + str(cur))

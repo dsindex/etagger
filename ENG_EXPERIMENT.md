@@ -5,7 +5,7 @@
 ```
 * test 8
 word embedding size : 100(glove6B)
-bert embedding : cased_L-24_H-1024_A-16, mean pooling with cls, 18 layer
+bert embedding : cased_L-24_H-1024_A-16, mean pooling, 18 layer
 bert_keep_prob : 0.7
 elmo embedding params : elmo_2x4096_512_2048cnn_2xhighway_5.5B_options.json
 elmo embedding size : 1024
@@ -20,6 +20,7 @@ pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 chk embedding size : 10
 chk embedding random init : -0.5 ~ 0.5
+highway_used : False
 rnn_used : True
 rnn_type : fused
 rnn_size : 200 -> 256
@@ -45,9 +46,9 @@ CRF
 +
 do_shuffle : True
 
-token :
-chunk :
-conlleval :
+token : 0.9265529841656517
+chunk : 0.9209392313780669
+conlleval : 92.09
 
 * test 7
 word embedding size : 100(glove6B)
@@ -66,6 +67,7 @@ pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 chk embedding size : 10
 chk embedding random init : -0.5 ~ 0.5
+highway_used : False
 rnn_used : True
 rnn_type : fused
 rnn_size : 200
@@ -91,9 +93,15 @@ CRF
 +
 do_shuffle : True
 
+# trial 1
 token : 0.9306700873495816
 chunk : 0.9264420532721821
 conlleval : 92.64           -> Glove(6B) + BERT(large) + ELMo + CNN + LSTM + CRF best
+
+# trial 2, highway_used True
+token : 0.9241202346041055
+chunk : 0.9201944321696861
+conlleval : 92.02
 
 * test 6
 word embedding size : 100(glove6B)
@@ -109,6 +117,7 @@ pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 chk embedding size : 10
 chk embedding random init : -0.5 ~ 0.5
+highway_used : False
 rnn_used : True
 rnn_type : fused
 rnn_size : 200
@@ -152,6 +161,7 @@ pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 chk embedding size : 10
 chk embedding random init : -0.5 ~ 0.5
+highway_used : False
 rnn_used : True
 rnn_type : fused
 rnn_size : 200 -> 250
@@ -195,6 +205,7 @@ pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 chk embedding size : 10
 chk embedding random init : -0.5 ~ 0.5
+highway_used : False
 rnn_used : True
 rnn_type : fused
 rnn_size : 200 -> 250
@@ -238,6 +249,7 @@ keep_prob : 0.9
 #pos embedding random init : -0.5 ~ 0.5
 #chk embedding size : 10
 #chk embedding random init : -0.5 ~ 0.5
+highway_used : False
 rnn_used : True
 rnn_type : fused
 rnn_size : 200
@@ -281,6 +293,7 @@ keep_prob : 0.9
 #pos embedding random init : -0.5 ~ 0.5
 #chk embedding size : 10
 #chk embedding random init : -0.5 ~ 0.5
+highway_used : False
 rnn_used : True
 rnn_type : fused
 rnn_size : 200
@@ -324,6 +337,7 @@ keep_prob : 0.9
 #pos embedding random init : -0.5 ~ 0.5
 #chk embedding size : 10
 #chk embedding random init : -0.5 ~ 0.5
+highway_used : False
 rnn_used : True
 rnn_type : fused
 rnn_size : 200
@@ -369,6 +383,7 @@ pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 chk embedding size : 10
 chk embedding random init : -0.5 ~ 0.5
+highway_used : False
 rnn_used : True
 rnn_type : fused -> qrnn
 rnn_size : 200
@@ -428,6 +443,7 @@ pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 chk embedding size : 10
 chk embedding random init : -0.5 ~ 0.5
+highway_used : False
 rnn_used : True
 rnn_type : fused -> qrnn
 rnn_size : 200
@@ -472,6 +488,7 @@ pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 chk embedding size : 10
 chk embedding random init : -0.5 ~ 0.5
+highway_used : False
 rnn_used : True
 rnn_type : fused -> qrnn
 rnn_size : 200
@@ -516,6 +533,7 @@ pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 chk embedding size : 10
 chk embedding random init : -0.5 ~ 0.5
+highway_used : False
 rnn_used : True
 rnn_type : fused -> qrnn
 rnn_size : 200
@@ -566,6 +584,7 @@ pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 chk embedding size : 10
 chk embedding random init : -0.5 ~ 0.5
+highway_used : False
 rnn_used : True
 rnn_type : fused -> qrnn
 rnn_size : 200
@@ -616,6 +635,7 @@ pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 chk embedding size : 10
 chk embedding random init : -0.5 ~ 0.5
+highway_used : False
 rnn_used : True
 rnn_type : fused -> qrnn
 rnn_size : 200
@@ -660,6 +680,7 @@ pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 chk embedding size : 10
 chk embedding random init : -0.5 ~ 0.5
+highway_used : False
 rnn_used : True
 rnn_type : fused -> qrnn
 rnn_size : 200
@@ -704,6 +725,7 @@ pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 chk embedding size : 10
 chk embedding random init : -0.5 ~ 0.5
+highway_used : False
 rnn_used : True
 rnn_type : fused -> qrnn
 rnn_size : 200
@@ -748,6 +770,7 @@ pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 chk embedding size : 10
 chk embedding random init : -0.5 ~ 0.5
+highway_used : False
 rnn_used : True
 rnn_type : fused -> qrnn
 rnn_size : 200
@@ -798,6 +821,7 @@ pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 chk embedding size : 10
 chk embedding random init : -0.5 ~ 0.5
+highway_used : False
 rnn_used : True
 rnn_type : fused -> qrnn
 rnn_size : 200
@@ -842,6 +866,7 @@ pos embedding size : 7
 pos embedding random init : -0.5 ~ 0.5
 chk embedding size : 10
 chk embedding random init : -0.5 ~ 0.5
+highway_used : False
 rnn_used : True
 rnn_type : fused -> qrnn
 rnn_size : 200
