@@ -2296,6 +2296,10 @@ token : 0.9322386962382061
 chunk : 0.928729526339088
 conlleval : 92.83          -> Glove(6B) + ELMo + CNN + LSTM + CRF best
 
+# trial 4
+token : 0.9328756206706307
+chunk : 0.9279390934844193
+conlleval : 92.74
 
 * test 15
 word embedding size : 300(glove6B) -> 100(glove6B)
