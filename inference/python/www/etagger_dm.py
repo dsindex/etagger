@@ -153,7 +153,7 @@ class Application(tornado.web.Application):
         # finalize resources
         self.log.info('finalize resources...')
         ## finalize something....
-        for pid, m in self.etagger.iteritems() :
+        for pid, m in self.etagger.items() :
             sess = m['sess']
             sess.close()
         
