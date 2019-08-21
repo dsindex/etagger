@@ -459,7 +459,7 @@ in IN O O O
   ```
   - web
     - demo : http://host:8898
-    - api  : http://host:8898?q=
+    - api  : http://host:8898/etagger?q=
     ![](/etc/webapi-2.png) 
     ![](/etc/webapi-1.png) 
   - inference api using memmapped model, C++, C/python wrapper 
