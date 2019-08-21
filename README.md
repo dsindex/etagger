@@ -386,6 +386,8 @@ in IN O O O
 
   * freeze graph
   $ python freeze.py --model_dir exported --output_node_names logits_indices,sentence_lengths --frozen_model_name ner_frozen.pb
+  * freeze graph for bert
+  $ python freeze.py --model_dir exported --output_node_names logits_indices,sentence_lengths,bert_embeddings_subgraph --frozen_model_name ner_frozen.pb
 
   $ ln -s ../embeddings embeddings
 

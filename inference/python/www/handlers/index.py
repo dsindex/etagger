@@ -89,7 +89,7 @@ def analyze(graph, sess, query, config, nlp):
         # compute bert embedding at runtime
         bert_embeddings = sess.run([t_bert_embeddings_subgraph], feed_dict=feed_dict)
         # update feed_dict
-        feed_dict[p_bert_embeddgins] = feed.align_bert_embeddings(config, bert_embeddings, inp.example['bert_wordidx2tokenidx'], -1)
+        feed_dict[p_bert_embeddings] = feed.align_bert_embeddings(config, bert_embeddings, inp.example['bert_wordidx2tokenidx'], -1)
     logits_indices, sentence_lengths = sess.run([t_logits_indices, t_sentence_lengths], feed_dict=feed_dict)
     tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
     ## build output
