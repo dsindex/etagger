@@ -118,8 +118,8 @@
           - 1 GPU(Tesla V100)  : pass
       - BERT(large) + Glove
         - setting : `experiments 15, test 6`
-        - per-token(partial) f1 : 0.9223324758054636
-        - per-chunk(exact)   f1 : 0.9159886805801203(chunk_eval), 91.57(conlleval)
+        - per-token(partial) f1 : 0.9217156200073737
+        - per-chunk(exact)   f1 : 0.9158398299078666(chunk_eval), 91.58(conlleval)
         - average processing time per bucket
           - 1 GPU(Tesla V100)  : pass
       - BERT(large)

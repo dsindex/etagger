@@ -143,9 +143,15 @@ CRF
 +
 do_shuffle : True
 
+# trial 1
 token : 0.9223324758054636
 chunk : 0.9159886805801203
 conlleval : 91.57
+
+# trial 2
+token : 0.9217156200073737
+chunk : 0.9158398299078666
+conlleval : 91.58
 
 * test 5
 word embedding size : 100(glove6B)
