@@ -33,38 +33,6 @@ def load_frozen_graph(frozen_graph_filename, prefix='prefix'):
         )
     return graph
 
-def build_input_feed_dict(graph, bucket, config):
-    """Build input and feed_dict for bucket(inference only)
-    """
-    # mapping placeholders
-    p_is_train = graph.get_tensor_by_name('prefix/is_train:0')
-    p_sentence_length = graph.get_tensor_by_name('prefix/sentence_length:0')
-    p_input_data_pos_ids = graph.get_tensor_by_name('prefix/input_data_pos_ids:0')
-    p_input_data_chk_ids = graph.get_tensor_by_name('prefix/input_data_chk_ids:0')
-    p_input_data_word_ids = graph.get_tensor_by_name('prefix/input_data_word_ids:0')
-    p_input_data_wordchr_ids = graph.get_tensor_by_name('prefix/input_data_wordchr_ids:0')
-    if 'elmo' in config.emb_class:
-        p_elmo_input_data_wordchr_ids = graph.get_tensor_by_name('prefix/elmo_input_data_wordchr_ids:0')
-    if 'bert' in config.emb_class:
-        p_bert_input_data_token_ids = graph.get_tensor_by_name('prefix/bert_input_data_token_ids:0')
-        p_bert_input_data_token_masks = graph.get_tensor_by_name('prefix/bert_input_data_token_masks:0')
-        p_bert_input_data_segment_ids = graph.get_tensor_by_name('prefix/bert_input_data_segment_ids:0')
-
-    inp = Input(bucket, config, build_output=False)
-    feed_dict = {p_input_data_pos_ids: inp.example['pos_ids'],
-                 p_input_data_chk_ids: inp.example['chk_ids'],
-                 p_is_train: False,
-                 p_sentence_length: inp.max_sentence_length}
-    feed_dict[p_input_data_word_ids] = inp.example['word_ids']
-    feed_dict[p_input_data_wordchr_ids] = inp.example['wordchr_ids']
-    if 'elmo' in config.emb_class:
-        feed_dict[p_elmo_input_data_wordchr_ids] = inp.example['elmo_wordchr_ids']
-    if 'bert' in config.emb_class:
-        feed_dict[p_bert_input_data_token_ids] = inp.example['bert_token_ids']
-        feed_dict[p_bert_input_data_token_masks] = inp.example['bert_token_masks']
-        feed_dict[p_bert_input_data_segment_ids] = inp.example['bert_segment_ids']
-    return inp, feed_dict
-
 def inference(config, frozen_pb_path):
     """Inference for bucket
     """
@@ -90,8 +58,9 @@ def inference(config, frozen_pb_path):
     sess = tf.Session(graph=graph, config=session_conf)
 
     # mapping output/input tensors for bert
-    t_bert_embeddings_subgraph = graph.get_tensor_by_name('prefix/bert_embeddings_subgraph:0')
-    p_bert_embeddings = graph.get_tensor_by_name('prefix/bert_embeddings:0')
+    if 'bert' in config.emb_class:
+        t_bert_embeddings_subgraph = graph.get_tensor_by_name('prefix/bert_embeddings_subgraph:0')
+        p_bert_embeddings = graph.get_tensor_by_name('prefix/bert_embeddings:0')
     # mapping output tensors
     t_logits_indices = graph.get_tensor_by_name('prefix/logits_indices:0')
     t_sentence_lengths = graph.get_tensor_by_name('prefix/sentence_lengths:0')
@@ -106,7 +75,7 @@ def inference(config, frozen_pb_path):
         line = line.strip()
         if not line and len(bucket) >= 1:
             start_time = time.time()
-            inp, feed_dict = build_input_feed_dict(graph, bucket, config)
+            inp, feed_dict = feed.build_input_feed_dict_with_graph(graph, config, bucket, Input)
             if 'bert' in config.emb_class:
                 # compute bert embedding at runtime
                 bert_embeddings = sess.run([t_bert_embeddings_subgraph], feed_dict=feed_dict)
@@ -128,7 +97,7 @@ def inference(config, frozen_pb_path):
         if line : bucket.append(line)
     if len(bucket) != 0:
         start_time = time.time()
-        inp, feed_dict = build_input_feed_dict(graph, bucket, config)
+        inp, feed_dict = feed.build_input_feed_dict_with_graph(graph, config, bucket, Input)
         if 'bert' in config.emb_class:
             # compute bert embedding at runtime
             bert_embeddings = sess.run([t_bert_embeddings_subgraph], feed_dict=feed_dict)
