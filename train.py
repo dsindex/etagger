@@ -153,7 +153,7 @@ def fit(model, train_data, dev_data):
     """Do actual training. 
     """
 
-    def get_summary_settings(model):
+    def get_summary_setting(model):
         config = model.config
         sess   = model.sess
         loss_summary = tf.summary.scalar('loss', model.loss)
