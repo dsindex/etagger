@@ -70,14 +70,15 @@ def train_step(model, data, summary_op, summary_writer):
     out = '\nduration_time : ' + str(duration_time) + ' sec for this epoch'
     tf.logging.debug(out)
 
-def np_concat(sum_var, var):
-    if sum_var is not None: sum_var = np.concatenate((sum_var, var), axis=0)
-    else: sum_var = var
-    return sum_var
-
 def dev_step(model, data, summary_writer, epoch):
     """Evaluate dev data
     """
+
+    def np_concat(sum_var, var):
+        if sum_var is not None: sum_var = np.concatenate((sum_var, var), axis=0)
+        else: sum_var = var
+        return sum_var
+
     sess = model.sess
     runopts = tf.RunOptions(report_tensor_allocations_upon_oom=True)
     sum_loss = 0.0
@@ -151,8 +152,23 @@ def dev_step(model, data, summary_writer, epoch):
 def fit(model, train_data, dev_data):
     """Do actual training. 
     """
+
+    def get_summary_settings(model):
+        config = model.config
+        sess   = model.sess
+        loss_summary = tf.summary.scalar('loss', model.loss)
+        acc_summary = tf.summary.scalar('accuracy', model.accuracy)
+        f1_summary = tf.summary.scalar('f1', model.f1)
+        lr_summary = tf.summary.scalar('learning_rate', model.learning_rate)
+        train_summary_op = tf.summary.merge([loss_summary, acc_summary, f1_summary, lr_summary])
+        train_summary_dir = os.path.join(config.summary_dir, 'summaries', 'train')
+        train_summary_writer = tf.summary.FileWriter(train_summary_dir, sess.graph)
+        dev_summary_dir = os.path.join(config.summary_dir, 'summaries', 'dev')
+        dev_summary_writer = tf.summary.FileWriter(dev_summary_dir, sess.graph)
+        return train_summary_op, train_summary_writer, dev_summary_writer
+
     config = model.config
-    sess = model.sess
+    sess   = model.sess
 
     # restore previous model if provided
     saver = tf.train.Saver()
@@ -161,15 +177,7 @@ def fit(model, train_data, dev_data):
         tf.logging.debug('model restored')
 
     # summary setting
-    loss_summary = tf.summary.scalar('loss', model.loss)
-    acc_summary = tf.summary.scalar('accuracy', model.accuracy)
-    f1_summary = tf.summary.scalar('f1', model.f1)
-    lr_summary = tf.summary.scalar('learning_rate', model.learning_rate)
-    train_summary_op = tf.summary.merge([loss_summary, acc_summary, f1_summary, lr_summary])
-    train_summary_dir = os.path.join(config.summary_dir, 'summaries', 'train')
-    train_summary_writer = tf.summary.FileWriter(train_summary_dir, sess.graph)
-    dev_summary_dir = os.path.join(config.summary_dir, 'summaries', 'dev')
-    dev_summary_writer = tf.summary.FileWriter(dev_summary_dir, sess.graph)
+    train_summary_op, train_summary_writer, dev_summary_writer = get_summary_setting(model)
     
     # train and evaluate
     early_stopping = EarlyStopping(patience=10, measure='f1', verbose=1)
