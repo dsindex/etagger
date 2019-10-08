@@ -154,6 +154,9 @@ def align_bert_embeddings(config, bert_embeddings, bert_wordidx2tokenidx, idx):
         tf.logging.debug('# bert_embeddings_updated')
         t = bert_embeddings_updated[0][0] # first (batch, seq, token) embedding
         tf.logging.debug(' '.join([str(x) for x in t]))
+        tf.logging.debug('# batch size: ' + str(len(bert_embeddings_updated)))
+        tf.logging.debug('# seq size: ' + str(len(bert_embeddings_updated[0])))
+        tf.logging.debug('# emb size: ' + str(len(bert_embeddings_updated[0][0])))
 
     return bert_embeddings_updated
 
