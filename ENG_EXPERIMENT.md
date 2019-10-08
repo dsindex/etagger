@@ -46,9 +46,9 @@ CRF
 +
 do_shuffle : True
 
-token :
-chunk :
-conlleval :
+token : 0.9186473903455036
+chunk : 0.9099911582670204
+conlleval : 91.00
 
 ```
 
