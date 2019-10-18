@@ -201,6 +201,22 @@ def fit(model, train_data, dev_data):
             tf.train.write_graph(sess.graph, '.', config.checkpoint_dir + '/' + 'graph.pb_txt', as_text=True)
             early_stopping.reset(max_token_f1)
         early_stopping.status()
+        '''for KOR KMOU
+        # early stopping
+        if early_stopping.validate(chunk_f1, measure='f1'): break
+        if chunk_f1 > max_chunk_f1:
+            tf.logging.debug('new best f1 score! : %s' % chunk_f1)
+            max_token_f1 = token_f1
+            max_chunk_f1 = chunk_f1
+            max_avg_f1 = avg_f1
+            # save best model
+            save_path = saver.save(sess, config.checkpoint_dir + '/' + 'ner_model')
+            tf.logging.debug('max model saved in file: %s' % save_path)
+            tf.train.write_graph(sess.graph, '.', config.checkpoint_dir + '/' + 'graph.pb', as_text=False)
+            tf.train.write_graph(sess.graph, '.', config.checkpoint_dir + '/' + 'graph.pb_txt', as_text=True)
+            early_stopping.reset(max_chunk_f1)
+        early_stopping.status()
+        '''
     sess.close()
 
 def train(config):
