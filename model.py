@@ -403,11 +403,15 @@ class Model:
             for i in range(config.rnn_num_layers):
                 if config.rnn_type == 'fused':
                     scope = 'bi-lstm-fused-%s' % i
-                    rnn_output = self.__bi_lstm_fused(rnn_output,
+                    x = rnn_output
+                    rnn_output = self.__bi_lstm_fused(x,
                                                       self.sentence_lengths,
                                                       rnn_size=config.rnn_size,
                                                       keep_prob=self.keep_prob,
                                                       scope=scope) # (batch_size, sentence_length, 2*rnn_size)
+                    # residual and dropout
+                    if i != 0:
+                        rnn_output = tf.nn.dropout(rnn_output + x, keep_prob=self.keep_prob)
                 elif config.rnn_type == 'qrnn':
                     scope = 'bi-qrnn-%s' % i
                     xp = self.__projection(rnn_output,
