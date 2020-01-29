@@ -266,6 +266,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     tf.logging.set_verbosity(tf.logging.DEBUG)
+    tf.set_random_seed(7777)
 
     config = Config(args, is_training=True, emb_class='glove', use_crf=True)
     train(config)
