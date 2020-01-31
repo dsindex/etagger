@@ -72,9 +72,6 @@ class Config:
         self.chk_dim = 64
         self.highway_used = True
         '''
-        '''for KOR nbest
-        self.chk_dim = 64
-        '''
         
         if 'elmo' in self.emb_class:
             from bilm import Batcher, BidirectionalLanguageModel

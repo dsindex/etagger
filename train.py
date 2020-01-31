@@ -230,10 +230,6 @@ def train(config):
     train_file = 'data/kor.train.txt'
     dev_file = 'data/kor.dev.txt'
     '''
-    '''for KOR nbest
-    train_file = 'data/kor.nbest.train.txt'
-    dev_file = 'data/kor.nbest.dev.txt'
-    '''
     '''for CRZ
     train_file = 'data/cruise.train.txt.in'
     dev_file = 'data/cruise.dev.txt.in'
