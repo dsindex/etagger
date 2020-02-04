@@ -29,7 +29,7 @@ class Model:
         self.use_crf = config.use_crf
         self.emb_class = config.emb_class
         self.is_training = config.is_training
-        self.set_cuda_visible_devices(self.is_training)
+        self.print_local_devices(self.is_training)
 
         """
         Input layer
@@ -638,9 +638,7 @@ class Model:
         return word_masks
 
     @staticmethod
-    def set_cuda_visible_devices(is_training):
-        import os
-        os.environ['CUDA_VISIBLE_DEVICES']='1'
+    def print_local_devices(is_training):
         if is_training:
             from tensorflow.python.client import device_lib
             print(device_lib.list_local_devices())
