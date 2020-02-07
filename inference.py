@@ -46,7 +46,9 @@ def inference_bucket(config):
             logits_indices, sentence_lengths = sess.run([model.logits_indices, model.sentence_lengths], feed_dict=feed_dict)
             tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
             for i in range(len(bucket)):
-                out = bucket[i] + ' ' + tags[i]
+                predict = config.embvec.oot_tag # ex) 'O'
+                if i < sentence_lengths[0]: predict = tags[i]
+                out = bucket[i] + ' ' + predict
                 sys.stdout.write(out + '\n')
             sys.stdout.write('\n')
             bucket = []
@@ -68,7 +70,9 @@ def inference_bucket(config):
         logits_indices, sentence_lengths = sess.run([model.logits_indices, model.sentence_lengths], feed_dict=feed_dict)
         tags = config.logit_indices_to_tags(logits_indices[0], sentence_lengths[0])
         for i in range(len(bucket)):
-            out = bucket[i] + ' ' + tags[i]
+            predict = config.embvec.oot_tag # ex) 'O'
+            if i < sentence_lengths[0]: predict = tags[i]
+            out = bucket[i] + ' ' + predict
             sys.stdout.write(out + '\n')
         sys.stdout.write('\n')
         duration_time = time.time() - start_time
