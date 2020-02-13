@@ -395,6 +395,7 @@ in IN O O O
   $ python freeze.py --model_dir exported --output_node_names logits_indices,sentence_lengths,bert_embeddings_subgraph --frozen_model_name ner_frozen.pb
 
   $ ln -s ../embeddings embeddings
+  $ ln -s ../data data
 
   * inference using python
   $ python python/inference.py --emb_path embeddings/glove.6B.100d.txt.pkl --wrd_dim 100 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt

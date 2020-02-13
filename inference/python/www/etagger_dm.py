@@ -27,6 +27,7 @@ from config import Config
 # etagger arguments
 define('emb_path', default='', help='path to word embedding vector + vocab(.pkl)', type=str)
 define('emb_class', default='glove', help='class of embedding(glove, elmo, bert, bert+elmo)', type=str)
+define('config_path', default='', help='path to config.json', type=str)
 define('wrd_dim', default=100, help='dimension of word embedding vector', type=int)
 define('word_length', default=15, help='max word length', type=int)
 define('frozen_path', default='', help='path to frozen graph', type=str)

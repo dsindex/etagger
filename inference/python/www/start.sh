@@ -135,6 +135,7 @@ function copy_resources {
     # data
     cp -rf ${PPPDIR}/embeddings/${EMB_FILENAME} ${CDIR}/data
     cp -rf ${PPDIR}/exported/${FROZEN_FILENAME} ${CDIR}/data
+    cp -rf ${PPDIR}/data/${CONFIG_FILENAME} ${CDIR}/data
     # lib
     cp -rf ${PPPDIR}/embvec.py ${CDIR}/lib
     cp -rf ${PPPDIR}/config.py ${CDIR}/lib
@@ -150,32 +151,30 @@ function copy_resources {
 copy_resources
 
 EMB_PATH=${CDIR}/data/${EMB_FILENAME}
+CONFIG_PATH=${CDIR}/data/${CONFIG_FILENAME}
 FROZEN_PATH=${CDIR}/data/${FROZEN_FILENAME}
 
 cd ${CDIR}
 
 if (( MODE == 0 )); then
-    nohup ${python} ${CDIR}/${daemon_name} \
-		--debug=True \
-		--port=${port_devel} \
-        --emb_path=${EMB_PATH} \
-        --emb_class=${EMB_CLASS} \
-        --wrd_dim=${WRD_DIM} \
-		--frozen_path=${FROZEN_PATH} \
-		--log_file_prefix=${CDIR}/log/access.log \
-		> /dev/null 2> /dev/null &
+    debug=True
+    port=${port_devel}
 else
-    nohup ${python} ${CDIR}/${daemon_name} \
-		--debug=False \
-		--port=${port_service} \
-		--process=${PROCESS} \
-        --emb_path=${EMB_PATH} \
-        --emb_class=${EMB_CLASS} \
-        --wrd_dim=${WRD_DIM} \
-		--frozen_path=${FROZEN_PATH} \
-		--log_file_prefix=${CDIR}/log/access.log \
-		> /dev/null 2> /dev/null &
+    debug=False
+    port=${port_service}
 fi
+
+nohup ${python} ${CDIR}/${daemon_name} \
+  --debug=${debug} \
+  --port=${port} \
+  --emb_path=${EMB_PATH} \
+  --emb_class=${EMB_CLASS} \
+  --config_path=${CONFIG_PATH} \
+  --wrd_dim=${WRD_DIM} \
+  --frozen_path=${FROZEN_PATH} \
+  --log_file_prefix=${CDIR}/log/access.log \
+  > /dev/null 2> /dev/null &
+
 cd ${CDIR}
 
 close_fd

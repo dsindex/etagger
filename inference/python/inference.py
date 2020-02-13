@@ -124,6 +124,7 @@ def inference(config, frozen_pb_path):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--emb_path', type=str, help='path to word embedding vector + vocab(.pkl)', required=True)
+    parser.add_argument('--config_path', type=str, default='data/config.json', help='path to config.json')
     parser.add_argument('--wrd_dim', type=int, help='dimension of word embedding vector', required=True)
     parser.add_argument('--word_length', type=int, default=15, help='max word length')
     parser.add_argument('--frozen_path', type=str, help='path to frozen model(ex, ./exported/ner_frozen.pb)', required=True)

@@ -48,7 +48,7 @@ correct_prediction = tf.equal(tf.argmax(logits,1), tf.argmax(Y,1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 # training
-xy_data = np.loadtxt('./data/iris.txt', unpack=True, dtype='float32')
+xy_data = np.loadtxt('./etc/iris.txt', unpack=True, dtype='float32')
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     x_data, y_data = prepare_data(xy_data)
