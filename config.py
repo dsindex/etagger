@@ -109,7 +109,7 @@ class Config:
             self.num_warmup_epoch = 1
             self.decay_steps = 5000
             '''
-            #'''for KOR(CLOVA NER)
+            '''for KOR(CLOVA NER)
             self.keep_prob = 0.9
             self.pos_dim = 100
             self.rnn_size = 200
@@ -117,7 +117,7 @@ class Config:
             self.bert_keep_prob = 1.0
             self.num_warmup_epoch = 3
             self.decay_steps = 10000
-            #'''
+            '''
 
     def __load_config(self, args):
         """Load config from file.
