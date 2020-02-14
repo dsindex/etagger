@@ -85,12 +85,6 @@ class Config:
             '''for KOR
             self.rnn_size = 250
             '''
-            '''for KOR(CLOVA NER)
-            self.rnn_size = 250
-            self.pos_dim = 100
-            self.keep_prob = 0.9
-            self.elmo_keep_prob = 0.8
-            '''
         if 'bert' in self.emb_class:
             from bert import modeling
             from bert import tokenization
