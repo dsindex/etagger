@@ -275,6 +275,9 @@ class Input:
             assert (len(tokens) == 4)
             word = tokens[0]
             bert_tokens = bert_tokenizer.tokenize(word)
+            if len(ntokens) + len(bert_tokens) > bert_max_seq_length - 1:
+                tf.logging.debug('len(ntokens): %s' % str(len(ntokens)))
+                break
             for j, bert_token in enumerate(bert_tokens):
                 ntokens.append(bert_token)
                 bert_segment_ids.append(0)
@@ -286,9 +289,6 @@ class Input:
                     bert_tags.append(tags[i])
                     bert_wordidx2tokenidx.append(tokenidx)
                 tokenidx += 1
-            if len(ntokens) == bert_max_seq_length - 1:
-                tf.logging.debug('len(ntokens): %s' % str(len(ntokens)))
-                break
 
         '''
         ntokens.append('[SEP]')
