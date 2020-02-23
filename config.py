@@ -17,7 +17,7 @@ class Config:
         """
         config = self.__load_config(args)
         self.emb_path = args.emb_path
-        self.embvec = pkl.load(open(self.emb_path, 'rb')) # resources(glove, vocab, path, etc)
+        self.embvec = pkl.load(open(self.emb_path, 'rb'))             # resources(glove, vocab, path, etc)
         self.wrd_dim = args.wrd_dim                                   # dim of word embedding(glove)
         self.chr_dim = config['chr_dim']                              # dim of character embedding
         self.pos_dim = config['pos_dim']                              # dim of part of speech embedding
@@ -104,13 +104,9 @@ class Config:
             self.decay_steps = 5000
             '''
             '''for KOR(CLOVA NER)
-            self.keep_prob = 0.9
             self.pos_dim = 100
-            self.rnn_size = 200
             self.starter_learning_rate = 5e-5
-            self.bert_keep_prob = 1.0
             self.num_warmup_epoch = 3
-            self.decay_steps = 10000
             '''
 
     def __load_config(self, args):
