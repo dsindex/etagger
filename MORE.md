@@ -7,6 +7,8 @@
     - etc/chunk_eval.py
     - etc/conlleval
   - The bellow results for BERT is not valid now. because BERT is used as feature-based currently.
+    - the result for feature-based BERT 
+      - read 'BERT new result, aligned wordpiece+word embeddings)'
 
 ### [experiment logs](https://github.com/dsindex/etagger/blob/master/ENG_EXPERIMENT.md)
 
