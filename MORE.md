@@ -2,11 +2,11 @@
 ## Evaluation
 
 ### History ( ~ 2020. 2. 25)
-
-  - evaluation script
+  - Evaluation script
     - etc/token_eval.py
     - etc/chunk_eval.py
     - etc/conlleval
+  - The bellow results for BERT is not valid now. because BERT is used as feature-based currently.
 
 ### [experiment logs](https://github.com/dsindex/etagger/blob/master/ENG_EXPERIMENT.md)
 

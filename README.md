@@ -8,6 +8,7 @@
       - [x] 1) word embedding(glove), character convolutional embedding
       - [x] 2) ELMo embedding, character convolutional embedding
       - [x] 3) BERT embedding, character convolutional embedding
+        - BERT as feature-based
     - etc embedding
       - [x] pos embedding
       - [x] chunk embedding
