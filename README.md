@@ -9,7 +9,6 @@
       - [x] 2) ELMo embedding, character convolutional embedding
       - [x] 3) BERT embedding, character convolutional embedding
         - BERT as feature-based
-          - checkout the code for BERT fine-tuning: https://github.com/dsindex/etagger/tree/7354971552bbf204a4357369637b687c1704bdcc
     - etc embedding
       - [x] pos embedding
       - [x] chunk embedding
