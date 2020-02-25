@@ -9,6 +9,7 @@
       - [x] 2) ELMo embedding, character convolutional embedding
       - [x] 3) BERT embedding, character convolutional embedding
         - BERT as feature-based
+          - checkout the code for BERT fine-tuning: https://github.com/dsindex/etagger/tree/7354971552bbf204a4357369637b687c1704bdcc
     - etc embedding
       - [x] pos embedding
       - [x] chunk embedding
@@ -213,7 +214,7 @@ $ python inference.py --mode bucket --emb_path embeddings/glove.6B.100d.txt.pkl 
 $ python inference.py --mode bucket --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/test.txt > pred.txt
 $ python inference.py --mode bucket --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/test.txt > pred.txt
 
-$ perl   etc/conlleval < pred.txt
+$ perl etc/conlleval < pred.txt
 ```
 
 ### inference(line)
