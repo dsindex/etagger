@@ -1,3 +1,6 @@
+
+### History ( ~ 2020. 2. 25)
+
 - summary
   - https://docs.google.com/spreadsheets/d/1Sy7YREtqsIaaesNM1LAdsstomB7nrQV483XPzwH5JBM/edit?usp=sharing
 

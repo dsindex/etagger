@@ -212,8 +212,6 @@ $ python inference.py --mode bucket --emb_path embeddings/glove.6B.100d.txt.pkl 
 $ python inference.py --mode bucket --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/test.txt > pred.txt
 $ python inference.py --mode bucket --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --restore checkpoint/ner_model < data/test.txt > pred.txt
 
-$ python token_eval.py < pred.txt
-$ python chunk_eval.py < pred.txt
 $ perl   etc/conlleval < pred.txt
 ```
 
@@ -409,14 +407,14 @@ in IN O O O
   $ python python/inference_trt.py --emb_path embeddings/glove.6B.300d.txt.pkl --wrd_dim 300 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
   $ python python/inference_trt.py --emb_path embeddings/glove.840B.300d.txt.pkl --wrd_dim 300 --frozen_path exported/ner_frozen.pb < ../data/test.txt > pred.txt
   * inspect `pred.txt` whether the predictions are same.
-  $ python ../token_eval.py < pred.txt
+  $ perl ../etc/conlleval < pred.txt
 
   * for inference by C++, i implemented emb_class='glove' only.
 
   * inference using C++
   $ ./cc/build/inference exported/ner_frozen.pb embeddings/vocab.txt < ../data/test.txt > pred.txt
   * inspect `pred.txt` whether the predictions are same.
-  $ python ../token_eval.py < pred.txt
+  $ perl ../etc/conlleval < pred.txt
   ```
   - optimizing graph for inference, convert it to memory mapped format and inference by C++
   ```
@@ -440,7 +438,7 @@ in IN O O O
   * inference using C++
   $ ./cc/build/inference exported/ner_frozen.pb.memmapped embeddings/vocab.txt 1 < ../data/test.txt > pred.txt
   * inspect `pred.txt` whether the predictions are same.
-  $ python ../token_eval.py < pred.txt
+  $ perl ../etc/conlleval < pred.txt
 
   * inspect the memory mapped graph is opened with MAP_SHARED
   $ cat /proc/pid/maps

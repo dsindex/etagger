@@ -1,6 +1,13 @@
 
 ## Evaluation
 
+### History ( ~ 2020. 2. 25)
+
+  - evaluation script
+    - etc/token_eval.py
+    - etc/chunk_eval.py
+    - etc/conlleval
+
 ### [experiment logs](https://github.com/dsindex/etagger/blob/master/ENG_EXPERIMENT.md)
 
 ### results

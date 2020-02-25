@@ -107,6 +107,7 @@ class Config:
             self.pos_dim = 100
             self.starter_learning_rate = 5e-5
             self.num_warmup_epoch = 3
+            self.decay_rate = 1.0
             '''
 
     def __load_config(self, args):
