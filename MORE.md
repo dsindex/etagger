@@ -1,15 +1,15 @@
 
-## Evaluation
-
-### History ( ~ 2020. 2. 25)
+## History ( ~ 2020. 2. 25)
   - Evaluation script
     - etc/token_eval.py
     - etc/chunk_eval.py
     - etc/conlleval
   - The bellow results for BERT is not valid now. because BERT is used as feature-based currently.
+    - checkout the code for BERT fine-tuning: https://github.com/dsindex/etagger/tree/7354971552bbf204a4357369637b687c1704bdcc
     - the result for feature-based BERT 
       - read 'BERT new result, aligned wordpiece+word embeddings)'
-  - checkout the code for BERT fine-tuning: https://github.com/dsindex/etagger/tree/7354971552bbf204a4357369637b687c1704bdcc
+
+## Evaluation
 
 ### [experiment logs](https://github.com/dsindex/etagger/blob/master/ENG_EXPERIMENT.md)
 

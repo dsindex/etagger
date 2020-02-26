@@ -6,7 +6,7 @@
   - etc/chunk_eval.py
   - etc/conlleval
 - The bellow results for BERT is not valid now. because BERT is used as feature-based currently.
-- checkout the code for BERT fine-tuning: https://github.com/dsindex/etagger/tree/7354971552bbf204a4357369637b687c1704bdcc
+  - checkout the code for BERT fine-tuning: https://github.com/dsindex/etagger/tree/7354971552bbf204a4357369637b687c1704bdcc
 
 - summary
   - https://docs.google.com/spreadsheets/d/1Sy7YREtqsIaaesNM1LAdsstomB7nrQV483XPzwH5JBM/edit?usp=sharing
