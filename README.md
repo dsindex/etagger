@@ -76,6 +76,7 @@ $ conda activate python3.6
 
 ### tensorflow >= 1.10
 ```
+* tensorflow < 2.0
 $ python -m pip install tensorflow-gpu
 * version matches
   tensorflow 1.10, CUDA 9.0, cuDNN 7.12
@@ -86,9 +87,9 @@ $ python -m pip install tensorflow-gpu
   (cuda-9.0-pkg/cuda-9.0/lib64, cudnn-9.0-v73/lib64, TensorRT-4.0.1.6/lib)
 ```
 
-### numpy
+### requirements
 ```
-$ python -m pip install numpy
+$ python -m pip install -r requirements
 ```
 
 ### tf_metrics

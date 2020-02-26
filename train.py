@@ -10,10 +10,9 @@ from config import Config
 from model import Model
 from input import Input
 import feed
-from token_eval  import TokenEval
-from chunk_eval  import ChunkEval
 from progbar import Progbar
 from early_stopping import EarlyStopping
+from seqeval.metrics import precision_score, recall_score, f1_score
 
 def train_step(model, data, summary_op, summary_writer):
     """Train one epoch
@@ -112,7 +111,7 @@ def dev_step(model, data, summary_writer, epoch):
         prog.update(idx + 1,
                     [('dev loss', loss),
                      ('dev accuracy', accuracy),
-                     ('dev f1', f1)])
+                     ('dev f1(tf_metrics)', f1)])
         sum_loss += loss
         sum_accuracy += accuracy
         sum_f1 += f1
@@ -125,29 +124,21 @@ def dev_step(model, data, summary_writer, epoch):
     avg_f1 = sum_f1 / data.num_batches
     tag_preds = model.config.logits_indices_to_tags_seq(sum_logits_indices, sum_sentence_lengths)
     tag_corrects = model.config.logits_indices_to_tags_seq(sum_output_indices, sum_sentence_lengths)
-    tf.logging.debug('\n[epoch %s/%s] dev precision, recall, f1(token): ' % (epoch, model.config.epoch))
-    token_f1, l_token_prec, l_token_rec, l_token_f1  = TokenEval.compute_f1(model.config.class_size, 
-                                                                            sum_logits_indices,
-                                                                            sum_output_indices,
-                                                                            sum_sentence_lengths)
-    tf.logging.debug('[' + ' '.join([str(x) for x in l_token_prec]) + ']')
-    tf.logging.debug('[' + ' '.join([str(x) for x in l_token_rec]) + ']')
-    tf.logging.debug('[' + ' '.join([str(x) for x in l_token_f1]) + ']')
-    chunk_prec, chunk_rec, chunk_f1 = ChunkEval.compute_f1(tag_preds, tag_corrects)
-    tf.logging.debug('dev precision(chunk), recall(chunk), f1(chunk): %s, %s, %s' % \
-        (chunk_prec, chunk_rec, chunk_f1) + \
-        '(invalid for bert due to X tag)')
+    seqeval_prec = precision_score(tag_corrects, tag_preds)
+    seqeval_rec  = recall_score(tag_corrects, tag_preds)
+    seqeval_f1   = f1_score(tag_corrects, tag_preds)
+    tf.logging.debug('\n[epoch %s/%s] dev precision(seqeval), recall(seqeval), f1(seqeval): %s, %s, %s' % \
+        (epoch, model.config.epoch, seqeval_prec, seqeval_rec, seqeval_f1))
 
     # create summaries manually.
     summary_value = [tf.Summary.Value(tag='loss', simple_value=avg_loss),
                      tf.Summary.Value(tag='accuracy', simple_value=avg_accuracy),
-                     tf.Summary.Value(tag='f1', simple_value=avg_f1),
-                     tf.Summary.Value(tag='token_f1', simple_value=token_f1),
-                     tf.Summary.Value(tag='chunk_f1', simple_value=chunk_f1)]
+                     tf.Summary.Value(tag='f1(tf_metrics)', simple_value=avg_f1),
+                     tf.Summary.Value(tag='f1(seqeval)', simple_value=seqeval_f1)]
     summaries = tf.Summary(value=summary_value)
     summary_writer.add_summary(summaries, global_step)
     
-    return token_f1, chunk_f1, avg_f1
+    return seqeval_f1, avg_f1
 
 def fit(model, train_data, dev_data):
     """Do actual training. 
@@ -181,25 +172,21 @@ def fit(model, train_data, dev_data):
     
     # train and evaluate
     early_stopping = EarlyStopping(patience=10, measure='f1', verbose=1)
-    max_token_f1 = 0
-    max_chunk_f1 = 0
-    max_avg_f1 = 0
+    max_seqeval_f1 = 0
     for e in range(config.epoch):
         train_step(model, train_data, train_summary_op, train_summary_writer)
-        token_f1, chunk_f1, avg_f1  = dev_step(model, dev_data, dev_summary_writer, e)
+        seqeval_f1, avg_f1  = dev_step(model, dev_data, dev_summary_writer, e)
         # early stopping
-        if early_stopping.validate(token_f1, measure='f1'): break
-        if token_f1 > max_token_f1 or (max_token_f1 - token_f1 < 0.0005 and chunk_f1 > max_chunk_f1):
-            tf.logging.debug('new best f1 score! : %s' % token_f1)
-            max_token_f1 = token_f1
-            max_chunk_f1 = chunk_f1
-            max_avg_f1 = avg_f1
+        if early_stopping.validate(seqeval_f1, measure='f1'): break
+        if seqeval_f1 > max_seqeval_f1:
+            tf.logging.debug('new best f1 score! : %s' % seqeval_f1)
+            max_seqeval_f1 = seqeval_f1
             # save best model
             save_path = saver.save(sess, config.checkpoint_dir + '/' + 'ner_model')
             tf.logging.debug('max model saved in file: %s' % save_path)
             tf.train.write_graph(sess.graph, '.', config.checkpoint_dir + '/' + 'graph.pb', as_text=False)
             tf.train.write_graph(sess.graph, '.', config.checkpoint_dir + '/' + 'graph.pb_txt', as_text=True)
-            early_stopping.reset(max_token_f1)
+            early_stopping.reset(max_seqeval_f1)
         early_stopping.status()
     sess.close()
 
