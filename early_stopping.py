@@ -28,6 +28,9 @@ class EarlyStopping():
 
     def status(self):
         print('Status: step / patience = %d / %d, value = %f\n' % (self._step, self.patience, self._value))
+
+    def step(self):
+        return self._step
  
     def validate(self, value, measure='loss'):
         going_worse = False
