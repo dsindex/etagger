@@ -9,8 +9,6 @@
       - [x] 2) ELMo embedding, character convolutional embedding
       - [x] 3) BERT embedding, character convolutional embedding
         - BERT as feature-based
-          - base  : 6th  layer = bert_model.get_all_encoder_layers()[-7] # -1 : 12, -2 : 11, ..., -7 : 6
-          - large : 18th layer = bert_model.get_all_encoder_layers()[-7] # -1 : 24, -2 : 23, ..., -7 : 18  
     - etc embedding
       - [x] pos embedding
       - [x] chunk embedding
@@ -479,3 +477,7 @@ in IN O O O
 
 ## Evaluation, Dev note, References, Etc
   - [read more](/MORE.md)
+  - recent evaluation results
+    - [CoNLL 2003 English](https://github.com/dsindex/ntagger#conll-2003-english)
+    - [NAVER NER 2019 Korean](https://github.com/dsindex/ntagger#naver-ner-2019-korean)
+    - [KMOU NER 2019 Korean](https://github.com/dsindex/ntagger#kmou-ner-2019-korean)
