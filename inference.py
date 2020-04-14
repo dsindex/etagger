@@ -56,7 +56,7 @@ def inference_bucket(config):
             out = 'duration_time : ' + str(duration_time) + ' sec'
             tf.logging.info(out)
             num_buckets += 1
-            if num_buckets != 1: # first one may takes longer time, so ignore in computing duration.
+            if num_buckets != 1: # first one may take longer time, so ignore in computing duration.
                 total_duration_time += duration_time
         if line : bucket.append(line)
     if len(bucket) != 0:
