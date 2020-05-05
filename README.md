@@ -1,5 +1,7 @@
 # ETagger: Entity Tagger
 
+* pytorch implementations : [ntagger](https://github.com/dsindex/ntagger)
+
 ## Description
 
 ### personally, i'm interested in NER tasks. so, i decided to implement a sequence tagging model which consists of 
@@ -478,6 +480,6 @@ in IN O O O
 ## Evaluation, Dev note, References, Etc
   - [read more](/MORE.md)
   - recent evaluation results
-    - [CoNLL 2003 English](https://github.com/dsindex/ntagger#conll-2003-english)
-    - [NAVER NER 2019 Korean](https://github.com/dsindex/ntagger#naver-ner-2019-korean)
-    - [KMOU NER 2019 Korean](https://github.com/dsindex/ntagger#kmou-ner-2019-korean)
+    - [CoNLL 2003 English](https://github.com/dsindex/ntagger#conll-2003-english-1)
+    - [NAVER NER 2019 Korean](https://github.com/dsindex/ntagger#naver-ner-2019-korean-1)
+    - [KMOU NER 2019 Korean](https://github.com/dsindex/ntagger#kmou-ner-2019-korean-1)
