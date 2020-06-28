@@ -53,8 +53,6 @@ class EmbVec:
         self.tag_vocab[self.xot_tag] = self.xot_tid
         self.itag_vocab[1] = self.xot_tag
     
-        self.wrd_vocab_tmp = {}  # word vocab for train/dev/test
-
         # elmo
         self.elmo_vocab = {}     # elmo vocab
         self.elmo_vocab_path   = args.elmo_vocab_path
@@ -105,9 +103,6 @@ class EmbVec:
                 self.tag_vocab[tag] = tid
                 self.itag_vocab[tid] = tag
                 tid += 1
-            if self.lowercase: word = word.lower()
-            if word not in self.wrd_vocab_tmp:
-                self.wrd_vocab_tmp[word] = 0
         # write elmo vocab.
         if self.elmo_vocab_path:
             elmo_vocab_fd = open(self.elmo_vocab_path, 'w')
@@ -144,7 +139,6 @@ class EmbVec:
             self.wrd_embeddings[wid] = vector
             self.wrd_vocab[word] = wid
             wid += 1
-        del(self.wrd_vocab_tmp)
 
     def get_wid(self, word):
         if self.lowercase: word = word.lower()
@@ -181,7 +175,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--emb_path', type=str, help='path to a file of word embedding vector(.txt)', required=True)
     parser.add_argument('--wrd_dim', type=int, help='embedding vector dimension', required=True)
-    parser.add_argument('--train_path', type=str, help='path to a train file', required=True)
+    parser.add_argument('--train_path', type=str, help='path to a train-dev file to build vocaburaries', required=True)
     parser.add_argument('--lowercase', type=str, help='apply lower case for word embedding', default=True)
     parser.add_argument('--elmo_vocab_path', type=str, help='path to elmo vocab file(write)', default='')
     parser.add_argument('--elmo_options_path', type=str, help='path to elmo options file', default='')
