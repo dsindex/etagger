@@ -75,7 +75,7 @@ class EmbVec:
         pid = self.unk_pid + 1
         kid = self.unk_kid + 1
         tid = self.xot_tid + 1
-        for line in open(args.total_path):
+        for line in open(args.train_path):
             line = line.strip()
             if not line: continue
             tokens = line.split()
@@ -105,7 +105,6 @@ class EmbVec:
                 self.tag_vocab[tag] = tid
                 self.itag_vocab[tid] = tag
                 tid += 1
-            # temp word vocab for train/dev/test
             if self.lowercase: word = word.lower()
             if word not in self.wrd_vocab_tmp:
                 self.wrd_vocab_tmp[word] = 0
@@ -122,11 +121,7 @@ class EmbVec:
 
         # build word embeddings and word vocab.
         wrd_vocab_size = 0
-        if self.lowercase: # glove 6B
-            for line in open(args.emb_path): wrd_vocab_size += 1
-        else:              # glove 840B
-            # glove 840B, filtering for fast training
-            wrd_vocab_size = len(self.wrd_vocab_tmp)
+        for line in open(args.emb_path): wrd_vocab_size += 1
         wrd_vocab_size += 2 # for pad, unk
         sys.stderr.write('wrd_vocab_size = %s\n' % (wrd_vocab_size))
         self.wrd_dim = args.wrd_dim
@@ -146,9 +141,6 @@ class EmbVec:
             except: continue
             if len(vector) != self.wrd_dim: continue
             if self.lowercase: word = word.lower()
-            if not self.lowercase : # glove 840B
-                # filtering for fast training
-                if word not in self.wrd_vocab_tmp: continue
             self.wrd_embeddings[wid] = vector
             self.wrd_vocab[word] = wid
             wid += 1
@@ -190,7 +182,6 @@ if __name__ == '__main__':
     parser.add_argument('--emb_path', type=str, help='path to a file of word embedding vector(.txt)', required=True)
     parser.add_argument('--wrd_dim', type=int, help='embedding vector dimension', required=True)
     parser.add_argument('--train_path', type=str, help='path to a train file', required=True)
-    parser.add_argument('--total_path', type=str, help='path to a train+dev+test file', required=True)
     parser.add_argument('--lowercase', type=str, help='apply lower case for word embedding', default=True)
     parser.add_argument('--elmo_vocab_path', type=str, help='path to elmo vocab file(write)', default='')
     parser.add_argument('--elmo_options_path', type=str, help='path to elmo options file', default='')
