@@ -138,7 +138,7 @@ class Input:
                     parsed['tags'] = tf.reshape(tf.cast(parsed['tags'], tf.int32), [-1, self.config.class_size])
             return parsed
 
-        dataset = dataset.map(parser)
+        dataset = dataset.map(parser,num_parallel_calls=tf.data.experimental.AUTOTUNE)
         if do_shuffle: dataset = dataset.shuffle(buffer_size=10000)
         dataset = dataset.batch(batch_size)
         return dataset
